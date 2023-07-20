@@ -6,7 +6,7 @@ interface IAuthRequired {
     page: React.JSX.Element;
 }
 
-export function AuthRequired({ page }: IAuthRequired) {
+export default function AuthRequired({ page }: IAuthRequired) {
     const { user } = useContext(AppContext);
     const navigate = useNavigate();
     const location = useLocation();
