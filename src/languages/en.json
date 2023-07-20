@@ -1,1 +1,48 @@
-{}
+{
+  "auth_page": {
+    "input_number": "Phone number",
+    "input_code": "Code",
+    "input_password": "Password",
+    "button_send_code": "Send code",
+    "button_confirm_code": "Confirm code",
+    "button_confirm_password": "Confirm code"
+  },
+  "common": {
+    "progress": "Loading...",
+    "footer": "Made by Kit 42 team",
+    "done": "Done!"
+  },
+  "profile": {
+    "button_logout": "Logout"
+  },
+  "routes": {
+    "get_id": "Get account/channel ID",
+    "contacts_analysis": "Contacts Analysis"
+  },
+  "methods": {
+    "get_id": {
+      "input_placeholder": "username",
+      "button_get": "Get ID",
+      "incorrect_username": "Incorrect username"
+    },
+    "contacts_analysis": {
+      "no_contacts": "You don't have contacts",
+      "show_all_users": "Show all users",
+      "headers": {
+        "premium": "Have Telegram Premium",
+        "old": "Registered in first 100 millions users",
+        "mutual": "Mutual contacts",
+        "non_mutual": "Non mutual contacts",
+        "without_photo": "Without photo",
+        "verified": "Verified",
+        "few_usernames": "Several usernames",
+        "without_phone": "Unknown phone number",
+        "without_username": "Without username",
+        "deleted": "Deleted",
+        "long_time_online": "Long time offline",
+        "hide_online": "Hide online",
+        "recent_online": "By last online time"
+      }
+    }
+  }
+}
