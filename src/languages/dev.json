@@ -5,7 +5,7 @@
     "input_password": "Password",
     "button_send_code": "Send code",
     "button_confirm_code": "Confirm code",
-    "button_confirm_password": "Confirm code"
+    "button_confirm_password": "Confirm password"
   },
   "common": {
     "progress": "Loading...",
