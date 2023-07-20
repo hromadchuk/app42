@@ -112,7 +112,7 @@ module.exports = {
         'prettier/prettier': 2,
         'quote-props': [2, 'as-needed'],
         quotes: [2, 'single', { allowTemplateLiterals: true }],
-        'react-refresh/only-export-components': 'warn',
+        'react-refresh/only-export-components': 0,
         'require-await': 1,
         semi: [2, 'always'],
         'semi-spacing': 2,
