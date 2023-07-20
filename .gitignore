@@ -4,6 +4,7 @@ dist
 dist-ssr
 *.local
 bundle-visualizer.html
+crowdin.yml
 
 # Logs
 logs
