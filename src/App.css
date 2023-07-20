@@ -1,0 +1,17 @@
+#root {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+* {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+}
+
+@media (pointer: fine) {
+    #root {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+}
