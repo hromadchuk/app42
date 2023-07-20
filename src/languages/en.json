@@ -5,7 +5,7 @@
     "input_password": "Password",
     "button_send_code": "Send code",
     "button_confirm_code": "Confirm code",
-    "button_confirm_password": "Confirm code"
+    "button_confirm_password": "Confirm password"
   },
   "common": {
     "progress": "Loading...",
@@ -32,7 +32,7 @@
         "premium": "Have Telegram Premium",
         "old": "Registered in first 100 millions users",
         "mutual": "Mutual contacts",
-        "non_mutual": "Non mutual contacts",
+        "non_mutual": "Non-mutual contacts",
         "without_photo": "Without photo",
         "verified": "Verified",
         "few_usernames": "Several usernames",
