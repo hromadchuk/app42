@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig, splitVendorChunkPlugin } from 'vite';
 import react from '@vitejs/plugin-react';
 
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
@@ -19,6 +19,7 @@ export default defineConfig({
             // Whether to polyfill `node:` protocol imports.
             protocolImports: true
         }),
+        splitVendorChunkPlugin(),
         visualizer({
             filename: 'bundle-visualizer.html'
         })
