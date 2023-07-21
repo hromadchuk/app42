@@ -2,9 +2,10 @@ import { createRoot } from 'react-dom/client';
 
 import App from './App.tsx';
 
-import * as dayjs from 'dayjs';
-import * as toObject from 'dayjs/plugin/toObject';
-import * as relativeTime from 'dayjs/plugin/relativeTime';
+import dayjs from 'dayjs';
+import toObject from 'dayjs/plugin/toObject';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
 dayjs.extend(toObject);
 dayjs.extend(relativeTime);
 

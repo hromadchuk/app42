@@ -52,7 +52,32 @@ const AuthPage = () => {
     const [password, setPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
-    const getCurrentUser = async () => {
+    useEffect(() => {
+        (async () => {
+            const session = localStorage.getItem(sessionStorageKey);
+
+            window.TelegramClient = new TelegramClient(
+                new StringSession(session || ''),
+                Constants.API_ID,
+                Constants.API_HASH,
+                {
+                    connectionRetries: 5,
+                    useWSS: true
+                }
+            );
+
+            await window.TelegramClient.connect();
+
+            if (!session) {
+                setSate(AuthState.number);
+                setLoading(false);
+            } else {
+                await getCurrentUser();
+            }
+        })();
+    }, []);
+
+    async function getCurrentUser() {
         try {
             const query = new URLSearchParams(location.search);
             const [user] = await window.TelegramClient.invoke(
@@ -70,9 +95,9 @@ const AuthPage = () => {
             setSate(AuthState.number);
             setLoading(false);
         }
-    };
+    }
 
-    const confirmNumber = async () => {
+    async function confirmNumber() {
         setLoading(true);
         setNumberError('');
 
@@ -99,9 +124,9 @@ const AuthPage = () => {
         }
 
         setLoading(false);
-    };
+    }
 
-    const confirmCode = async () => {
+    async function confirmCode() {
         setLoading(true);
         setCodeError('');
 
@@ -129,9 +154,9 @@ const AuthPage = () => {
         }
 
         setLoading(false);
-    };
+    }
 
-    const confirmPassword = async () => {
+    async function confirmPassword() {
         setLoading(true);
         setPasswordError('');
 
@@ -150,32 +175,7 @@ const AuthPage = () => {
             setPasswordError(error.message);
         }
         setLoading(false);
-    };
-
-    useEffect(() => {
-        (async () => {
-            const session = localStorage.getItem(sessionStorageKey);
-
-            window.TelegramClient = new TelegramClient(
-                new StringSession(session || ''),
-                Constants.API_ID,
-                Constants.API_HASH,
-                {
-                    connectionRetries: 5,
-                    useWSS: true
-                }
-            );
-
-            await window.TelegramClient.connect();
-
-            if (!session) {
-                setSate(AuthState.number);
-                setLoading(false);
-            } else {
-                await getCurrentUser();
-            }
-        })();
-    }, []);
+    }
 
     const InputItemRow = ({ visibleStates = [], disabledStates = [], error, setValue, type, label }: IInputItemRow) => {
         if (!visibleStates.includes(state)) {
