@@ -14,7 +14,7 @@ export default defineConfig({
                 background_color: '#449aea',
                 display: 'standalone',
                 scope: '/',
-                start_url: '/',
+                start_url: '/kit-42/',
                 short_name: 'Kit 42',
                 description: 'Kit 42 is a product with features for Telegram',
                 name: 'Kit 42',
