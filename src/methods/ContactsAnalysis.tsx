@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Badge, Button, Card, Divider, Group, Modal, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Api } from 'telegram';
-import * as dayjs from 'dayjs';
+import dayjs from 'dayjs';
 
 import { MethodContext } from '../components/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';

@@ -30,7 +30,8 @@ export function OwnerAvatar({ owner }: IOwnerAvatar) {
                 setUserAvatar(cache as string);
             } else {
                 window.TelegramClient.downloadProfilePhoto(owner.id).then((buffer) => {
-                    const imageBase64 = `data:image/jpeg;base64,${Buffer.from(buffer as Buffer).toString('base64')}`;
+                    // @ts-ignore - Buffer is not defined
+                    const imageBase64 = `data:image/jpeg;base64,${Buffer.from(buffer).toString('base64')}`;
 
                     setCache(cacheKey, imageBase64, 30);
                     setUserAvatar(imageBase64);
