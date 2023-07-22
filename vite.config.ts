@@ -11,7 +11,6 @@ export default defineConfig({
         VitePWA({
             manifest: {
                 theme_color: '#449aea',
-                background_color: '#449aea',
                 display: 'standalone',
                 scope: '/',
                 start_url: '/kit-42/',
