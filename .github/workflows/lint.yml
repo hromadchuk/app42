@@ -1,15 +1,15 @@
 name: Lint
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 jobs:
-    build:
+    lint:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v1
+            -   uses: actions/checkout@v1
 
-            - name: Install NPM dependencies
-              run: npm ci
+            -   name: Install NPM dependencies
+                run: npm ci
 
-            - name: Run lint
-              run: npm run lint
+            -   name: Run lint
+                run: npm run lint
