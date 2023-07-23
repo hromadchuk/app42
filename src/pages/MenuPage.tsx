@@ -1,7 +1,10 @@
-import { createStyles, getStylesRef } from '@mantine/core';
-
+import { Alert, createStyles, getStylesRef } from '@mantine/core';
+import { useEffect, useState } from 'react';
+import { Api } from 'telegram';
 import { Link } from 'react-router-dom';
+import { OwnerRow } from '../components/OwnerRow.tsx';
 import { routers } from '../routes.tsx';
+import { t } from '../lib/lang.tsx';
 
 const useStyles = createStyles((theme) => ({
     link: {
@@ -34,6 +37,19 @@ const useStyles = createStyles((theme) => ({
 
 const MenuPage = () => {
     const { classes } = useStyles();
+    const [developer, setDeveloper] = useState<null | Api.User>(null);
+
+    useEffect(() => {
+        window.TelegramClient.invoke(
+            new Api.users.GetUsers({
+                id: ['paulo']
+            })
+        ).then(([user]) => {
+            if (user) {
+                setDeveloper(user as Api.User);
+            }
+        });
+    }, []);
 
     const links = routers
         .filter((item) => item.isMethod)
@@ -44,7 +60,18 @@ const MenuPage = () => {
             </Link>
         ));
 
-    return <>{links}</>;
+    return (
+        <>
+            {links}
+
+            {developer && (
+                <Alert color="gray" m="xs">
+                    {t('alpha.description')}
+                    <OwnerRow owner={developer} description={t('alpha.user_description')} />
+                </Alert>
+            )}
+        </>
+    );
 };
 
 export default MenuPage;

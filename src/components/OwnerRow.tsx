@@ -1,18 +1,49 @@
-import { Center, Group, Text } from '@mantine/core';
+import { Center, Group, Text, UnstyledButton } from '@mantine/core';
 import React from 'react';
 import { Api } from 'telegram';
-import { IconCheck } from '@tabler/icons-react';
+import { IconCheck, IconChevronRight } from '@tabler/icons-react';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
 
 interface IOwnerAvatar {
     owner: null | Api.TypeUser | Api.TypeChat;
     description?: string;
+    withoutLink?: boolean;
+    callback?: () => void;
 }
 
-export function OwnerRow({ owner, description }: IOwnerAvatar) {
-    const name: string[] = [];
+interface ILinkProps {
+    onClick?: () => void;
+    href?: string;
+    target?: string;
+    component?: 'a' | 'button';
+}
 
-    if (owner?.className === 'User') {
+export function OwnerRow({ owner, description, withoutLink, callback }: IOwnerAvatar) {
+    const name: string[] = [];
+    const linkProps: ILinkProps = {};
+    const isUser = owner?.className === 'User';
+    const isChat = owner?.className === 'Chat';
+    const isChannel = owner?.className === 'Channel';
+
+    if (!withoutLink) {
+        if (callback) {
+            linkProps.onClick = () => callback();
+            linkProps.component = 'button';
+        } else if ((isUser || isChannel) && (owner.username || owner.usernames)) {
+            const username = (owner.usernames ? owner.usernames[0].username : owner.username) as string;
+
+            linkProps.href = `https://t.me/${username}`;
+        } else if (owner?.id && (isChannel || isChat)) {
+            linkProps.href = `https://t.me/c/${owner.id}/999999999`;
+        }
+
+        if (linkProps.href) {
+            linkProps.target = '_blank';
+            linkProps.component = 'a';
+        }
+    }
+
+    if (isUser) {
         if (owner.firstName) {
             name.push(owner.firstName);
         }
@@ -20,10 +51,14 @@ export function OwnerRow({ owner, description }: IOwnerAvatar) {
         if (owner.lastName) {
             name.push(owner.lastName);
         }
-    } else if (owner?.className === 'Chat' || owner?.className === 'Channel') {
+    } else if (isChat || isChannel) {
         if (owner.title) {
             name.push(owner.title);
         }
+    }
+
+    if (!name.length) {
+        name.push('Unknown name');
     }
 
     function getVerification(): null | React.JSX.Element {
@@ -38,7 +73,7 @@ export function OwnerRow({ owner, description }: IOwnerAvatar) {
         return null;
     }
 
-    return (
+    const Row = (
         <Group spacing="sm" py={3}>
             <OwnerAvatar owner={owner} />
 
@@ -51,6 +86,10 @@ export function OwnerRow({ owner, description }: IOwnerAvatar) {
                     {description}
                 </Text>
             </div>
+
+            {linkProps.component && <IconChevronRight size="0.9rem" stroke={1.5} />}
         </Group>
     );
+
+    return !linkProps.component ? Row : <UnstyledButton {...linkProps}>{Row}</UnstyledButton>;
 }
