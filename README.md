@@ -2,6 +2,8 @@
 
 Kit 42 is a product with features for Telegram
 
+https://gromadchuk.github.io/kit-42
+
 ## Run locally
 #### Requirement: [Node.js](https://nodejs.org/en/) >= 18
 1. `git clone https://github.com/gromadchuk/kit-42.git`
