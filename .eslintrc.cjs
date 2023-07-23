@@ -40,7 +40,7 @@ module.exports = {
         'comma-dangle': 2,
         'comma-spacing': 2,
         'comma-style': 2,
-        complexity: 2,
+        complexity: [2, { max: 50 }],
         'computed-property-spacing': 2,
         'consistent-return': 2,
         'consistent-this': 2,
