@@ -7,7 +7,7 @@ import { AppContext } from './components/AppContext.tsx';
 import { clearOldCache } from './lib/cache.tsx';
 import { IRouter, routers } from './routes.tsx';
 
-import { AppHeader } from './components/AppHeader.tsx';
+import { AppHeader } from './components/AppHeader.tsx'
 import { AppFooter } from './components/AppFooter.tsx';
 
 import './App.css';
