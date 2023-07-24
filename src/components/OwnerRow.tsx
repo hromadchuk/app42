@@ -61,7 +61,7 @@ export function OwnerRow({ owner, description, withoutLink, callback }: IOwnerAv
         name.push('Unknown name');
     }
 
-    function getVerification(): null | React.JSX.Element {
+    function getBadge(): null | React.JSX.Element {
         if ((owner instanceof Api.User || owner instanceof Api.Channel) && owner.verified) {
             return (
                 <Center inline ml={5}>
@@ -80,7 +80,7 @@ export function OwnerRow({ owner, description, withoutLink, callback }: IOwnerAv
             <div>
                 <Text lineClamp={1} span fz="sm" fw={500}>
                     {name.join(' ')}
-                    {getVerification()}
+                    {getBadge()}
                 </Text>
                 <Text c="dimmed" fz="xs">
                     {description}

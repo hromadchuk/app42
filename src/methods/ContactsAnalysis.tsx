@@ -60,51 +60,105 @@ export const ContactsAnalysis = () => {
             return;
         }
 
-        const users = (result.users as Api.User[]).filter(({ self }) => !self);
+        const users = (result.users as Api.User[]).reduce(
+            (filtered, user) => {
+                if (user.id.valueOf() < 100_000_000) {
+                    filtered.oldUsers.push(user);
+                }
 
-        const premiumUsers = users.filter(({ premium }) => premium);
-        const mutualUsers = users.filter(({ mutualContact }) => mutualContact);
-        const nonMutualUsers = users.filter(({ mutualContact }) => !mutualContact);
-        const withoutPhotoUsers = users.filter(({ photo }) => !photo);
-        const verifiedUsers = users.filter(({ verified }) => verified);
-        const withoutPhoneUsers = users.filter(({ phone }) => !phone);
-        const withoutUsernameUsers = users.filter(({ username, usernames }) => !username && !usernames);
-        const deletedUsers = users.filter(({ deleted }) => deleted);
-        const fewUsernamesUsers = users.filter(({ usernames }) => usernames);
-        const longTimeOnlineUsers = users.filter(({ status }) => !status);
-        const hideOnlineUsers = users.filter(({ status }) => status?.className === 'UserStatusRecently');
+                if (user.self) {
+                    return filtered;
+                }
 
-        const recentOnlineUsers = users
-            .filter(({ status }) => status?.className === 'UserStatusOffline')
-            .filter(({ status }) => {
-                const userStatus = status as Api.UserStatusOffline;
+                if (user.premium) {
+                    filtered.premiumUsers.push(user);
+                }
 
-                return dayjs().diff(userStatus.wasOnline * 1000, 'seconds') < 60 * 60 * 24 * 3 * 1000;
-            })
-            .sort((userA, userB) => {
-                const statusA = userA.status as Api.UserStatusOffline;
-                const statusB = userB.status as Api.UserStatusOffline;
+                if (user.mutualContact) {
+                    filtered.mutualUsers.push(user);
+                }
 
-                return statusB.wasOnline - statusA.wasOnline;
-            });
+                if (!user.mutualContact) {
+                    filtered.nonMutualUsers.push(user);
+                }
 
-        const oldUsers = users
-            .filter(({ id }) => id.valueOf() < 100_000_000)
-            .sort((a, b) => a.id.valueOf() - b.id.valueOf());
+                if (!user.photo) {
+                    filtered.withoutPhotoUsers.push(user);
+                }
 
-        setPremiumUsers(premiumUsers);
-        setMutualUsers(mutualUsers);
-        setNonMutualUsers(nonMutualUsers);
-        setWithoutPhotoUsers(withoutPhotoUsers);
-        setVerifiedUsers(verifiedUsers);
-        setWithoutPhoneUsers(withoutPhoneUsers);
-        setWithoutUsernameUsers(withoutUsernameUsers);
-        setDeletedUsers(deletedUsers);
-        setFewUsernamesUsers(fewUsernamesUsers);
-        setLongTimeOnlineUsers(longTimeOnlineUsers);
-        setHideOnlineUsers(hideOnlineUsers);
-        serRecentOnlineUsers(recentOnlineUsers);
-        setOldUsers(oldUsers);
+                if (user.verified) {
+                    filtered.verifiedUsers.push(user);
+                }
+
+                if (!user.phone) {
+                    filtered.withoutPhoneUsers.push(user);
+                }
+
+                if (!user.username && !user.usernames) {
+                    filtered.withoutUsernameUsers.push(user);
+                }
+
+                if (user.deleted) {
+                    filtered.deletedUsers.push(user);
+                }
+
+                if (user.usernames && user.usernames.length > 1) {
+                    filtered.fewUsernamesUsers.push(user);
+                }
+
+                if (!user.status) {
+                    filtered.longTimeOnlineUsers.push(user);
+                }
+
+                if (user.status?.className === 'UserStatusOffline') {
+                    const userStatus = user.status as Api.UserStatusOffline;
+
+                    if (dayjs().diff(userStatus.wasOnline * 1000, 'seconds') < 60 * 60 * 24 * 3 * 1000) {
+                        filtered.recentOnlineUsers.push(user);
+                    }
+                }
+
+                return filtered;
+            },
+            {
+                premiumUsers: [] as Api.User[],
+                mutualUsers: [] as Api.User[],
+                nonMutualUsers: [] as Api.User[],
+                withoutPhotoUsers: [] as Api.User[],
+                verifiedUsers: [] as Api.User[],
+                withoutPhoneUsers: [] as Api.User[],
+                withoutUsernameUsers: [] as Api.User[],
+                deletedUsers: [] as Api.User[],
+                fewUsernamesUsers: [] as Api.User[],
+                longTimeOnlineUsers: [] as Api.User[],
+                hideOnlineUsers: [] as Api.User[],
+                recentOnlineUsers: [] as Api.User[],
+                oldUsers: [] as Api.User[]
+            }
+        );
+
+        users.recentOnlineUsers.sort((userA, userB) => {
+            const statusA = userA.status as Api.UserStatusOffline;
+            const statusB = userB.status as Api.UserStatusOffline;
+
+            return statusB.wasOnline - statusA.wasOnline;
+        });
+
+        users.oldUsers.sort((a, b) => a.id.valueOf() - b.id.valueOf());
+
+        setPremiumUsers(users.premiumUsers);
+        setMutualUsers(users.mutualUsers);
+        setNonMutualUsers(users.nonMutualUsers);
+        setWithoutPhotoUsers(users.withoutPhotoUsers);
+        setVerifiedUsers(users.verifiedUsers);
+        setWithoutPhoneUsers(users.withoutPhoneUsers);
+        setWithoutUsernameUsers(users.withoutUsernameUsers);
+        setDeletedUsers(users.deletedUsers);
+        setFewUsernamesUsers(users.fewUsernamesUsers);
+        setLongTimeOnlineUsers(users.longTimeOnlineUsers);
+        setHideOnlineUsers(users.hideOnlineUsers);
+        serRecentOnlineUsers(users.recentOnlineUsers);
+        setOldUsers(users.oldUsers);
 
         setProgress(null);
     }
