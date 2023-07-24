@@ -12,6 +12,10 @@
     "footer": "Made by Kit 42 team",
     "done": "Done!"
   },
+  "alpha": {
+    "description": "This is an alpha version of the product and there may be bugs. If you find a bug or have a suggestion, please send a message to the developer. Features will be added as the product is developed.",
+    "user_description": "Developer"
+  },
   "profile": {
     "button_logout": "Logout"
   },
