@@ -111,11 +111,7 @@ export const ContactsAnalysis = () => {
                 }
 
                 if (user.status?.className === 'UserStatusOffline') {
-                    const userStatus = user.status as Api.UserStatusOffline;
-
-                    if (dayjs().diff(userStatus.wasOnline * 1000, 'seconds') < 60 * 60 * 24 * 3 * 1000) {
-                        filtered.recentOnlineUsers.push(user);
-                    }
+                    filtered.recentOnlineUsers.push(user);
                 }
 
                 return filtered;
@@ -141,7 +137,7 @@ export const ContactsAnalysis = () => {
             const statusA = userA.status as Api.UserStatusOffline;
             const statusB = userB.status as Api.UserStatusOffline;
 
-            return statusB.wasOnline - statusA.wasOnline;
+            return statusA.wasOnline - statusB.wasOnline;
         });
 
         users.oldUsers.sort((a, b) => a.id.valueOf() - b.id.valueOf());
