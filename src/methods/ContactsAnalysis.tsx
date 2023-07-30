@@ -24,7 +24,7 @@ enum EFilerType {
 }
 
 export const ContactsAnalysis = () => {
-    const { needHideContent, setProgress, setFinishBlock, mt } = useContext(MethodContext);
+    const { mt, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
 
     const [opened, { open, close }] = useDisclosure(false);
 

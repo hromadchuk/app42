@@ -13,13 +13,16 @@ export interface IFinishBlock {
 
 export interface IMethodContext {
     progress?: IProgress | null;
+    progressSafe?: IProgress | null;
     setProgress: (progress: IProgress | null) => void;
+    getProgress: () => IProgress;
     finishBlock?: IFinishBlock;
     setFinishBlock: (finishBlock: IFinishBlock) => void;
     needHideContent: () => boolean;
     t: (key: string) => string;
     td: (key: string) => string[];
     mt: (key: string) => string;
+    md: (key: string) => string[];
 }
 
 // @ts-ignore

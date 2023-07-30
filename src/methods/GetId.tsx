@@ -9,7 +9,7 @@ import { OwnerRow } from '../components/OwnerRow.tsx';
 type TOwnerInfo = null | Api.TypeUser | Api.TypeChat;
 
 export const GetId = () => {
-    const { needHideContent, mt } = useContext(MethodContext);
+    const { mt, needHideContent } = useContext(MethodContext);
 
     const [isLoading, setIsLoading] = useState(false);
     const [username, setUsername] = useState('');

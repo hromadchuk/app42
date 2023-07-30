@@ -221,6 +221,8 @@ const AuthPage = () => {
 
     return (
         <Container>
+            <Center py={10}>{t('auth_page.description')}</Center>
+
             {InputItemRow({
                 label: t('auth_page.input_number'),
                 visibleStates: [AuthState.number, AuthState.code, AuthState.password],

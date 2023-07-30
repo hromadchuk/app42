@@ -1,7 +1,7 @@
 import DEVLang from '../languages/dev.json';
 import ENLang from '../languages/en.json';
 
-enum LangType {
+export enum LangType {
     DEV = 'dev',
     EN = 'en'
 }
@@ -41,7 +41,7 @@ const mergeDeep = (target: ILang, ...sources: ILang[]): Object => {
     return mergeDeep(target, ...sources);
 };
 
-const getAppLangCode = (): LangType => {
+export const getAppLangCode = (): LangType => {
     // language detection code
 
     return LangType.EN;
@@ -94,7 +94,7 @@ export const td = (path: string): string[] => {
     const found = findLevel(path);
 
     if (!found || !Array.isArray(found)) {
-        return [path, path];
+        return [path, path, path];
     }
 
     return found as string[];

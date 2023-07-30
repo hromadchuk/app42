@@ -21,9 +21,9 @@ interface ILinkProps {
 export function OwnerRow({ owner, description, withoutLink, callback }: IOwnerAvatar) {
     const name: string[] = [];
     const linkProps: ILinkProps = {};
-    const isUser = owner?.className === 'User';
-    const isChat = owner?.className === 'Chat';
-    const isChannel = owner?.className === 'Channel';
+    const isUser = owner instanceof Api.User;
+    const isChat = owner instanceof Api.Chat;
+    const isChannel = owner instanceof Api.Channel;
 
     if (!withoutLink) {
         if (callback) {
@@ -62,7 +62,7 @@ export function OwnerRow({ owner, description, withoutLink, callback }: IOwnerAv
     }
 
     function getBadge(): null | React.JSX.Element {
-        if ((owner instanceof Api.User || owner instanceof Api.Channel) && owner.verified) {
+        if ((isUser || isChannel) && owner.verified) {
             return (
                 <Center inline ml={5}>
                     <IconCheck size={14} color="#1c93e3" />

@@ -54,7 +54,6 @@ module.exports = {
         indent: [2, 4, { SwitchCase: 2 }],
         'key-spacing': 2,
         'keyword-spacing': 2,
-        'line-comment-position': 2,
         'linebreak-style': 2,
         'lines-around-comment': 0,
         'max-depth': [2, { max: 5 }],
