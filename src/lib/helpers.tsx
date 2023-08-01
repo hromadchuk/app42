@@ -1,5 +1,7 @@
 import { getAppLangCode, LangType, td } from './lang';
 
+export const isDev = window.location.hostname === 'localhost';
+
 export function formatNumber(number: number): string {
     return `${number}`.replace(/(\d)(?=(\d{3})+$)/g, '$1\u00a0');
 }

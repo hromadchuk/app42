@@ -1,4 +1,4 @@
-import { Divider, Group, List, Menu, Tabs, Text, UnstyledButton } from '@mantine/core';
+import { Button, Divider, Group, Notification, Text, UnstyledButton, useMantineTheme } from '@mantine/core';
 import {
     IconCalendarTime,
     IconHeart,
@@ -9,15 +9,17 @@ import {
     IconPaperclip,
     IconPhone,
     IconSticker,
-    IconVideo
+    IconVideo,
+    TablerIconsProps
 } from '@tabler/icons-react';
 import dayjs from 'dayjs';
-import { useContext, useEffect, useState } from 'react';
+import { JSX, useContext, useEffect, useState } from 'react';
 import { Api } from 'telegram';
 
 import { AppContext } from '../components/AppContext.tsx';
 import { MethodContext } from '../components/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
+import { ITabItem, TabsList } from '../components/TabsList.tsx';
 import { declineAndFormat, formatNumber, getTextTime, sleep } from '../lib/helpers.tsx';
 
 type TOwner = Api.User | Api.Chat | Api.Channel;
@@ -107,11 +109,19 @@ enum ETabId {
     roundDuration = 'roundDuration'
 }
 
+interface ITabTops {
+    id: ETabId;
+    lang: string;
+    icon: (props: TablerIconsProps) => JSX.Element;
+    owners: ITopItem[];
+}
+
 const ownersInfo = new Map<number, TOwner>();
 
 export const MessagesStat = () => {
     const { user } = useContext(AppContext);
     const { mt, md, needHideContent, getProgress, setProgress, setFinishBlock } = useContext(MethodContext);
+    const { colorScheme } = useMantineTheme();
 
     const [dialogsList, setDialogsList] = useState<(Api.User | Api.Chat | Api.Channel)[]>([]);
     const [ownerMessages, setOwnerMessages] = useState<Api.TypeMessage[]>([]);
@@ -119,6 +129,7 @@ export const MessagesStat = () => {
     const [selectedOwner, setSelectedOwner] = useState<TOwner | null>(null);
     const [statResult, setStatResult] = useState<IScanDataResult | null>(null);
     const [selectedTab, setSelectedTab] = useState<ETabId>(ETabId.messages);
+    const [isSentToChat, setSentToChat] = useState<boolean>(false);
 
     useEffect(() => {
         getLastDialogs();
@@ -624,7 +635,7 @@ export const MessagesStat = () => {
             { icon: IconPhone, label: mt('headers.call_duration'), value: getTextTime(statResult.callDuration) }
         ].filter((item) => Boolean(item.value));
 
-        const tabs = [
+        const tabs: ITabTops[] = [
             {
                 id: ETabId.messages,
                 lang: 'count',
@@ -665,9 +676,99 @@ export const MessagesStat = () => {
                 id: ETabId.roundDuration,
                 lang: 'round_duration',
                 icon: IconVideo,
-                owners: statResult.tops.voiceDuration
+                owners: statResult.tops.roundDuration
             }
-        ].filter((item) => item.owners.length);
+        ].filter((tab) => tab.owners.length);
+
+        const tabsList = tabs.map(
+            (tab) =>
+                ({
+                    id: tab.id as string,
+                    name: mt(`headers.${tab.lang}`),
+                    icon: tab.icon
+                }) as ITabItem
+        );
+
+        const getRowBackground = (index: number): string => {
+            if (index % 2) {
+                return colorScheme === 'dark' ? 'gray.9' : 'gray.1';
+            }
+
+            return '';
+        };
+
+        const getDescription = (tabId: ETabId, count: number): string => {
+            if (tabId === ETabId.messages) {
+                return declineAndFormat(count, md('decline.messages'));
+            }
+
+            if (tabId === ETabId.uniqMessages) {
+                return declineAndFormat(count, md('decline.uniq_messages'));
+            }
+
+            if (tabId === ETabId.emoji) {
+                return declineAndFormat(count, md('decline.emoji'));
+            }
+
+            if (tabId === ETabId.attachments) {
+                return declineAndFormat(count, md('decline.attachments'));
+            }
+
+            if (tabId === ETabId.stickers) {
+                return declineAndFormat(count, md('decline.stickers'));
+            }
+
+            if (tabId === ETabId.voiceDuration) {
+                return getTextTime(count);
+            }
+
+            if (tabId === ETabId.roundDuration) {
+                return getTextTime(count);
+            }
+
+            return '';
+        };
+
+        const getTabDescription = () => {
+            let langKey = null;
+
+            if (selectedTab === ETabId.uniqMessages) {
+                langKey = 'uniq_description';
+            }
+
+            if (selectedTab === ETabId.emoji) {
+                langKey = 'emoji_description';
+            }
+
+            if (langKey) {
+                return (
+                    <Notification withCloseButton={false} my="xs" color="gray">
+                        {mt(langKey)}
+                    </Notification>
+                );
+            }
+
+            return null;
+        };
+
+        const sendToChat = () => {
+            setSentToChat(true);
+
+            const lines = [mt('stat_date').replace('{date}', statResult.period), ''];
+
+            counts.forEach(({ label, value }) => {
+                lines.push(`* ${label} — ${value}`);
+            });
+
+            window.TelegramClient.invoke(
+                new Api.messages.SendMessage({
+                    peer: selectedOwner?.id,
+                    message: lines.join('\n')
+                })
+            );
+        };
+
+        const topOwners = tabs.find((tab) => tab.id === selectedTab)?.owners || [];
 
         return (
             <>
@@ -677,50 +778,39 @@ export const MessagesStat = () => {
                     description={mt('stat_date').replace('{date}', statResult.period)}
                 />
 
+                <Button fullWidth size="xs" mt="xs" onClick={sendToChat} disabled={isSentToChat}>
+                    {isSentToChat ? mt('button_send_done') : mt('button_send')}
+                </Button>
+
                 <Divider my="xs" label={mt('headers.counts')} labelPosition="center" mb={0} />
-                <Menu>
-                    {counts.map((item, key) => (
-                        <Menu.Item
-                            key={key}
-                            p={0}
-                            mt={0}
-                            icon={<item.icon size={14} />}
-                            rightSection={
-                                <Text size="xs" color="dimmed">
-                                    {item.value}
-                                </Text>
-                            }
-                        >
-                            {item.label}
-                        </Menu.Item>
-                    ))}
-                </Menu>
-                <List size="sm">
-                    {counts.map((item, key) => (
-                        <Group key={key}>
-                            <item.icon size={16} />
-                            <Text weight={500} size="sm">
+
+                {counts.map((item, key) => (
+                    <Group spacing="xs" grow key={key} p={5} bg={getRowBackground(key)}>
+                        <Group>
+                            <item.icon size={14} />
+                            <Text size="sm" inline>
                                 {item.label}
                             </Text>
-                            <Text size="xs" color="dimmed" align="right">
+                        </Group>
+
+                        <Group position="right">
+                            <Text size={12} color="dimmed">
                                 {item.value}
                             </Text>
                         </Group>
-                    ))}
-                </List>
+                    </Group>
+                ))}
 
                 <Divider my="xs" label={mt('headers.tops')} labelPosition="center" mb={0} />
-                <Tabs defaultValue={ETabId.messages} onTabChange={(value) => setSelectedTab(value as ETabId)}>
-                    <Tabs.List>
-                        {tabs.map((tab, key) => (
-                            <Tabs.Tab key={key} icon={<tab.icon size={14} />} value={tab.id}>
-                                {mt(`headers.${tab.lang}`)}
-                            </Tabs.Tab>
-                        ))}
-                    </Tabs.List>
-                </Tabs>
-
-                <div>selectedTab: {selectedTab}</div>
+                <TabsList tabs={tabsList} onChange={(tabId) => setSelectedTab(tabId as ETabId)} />
+                {getTabDescription()}
+                {topOwners.map((top) => (
+                    <OwnerRow
+                        key={selectedTab + top.owner.id.valueOf()}
+                        owner={top.owner}
+                        description={getDescription(selectedTab, top.count)}
+                    />
+                ))}
             </>
         );
     }

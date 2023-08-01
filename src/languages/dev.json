@@ -63,6 +63,8 @@
       "no_messages": "No messages in dialogue",
       "too_few_messages": "For stats need more messages",
       "stat_date": "Stats for {date}",
+      "button_send": "Send stat to dialog",
+      "button_send_done": "Sent!",
       "headers": {
         "period": "Period of stats",
         "counts": "Counts",
@@ -78,6 +80,7 @@
         "call_duration": "Calls duration"
       },
       "uniq_description": "Several messages in a row, inseparable by other interlocutor, will be considered unique",
+      "emoji_description": "Collected reactions on messages",
       "periods": {
         "0": "All dialogue",
         "1": "Day",

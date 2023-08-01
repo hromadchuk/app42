@@ -1,5 +1,5 @@
+import { JSX } from 'react';
 import { Center, Group, Text, UnstyledButton } from '@mantine/core';
-import React from 'react';
 import { Api } from 'telegram';
 import { IconCheck, IconChevronRight } from '@tabler/icons-react';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
@@ -61,7 +61,7 @@ export function OwnerRow({ owner, description, withoutLink, callback }: IOwnerAv
         name.push('Unknown name');
     }
 
-    function getBadge(): null | React.JSX.Element {
+    function getBadge(): null | JSX.Element {
         if ((isUser || isChannel) && owner.verified) {
             return (
                 <Center inline ml={5}>

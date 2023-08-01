@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Badge, Button, Card, Divider, Group, Modal, Text } from '@mantine/core';
+import { JSX, useContext, useEffect, useState } from 'react';
+import { Badge, Box, Button, Card, Divider, Group, Modal } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Api } from 'telegram';
 import dayjs from 'dayjs';
@@ -184,7 +184,7 @@ export const ContactsAnalysis = () => {
         return undefined;
     }
 
-    function SectionBlock(type: EFilerType, users: Api.User[], lang: string): React.JSX.Element | null {
+    function SectionBlock(type: EFilerType, users: Api.User[], lang: string): JSX.Element | null {
         if (!users.length) {
             return null;
         }
@@ -192,10 +192,18 @@ export const ContactsAnalysis = () => {
         return (
             <>
                 <Card.Section mt="md">
-                    <Group position="apart">
-                        <Text fz="md">{mt(`headers.${lang}`)}</Text>
-                        <Badge size="sm">{users.length}</Badge>
-                    </Group>
+                    <Divider
+                        my="xs"
+                        label={
+                            <>
+                                <Box fz={13} mr={5}>
+                                    {mt(`headers.${lang}`)}
+                                </Box>
+                                <Badge size="xs">{users.length}</Badge>
+                            </>
+                        }
+                        labelPosition="center"
+                    />
 
                     {users.slice(0, 3).map((owner, key) => (
                         <div key={key}>{OwnerRow({ owner, description: getDescription(type, owner) })}</div>
@@ -213,8 +221,6 @@ export const ContactsAnalysis = () => {
                         </Button>
                     </Group>
                 )}
-
-                <Divider my="sm" />
             </>
         );
     }

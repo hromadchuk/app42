@@ -77,7 +77,7 @@ module.exports = {
         'no-implicit-coercion': 2,
         'no-inner-declarations': 2,
         'no-lonely-if': 2,
-        'no-mixed-operators': 2,
+        'no-mixed-operators': 0,
         'no-mixed-spaces-and-tabs': 2,
         'no-multi-assign': 2,
         'no-multi-spaces': 2,
