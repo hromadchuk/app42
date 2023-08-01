@@ -1,4 +1,4 @@
-import { getAppLangCode, LangType } from './lang';
+import { getAppLangCode, LangType, td } from './lang';
 
 export function formatNumber(number: number): string {
     return `${number}`.replace(/(\d)(?=(\d{3})+$)/g, '$1\u00a0');
@@ -30,4 +30,52 @@ export function decline(number: number, titles: string[]): string {
 
 export function declineAndFormat(number: number, titles: string[]): string {
     return `${formatNumber(number)} ${decline(number, titles)}`;
+}
+
+export async function sleep(milliseconds: number): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+export interface ITime {
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+}
+
+export function getTime(time: number): ITime {
+    const days = Math.floor(time / 86400);
+    const hours = Math.floor((time % 86400) / 3600);
+    const minutes = Math.floor(((time % 86400) % 3600) / 60);
+    const seconds = Math.floor(((time % 86400) % 3600) % 60);
+
+    return {
+        days,
+        hours,
+        minutes,
+        seconds
+    };
+}
+
+export function getTextTime(seconds: number): string {
+    const period = getTime(seconds);
+    const result: string[] = [];
+
+    if (period.days) {
+        result.push(`${period.days} ${decline(period.days, td('common.time.days'))}`);
+    }
+
+    if (period.hours) {
+        result.push(`${period.hours} ${decline(period.hours, td('common.time.hours'))}`);
+    }
+
+    if (period.minutes) {
+        result.push(`${period.minutes} ${decline(period.minutes, td('common.time.minutes'))}`);
+    }
+
+    if (period.seconds) {
+        result.push(`${period.seconds} ${decline(period.seconds, td('common.time.seconds'))}`);
+    }
+
+    return result.join(' ');
 }

@@ -11,7 +11,13 @@
   "common": {
     "progress": "Loading",
     "footer": "Made by Kit 42 team",
-    "done": "Done!"
+    "done": "Done!",
+    "time": {
+      "days": ["day", "days", "days"],
+      "hours": ["hour", "hours", "hours"],
+      "minutes": ["minute", "minutes", "minutes"],
+      "seconds": ["second", "seconds", "seconds"]
+    }
   },
   "alpha": {
     "description": "This is an alpha version of the product and there may be bugs. If you find a bug or have a suggestion, please send a message to the developer. Features will be added as the product is developed.",
@@ -56,25 +62,22 @@
       "loading_calculation": "Calculating stats",
       "no_messages": "No messages in dialogue",
       "too_few_messages": "For stats need more messages",
-      "get_messages": "Getting messages",
       "stat_date": "Stats for {date}",
-      "tops": {
+      "headers": {
+        "period": "Period of stats",
+        "counts": "Counts",
+        "tops": "Tops",
         "count": "Messages",
         "uniq_count": "Unique messages",
-        "emoji": "Premium Emoji",
+        "emoji": "Emoji",
+        "reactions": "Reactions",
         "attachments": "Attachments",
         "stickers": "Stickers",
-        "voice_duration": "Voice messages",
-        "round_duration": "Video messages"
+        "voice_duration": "Voices duration",
+        "round_duration": "Videos duration",
+        "call_duration": "Calls duration"
       },
       "uniq_description": "Several messages in a row, inseparable by other interlocutor, will be considered unique",
-      "total_descriptions": {
-        "voice": "Voice messages duration",
-        "round": "Video messages duration",
-        "calls": "Calls duration"
-      },
-      "not_counted": "Couldn't define the period",
-      "periods_header": "Period of stats",
       "periods": {
         "0": "All dialogue",
         "1": "Day",
@@ -98,9 +101,9 @@
           "unique messages"
         ],
         "emoji": [
-          "premium emoji",
-          "premium emoji",
-          "premium emoji"
+          "emoji",
+          "emoji",
+          "emoji"
         ],
         "attachments": [
           "attachment",
@@ -111,6 +114,11 @@
           "sticker",
           "stickers",
           "stickers"
+        ],
+        "reactions": [
+          "reaction",
+          "reactions",
+          "reactions"
         ]
       }
     }

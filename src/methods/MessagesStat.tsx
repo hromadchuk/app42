@@ -1,14 +1,24 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Api } from 'telegram';
+import { Divider, Group, List, Menu, Tabs, Text, UnstyledButton } from '@mantine/core';
+import {
+    IconCalendarTime,
+    IconHeart,
+    IconMessage,
+    IconMessage2Bolt,
+    IconMicrophone,
+    IconMoodSmile,
+    IconPaperclip,
+    IconPhone,
+    IconSticker,
+    IconVideo
+} from '@tabler/icons-react';
 import dayjs from 'dayjs';
-import { Badge, Button, Card, Divider, Group, Modal, Text, UnstyledButton } from '@mantine/core';
-import { IconCalendarTime, IconChevronRight } from '@tabler/icons-react';
-import { useDisclosure } from '@mantine/hooks';
-import { OwnerRow } from '../components/OwnerRow.tsx';
+import { useContext, useEffect, useState } from 'react';
+import { Api } from 'telegram';
 
 import { AppContext } from '../components/AppContext.tsx';
 import { MethodContext } from '../components/MethodContext.tsx';
-import { declineAndFormat } from '../lib/helpers.tsx';
+import { OwnerRow } from '../components/OwnerRow.tsx';
+import { declineAndFormat, formatNumber, getTextTime, sleep } from '../lib/helpers.tsx';
 
 type TOwner = Api.User | Api.Chat | Api.Channel;
 
@@ -29,6 +39,7 @@ interface IPeriodData {
 }
 
 interface IPeerData {
+    peerId: number;
     count: number;
     uniqCount: number;
     emoji: number;
@@ -38,7 +49,7 @@ interface IPeerData {
     roundDuration: number;
 }
 
-interface IScanData {
+interface IScanDataCalculation {
     firstMessage: TCorrectMessage;
     lastMessage: TCorrectMessage;
     messages: number;
@@ -46,12 +57,54 @@ interface IScanData {
     voiceDuration: number;
     roundDuration: number;
     callDuration: number;
-    attachments: number;
-    attachmentsTypes: { [key: string]: string };
-    // emoji: {},
-    // stickers: {},
+    attachmentsTotal: number;
+    attachmentsTypes: { [key: string]: number };
+    emojiTotal: number;
+    emoji: { [key: string]: number };
     stickersTotal: number;
+    stickers: { [key: string]: number };
+    reactionsTotal: number;
+    reactions: { [key: string]: number };
     servicesMessages: { [key: string]: number };
+    mentions: { [key: string]: number };
+}
+
+interface ITopItem {
+    count: number;
+    description: string;
+    owner: TOwner;
+}
+
+interface IScanDataResult {
+    period: string;
+    messages: number;
+    uniqMessages: number;
+    voiceDuration: number;
+    roundDuration: number;
+    callDuration: number;
+    attachmentsTotal: number;
+    emojiTotal: number;
+    stickersTotal: number;
+    reactionsTotal: number;
+    tops: {
+        messages: ITopItem[];
+        uniqMessages: ITopItem[];
+        emoji: ITopItem[];
+        attachments: ITopItem[];
+        stickers: ITopItem[];
+        voiceDuration: ITopItem[];
+        roundDuration: ITopItem[];
+    };
+}
+
+enum ETabId {
+    messages = 'messages',
+    uniqMessages = 'uniqMessages',
+    emoji = 'emoji',
+    attachments = 'attachments',
+    stickers = 'stickers',
+    voiceDuration = 'voiceDuration',
+    roundDuration = 'roundDuration'
 }
 
 const ownersInfo = new Map<number, TOwner>();
@@ -64,6 +117,8 @@ export const MessagesStat = () => {
     const [ownerMessages, setOwnerMessages] = useState<Api.TypeMessage[]>([]);
     const [ownerPeriods, setOwnerPeriods] = useState<IPeriodData[]>([]);
     const [selectedOwner, setSelectedOwner] = useState<TOwner | null>(null);
+    const [statResult, setStatResult] = useState<IScanDataResult | null>(null);
+    const [selectedTab, setSelectedTab] = useState<ETabId>(ETabId.messages);
 
     useEffect(() => {
         getLastDialogs();
@@ -112,8 +167,6 @@ export const MessagesStat = () => {
         setProgress({ text: mt('loading_messages') });
         setSelectedOwner(owner);
 
-        console.log('owner', owner);
-
         const { count } = (await window.TelegramClient.invoke(
             new Api.messages.GetHistory({
                 peer: owner.id,
@@ -145,8 +198,6 @@ export const MessagesStat = () => {
 
         if (count < 3_000) {
             const messages = await getMessages(owner, count, 0);
-
-            console.log(1, { messages });
 
             for (const period of periods) {
                 const periodDate = Math.round(Number(dayjs().add(-period, 'days')) / 1000);
@@ -223,8 +274,6 @@ export const MessagesStat = () => {
     }
 
     async function getMessages(owner: TOwner, total: number, endTime: number): Promise<TCorrectMessage[]> {
-        console.log({ owner, total, endTime });
-
         if (ownerMessages.length) {
             return filterMessages(ownerMessages, endTime);
         }
@@ -239,8 +288,11 @@ export const MessagesStat = () => {
         };
 
         let working = true;
-
         while (working) {
+            if (total > 3_000) {
+                await sleep(777);
+            }
+
             const { messages, chats, users } = (await window.TelegramClient.invoke(
                 new Api.messages.GetHistory(params)
             )) as Api.messages.MessagesSlice;
@@ -262,26 +314,31 @@ export const MessagesStat = () => {
             }
         }
 
-        console.log('ownersInfo', ownersInfo);
-
         setOwnerMessages(processMessages);
 
         return processMessages;
     }
 
-    async function calcStatistic(period: IPeriodData) {
-        console.log({period, selectedOwner});
+    function getSelectedPeriod(firstMessage: TCorrectMessage, lastMessage: TCorrectMessage): string {
+        const firstMessageDate = dayjs.unix(firstMessage.date).format('DD.MM.YYYY');
+        const lastMessageDate = dayjs.unix(lastMessage.date).format('DD.MM.YYYY');
 
+        if (firstMessageDate === lastMessageDate) {
+            return firstMessageDate;
+        }
+
+        return `${firstMessageDate} - ${lastMessageDate}`;
+    }
+
+    async function calcStatistic(period: IPeriodData) {
         const messages = await getMessages(selectedOwner as TOwner, period.count, period.periodDate);
 
         setProgress({ text: mt('loading_calculation') });
 
-        console.log({messages});
-
         let lastPeerId = 0;
         const groupedIds = new Set<number>();
         const peersData: { [key: number]: IPeerData } = {};
-        const statData: IScanData = {
+        const statData: IScanDataCalculation = {
             firstMessage: messages.reduce((prev, current) => {
                 return prev.date < current.date ? prev : current;
             }),
@@ -293,21 +350,24 @@ export const MessagesStat = () => {
             voiceDuration: 0,
             roundDuration: 0,
             callDuration: 0,
-            attachments: 0,
+            attachmentsTotal: 0,
             attachmentsTypes: {},
-            // emoji: {},
-            // stickers: {},
+            emojiTotal: 0,
+            emoji: {},
             stickersTotal: 0,
-            servicesMessages: {}
+            stickers: {},
+            servicesMessages: {},
+            mentions: {},
+            reactionsTotal: 0,
+            reactions: {}
         };
 
         messages.forEach((message) => {
             const peerId = getAuthorId(message);
 
-            console.log(peerId);
-
             if (!peersData[peerId]) {
                 peersData[peerId] = {
+                    peerId,
                     count: 0,
                     uniqCount: 0,
                     emoji: 0,
@@ -318,9 +378,21 @@ export const MessagesStat = () => {
                 };
             }
 
-            if (message instanceof Api.MessageService) {
-                console.log('SERVICE', message);
+            if (message.reactions) {
+                message.reactions.results.forEach(({ reaction }) => {
+                    if (reaction instanceof Api.ReactionEmoji) {
+                        statData.reactionsTotal++;
 
+                        if (!statData.reactions[reaction.emoticon]) {
+                            statData.reactions[reaction.emoticon] = 0;
+                        }
+
+                        statData.reactions[reaction.emoticon]++;
+                    }
+                });
+            }
+
+            if (message instanceof Api.MessageService) {
                 const action = message.action;
                 const actionKey = action.className;
 
@@ -335,65 +407,90 @@ export const MessagesStat = () => {
                 }
             }
 
-        //     if (message.media) {
-        //         const type = message.media._;
-        //         const isDocument = type === 'messageMediaDocument';
-        //         const attributes = (isDocument && ((message.media.document && message.media.document.attributes) || [])) || []
-        //
-        //         const sticker = attributes.find((attr) => attr._ === 'documentAttributeSticker');
-        //         const voice = attributes.find((attr) => attr.voice);
-        //         const round = attributes.find((attr) => attr.round_message);
-        //
-        //         if (sticker) {
-        //             const stickerId = `${ message.media.document.id }_${ message.media.document.access_hash }`;
-        //
-        //             if (!statData.stickers[stickerId]) {
-        //                 statData.stickers[stickerId] = 0;
-        //             }
-        //
-        //             peersData[peerId].stickers++;
-        //             statData.stickers[stickerId]++;
-        //             statData.stickersTotal++;
-        //         } else if (voice) {
-        //             statData.voiceDuration += voice.duration;
-        //             peersData[peerId].voiceDuration += voice.duration;
-        //         } else if (round) {
-        //             statData.roundDuration += round.duration;
-        //             peersData[peerId].roundDuration += round.duration;
-        //         } else {
-        //             const attachType = message.media._.replace('messageMedia', '').toLowerCase();
-        //
-        //             if (!statData.attachmentsTypes[attachType]) {
-        //                 statData.attachmentsTypes[attachType] = 0;
-        //             }
-        //
-        //             peersData[peerId].attachments++;
-        //
-        //             statData.attachmentsTypes[attachType]++;
-        //             statData.attachments++;
-        //         }
-        //     }
-        //
-        //     if (message.entities) {
-        //         message.entities.forEach(({ _, document_id }) => {
-        //             if (_ === 'messageEntityCustomEmoji') {
-        //                 if (!statData.emoji[document_id]) {
-        //                     statData.emoji[document_id] = 0;
-        //                 }
-        //
-        //                 peersData[peerId].emoji++;
-        //                 statData.emoji[document_id]++;
-        //             }
-        //         });
-        //     }
-        //
-        //     if (message.grouped_id) {
-        //         if (groupedIds[message.grouped_id]) {
-        //             return; // skip duplicate
-        //         }
-        //
-        //         groupedIds[message.grouped_id] = true;
-        //     }
+            if (message.media) {
+                const type = message.media.className;
+
+                statData.attachmentsTotal++;
+                peersData[peerId].attachments++;
+                if (!statData.attachmentsTypes[type]) {
+                    statData.attachmentsTypes[type] = 0;
+                }
+                statData.attachmentsTypes[type]++;
+
+                const isDocument = message.media instanceof Api.MessageMediaDocument;
+                if (isDocument) {
+                    const media = message.media as Api.MessageMediaDocument;
+
+                    if (media.document instanceof Api.Document) {
+                        const attributes = media.document.attributes;
+
+                        const sticker = attributes.find(
+                            (attribute) => attribute instanceof Api.DocumentAttributeSticker
+                        ) as Api.DocumentAttributeSticker | undefined;
+                        if (sticker && sticker.stickerset instanceof Api.InputStickerSetID) {
+                            const stickerId = `${sticker.stickerset.id}_${sticker.stickerset.accessHash}`;
+
+                            if (!statData.stickers[stickerId]) {
+                                statData.stickers[stickerId] = 0;
+                            }
+
+                            peersData[peerId].stickers++;
+                            statData.stickersTotal++;
+                            statData.stickers[stickerId]++;
+                        }
+
+                        const voice = attributes.find(
+                            (attribute) => attribute instanceof Api.DocumentAttributeAudio
+                        ) as Api.DocumentAttributeAudio | undefined;
+                        if (voice) {
+                            peersData[peerId].voiceDuration += voice.duration;
+                            statData.voiceDuration += voice.duration;
+                        }
+
+                        const round = attributes.find(
+                            (attribute) => attribute instanceof Api.DocumentAttributeVideo
+                        ) as Api.DocumentAttributeVideo | undefined;
+                        if (round) {
+                            peersData[peerId].roundDuration += round.duration;
+                            statData.roundDuration += round.duration;
+                        }
+                    }
+                }
+            }
+
+            if (message.entities) {
+                message.entities.forEach((entity) => {
+                    if (entity instanceof Api.MessageEntityMention) {
+                        const mention = message.message.slice(entity.offset, entity.offset + entity.length);
+
+                        if (!statData.mentions[mention]) {
+                            statData.mentions[mention] = 0;
+                        }
+
+                        statData.mentions[mention]++;
+                    }
+
+                    if (entity instanceof Api.MessageEntityCustomEmoji) {
+                        const documentId = entity.documentId.valueOf();
+
+                        if (!statData.emoji[documentId]) {
+                            statData.emoji[documentId] = 0;
+                        }
+
+                        peersData[peerId].emoji++;
+                        statData.emojiTotal++;
+                        statData.emoji[documentId]++;
+                    }
+                });
+            }
+
+            if (message.groupedId) {
+                if (groupedIds.has(message.groupedId.valueOf())) {
+                    return; // skip duplicate
+                }
+
+                groupedIds.add(message.groupedId.valueOf());
+            }
 
             if (peerId !== lastPeerId) {
                 statData.uniqMessages++;
@@ -405,54 +502,235 @@ export const MessagesStat = () => {
             statData.messages++;
         });
 
-        // this.log('statData', statData);
-        //
-        // const usersDataArray = Object.keys(peersData).map((peerId) => {
-        //     peersData[peerId].id = peerId;
-        //
-        //     return peersData[peerId];
-        // });
-        //
-        // const getTop = (key) => {
-        //     return usersDataArray
-        //         .sort((a, b) => b[key] - a[key])
-        //         .slice(0, 50)
-        //         .filter(user => user[key]);
-        // };
-        //
-        // statData.tops = {
-        //     count: getTop('count'),
-        //     uniq_count: getTop('uniqCount'),
-        //     emoji: getTop('emoji'),
-        //     attachments: getTop('attachments'),
-        //     stickers: getTop('stickers'),
-        //     voice_duration: getTop('voiceDuration'),
-        //     round_duration: getTop('roundDuration'),
-        // };
-        //
-        // Object.keys(statData.tops).forEach((key) => {
-        //     if (!statData.tops[key].length) {
-        //         delete statData.tops[key];
-        //     }
-        // });
-        //
-        // this.setState({
-        //     stat: statData,
-        //     selectedTopTab: Object.keys(statData.tops)[0],
-        // });
-        //
-        // this.endProgress();
+        const stat: IScanDataResult = {
+            period: getSelectedPeriod(statData.firstMessage, statData.lastMessage),
+            messages: statData.messages,
+            uniqMessages: statData.uniqMessages,
+            voiceDuration: statData.voiceDuration,
+            roundDuration: statData.roundDuration,
+            callDuration: statData.callDuration,
+            attachmentsTotal: statData.attachmentsTotal,
+            emojiTotal: statData.emojiTotal,
+            stickersTotal: statData.stickersTotal,
+            reactionsTotal: statData.reactionsTotal,
+            tops: {
+                messages: [],
+                uniqMessages: [],
+                emoji: [],
+                attachments: [],
+                stickers: [],
+                voiceDuration: [],
+                roundDuration: []
+            }
+        };
 
-        console.log('statData', statData);
-        console.log('peersData', peersData);
+        const usersDataArray = Object.values(peersData);
+        const topLimit = 30;
+
+        stat.tops.messages = usersDataArray
+            .sort((a, b) => b.count - a.count)
+            .slice(0, topLimit)
+            .map((peer) => {
+                return {
+                    count: peer.count,
+                    description: declineAndFormat(peer.count, md('decline.messages')),
+                    owner: ownersInfo.get(peer.peerId)
+                } as ITopItem;
+            })
+            .filter(({ count }) => Boolean(count));
+        stat.tops.uniqMessages = usersDataArray
+            .sort((a, b) => b.uniqCount - a.uniqCount)
+            .slice(0, topLimit)
+            .map((peer) => {
+                return {
+                    count: peer.uniqCount,
+                    description: declineAndFormat(peer.uniqCount, md('decline.uniq_messages')),
+                    owner: ownersInfo.get(peer.peerId)
+                } as ITopItem;
+            })
+            .filter(({ count }) => Boolean(count));
+        stat.tops.emoji = usersDataArray
+            .sort((a, b) => b.emoji - a.emoji)
+            .slice(0, topLimit)
+            .map((peer) => {
+                return {
+                    count: peer.emoji,
+                    description: declineAndFormat(peer.emoji, md('decline.emoji')),
+                    owner: ownersInfo.get(peer.peerId)
+                } as ITopItem;
+            })
+            .filter(({ count }) => Boolean(count));
+        stat.tops.attachments = usersDataArray
+            .sort((a, b) => b.attachments - a.attachments)
+            .slice(0, topLimit)
+            .map((peer) => {
+                return {
+                    count: peer.attachments,
+                    description: declineAndFormat(peer.attachments, md('decline.attachments')),
+                    owner: ownersInfo.get(peer.peerId)
+                } as ITopItem;
+            })
+            .filter(({ count }) => Boolean(count));
+        stat.tops.stickers = usersDataArray
+            .sort((a, b) => b.stickers - a.stickers)
+            .slice(0, topLimit)
+            .map((peer) => {
+                return {
+                    count: peer.stickers,
+                    description: declineAndFormat(peer.stickers, md('decline.stickers')),
+                    owner: ownersInfo.get(peer.peerId)
+                } as ITopItem;
+            })
+            .filter(({ count }) => Boolean(count));
+        stat.tops.voiceDuration = usersDataArray
+            .sort((a, b) => b.voiceDuration - a.voiceDuration)
+            .slice(0, topLimit)
+            .map((peer) => {
+                return {
+                    count: peer.voiceDuration,
+                    description: getTextTime(peer.voiceDuration),
+                    owner: ownersInfo.get(peer.peerId)
+                } as ITopItem;
+            })
+            .filter(({ count }) => Boolean(count));
+        stat.tops.roundDuration = usersDataArray
+            .sort((a, b) => b.roundDuration - a.roundDuration)
+            .slice(0, topLimit)
+            .map((peer) => {
+                return {
+                    count: peer.roundDuration,
+                    description: getTextTime(peer.roundDuration),
+                    owner: ownersInfo.get(peer.peerId)
+                } as ITopItem;
+            })
+            .filter(({ count }) => Boolean(count));
+
+        setStatResult(stat);
+        setProgress(null);
     }
 
     if (needHideContent()) return null;
 
+    if (statResult) {
+        const counts = [
+            { icon: IconMessage, label: mt('headers.count'), value: formatNumber(statResult.messages) },
+            { icon: IconMessage2Bolt, label: mt('headers.uniq_count'), value: formatNumber(statResult.uniqMessages) },
+            { icon: IconMoodSmile, label: mt('headers.emoji'), value: formatNumber(statResult.emojiTotal) },
+            { icon: IconPaperclip, label: mt('headers.attachments'), value: formatNumber(statResult.attachmentsTotal) },
+            { icon: IconSticker, label: mt('headers.stickers'), value: formatNumber(statResult.stickersTotal) },
+            { icon: IconHeart, label: mt('headers.reactions'), value: formatNumber(statResult.reactionsTotal) },
+            { icon: IconMicrophone, label: mt('headers.voice_duration'), value: getTextTime(statResult.voiceDuration) },
+            { icon: IconVideo, label: mt('headers.round_duration'), value: getTextTime(statResult.roundDuration) },
+            { icon: IconPhone, label: mt('headers.call_duration'), value: getTextTime(statResult.callDuration) }
+        ].filter((item) => Boolean(item.value));
+
+        const tabs = [
+            {
+                id: ETabId.messages,
+                lang: 'count',
+                icon: IconMessage,
+                owners: statResult.tops.messages
+            },
+            {
+                id: ETabId.uniqMessages,
+                lang: 'uniq_count',
+                icon: IconMessage2Bolt,
+                owners: statResult.tops.uniqMessages
+            },
+            {
+                id: ETabId.emoji,
+                lang: 'emoji',
+                icon: IconMoodSmile,
+                owners: statResult.tops.emoji
+            },
+            {
+                id: ETabId.attachments,
+                lang: 'attachments',
+                icon: IconPaperclip,
+                owners: statResult.tops.attachments
+            },
+            {
+                id: ETabId.stickers,
+                lang: 'stickers',
+                icon: IconSticker,
+                owners: statResult.tops.stickers
+            },
+            {
+                id: ETabId.voiceDuration,
+                lang: 'voice_duration',
+                icon: IconMicrophone,
+                owners: statResult.tops.voiceDuration
+            },
+            {
+                id: ETabId.roundDuration,
+                lang: 'round_duration',
+                icon: IconVideo,
+                owners: statResult.tops.voiceDuration
+            }
+        ].filter((item) => item.owners.length);
+
+        return (
+            <>
+                <OwnerRow
+                    owner={selectedOwner}
+                    withoutLink={true}
+                    description={mt('stat_date').replace('{date}', statResult.period)}
+                />
+
+                <Divider my="xs" label={mt('headers.counts')} labelPosition="center" mb={0} />
+                <Menu>
+                    {counts.map((item, key) => (
+                        <Menu.Item
+                            key={key}
+                            p={0}
+                            mt={0}
+                            icon={<item.icon size={14} />}
+                            rightSection={
+                                <Text size="xs" color="dimmed">
+                                    {item.value}
+                                </Text>
+                            }
+                        >
+                            {item.label}
+                        </Menu.Item>
+                    ))}
+                </Menu>
+                <List size="sm">
+                    {counts.map((item, key) => (
+                        <Group key={key}>
+                            <item.icon size={16} />
+                            <Text weight={500} size="sm">
+                                {item.label}
+                            </Text>
+                            <Text size="xs" color="dimmed" align="right">
+                                {item.value}
+                            </Text>
+                        </Group>
+                    ))}
+                </List>
+
+                <Divider my="xs" label={mt('headers.tops')} labelPosition="center" mb={0} />
+                <Tabs defaultValue={ETabId.messages} onTabChange={(value) => setSelectedTab(value as ETabId)}>
+                    <Tabs.List>
+                        {tabs.map((tab, key) => (
+                            <Tabs.Tab key={key} icon={<tab.icon size={14} />} value={tab.id}>
+                                {mt(`headers.${tab.lang}`)}
+                            </Tabs.Tab>
+                        ))}
+                    </Tabs.List>
+                </Tabs>
+
+                <div>selectedTab: {selectedTab}</div>
+            </>
+        );
+    }
+
     if (ownerPeriods.length) {
         return (
             <>
-                {OwnerRow({ owner: selectedOwner, withoutLink: true })}
+                <OwnerRow owner={selectedOwner} withoutLink={true} />
+
+                <Divider my="xs" label={mt('headers.period')} labelPosition="center" mb={0} />
                 {ownerPeriods.map((period, key) => (
                     <div key={key}>
                         <UnstyledButton
@@ -486,10 +764,7 @@ export const MessagesStat = () => {
             <>
                 {dialogsList.map((dialog, key) => (
                     <div key={key}>
-                        {OwnerRow({
-                            owner: dialog,
-                            callback: () => getOptions(dialog)
-                        })}
+                        <OwnerRow owner={dialog} callback={() => getOptions(dialog)} />
                     </div>
                 ))}
             </>

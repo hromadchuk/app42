@@ -59,7 +59,6 @@ module.exports = {
         'max-depth': [2, { max: 5 }],
         'max-len': [1, { code: 120 }],
         'max-lines': [2, { max: 2000, skipBlankLines: true }],
-        'max-lines-per-function': [2, { max: 500 }],
         'max-statements-per-line': 2,
         'no-async-promise-executor': 2,
         'no-case-declarations': 0,

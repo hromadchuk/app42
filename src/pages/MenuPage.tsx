@@ -1,4 +1,4 @@
-import { Alert, createStyles, getStylesRef } from '@mantine/core';
+import { createStyles, getStylesRef, Notification } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Api } from 'telegram';
 import { Link } from 'react-router-dom';
@@ -65,10 +65,10 @@ const MenuPage = () => {
             {links}
 
             {developer && (
-                <Alert color="gray" m="xs">
+                <Notification withCloseButton={false} m="xs" color="gray">
                     {t('alpha.description')}
                     <OwnerRow owner={developer} description={t('alpha.user_description')} />
-                </Alert>
+                </Notification>
             )}
         </>
     );
