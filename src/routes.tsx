@@ -1,5 +1,5 @@
-import React, { createElement, lazy, Suspense } from 'react';
-import { Icon123, IconAddressBook, TablerIconsProps } from '@tabler/icons-react';
+import { createElement, JSX, lazy, Suspense } from 'react';
+import { Icon123, IconAddressBook, IconMessageCircleSearch, TablerIconsProps } from '@tabler/icons-react';
 
 import { t } from './lib/lang.tsx';
 
@@ -11,9 +11,9 @@ export interface IRouter {
     name?: string;
     withoutAuth?: boolean;
     isMethod?: boolean;
-    element: React.JSX.Element;
-    childElement?: React.JSX.Element;
-    icon?: (props: TablerIconsProps) => React.JSX.Element;
+    element: JSX.Element;
+    childElement?: JSX.Element;
+    icon?: (props: TablerIconsProps) => JSX.Element;
 }
 
 export const routers: IRouter[] = [
@@ -45,6 +45,14 @@ export const routers: IRouter[] = [
         path: '/methods/contacts_analysis',
         element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
         childElement: createElement(lazy(() => import('./methods/ContactsAnalysis.tsx')))
+    },
+    {
+        id: 'messages_stat',
+        icon: IconMessageCircleSearch,
+        isMethod: true,
+        path: '/methods/messages_stat',
+        element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
+        childElement: createElement(lazy(() => import('./methods/MessagesStat.tsx')))
     }
 ].map((route: IRouter) => {
     if (route.id) {

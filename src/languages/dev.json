@@ -1,5 +1,6 @@
 {
   "auth_page": {
+    "description": "Kit 42 is a product with many features for Telegram. For the product to work, you need to log in to your Telegram account.",
     "input_number": "Phone number",
     "input_code": "Code",
     "input_password": "Password",
@@ -8,9 +9,15 @@
     "button_confirm_password": "Confirm password"
   },
   "common": {
-    "progress": "Loading...",
+    "progress": "Loading",
     "footer": "Made by Kit 42 team",
-    "done": "Done!"
+    "done": "Done!",
+    "time": {
+      "days": ["day", "days", "days"],
+      "hours": ["hour", "hours", "hours"],
+      "minutes": ["minute", "minutes", "minutes"],
+      "seconds": ["second", "seconds", "seconds"]
+    }
   },
   "alpha": {
     "description": "This is an alpha version of the product and there may be bugs. If you find a bug or have a suggestion, please send a message to the developer. Features will be added as the product is developed.",
@@ -21,7 +28,8 @@
   },
   "routes": {
     "get_id": "Get account/channel ID",
-    "contacts_analysis": "Contacts Analysis"
+    "contacts_analysis": "Contacts Analysis",
+    "messages_stat": "Messages Stat"
   },
   "methods": {
     "get_id": {
@@ -46,6 +54,75 @@
         "long_time_online": "Long time offline",
         "hide_online": "Hide online",
         "recent_online": "By last online time"
+      }
+    },
+    "messages_stat": {
+      "loading_dialogs": "Getting dialogs",
+      "loading_messages": "Getting messages",
+      "loading_calculation": "Calculating stats",
+      "no_messages": "No messages in dialogue",
+      "too_few_messages": "For stats need more messages",
+      "stat_date": "Stats for {date}",
+      "button_send": "Send stat to dialog",
+      "button_send_done": "Sent!",
+      "headers": {
+        "period": "Period of stats",
+        "counts": "Counts",
+        "tops": "Tops",
+        "count": "Messages",
+        "uniq_count": "Unique messages",
+        "emoji": "Emoji",
+        "reactions": "Reactions",
+        "attachments": "Attachments",
+        "stickers": "Stickers",
+        "voice_duration": "Voices duration",
+        "round_duration": "Videos duration",
+        "call_duration": "Calls duration"
+      },
+      "uniq_description": "Several messages in a row, inseparable by other interlocutor, will be considered unique",
+      "emoji_description": "Collected reactions on messages",
+      "periods": {
+        "0": "All dialogue",
+        "1": "Day",
+        "3": "3 days",
+        "7": "Week",
+        "14": "2 weeks",
+        "30": "Month",
+        "90": "Quarter",
+        "180": "Six months",
+        "365": "Year"
+      },
+      "decline": {
+        "messages": [
+          "message",
+          "messages",
+          "messages"
+        ],
+        "uniq_messages": [
+          "unique message",
+          "unique messages",
+          "unique messages"
+        ],
+        "emoji": [
+          "emoji",
+          "emoji",
+          "emoji"
+        ],
+        "attachments": [
+          "attachment",
+          "attachments",
+          "attachments"
+        ],
+        "stickers": [
+          "sticker",
+          "stickers",
+          "stickers"
+        ],
+        "reactions": [
+          "reaction",
+          "reactions",
+          "reactions"
+        ]
       }
     }
   }

@@ -1,9 +1,9 @@
-import React, { useContext, useEffect } from 'react';
+import { JSX, useContext, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AppContext } from './AppContext.tsx';
 
 interface IAuthRequired {
-    page: React.JSX.Element;
+    page: JSX.Element;
 }
 
 export default function AuthRequired({ page }: IAuthRequired) {
