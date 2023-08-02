@@ -778,10 +778,11 @@ export const MessagesStat = () => {
                     description={mt('stat_date').replace('{date}', statResult.period)}
                 />
 
-                <Button fullWidth size="xs" mt="xs" onClick={sendToChat} disabled={isSentToChat}>
-                    {isSentToChat ? mt('button_send_done') : mt('button_send')}
-                </Button>
-
+                {(selectedOwner instanceof Api.User || selectedOwner instanceof Api.Chat) && (
+                    <Button fullWidth size="xs" mt="xs" onClick={sendToChat} disabled={isSentToChat}>
+                        {isSentToChat ? mt('button_send_done') : mt('button_send')}
+                    </Button>
+                )}
                 <Divider my="xs" label={mt('headers.counts')} labelPosition="center" mb={0} />
 
                 {counts.map((item, key) => (
@@ -794,7 +795,7 @@ export const MessagesStat = () => {
                         </Group>
 
                         <Group position="right">
-                            <Text size={12} color="dimmed">
+                            <Text size={12} color="dimmed" ta="right">
                                 {item.value}
                             </Text>
                         </Group>
