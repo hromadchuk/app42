@@ -71,7 +71,6 @@
         "tops": "Tops",
         "count": "Messages",
         "uniq_count": "Unique messages",
-        "emoji": "Emoji",
         "reactions": "Reactions",
         "attachments": "Attachments",
         "stickers": "Stickers",
@@ -102,11 +101,6 @@
           "unique message",
           "unique messages",
           "unique messages"
-        ],
-        "emoji": [
-          "emoji",
-          "emoji",
-          "emoji"
         ],
         "attachments": [
           "attachment",
