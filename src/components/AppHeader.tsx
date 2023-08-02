@@ -1,7 +1,10 @@
 import { ActionIcon, Center, Container, createStyles, Header, rem, UnstyledButton } from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
+import { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Api } from 'telegram';
+import ReactGA from 'react-ga4';
+import { isDev } from '../lib/helpers.tsx';
 
 import Logo from './Logo.tsx';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
@@ -25,6 +28,18 @@ export function AppHeader({ user }: IAppHeader) {
     const location = useLocation();
     const navigate = useNavigate();
     const { classes } = useStyles();
+
+    useEffect(() => {
+        if (!isDev) {
+            ReactGA.initialize('G-T5H886J9RS');
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!isDev) {
+            ReactGA.send({ hitType: 'pageview', page: location.pathname });
+        }
+    }, [location]);
 
     const LeftSide = () => {
         if (excludeBackButton.includes(location.pathname)) {
