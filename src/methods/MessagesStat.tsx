@@ -44,7 +44,7 @@ interface IPeerData {
     peerId: number;
     count: number;
     uniqCount: number;
-    emoji: number;
+    reactions: number;
     attachments: number;
     stickers: number;
     voiceDuration: number;
@@ -61,8 +61,6 @@ interface IScanDataCalculation {
     callDuration: number;
     attachmentsTotal: number;
     attachmentsTypes: { [key: string]: number };
-    emojiTotal: number;
-    emoji: { [key: string]: number };
     stickersTotal: number;
     stickers: { [key: string]: number };
     reactionsTotal: number;
@@ -85,13 +83,12 @@ interface IScanDataResult {
     roundDuration: number;
     callDuration: number;
     attachmentsTotal: number;
-    emojiTotal: number;
     stickersTotal: number;
     reactionsTotal: number;
     tops: {
         messages: ITopItem[];
         uniqMessages: ITopItem[];
-        emoji: ITopItem[];
+        reactions: ITopItem[];
         attachments: ITopItem[];
         stickers: ITopItem[];
         voiceDuration: ITopItem[];
@@ -102,7 +99,7 @@ interface IScanDataResult {
 enum ETabId {
     messages = 'messages',
     uniqMessages = 'uniqMessages',
-    emoji = 'emoji',
+    reactions = 'reactions',
     attachments = 'attachments',
     stickers = 'stickers',
     voiceDuration = 'voiceDuration',
@@ -363,8 +360,6 @@ export const MessagesStat = () => {
             callDuration: 0,
             attachmentsTotal: 0,
             attachmentsTypes: {},
-            emojiTotal: 0,
-            emoji: {},
             stickersTotal: 0,
             stickers: {},
             servicesMessages: {},
@@ -381,7 +376,7 @@ export const MessagesStat = () => {
                     peerId,
                     count: 0,
                     uniqCount: 0,
-                    emoji: 0,
+                    reactions: 0,
                     attachments: 0,
                     stickers: 0,
                     voiceDuration: 0,
@@ -399,6 +394,7 @@ export const MessagesStat = () => {
                         }
 
                         statData.reactions[reaction.emoticon]++;
+                        peersData[peerId].reactions++;
                     }
                 });
             }
@@ -480,18 +476,6 @@ export const MessagesStat = () => {
 
                         statData.mentions[mention]++;
                     }
-
-                    if (entity instanceof Api.MessageEntityCustomEmoji) {
-                        const documentId = entity.documentId.valueOf();
-
-                        if (!statData.emoji[documentId]) {
-                            statData.emoji[documentId] = 0;
-                        }
-
-                        peersData[peerId].emoji++;
-                        statData.emojiTotal++;
-                        statData.emoji[documentId]++;
-                    }
                 });
             }
 
@@ -521,13 +505,12 @@ export const MessagesStat = () => {
             roundDuration: statData.roundDuration,
             callDuration: statData.callDuration,
             attachmentsTotal: statData.attachmentsTotal,
-            emojiTotal: statData.emojiTotal,
             stickersTotal: statData.stickersTotal,
             reactionsTotal: statData.reactionsTotal,
             tops: {
                 messages: [],
                 uniqMessages: [],
-                emoji: [],
+                reactions: [],
                 attachments: [],
                 stickers: [],
                 voiceDuration: [],
@@ -560,13 +543,13 @@ export const MessagesStat = () => {
                 } as ITopItem;
             })
             .filter(({ count }) => Boolean(count));
-        stat.tops.emoji = usersDataArray
-            .sort((a, b) => b.emoji - a.emoji)
+        stat.tops.reactions = usersDataArray
+            .sort((a, b) => b.reactions - a.reactions)
             .slice(0, topLimit)
             .map((peer) => {
                 return {
-                    count: peer.emoji,
-                    description: declineAndFormat(peer.emoji, md('decline.emoji')),
+                    count: peer.reactions,
+                    description: declineAndFormat(peer.reactions, md('decline.reactions')),
                     owner: ownersInfo.get(peer.peerId)
                 } as ITopItem;
             })
@@ -626,7 +609,6 @@ export const MessagesStat = () => {
         const counts = [
             { icon: IconMessage, label: mt('headers.count'), value: formatNumber(statResult.messages) },
             { icon: IconMessage2Bolt, label: mt('headers.uniq_count'), value: formatNumber(statResult.uniqMessages) },
-            { icon: IconMoodSmile, label: mt('headers.emoji'), value: formatNumber(statResult.emojiTotal) },
             { icon: IconPaperclip, label: mt('headers.attachments'), value: formatNumber(statResult.attachmentsTotal) },
             { icon: IconSticker, label: mt('headers.stickers'), value: formatNumber(statResult.stickersTotal) },
             { icon: IconHeart, label: mt('headers.reactions'), value: formatNumber(statResult.reactionsTotal) },
@@ -649,10 +631,10 @@ export const MessagesStat = () => {
                 owners: statResult.tops.uniqMessages
             },
             {
-                id: ETabId.emoji,
-                lang: 'emoji',
+                id: ETabId.reactions,
+                lang: 'reactions',
                 icon: IconMoodSmile,
-                owners: statResult.tops.emoji
+                owners: statResult.tops.reactions
             },
             {
                 id: ETabId.attachments,
@@ -678,7 +660,13 @@ export const MessagesStat = () => {
                 icon: IconVideo,
                 owners: statResult.tops.roundDuration
             }
-        ].filter((tab) => tab.owners.length);
+        ].filter((tab) => {
+            if (tab.id === ETabId.uniqMessages && selectedOwner instanceof Api.Channel) {
+                return false;
+            }
+
+            return tab.owners.length;
+        });
 
         const tabsList = tabs.map(
             (tab) =>
@@ -706,8 +694,8 @@ export const MessagesStat = () => {
                 return declineAndFormat(count, md('decline.uniq_messages'));
             }
 
-            if (tabId === ETabId.emoji) {
-                return declineAndFormat(count, md('decline.emoji'));
+            if (tabId === ETabId.reactions) {
+                return declineAndFormat(count, md('decline.reactions'));
             }
 
             if (tabId === ETabId.attachments) {
@@ -736,8 +724,8 @@ export const MessagesStat = () => {
                 langKey = 'uniq_description';
             }
 
-            if (selectedTab === ETabId.emoji) {
-                langKey = 'emoji_description';
+            if (selectedTab === ETabId.reactions) {
+                langKey = 'reactions_description';
             }
 
             if (langKey) {

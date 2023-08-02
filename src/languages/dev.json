@@ -80,7 +80,7 @@
         "call_duration": "Calls duration"
       },
       "uniq_description": "Several messages in a row, inseparable by other interlocutor, will be considered unique",
-      "emoji_description": "Collected reactions on messages",
+      "reactions_description": "Collected reactions on messages",
       "periods": {
         "0": "All dialogue",
         "1": "Day",
