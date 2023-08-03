@@ -1,3 +1,4 @@
+import { Center, Loader } from '@mantine/core';
 import { createElement, JSX, lazy, Suspense } from 'react';
 import { Icon123, IconAddressBook, IconMessageCircleSearch, TablerIconsProps } from '@tabler/icons-react';
 
@@ -63,7 +64,17 @@ export const routers: IRouter[] = [
         route.element = <AuthRequired page={route.element} />;
     }
 
-    route.element = <Suspense fallback={<>Lazy loading...</>}>{route.element}</Suspense>;
+    route.element = (
+        <Suspense
+            fallback={
+                <Center h={100} mx="auto">
+                    <Loader />
+                </Center>
+            }
+        >
+            {route.element}
+        </Suspense>
+    );
 
     return route;
 });

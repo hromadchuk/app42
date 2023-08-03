@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Api } from 'telegram';
 import { AppContext } from '../components/AppContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
+import { SelectLanguage } from '../components/SelectLanguage.tsx';
 import { t } from '../lib/lang.tsx';
 
 const ProfilePage = () => {
@@ -28,6 +29,8 @@ const ProfilePage = () => {
     return (
         <Container my="xs">
             <OwnerRow owner={user} description={getUserDescription()} />
+
+            <SelectLanguage />
 
             <Button fullWidth onClick={logout} mt="xs">
                 {t('profile.button_logout')}
