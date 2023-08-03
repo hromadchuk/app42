@@ -1,8 +1,8 @@
 {
   "auth_page": {
-    "description": "Kit 42 is a product with many features for Telegram. For the product to work, you need to log in to your Telegram account.",
+    "description": "Kit 42 is a product with features for Telegram. For the product to work, you need to log in to your Telegram account.",
     "input_number": "Phone number",
-    "input_code": "Code",
+    "input_code": "Verification code",
     "input_password": "Password",
     "button_send_code": "Send code",
     "button_confirm_code": "Confirm code",
@@ -13,10 +13,26 @@
     "footer": "Made by Kit 42 team",
     "done": "Done!",
     "time": {
-      "days": ["day", "days", "days"],
-      "hours": ["hour", "hours", "hours"],
-      "minutes": ["minute", "minutes", "minutes"],
-      "seconds": ["second", "seconds", "seconds"]
+      "days": [
+        "day",
+        "days",
+        "days"
+      ],
+      "hours": [
+        "hour",
+        "hours",
+        "hours"
+      ],
+      "minutes": [
+        "minute",
+        "minutes",
+        "minutes"
+      ],
+      "seconds": [
+        "second",
+        "seconds",
+        "seconds"
+      ]
     }
   },
   "alpha": {
@@ -27,9 +43,9 @@
     "button_logout": "Logout"
   },
   "routes": {
-    "get_id": "Get account/channel ID",
-    "contacts_analysis": "Contacts Analysis",
-    "messages_stat": "Messages Stat"
+    "get_id": "Get account or channel ID",
+    "contacts_analysis": "Contact analysis",
+    "messages_stat": "Messages stat"
   },
   "methods": {
     "get_id": {
@@ -38,35 +54,35 @@
       "incorrect_username": "Incorrect username"
     },
     "contacts_analysis": {
-      "no_contacts": "You don't have contacts",
-      "show_all_users": "Show all users",
+      "no_contacts": "You don't have any contacts",
+      "show_all_users": "View all users",
       "headers": {
-        "premium": "Have Telegram Premium",
-        "old": "Registered in first 100 millions users",
+        "premium": "Has Telegram Premium",
+        "old": "Registered among the first 100 million users",
         "mutual": "Mutual contacts",
-        "non_mutual": "Non mutual contacts",
+        "non_mutual": "Non-mutual contacts",
         "without_photo": "Without photo",
         "verified": "Verified",
-        "few_usernames": "Several usernames",
+        "few_usernames": "Has several usernames",
         "without_phone": "Unknown phone number",
         "without_username": "Without username",
         "deleted": "Deleted",
-        "long_time_online": "Long time offline",
-        "hide_online": "Hide online",
-        "recent_online": "By last online time"
+        "long_time_online": "Last seen a long time ago",
+        "hide_online": "Hidden online",
+        "recent_online": "By last seen"
       }
     },
     "messages_stat": {
       "loading_dialogs": "Getting dialogs",
       "loading_messages": "Getting messages",
       "loading_calculation": "Calculating stats",
-      "no_messages": "No messages in dialogue",
-      "too_few_messages": "For stats need more messages",
+      "no_messages": "No messages in the dialogue",
+      "too_few_messages": "More messages are needed for the stats",
       "stat_date": "Stats for {date}",
-      "button_send": "Send stat to dialog",
-      "button_send_done": "Sent!",
+      "button_send": "Send stats to the dialog",
+      "button_send_done": "Sent",
       "headers": {
-        "period": "Period of stats",
+        "period": "Select the period for stats",
         "counts": "Counts",
         "tops": "Tops",
         "count": "Messages",
@@ -81,14 +97,14 @@
       "uniq_description": "Several messages in a row, inseparable by other interlocutor, will be considered unique",
       "reactions_description": "Collected reactions on messages",
       "periods": {
-        "0": "All dialogue",
+        "0": "All time",
         "1": "Day",
         "3": "3 days",
         "7": "Week",
         "14": "2 weeks",
         "30": "Month",
         "90": "Quarter",
-        "180": "Six months",
+        "180": "6 months",
         "365": "Year"
       },
       "decline": {

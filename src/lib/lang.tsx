@@ -1,9 +1,13 @@
 import DEVLang from '../languages/dev.json';
 import ENLang from '../languages/en.json';
+import UKLang from '../languages/uk.json';
+import RULang from '../languages/ru.json';
 
 export enum LangType {
     DEV = 'dev',
-    EN = 'en'
+    EN = 'en',
+    UK = 'uk',
+    RU = 'ru'
 }
 
 export interface ILang {
@@ -12,7 +16,9 @@ export interface ILang {
 
 const appLangSources: ILang = {
     [LangType.DEV]: DEVLang as ILang,
-    [LangType.EN]: ENLang as ILang
+    [LangType.EN]: ENLang as ILang,
+    [LangType.UK]: UKLang as ILang,
+    [LangType.RU]: RULang as ILang
 };
 
 const isObject = (item: ILang): boolean => {
@@ -42,7 +48,21 @@ const mergeDeep = (target: ILang, ...sources: ILang[]): Object => {
 };
 
 export const getAppLangCode = (): LangType => {
-    // language detection code
+    const selectedLang = localStorage.getItem('lang') as LangType;
+
+    if (selectedLang && appLangSources[selectedLang]) {
+        return selectedLang;
+    }
+
+    const browserLanguage = navigator.language;
+
+    if (browserLanguage.includes(LangType.UK)) {
+        return LangType.UK;
+    }
+
+    if (browserLanguage.includes(LangType.RU)) {
+        return LangType.RU;
+    }
 
     return LangType.EN;
 };

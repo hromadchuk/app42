@@ -213,7 +213,8 @@ export const ContactsAnalysis = () => {
                 {users.length > 3 && (
                     <Group mt="xs">
                         <Button
-                            variant="subtle"
+                            variant="light"
+                            color="gray"
                             fullWidth
                             onClick={() => openModal(mt(`headers.${lang}`), users, type)}
                         >
