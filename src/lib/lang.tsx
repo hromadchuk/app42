@@ -66,7 +66,7 @@ export const getAppLangCode = (): LangType => {
 
     return LangType.EN;
 };
-const appLanguages = [LangType.EN];
+const appLanguages = [LangType.EN, LangType.UK, LangType.RU];
 
 for (const appLang of appLanguages) {
     appLangSources[appLang] = mergeDeep(
