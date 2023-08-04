@@ -1,4 +1,14 @@
-import { Button, Divider, Group, Notification, Text, UnstyledButton, useMantineTheme } from '@mantine/core';
+import {
+    Button,
+    Container,
+    Divider,
+    Flex,
+    Group,
+    Notification,
+    Text,
+    UnstyledButton,
+    useMantineTheme
+} from '@mantine/core';
 import {
     IconCalendarTime,
     IconHeart,
@@ -615,7 +625,7 @@ export const MessagesStat = () => {
             { icon: IconMicrophone, label: mt('headers.voice_duration'), value: getTextTime(statResult.voiceDuration) },
             { icon: IconVideo, label: mt('headers.round_duration'), value: getTextTime(statResult.roundDuration) },
             { icon: IconPhone, label: mt('headers.call_duration'), value: getTextTime(statResult.callDuration) }
-        ].filter((item) => Boolean(item.value));
+        ].filter((item) => Boolean(item.value) && item.value !== '0');
 
         const tabs: ITabTops[] = [
             {
@@ -661,7 +671,10 @@ export const MessagesStat = () => {
                 owners: statResult.tops.roundDuration
             }
         ].filter((tab) => {
-            if (tab.id === ETabId.uniqMessages && selectedOwner instanceof Api.Channel) {
+            if (
+                tab.id === ETabId.uniqMessages &&
+                (selectedOwner instanceof Api.Channel || selectedOwner instanceof Api.User)
+            ) {
                 return false;
             }
 
@@ -771,23 +784,30 @@ export const MessagesStat = () => {
                         {isSentToChat ? mt('button_send_done') : mt('button_send')}
                     </Button>
                 )}
+
                 <Divider my="xs" label={mt('headers.counts')} labelPosition="center" mb={0} />
-
                 {counts.map((item, key) => (
-                    <Group spacing="xs" grow key={key} p={5} bg={getRowBackground(key)}>
-                        <Group>
-                            <item.icon size={14} />
-                            <Text size="sm" inline>
-                                {item.label}
-                            </Text>
-                        </Group>
+                    <Flex
+                        key={key}
+                        gap="md"
+                        p={5}
+                        justify="flex-start"
+                        align="center"
+                        direction="row"
+                        wrap="wrap"
+                        bg={getRowBackground(key)}
+                    >
+                        <item.icon size={14} />
+                        <Text size="sm" inline>
+                            {item.label}
+                        </Text>
 
-                        <Group position="right">
-                            <Text size={12} color="dimmed" ta="right">
+                        <Container p={0} mr={0}>
+                            <Text size={12} color="dimmed">
                                 {item.value}
                             </Text>
-                        </Group>
-                    </Group>
+                        </Container>
+                    </Flex>
                 ))}
 
                 <Divider my="xs" label={mt('headers.tops')} labelPosition="center" mb={0} />
@@ -842,9 +862,7 @@ export const MessagesStat = () => {
         return (
             <>
                 {dialogsList.map((dialog, key) => (
-                    <div key={key}>
-                        <OwnerRow owner={dialog} callback={() => getOptions(dialog)} />
-                    </div>
+                    <OwnerRow key={key} owner={dialog} callback={() => getOptions(dialog)} />
                 ))}
             </>
         );
