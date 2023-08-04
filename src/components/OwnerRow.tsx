@@ -1,5 +1,5 @@
 import { JSX } from 'react';
-import { Center, Group, Text, UnstyledButton } from '@mantine/core';
+import { Center, Container, Flex, Text, UnstyledButton } from '@mantine/core';
 import { Api } from 'telegram';
 import { IconCheck, IconChevronRight } from '@tabler/icons-react';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
@@ -28,7 +28,7 @@ export function OwnerRow({ owner, description, withoutLink, callback }: IOwnerAv
     if (!withoutLink) {
         if (callback) {
             linkProps.onClick = () => callback();
-            linkProps.component = 'button';
+            linkProps.component = 'a';
         } else if ((isUser || isChannel) && (owner.username || owner.usernames)) {
             const username = (owner.usernames ? owner.usernames[0].username : owner.username) as string;
 
@@ -74,11 +74,11 @@ export function OwnerRow({ owner, description, withoutLink, callback }: IOwnerAv
     }
 
     const Row = (
-        <Group spacing="sm" py={3}>
+        <Flex gap="md" p={5} justify="flex-start" align="center" direction="row" wrap="nowrap">
             <OwnerAvatar owner={owner} />
 
             <div>
-                <Text lineClamp={1} span fz="sm" fw={500}>
+                <Text size="sm" inline>
                     {name.join(' ')}
                     {getBadge()}
                 </Text>
@@ -87,9 +87,15 @@ export function OwnerRow({ owner, description, withoutLink, callback }: IOwnerAv
                 </Text>
             </div>
 
-            {linkProps.component && <IconChevronRight size="0.9rem" stroke={1.5} />}
-        </Group>
+            <Container p={0} mr={0}>
+                {linkProps.component && <IconChevronRight size="0.9rem" stroke={1.5} />}
+            </Container>
+        </Flex>
     );
 
-    return !linkProps.component ? Row : <UnstyledButton {...linkProps}>{Row}</UnstyledButton>;
+    return (
+        <Container p={0}>
+            {!linkProps.component ? Row : <UnstyledButton {...linkProps}>{Row}</UnstyledButton>}
+        </Container>
+    );
 }

@@ -110,7 +110,7 @@ export const AbstractMethod = () => {
                 td
             }}
         >
-            <Container mt="xs">
+            <Container mt="xs" p="xs">
                 {HelperBlock()}
                 {routerInfo.childElement}
             </Container>
