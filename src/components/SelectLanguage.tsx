@@ -53,11 +53,12 @@ export function SelectLanguage() {
     const [selected, setSelected] = useState<ISelectLanguage>(appLanguages[0]);
     const items = appLanguages.map((item) => (
         <Menu.Item
+            disabled={selected.code === item.code}
             icon={<Image src={item.icon} width={18} height={18} />}
             onClick={() => {
                 localStorage.setItem('lang', item.code);
-                location.reload();
                 setSelected(item);
+                location.reload();
             }}
             key={item.label}
         >

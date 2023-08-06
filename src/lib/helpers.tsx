@@ -1,3 +1,4 @@
+import { Api } from 'telegram';
 import { getAppLangCode, LangType, td } from './lang';
 
 export const isDev = window.location.hostname === 'localhost';
@@ -80,4 +81,18 @@ export function getTextTime(seconds: number): string {
     }
 
     return result.join(' ');
+}
+
+export async function CallAPI<R extends Api.AnyRequest>(request: R): Promise<R['__response']> {
+    const method = request.className;
+
+    console.group(`API ${method}`);
+    console.log('Request:', request);
+
+    const result = await window.TelegramClient.invoke(request);
+
+    console.log('Result:', result);
+    console.groupEnd();
+
+    return result;
 }

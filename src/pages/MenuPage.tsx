@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Api } from 'telegram';
 import { Link } from 'react-router-dom';
 import { OwnerRow } from '../components/OwnerRow.tsx';
+import { CallAPI } from '../lib/helpers.tsx';
 import { routers } from '../routes.tsx';
 import { t } from '../lib/lang.tsx';
 
@@ -40,7 +41,7 @@ const MenuPage = () => {
     const [developer, setDeveloper] = useState<null | Api.User>(null);
 
     useEffect(() => {
-        window.TelegramClient.invoke(
+        CallAPI(
             new Api.users.GetUsers({
                 id: ['paulo']
             })

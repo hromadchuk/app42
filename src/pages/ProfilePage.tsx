@@ -5,6 +5,7 @@ import { Api } from 'telegram';
 import { AppContext } from '../components/AppContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { SelectLanguage } from '../components/SelectLanguage.tsx';
+import { CallAPI } from '../lib/helpers.tsx';
 import { t } from '../lib/lang.tsx';
 
 const ProfilePage = () => {
@@ -12,7 +13,7 @@ const ProfilePage = () => {
     const navigate = useNavigate();
 
     const logout = async () => {
-        await window.TelegramClient.invoke(new Api.auth.LogOut());
+        await CallAPI(new Api.auth.LogOut());
 
         setUser(null);
         navigate('/');
