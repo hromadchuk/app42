@@ -3,6 +3,7 @@ import { Badge, Box, Button, Card, Divider, Group, Modal } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Api } from 'telegram';
 import dayjs from 'dayjs';
+import { CallAPI } from '../lib/helpers.tsx';
 
 import { MethodContext } from '../components/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
@@ -52,7 +53,7 @@ export const ContactsAnalysis = () => {
     async function getContacts() {
         setProgress({});
 
-        const result = (await window.TelegramClient.invoke(new Api.contacts.GetContacts({}))) as Api.contacts.Contacts;
+        const result = (await CallAPI(new Api.contacts.GetContacts({}))) as Api.contacts.Contacts;
 
         if (!result.users) {
             setProgress(null);
@@ -199,7 +200,9 @@ export const ContactsAnalysis = () => {
                                 <Box fz={13} mr={5}>
                                     {mt(`headers.${lang}`)}
                                 </Box>
-                                <Badge size="xs">{users.length}</Badge>
+                                <Badge size="xs" display="-webkit-box">
+                                    {users.length}
+                                </Badge>
                             </>
                         }
                         labelPosition="center"

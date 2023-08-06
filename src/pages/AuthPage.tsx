@@ -4,10 +4,11 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Api, TelegramClient } from 'telegram';
 import { computeCheck } from 'telegram/Password';
 import { StringSession } from 'telegram/sessions';
+import { CallAPI } from '../lib/helpers.tsx';
+import { t } from '../lib/lang.tsx';
 
 import { Constants } from '../constants.tsx';
 import { AppContext } from '../components/AppContext.tsx';
-import { t } from '../lib/lang.tsx';
 
 enum AuthState {
     loading = 'loading',
@@ -80,7 +81,7 @@ const AuthPage = () => {
     async function getCurrentUser() {
         try {
             const query = new URLSearchParams(location.search);
-            const [user] = await window.TelegramClient.invoke(
+            const [user] = await CallAPI(
                 new Api.users.GetUsers({
                     id: [new Api.InputUserSelf()]
                 })
@@ -102,7 +103,7 @@ const AuthPage = () => {
         setNumberError('');
 
         try {
-            const result = (await window.TelegramClient.invoke(
+            const result = (await CallAPI(
                 new Api.auth.SendCode({
                     phoneNumber: number,
                     apiId: Constants.API_ID,
@@ -131,7 +132,7 @@ const AuthPage = () => {
         setCodeError('');
 
         try {
-            await window.TelegramClient.invoke(
+            await CallAPI(
                 new Api.auth.SignIn({
                     phoneNumber: number,
                     phoneCodeHash,
@@ -161,11 +162,9 @@ const AuthPage = () => {
         setPasswordError('');
 
         try {
-            const dataLogin = await window.TelegramClient.invoke(new Api.account.GetPassword());
+            const dataLogin = await CallAPI(new Api.account.GetPassword());
 
-            await window.TelegramClient.invoke(
-                new Api.auth.CheckPassword({ password: await computeCheck(dataLogin, password) })
-            );
+            await CallAPI(new Api.auth.CheckPassword({ password: await computeCheck(dataLogin, password) }));
 
             localStorage.setItem(sessionStorageKey, `${window.TelegramClient.session.save()}`);
 

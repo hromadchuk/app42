@@ -30,7 +30,7 @@ import { AppContext } from '../components/AppContext.tsx';
 import { MethodContext } from '../components/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
-import { declineAndFormat, formatNumber, getTextTime, sleep } from '../lib/helpers.tsx';
+import { CallAPI, declineAndFormat, formatNumber, getTextTime, sleep } from '../lib/helpers.tsx';
 
 type TOwner = Api.User | Api.Chat | Api.Channel;
 
@@ -145,7 +145,7 @@ export const MessagesStat = () => {
     async function getLastDialogs() {
         setProgress({ text: mt('loading_dialogs') });
 
-        const result = (await window.TelegramClient.invoke(
+        const result = (await CallAPI(
             new Api.messages.GetDialogs({
                 offsetPeer: user?.id.valueOf(),
                 limit: 100
@@ -185,7 +185,7 @@ export const MessagesStat = () => {
         setProgress({ text: mt('loading_messages') });
         setSelectedOwner(owner);
 
-        const { count } = (await window.TelegramClient.invoke(
+        const { count } = (await CallAPI(
             new Api.messages.GetHistory({
                 peer: owner.id,
                 limit: 1
@@ -232,7 +232,7 @@ export const MessagesStat = () => {
             for (const period of periods) {
                 const periodDate = Math.round(Number(dayjs().add(-period, 'days')) / 1000);
 
-                const { offsetIdOffset } = (await window.TelegramClient.invoke(
+                const { offsetIdOffset } = (await CallAPI(
                     new Api.messages.Search({
                         peer: owner.id,
                         q: '',
@@ -311,7 +311,7 @@ export const MessagesStat = () => {
                 await sleep(777);
             }
 
-            const { messages, chats, users } = (await window.TelegramClient.invoke(
+            const { messages, chats, users } = (await CallAPI(
                 new Api.messages.GetHistory(params)
             )) as Api.messages.MessagesSlice;
 
@@ -761,7 +761,7 @@ export const MessagesStat = () => {
                 lines.push(`* ${label} — ${value}`);
             });
 
-            window.TelegramClient.invoke(
+            CallAPI(
                 new Api.messages.SendMessage({
                     peer: selectedOwner?.id,
                     message: lines.join('\n')

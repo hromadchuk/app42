@@ -2,6 +2,7 @@ import { useContext, useState } from 'react';
 import { ActionIcon, Button, CopyButton, Input, Space, TextInput } from '@mantine/core';
 import { IconAt, IconCheck, IconCopy } from '@tabler/icons-react';
 import { Api } from 'telegram';
+import { CallAPI } from '../lib/helpers.tsx';
 
 import { MethodContext } from '../components/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
@@ -22,7 +23,7 @@ export const GetId = () => {
         setOwnerInfo(null);
 
         try {
-            const result = await window.TelegramClient.invoke(
+            const result = await CallAPI(
                 new Api.contacts.ResolveUsername({
                     username
                 })
