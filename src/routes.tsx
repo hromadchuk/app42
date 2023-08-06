@@ -1,6 +1,12 @@
 import { Center, Loader } from '@mantine/core';
 import { createElement, JSX, lazy, Suspense } from 'react';
-import { Icon123, IconAddressBook, IconMessageCircleSearch, TablerIconsProps } from '@tabler/icons-react';
+import {
+    Icon123,
+    IconAddressBook,
+    IconKeyframes,
+    IconMessageCircleSearch,
+    TablerIconsProps
+} from '@tabler/icons-react';
 
 import { t } from './lib/lang.tsx';
 
@@ -54,6 +60,14 @@ export const routers: IRouter[] = [
         path: '/methods/messages_stat',
         element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
         childElement: createElement(lazy(() => import('./methods/MessagesStat.tsx')))
+    },
+    {
+        id: 'animated_messages',
+        icon: IconKeyframes,
+        isMethod: true,
+        path: '/methods/animated_messages',
+        element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
+        childElement: createElement(lazy(() => import('./methods/AnimatedMessages.tsx')))
     }
 ].map((route: IRouter) => {
     if (route.id) {

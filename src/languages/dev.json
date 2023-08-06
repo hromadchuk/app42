@@ -45,7 +45,8 @@
   "routes": {
     "get_id": "Get account or channel ID",
     "contacts_analysis": "Contact analysis",
-    "messages_stat": "Messages stat"
+    "messages_stat": "Messages stat",
+    "animated_messages": "Animated messages"
   },
   "methods": {
     "get_id": {
@@ -134,6 +135,9 @@
           "reactions"
         ]
       }
+    },
+    "animated_messages": {
+      "loading_dialogs": "Getting dialogs"
     }
   }
 }
