@@ -45,7 +45,8 @@
   "routes": {
     "get_id": "Узнать ID аккаунта или канала",
     "contacts_analysis": "Анализ контактов",
-    "messages_stat": "Статистика сообщений"
+    "messages_stat": "Статистика сообщений",
+    "animated_messages": "Анимированные сообщения"
   },
   "methods": {
     "get_id": {
@@ -133,6 +134,21 @@
           "реакции",
           "реакций"
         ]
+      }
+    },
+    "animated_messages": {
+      "loading_dialogs": "Получение диалогов",
+      "loading_animation": "Отображение анимации",
+      "sending_message": "Отправка сообщения",
+      "sending_message_error": "Ошибка отправки сообщения",
+      "message_recipient": "Выберите получателя сообщения",
+      "few_animation": "В будущем будет больше анимации",
+      "read_wait": "Ожидание прочтения сообщения",
+      "send_button": "Отправить анимацию",
+      "has_message_after_animation": "Есть сообщение после анимации",
+      "message_after_animation": "Сообщение после анимации",
+      "titles": {
+        "heart": "Анимационное сердце"
       }
     }
   }

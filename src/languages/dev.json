@@ -143,12 +143,10 @@
       "sending_message_error": "Message sending error",
       "message_recipient": "Select a message recipient",
       "few_animation": "There will be more animation in the future",
-      "duration": "Animation time",
       "read_wait": "Waiting for the message to be read",
       "send_button": "Send animation",
       "has_message_after_animation": "Has custom message after animation",
       "message_after_animation": "Custom message after animation",
-      "look_animation": "Look animation",
       "titles": {
         "heart": "Animation heart"
       }

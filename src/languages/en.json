@@ -45,7 +45,8 @@
   "routes": {
     "get_id": "Get account or channel ID",
     "contacts_analysis": "Contact analysis",
-    "messages_stat": "Messages stat"
+    "messages_stat": "Messages stat",
+    "animated_messages": "Animated messages"
   },
   "methods": {
     "get_id": {
@@ -133,6 +134,21 @@
           "reactions",
           "reactions"
         ]
+      }
+    },
+    "animated_messages": {
+      "loading_dialogs": "Getting dialogs",
+      "loading_animation": "Showing animation",
+      "sending_message": "Sending message",
+      "sending_message_error": "Message sending error",
+      "message_recipient": "Select a message recipient",
+      "few_animation": "There will be more animation in the future",
+      "read_wait": "Waiting for the message to be read",
+      "send_button": "Send animation",
+      "has_message_after_animation": "Has custom message after animation",
+      "message_after_animation": "Custom message after animation",
+      "titles": {
+        "heart": "Animation heart"
       }
     }
   }

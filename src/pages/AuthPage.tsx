@@ -1,9 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
 import { Button, Center, Container, Loader, TextInput } from '@mantine/core';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Api, TelegramClient } from 'telegram';
+import { Api } from 'telegram';
 import { computeCheck } from 'telegram/Password';
-import { StringSession } from 'telegram/sessions';
 import { CallAPI } from '../lib/helpers.tsx';
 import { t } from '../lib/lang.tsx';
 
@@ -33,8 +32,6 @@ interface IButtonItemRow {
     name?: string;
 }
 
-const sessionStorageKey = 'kit42Session';
-
 const AuthPage = () => {
     const { setUser } = useContext(AppContext);
     const navigate = useNavigate();
@@ -55,17 +52,7 @@ const AuthPage = () => {
 
     useEffect(() => {
         (async () => {
-            const session = localStorage.getItem(sessionStorageKey);
-
-            window.TelegramClient = new TelegramClient(
-                new StringSession(session || ''),
-                Constants.API_ID,
-                Constants.API_HASH,
-                {
-                    connectionRetries: 5,
-                    useWSS: true
-                }
-            );
+            const session = localStorage.getItem(Constants.SESSION_KEY);
 
             await window.TelegramClient.connect();
 
@@ -140,7 +127,7 @@ const AuthPage = () => {
                 })
             );
 
-            localStorage.setItem(sessionStorageKey, `${window.TelegramClient.session.save()}`);
+            localStorage.setItem(Constants.SESSION_KEY, `${window.TelegramClient.session.save()}`);
 
             await getCurrentUser();
         } catch (error) {
@@ -166,7 +153,7 @@ const AuthPage = () => {
 
             await CallAPI(new Api.auth.CheckPassword({ password: await computeCheck(dataLogin, password) }));
 
-            localStorage.setItem(sessionStorageKey, `${window.TelegramClient.session.save()}`);
+            localStorage.setItem(Constants.SESSION_KEY, `${window.TelegramClient.session.save()}`);
 
             await getCurrentUser();
         } catch (error) {
