@@ -78,7 +78,6 @@
       "loading_messages": "Getting messages",
       "loading_calculation": "Calculating stats",
       "no_messages": "No messages in the dialogue",
-      "too_few_messages": "More messages are needed for the stats",
       "stat_date": "Stats for {date}",
       "button_send": "Send stats to the dialog",
       "button_send_done": "Sent",
