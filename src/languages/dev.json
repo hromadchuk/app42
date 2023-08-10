@@ -46,7 +46,8 @@
     "get_id": "Get account or channel ID",
     "contacts_analysis": "Contact analysis",
     "messages_stat": "Messages stat",
-    "animated_messages": "Animated messages"
+    "animated_messages": "Animated messages",
+    "clear_channel_followers": "Clear channel followers"
   },
   "methods": {
     "get_id": {
@@ -149,6 +150,10 @@
       "titles": {
         "heart": "Animation heart"
       }
+    },
+    "clear_channel_followers": {
+      "decline_members": ["member", "members", "members"],
+      "loading_members": "Getting members"
     }
   }
 }

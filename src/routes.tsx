@@ -5,6 +5,7 @@ import {
     IconAddressBook,
     IconKeyframes,
     IconMessageCircleSearch,
+    IconUsersMinus,
     TablerIconsProps
 } from '@tabler/icons-react';
 
@@ -68,6 +69,14 @@ export const routers: IRouter[] = [
         path: '/methods/animated_messages',
         element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
         childElement: createElement(lazy(() => import('./methods/AnimatedMessages.tsx')))
+    },
+    {
+        id: 'clear_channel_followers',
+        icon: IconUsersMinus,
+        isMethod: true,
+        path: '/methods/clear_channel_followers',
+        element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
+        childElement: createElement(lazy(() => import('./methods/ClearChannelFollowers.tsx')))
     }
 ].map((route: IRouter) => {
     if (route.id) {
