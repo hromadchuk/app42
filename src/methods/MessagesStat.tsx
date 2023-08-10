@@ -197,11 +197,6 @@ export const MessagesStat = () => {
             return;
         }
 
-        if (count < 20) {
-            setFinishBlock({ text: mt('too_few_messages'), state: 'error' });
-            return;
-        }
-
         const periods = [
             1, // 1 day
             3, // 3 days
