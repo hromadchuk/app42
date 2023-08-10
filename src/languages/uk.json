@@ -45,7 +45,8 @@
   "routes": {
     "get_id": "Отримати ID акаунту/каналу",
     "contacts_analysis": "Аналіз контактів",
-    "messages_stat": "Статистика повідомлень"
+    "messages_stat": "Статистика повідомлень",
+    "animated_messages": "Анімовані повідомлення"
   },
   "methods": {
     "get_id": {
@@ -133,6 +134,21 @@
           "реакції",
           "реакцій"
         ]
+      }
+    },
+    "animated_messages": {
+      "loading_dialogs": "Отримання діалогів",
+      "loading_animation": "Показ анімації",
+      "sending_message": "Надсилання повідомлення",
+      "sending_message_error": "Помилка надсилання повідомлення",
+      "message_recipient": "Виберіть одержувача повідомлення",
+      "few_animation": "У майбутньому буде більше анімацій",
+      "read_wait": "Очікування прочитання повідомлення",
+      "send_button": "Надіслати анімацію",
+      "has_message_after_animation": "Є повідомлення після анімації",
+      "message_after_animation": "Повідомлення після анімації",
+      "titles": {
+        "heart": "Анімаційне серце"
       }
     }
   }

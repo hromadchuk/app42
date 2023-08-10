@@ -45,6 +45,8 @@ const useStyles = createStyles((theme) => ({
     }
 }));
 
+const stateReadMessages = new Map<number, number>();
+
 export const AnimatedMessages = () => {
     const { user } = useContext(AppContext);
     const { mt, needHideContent, setProgress, setFinishBlock, getProgress } = useContext(MethodContext);
@@ -68,6 +70,18 @@ export const AnimatedMessages = () => {
 
     useEffect(() => {
         getLastDialogs();
+
+        window.listenEvents.UpdateReadHistoryOutbox = (event: object) => {
+            const thEvent = event as Api.UpdateReadHistoryOutbox;
+            const peer = thEvent.peer as Api.PeerUser;
+            const userId = peer.userId.valueOf();
+
+            stateReadMessages.set(userId, thEvent.maxId);
+        };
+
+        return () => {
+            delete window.listenEvents.UpdateReadHistoryOutbox;
+        };
     }, []);
 
     async function getLastDialogs() {
@@ -118,7 +132,7 @@ export const AnimatedMessages = () => {
 
         setProgress({ text: mt('read_wait') });
 
-        await waitReadMessage(ownerId);
+        await waitReadMessage(ownerId, messageId);
 
         if (lastMessage) {
             lines.push(lastMessage);
@@ -167,30 +181,17 @@ export const AnimatedMessages = () => {
         return newMessageId;
     }
 
-    async function waitReadMessage(ownerId: number) {
+    async function waitReadMessage(ownerId: number, messageId: number) {
         let work = true;
 
         while (work) {
-            const result = (await CallAPI(
-                new Api.messages.GetDialogs({
-                    offsetPeer: ownerId,
-                    limit: 100
-                })
-            )) as Api.messages.Dialogs;
+            const maxId = stateReadMessages.get(ownerId) || 0;
 
-            const find = result.dialogs.find((dialog) => {
-                if (!(dialog.peer instanceof Api.PeerUser)) {
-                    return false;
-                }
-
-                return dialog.peer.userId.valueOf() === ownerId;
-            }) as Api.Dialog;
-
-            if (find.readOutboxMaxId === find.topMessage) {
+            if (maxId >= messageId) {
                 work = false;
             }
 
-            await sleep(1500);
+            await sleep(200);
         }
     }
 
