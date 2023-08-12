@@ -153,7 +153,8 @@
     },
     "clear_channel_followers": {
       "decline_members": ["member", "members", "members"],
-      "loading_members": "Getting members"
+      "loading_members": "Getting members",
+      "no_rights": "you don't have remove rights"
     }
   }
 }
