@@ -4,10 +4,11 @@ import { Api } from 'telegram';
 import { IconCheck, IconChevronRight } from '@tabler/icons-react';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
 
-interface IOwnerAvatar {
+interface IOwnerRow {
     owner: null | Api.TypeUser | Api.TypeChat;
     description?: string;
     withoutLink?: boolean;
+    disabled?: boolean;
     callback?: () => void;
 }
 
@@ -18,14 +19,14 @@ interface ILinkProps {
     component?: 'a' | 'button';
 }
 
-export function OwnerRow({ owner, description, withoutLink, callback }: IOwnerAvatar) {
+export function OwnerRow({ owner, description, withoutLink, callback, disabled }: IOwnerRow) {
     const name: string[] = [];
     const linkProps: ILinkProps = {};
     const isUser = owner instanceof Api.User;
     const isChat = owner instanceof Api.Chat;
     const isChannel = owner instanceof Api.Channel;
 
-    if (!withoutLink) {
+    if (!withoutLink && !disabled) {
         if (callback) {
             linkProps.onClick = () => callback();
             linkProps.component = 'a';
@@ -74,7 +75,15 @@ export function OwnerRow({ owner, description, withoutLink, callback }: IOwnerAv
     }
 
     const Row = (
-        <Flex gap="md" p={5} justify="flex-start" align="center" direction="row" wrap="nowrap">
+        <Flex
+            gap="md"
+            p={5}
+            justify="flex-start"
+            align="center"
+            direction="row"
+            wrap="nowrap"
+            opacity={disabled ? 0.5 : 1}
+        >
             <OwnerAvatar owner={owner} />
 
             <div>
@@ -95,7 +104,13 @@ export function OwnerRow({ owner, description, withoutLink, callback }: IOwnerAv
 
     return (
         <Container p={0}>
-            {!linkProps.component ? Row : <UnstyledButton {...linkProps}>{Row}</UnstyledButton>}
+            {!linkProps.component ? (
+                Row
+            ) : (
+                <UnstyledButton {...linkProps} disabled={true}>
+                    {Row}
+                </UnstyledButton>
+            )}
         </Container>
     );
 }
