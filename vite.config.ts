@@ -13,7 +13,6 @@ export default defineConfig({
                 globPatterns: ['**/*.{svg,png,gif}']
             },
             manifest: {
-                // theme_color: '#449aea',
                 display: 'standalone',
                 scope: '/',
                 start_url: '/kit-42/',
