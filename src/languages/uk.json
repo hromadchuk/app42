@@ -46,7 +46,8 @@
     "get_id": "Отримати ID акаунту/каналу",
     "contacts_analysis": "Аналіз контактів",
     "messages_stat": "Статистика повідомлень",
-    "animated_messages": "Анімовані повідомлення"
+    "animated_messages": "Анімовані повідомлення",
+    "inactive_channels": "Неактивні канали та супергрупи"
   },
   "methods": {
     "get_id": {
@@ -149,6 +150,10 @@
       "titles": {
         "heart": "Анімаційне серце"
       }
+    },
+    "inactive_channels": {
+      "no_inactive": "У вас немає неактивних каналів і супергруп",
+      "last_active": "Остання активність {diff_time}"
     }
   }
 }
