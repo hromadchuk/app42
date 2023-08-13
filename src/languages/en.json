@@ -46,7 +46,8 @@
     "get_id": "Get account or channel ID",
     "contacts_analysis": "Contact analysis",
     "messages_stat": "Messages stat",
-    "animated_messages": "Animated messages"
+    "animated_messages": "Animated messages",
+    "inactive_channels": "Inactive channels and supergroups"
   },
   "methods": {
     "get_id": {
@@ -149,6 +150,10 @@
       "titles": {
         "heart": "Animation heart"
       }
+    },
+    "inactive_channels": {
+      "no_inactive": "You don't have inactive channels and supergroups",
+      "last_active": "Last active {diff_time}"
     }
   }
 }

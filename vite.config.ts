@@ -9,8 +9,11 @@ export default defineConfig({
     plugins: [
         react(),
         VitePWA({
+            workbox: {
+                globPatterns: ['**/*.{svg}']
+            },
             manifest: {
-                theme_color: '#449aea',
+                // theme_color: '#449aea',
                 display: 'standalone',
                 scope: '/',
                 start_url: '/kit-42/',
