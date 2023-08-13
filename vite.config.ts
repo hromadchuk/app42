@@ -10,7 +10,7 @@ export default defineConfig({
         react(),
         VitePWA({
             workbox: {
-                globPatterns: ['**/*.{svg}']
+                globPatterns: ['**/*.{svg,png,gif}']
             },
             manifest: {
                 // theme_color: '#449aea',
