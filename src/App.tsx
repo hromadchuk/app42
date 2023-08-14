@@ -28,24 +28,32 @@ const App = () => {
     useEffect(() => {
         clearOldCache();
 
-        const session = localStorage.getItem(Constants.SESSION_KEY);
+        const versionKey = 'KIT_42_CACHE_VERSION';
+        const currentVersion = localStorage.getItem(versionKey);
+        if (currentVersion !== Constants.KIT_42_CACHE_VERSION) {
+            localStorage.clear();
+            localStorage.setItem(versionKey, Constants.KIT_42_CACHE_VERSION);
+            location.reload();
+        } else {
+            const session = localStorage.getItem(Constants.SESSION_KEY);
 
-        window.TelegramClient = new TelegramClient(
-            new StringSession(session || ''),
-            Constants.API_ID,
-            Constants.API_HASH,
-            {
-                connectionRetries: 5,
-                useWSS: true
-            }
-        );
+            window.TelegramClient = new TelegramClient(
+                new StringSession(session || ''),
+                Constants.API_ID,
+                Constants.API_HASH,
+                {
+                    connectionRetries: 5,
+                    useWSS: true
+                }
+            );
 
-        window.listenEvents = {};
-        window.TelegramClient.addEventHandler((event) => {
-            if (window.listenEvents[event.className]) {
-                window.listenEvents[event.className](event);
-            }
-        });
+            window.listenEvents = {};
+            window.TelegramClient.addEventHandler((event) => {
+                if (window.listenEvents[event.className]) {
+                    window.listenEvents[event.className](event);
+                }
+            });
+        }
     }, []);
 
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
