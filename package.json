@@ -20,7 +20,7 @@
     "react-dom": "^18.2.0",
     "react-ga4": "^2.1.0",
     "react-router-dom": "^6.14.2",
-    "telegram": "^2.17.9"
+    "telegram": "^2.18.25"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",
