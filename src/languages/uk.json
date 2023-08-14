@@ -139,6 +139,7 @@
     "animated_messages": {
       "loading_dialogs": "Отримання діалогів",
       "loading_animation": "Показ анімації",
+      "loading_warning": "Не закривайте сторінку до завершення процесу",
       "sending_message": "Надсилання повідомлення",
       "sending_message_error": "Помилка надсилання повідомлення",
       "message_recipient": "Виберіть одержувача повідомлення",

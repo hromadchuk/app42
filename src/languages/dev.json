@@ -139,6 +139,7 @@
     "animated_messages": {
       "loading_dialogs": "Getting dialogs",
       "loading_animation": "Showing animation",
+      "loading_warning": "Do not close the page until the end of the process",
       "sending_message": "Sending message",
       "sending_message_error": "Message sending error",
       "message_recipient": "Select a message recipient",
