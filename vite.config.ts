@@ -9,9 +9,9 @@ export default defineConfig({
     plugins: [
         react(),
         VitePWA({
-            workbox: {
-                globPatterns: ['**/*.{svg,png,gif}']
-            },
+            registerType: 'autoUpdate',
+            injectRegister: 'inline',
+            includeAssets: ['*.svg', '*.png', '*.gif'],
             manifest: {
                 display: 'standalone',
                 scope: '/',

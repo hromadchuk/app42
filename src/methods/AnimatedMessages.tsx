@@ -113,7 +113,7 @@ export const AnimatedMessages = () => {
     }
 
     async function sendAnimation() {
-        setProgress({ text: mt('sending_message') });
+        setProgress({ text: mt('sending_message'), warningText: mt('loading_warning') });
 
         const owner = selectedOwner as Api.User;
         const ownerId = owner.id.valueOf();
@@ -130,7 +130,7 @@ export const AnimatedMessages = () => {
             return;
         }
 
-        setProgress({ text: mt('read_wait') });
+        setProgress({ text: mt('read_wait'), warningText: mt('loading_warning') });
 
         await waitReadMessage(ownerId, messageId);
 
@@ -138,7 +138,11 @@ export const AnimatedMessages = () => {
             lines.push(lastMessage);
         }
 
-        setProgress({ text: mt('loading_animation'), total: lines.length });
+        setProgress({
+            text: mt('loading_animation'),
+            total: lines.length,
+            warningText: mt('loading_warning')
+        });
 
         for (const line of lines) {
             await CallAPI(

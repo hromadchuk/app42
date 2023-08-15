@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Box, Center, Container, Progress, Text } from '@mantine/core';
+import { Box, Center, Container, Notification, Progress, Text } from '@mantine/core';
 import { IconCircleCheck, IconExclamationCircle } from '@tabler/icons-react';
 
 import { IFinishBlock, IProgress, MethodContext } from '../components/MethodContext.tsx';
@@ -70,6 +70,11 @@ export const AbstractMethod = () => {
 
             return (
                 <>
+                    {progress.warningText && (
+                        <Notification withCloseButton={false} mb="xl" color="orange">
+                            {progress.warningText}
+                        </Notification>
+                    )}
                     <Progress value={percent} animate />
                     <Text align="center" size="xs">
                         {progress.text || t('common.progress')}

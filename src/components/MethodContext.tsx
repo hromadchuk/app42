@@ -4,6 +4,7 @@ export interface IProgress {
     count?: number;
     total?: number;
     text?: string;
+    warningText?: string;
 }
 
 export interface IFinishBlock {
