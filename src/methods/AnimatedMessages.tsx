@@ -16,9 +16,9 @@ import {
 import { IconHeart, IconMail, TablerIconsProps } from '@tabler/icons-react';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { Api } from 'telegram';
+import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { CallAPI, getTextTime, sleep } from '../lib/helpers.tsx';
 
-import { AppContext } from '../components/AppContext.tsx';
 import { MethodContext } from '../components/MethodContext.tsx';
 
 import HeartAnimation from '../assets/animated_messages/heart.tsx';
@@ -48,12 +48,10 @@ const useStyles = createStyles((theme) => ({
 const stateReadMessages = new Map<number, number>();
 
 export const AnimatedMessages = () => {
-    const { user } = useContext(AppContext);
     const { mt, needHideContent, setProgress, setFinishBlock, getProgress } = useContext(MethodContext);
     const { classes } = useStyles();
     const [opened, { open, close }] = useDisclosure(false);
 
-    const [dialogsList, setDialogsList] = useState<Api.User[]>([]);
     const [selectedOwner, setSelectedOwner] = useState<Api.User | null>(null);
     const [selectedOption, setSelectedOption] = useState<IOption | null>(null);
     const [lastMessage, setLastMessage] = useState<string>('');
@@ -69,8 +67,6 @@ export const AnimatedMessages = () => {
     ];
 
     useEffect(() => {
-        getLastDialogs();
-
         window.listenEvents.UpdateReadHistoryOutbox = (event: object) => {
             const thEvent = event as Api.UpdateReadHistoryOutbox;
             const peer = thEvent.peer as Api.PeerUser;
@@ -83,34 +79,6 @@ export const AnimatedMessages = () => {
             delete window.listenEvents.UpdateReadHistoryOutbox;
         };
     }, []);
-
-    async function getLastDialogs() {
-        setProgress({ text: mt('loading_dialogs') });
-
-        const result = (await CallAPI(
-            new Api.messages.GetDialogs({
-                offsetPeer: user?.id.valueOf(),
-                limit: 100
-            })
-        )) as Api.messages.Dialogs;
-
-        const dialogs = result.dialogs
-            .filter((dialog) => {
-                if (!(dialog.peer instanceof Api.PeerUser)) {
-                    return false;
-                }
-
-                return dialog.peer.userId.valueOf() !== user?.id.valueOf();
-            })
-            .map((dialog) => {
-                const peer = dialog.peer as Api.PeerUser;
-
-                return result.users.find((findUser) => findUser.id.valueOf() === peer.userId.valueOf()) as Api.User;
-            });
-
-        setDialogsList(dialogs);
-        setProgress(null);
-    }
 
     async function sendAnimation() {
         setProgress({ text: mt('sending_message'), warningText: mt('loading_warning') });
@@ -256,20 +224,21 @@ export const AnimatedMessages = () => {
         );
     }
 
-    if (dialogsList.length) {
-        return (
-            <>
-                <Notification withCloseButton={false} mb="xs" color="gray">
-                    {mt('message_recipient')}
-                </Notification>
-                {dialogsList.map((dialog, key) => (
-                    <OwnerRow key={key} owner={dialog} callback={() => setSelectedOwner(dialog)} />
-                ))}
-            </>
-        );
-    }
+    return (
+        <>
+            <Notification withCloseButton={false} mb="xs" color="gray">
+                {mt('message_recipient')}
+            </Notification>
 
-    return null;
+            <SelectDialog
+                allowTypes={[EOwnerType.user]}
+                selfIgnore={true}
+                onOwnerSelect={(owner) => {
+                    setSelectedOwner(owner as Api.User);
+                }}
+            />
+        </>
+    );
 };
 
 export default AnimatedMessages;

@@ -101,7 +101,7 @@ module.exports = {
         'object-property-newline': [2, { allowAllPropertiesOnSameLine: true }],
         'object-shorthand': [2, 'always', { avoidExplicitReturnArrows: false }],
         'one-var': [2, 'never'],
-        'operator-linebreak': [2, 'after'],
+        'operator-linebreak': [1, 'before'],
         'prefer-arrow-callback': 2,
         'prefer-const': 2,
         'prefer-object-spread': 2,
