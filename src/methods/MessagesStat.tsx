@@ -23,12 +23,12 @@ import {
     TablerIconsProps
 } from '@tabler/icons-react';
 import dayjs from 'dayjs';
-import { JSX, useContext, useEffect, useState } from 'react';
+import { JSX, useContext, useState } from 'react';
 import { Api } from 'telegram';
 
-import { AppContext } from '../components/AppContext.tsx';
 import { MethodContext } from '../components/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
+import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
 import { CallAPI, declineAndFormat, formatNumber, getTextTime, sleep } from '../lib/helpers.tsx';
 
@@ -126,60 +126,15 @@ interface ITabTops {
 const ownersInfo = new Map<number, TOwner>();
 
 export const MessagesStat = () => {
-    const { user } = useContext(AppContext);
     const { mt, md, needHideContent, getProgress, setProgress, setFinishBlock } = useContext(MethodContext);
     const { colorScheme } = useMantineTheme();
 
-    const [dialogsList, setDialogsList] = useState<(Api.User | Api.Chat | Api.Channel)[]>([]);
     const [ownerMessages, setOwnerMessages] = useState<Api.TypeMessage[]>([]);
     const [ownerPeriods, setOwnerPeriods] = useState<IPeriodData[]>([]);
     const [selectedOwner, setSelectedOwner] = useState<TOwner | null>(null);
     const [statResult, setStatResult] = useState<IScanDataResult | null>(null);
     const [selectedTab, setSelectedTab] = useState<ETabId>(ETabId.messages);
     const [isSentToChat, setSentToChat] = useState<boolean>(false);
-
-    useEffect(() => {
-        getLastDialogs();
-    }, []);
-
-    async function getLastDialogs() {
-        setProgress({ text: mt('loading_dialogs') });
-
-        const result = (await CallAPI(
-            new Api.messages.GetDialogs({
-                offsetPeer: user?.id.valueOf(),
-                limit: 100
-            })
-        )) as Api.messages.Dialogs;
-
-        const dialogs = result.dialogs.map((dialog): TOwner => {
-            const isUser = dialog.peer instanceof Api.PeerUser;
-            const isChat = dialog.peer instanceof Api.PeerChat;
-            const isChannel = dialog.peer instanceof Api.PeerChannel;
-
-            let ownerId = 0;
-            if (isUser) {
-                ownerId = (dialog.peer as Api.PeerUser).userId.valueOf();
-            } else if (isChat) {
-                ownerId = (dialog.peer as Api.PeerChat).chatId.valueOf();
-            } else if (isChannel) {
-                ownerId = (dialog.peer as Api.PeerChannel).channelId.valueOf();
-            }
-
-            if (isUser) {
-                return result.users.find((findUser) => findUser.id.valueOf() === ownerId) as Api.User;
-            }
-
-            if (isChat) {
-                return result.chats.find((findChat) => findChat.id.valueOf() === ownerId) as Api.Chat;
-            }
-
-            return result.chats.find((findChannel) => findChannel.id.valueOf() === ownerId) as Api.Channel;
-        });
-
-        setDialogsList(dialogs);
-        setProgress(null);
-    }
 
     async function getOptions(owner: TOwner) {
         setProgress({ text: mt('loading_messages') });
@@ -853,17 +808,15 @@ export const MessagesStat = () => {
         );
     }
 
-    if (dialogsList.length) {
-        return (
-            <>
-                {dialogsList.map((dialog, key) => (
-                    <OwnerRow key={key} owner={dialog} callback={() => getOptions(dialog)} />
-                ))}
-            </>
-        );
-    }
-
-    return null;
+    return (
+        <SelectDialog
+            allowTypes={[EOwnerType.user, EOwnerType.chat, EOwnerType.channel]}
+            onOwnerSelect={(owner) => {
+                setSelectedOwner(owner);
+                getOptions(owner);
+            }}
+        />
+    );
 };
 
 export default MessagesStat;
