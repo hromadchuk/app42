@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Center, Loader } from '@mantine/core';
-import { IconUsersGroup } from '@tabler/icons-react';
+import { ActionIcon, Box, Center, Input, Loader } from '@mantine/core';
+import { useDebouncedValue } from '@mantine/hooks';
+import { IconSearch, IconUsersGroup, IconX } from '@tabler/icons-react';
 import { Api } from 'telegram';
 import { CallAPI } from '../lib/helpers.tsx';
 import { t } from '../lib/lang.tsx';
@@ -34,20 +35,37 @@ interface IOptionsSelectOwner extends IOptionsBase {
 
 type IOptionsSelectDialog = IOptionsBase;
 
-function SelectOwner({ getOwners, onOwnerSelect }: IOptionsSelectOwner) {
+function SelectOwner({ getOwners, onOwnerSelect, searchOwners }: IOptionsSelectOwner) {
     const [isLoading, setLoading] = useState(true);
     const [dialogsList, setDialogsList] = useState<IOwnerRow[]>([]);
+    const [searchDialogsList, setSearchDialogsList] = useState<IOwnerRow[] | null>(null);
+    const [searchQuery, setSearchQuery] = useState<string>('');
+    const [debouncedSearchQuery] = useDebouncedValue(searchQuery, 500);
 
     useEffect(() => {
         (async () => {
             const owners = await getOwners();
 
-            console.log('owners', owners);
-
             setDialogsList(owners);
             setLoading(false);
         })();
     }, []);
+
+    useEffect(() => {
+        if (!debouncedSearchQuery) {
+            setSearchDialogsList(null);
+            return;
+        }
+
+        (async () => {
+            setLoading(true);
+
+            const owners = await searchOwners(debouncedSearchQuery);
+
+            setSearchDialogsList(owners);
+            setLoading(false);
+        })();
+    }, [debouncedSearchQuery]);
 
     const UsersBlock = () => {
         if (isLoading) {
@@ -58,7 +76,18 @@ function SelectOwner({ getOwners, onOwnerSelect }: IOptionsSelectOwner) {
             );
         }
 
-        if (!dialogsList.length) {
+        if (searchDialogsList?.length) {
+            return searchDialogsList.map((row) => (
+                <OwnerRow
+                    key={row.owner.id.valueOf()}
+                    owner={row.owner}
+                    description={row.description}
+                    callback={() => onOwnerSelect(row.owner)}
+                />
+            ));
+        }
+
+        if (!dialogsList.length || (searchDialogsList && !searchDialogsList.length)) {
             return (
                 <Box p="lg">
                     <Center>
@@ -79,11 +108,77 @@ function SelectOwner({ getOwners, onOwnerSelect }: IOptionsSelectOwner) {
         ));
     };
 
-    return <>{UsersBlock()}</>;
+    return (
+        <>
+            <Input
+                icon={<IconSearch />}
+                mb="sm"
+                placeholder={t('select_owner.search_placeholder')}
+                value={searchQuery}
+                rightSection={
+                    searchQuery && (
+                        <ActionIcon size="sm" onClick={() => setSearchQuery('')}>
+                            <IconX size="0.875rem" />
+                        </ActionIcon>
+                    )
+                }
+                onChange={(event) => setSearchQuery(event.currentTarget.value)}
+            />
+            {UsersBlock()}
+        </>
+    );
 }
 
 export function SelectDialog(options: IOptionsSelectDialog) {
     const { user } = useContext(AppContext);
+
+    function filterOwner(row: IOwnerRow): boolean {
+        if (row.owner instanceof Api.User) {
+            if (row.owner.bot) {
+                return false;
+            }
+
+            if (options.selfIgnore && row.owner.id.valueOf() === user?.id.valueOf()) {
+                return false;
+            }
+        }
+
+        if (options.allowTypes.includes(EOwnerType.user) && row.owner instanceof Api.User) {
+            return true;
+        }
+
+        if (options.allowTypes.includes(EOwnerType.chat) && row.owner instanceof Api.Chat) {
+            return true;
+        }
+
+        return options.allowTypes.includes(EOwnerType.channel) && row.owner instanceof Api.Channel;
+    }
+
+    function formatRows(peers: Api.TypePeer[], users: Api.User[], chats: (Api.Chat | Api.Channel)[]): IOwnerRow[] {
+        return peers.map((peer): IOwnerRow => {
+            let ownerId = 0;
+            if (peer instanceof Api.PeerUser) {
+                ownerId = peer.userId.valueOf();
+            } else if (peer instanceof Api.PeerChat) {
+                ownerId = peer.chatId.valueOf();
+            } else {
+                ownerId = peer.channelId.valueOf();
+            }
+
+            const owner =
+                peer instanceof Api.PeerUser
+                    ? (users.find((findUser) => findUser.id.valueOf() === ownerId) as Api.User)
+                    : (chats.find((findChat) => findChat.id.valueOf() === ownerId) as Api.Chat | Api.Channel);
+
+            const row: IOwnerRow = { owner };
+
+            if (options.getDescription) {
+                row.description = options.getDescription(owner);
+            }
+
+            return row;
+        });
+    }
 
     async function getOwners(): Promise<IOwnerRow[]> {
         const result = (await CallAPI(
@@ -93,62 +188,26 @@ export function SelectDialog(options: IOptionsSelectDialog) {
             })
         )) as Api.messages.Dialogs;
 
-        return result.dialogs
-            .map((dialog): IOwnerRow => {
-                let ownerId = 0;
-                if (dialog.peer instanceof Api.PeerUser) {
-                    ownerId = dialog.peer.userId.valueOf();
-                } else if (dialog.peer instanceof Api.PeerChat) {
-                    ownerId = dialog.peer.chatId.valueOf();
-                } else {
-                    ownerId = dialog.peer.channelId.valueOf();
-                }
-
-                const owner =
-                    dialog.peer instanceof Api.PeerUser
-                        ? (result.users.find((findUser) => findUser.id.valueOf() === ownerId) as Api.User)
-                        : (result.chats.find((findChat) => findChat.id.valueOf() === ownerId) as
-                              | Api.Chat
-                              | Api.Channel);
-
-                const row: IOwnerRow = { owner };
-
-                if (options.getDescription) {
-                    row.description = options.getDescription(owner);
-                }
-
-                return row;
-            })
-            .filter((row) => {
-                if (
-                    options.selfIgnore &&
-                    row.owner instanceof Api.User &&
-                    row.owner.id.valueOf() === user?.id.valueOf()
-                ) {
-                    return false;
-                }
-
-                if (row.owner instanceof Api.User && row.owner.bot) {
-                    return false;
-                }
-
-                if (options.allowTypes.includes(EOwnerType.user) && row.owner instanceof Api.User) {
-                    return true;
-                }
-
-                if (options.allowTypes.includes(EOwnerType.chat) && row.owner instanceof Api.Chat) {
-                    return true;
-                }
-
-                return options.allowTypes.includes(EOwnerType.channel) && row.owner instanceof Api.Channel;
-            })
+        return formatRows(
+            result.dialogs.map((dialog) => dialog.peer),
+            result.users as Api.User[],
+            result.chats as (Api.Chat | Api.Channel)[]
+        )
+            .filter(filterOwner)
             .slice(0, 20);
     }
 
     async function searchOwners(query: string): Promise<IOwnerRow[]> {
-        console.log('searchOwners', query);
+        const result = await CallAPI(
+            new Api.contacts.Search({
+                q: query,
+                limit: 100
+            })
+        );
 
-        return [];
+        return formatRows(result.myResults, result.users as Api.User[], result.chats as (Api.Chat | Api.Channel)[])
+            .filter(filterOwner)
+            .slice(0, 20);
     }
 
     return SelectOwner({ ...options, getOwners, searchOwners });

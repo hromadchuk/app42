@@ -36,7 +36,8 @@
     }
   },
   "select_owner": {
-    "no_dialogs": "Dialogs not found"
+    "no_dialogs": "Dialogs not found",
+    "search_placeholder": "Type to search"
   },
   "alpha": {
     "description": "This is an alpha version of the product and there may be bugs. If you find a bug or have a suggestion, please send a message to the developer. Features will be added as the product is developed.",
