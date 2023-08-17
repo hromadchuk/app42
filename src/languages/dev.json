@@ -51,7 +51,8 @@
     "contacts_analysis": "Contact analysis",
     "messages_stat": "Messages stat",
     "animated_messages": "Animated messages",
-    "inactive_channels": "Inactive channels and supergroups"
+    "inactive_channels": "Inactive channels and supergroups",
+    "clear_blacklist": "Clear blacklist"
   },
   "methods": {
     "get_id": {
@@ -159,6 +160,11 @@
     "inactive_channels": {
       "no_inactive": "You don't have inactive channels and supergroups",
       "last_active": "Last active {diff_time}"
+    },
+    "clear_blacklist": {
+      "blacklist_empty": "Your blacklist is empty",
+      "button_clear": "Clear blacklist",
+      "title": "Users/bots blocked"
     }
   }
 }

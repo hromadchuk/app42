@@ -35,6 +35,14 @@ export function declineAndFormat(number: number, titles: string[]): string {
     return `${formatNumber(number)} ${decline(number, titles)}`;
 }
 
+export function getPercent(count: number, total: number): number {
+    if (count >= total) {
+        return 100;
+    }
+
+    return Math.floor((100 * count) / total);
+}
+
 export async function sleep(milliseconds: number): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
