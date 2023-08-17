@@ -3,6 +3,7 @@ import { createElement, JSX, lazy, Suspense } from 'react';
 import {
     Icon123,
     IconAddressBook,
+    IconHourglassLow,
     IconKeyframes,
     IconMessageCircleSearch,
     IconUsersMinus,
@@ -69,6 +70,14 @@ export const routers: IRouter[] = [
         path: '/methods/animated_messages',
         element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
         childElement: createElement(lazy(() => import('./methods/AnimatedMessages.tsx')))
+    },
+    {
+        id: 'inactive_channels',
+        icon: IconHourglassLow,
+        isMethod: true,
+        path: '/methods/inactive_channels',
+        element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
+        childElement: createElement(lazy(() => import('./methods/InactiveChannels.tsx')))
     },
     {
         id: 'clear_channel_followers',

@@ -9,8 +9,10 @@ export default defineConfig({
     plugins: [
         react(),
         VitePWA({
+            registerType: 'autoUpdate',
+            injectRegister: 'inline',
+            includeAssets: ['*.svg', '*.png', '*.gif'],
             manifest: {
-                theme_color: '#449aea',
                 display: 'standalone',
                 scope: '/',
                 start_url: '/kit-42/',

@@ -35,6 +35,10 @@
       ]
     }
   },
+  "select_owner": {
+    "no_dialogs": "Dialogs not found",
+    "search_placeholder": "Type to search"
+  },
   "alpha": {
     "description": "This is an alpha version of the product and there may be bugs. If you find a bug or have a suggestion, please send a message to the developer. Features will be added as the product is developed.",
     "user_description": "Developer"
@@ -46,7 +50,8 @@
     "get_id": "Get account or channel ID",
     "contacts_analysis": "Contact analysis",
     "messages_stat": "Messages stat",
-    "animated_messages": "Animated messages"
+    "animated_messages": "Animated messages",
+    "inactive_channels": "Inactive channels and supergroups"
   },
   "methods": {
     "get_id": {
@@ -138,6 +143,7 @@
     "animated_messages": {
       "loading_dialogs": "Getting dialogs",
       "loading_animation": "Showing animation",
+      "loading_warning": "Do not close the page until the end of the process",
       "sending_message": "Sending message",
       "sending_message_error": "Message sending error",
       "message_recipient": "Select a message recipient",
@@ -149,6 +155,10 @@
       "titles": {
         "heart": "Animation heart"
       }
+    },
+    "inactive_channels": {
+      "no_inactive": "You don't have inactive channels and supergroups",
+      "last_active": "Last active {diff_time}"
     }
   }
 }
