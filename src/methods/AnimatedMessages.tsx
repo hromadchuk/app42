@@ -1,18 +1,6 @@
 import { useDisclosure } from '@mantine/hooks';
 import { JSX, useContext, useEffect, useState } from 'react';
-import {
-    Badge,
-    Button,
-    Card,
-    createStyles,
-    Group,
-    Image,
-    Input,
-    Modal,
-    Notification,
-    Space,
-    Text
-} from '@mantine/core';
+import { Badge, Button, Card, Group, Image, Input, Modal, Notification, Space, Text } from '@mantine/core';
 import { IconHeart, IconMail, TablerIconsProps } from '@tabler/icons-react';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { Api } from 'telegram';
@@ -20,6 +8,9 @@ import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { CallAPI, getTextTime, sleep } from '../lib/helpers.tsx';
 
 import { MethodContext } from '../components/MethodContext.tsx';
+
+// @ts-ignore
+import classes from '../styles/AnimatedMessages.module.css';
 
 import HeartAnimation from '../assets/animated_messages/heart.tsx';
 // @ts-ignore
@@ -35,21 +26,10 @@ interface IOption {
 
 const FRAME_TIME = 100;
 
-const useStyles = createStyles((theme) => ({
-    card: {
-        cursor: 'pointer',
-
-        '&:hover': {
-            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[0]
-        }
-    }
-}));
-
 const stateReadMessages = new Map<number, number>();
 
 export const AnimatedMessages = () => {
     const { mt, needHideContent, setProgress, setFinishBlock, getProgress } = useContext(MethodContext);
-    const { classes } = useStyles();
     const [opened, { open, close }] = useDisclosure(false);
 
     const [selectedOwner, setSelectedOwner] = useState<Api.User | null>(null);
@@ -177,7 +157,7 @@ export const AnimatedMessages = () => {
 
         return (
             <Card withBorder radius="md" key={key} className={classes.card} onClick={() => showModal(option)}>
-                <Group position="apart">
+                <Group>
                     <div>
                         <Text fw={500}>{option.title}</Text>
                         {option.withEndText && (
@@ -202,7 +182,7 @@ export const AnimatedMessages = () => {
 
                     {selectedOption?.withEndText && (
                         <Input
-                            icon={<IconMail size="1rem" />}
+                            leftSection={<IconMail size="1rem" />}
                             placeholder={mt('message_after_animation')}
                             onChange={(event) => setLastMessage(event.target.value)}
                         />

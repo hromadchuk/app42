@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { MantineProvider } from '@mantine/core';
+import { AppShell, createTheme, MantineProvider } from '@mantine/core';
 import { useColorScheme } from '@mantine/hooks';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { Api, TelegramClient } from 'telegram';
@@ -12,6 +12,7 @@ import { IRouter, routers } from './routes.tsx';
 import { AppHeader } from './components/AppHeader.tsx';
 import { AppFooter } from './components/AppFooter.tsx';
 
+import '@mantine/core/styles.css';
 import './App.css';
 
 declare global {
@@ -58,13 +59,21 @@ const App = () => {
 
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
 
+    const theme = createTheme({
+        // primaryColor: 'cyan',
+    });
+
     return (
-        <MantineProvider withGlobalStyles withNormalizeCSS theme={{ colorScheme: useColorScheme() }}>
+        <MantineProvider theme={theme} forceColorScheme={useColorScheme()}>
             <AppContext.Provider value={{ user, setUser }}>
                 <HashRouter>
-                    <AppHeader user={user} />
-                    <Routes>{routers.map(GetRouter)}</Routes>
-                    <AppFooter />
+                    <AppShell header={{ height: 56 }}>
+                        <AppHeader user={user} />
+                        <AppShell.Main>
+                            <Routes>{routers.map(GetRouter)}</Routes>
+                            <AppFooter />
+                        </AppShell.Main>
+                    </AppShell>
                 </HashRouter>
             </AppContext.Provider>
         </MantineProvider>

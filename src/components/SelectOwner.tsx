@@ -111,7 +111,7 @@ function SelectOwner({ getOwners, onOwnerSelect, searchOwners }: IOptionsSelectO
     return (
         <>
             <Input
-                icon={<IconSearch />}
+                leftSection={<IconSearch />}
                 mb="sm"
                 placeholder={t('select_owner.search_placeholder')}
                 value={searchQuery}
