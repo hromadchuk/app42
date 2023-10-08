@@ -96,3 +96,21 @@ export async function CallAPI<R extends Api.AnyRequest>(request: R): Promise<R['
 
     return result;
 }
+
+export function classNames(...classes: (string | object)[]): string {
+    const list: string[] = [];
+
+    for (const name of classes) {
+        if (typeof name === 'string') {
+            list.push(name);
+        } else {
+            for (const [key, value] of Object.entries(name)) {
+                if (value) {
+                    list.push(key);
+                }
+            }
+        }
+    }
+
+    return list.join(' ');
+}

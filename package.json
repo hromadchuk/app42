@@ -12,15 +12,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@mantine/core": "^6.0.17",
-    "@mantine/hooks": "^6.0.17",
-    "@tabler/icons-react": "^2.28.0",
-    "dayjs": "^1.11.9",
+    "@mantine/core": "^7.1.2",
+    "@mantine/hooks": "^7.1.2",
+    "@tabler/icons-react": "^2.38.0",
+    "dayjs": "^1.11.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-ga4": "^2.1.0",
-    "react-router-dom": "^6.14.2",
-    "telegram": "^2.18.25"
+    "react-router-dom": "^6.16.0",
+    "telegram": "^2.19.5"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",
@@ -33,6 +33,7 @@
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.3.5",
+    "postcss-preset-mantine": "^1.8.0",
     "rollup-plugin-visualizer": "^5.9.2",
     "typescript": "^5.1.6",
     "vite": "^4.4.6",

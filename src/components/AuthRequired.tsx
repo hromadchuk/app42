@@ -13,7 +13,7 @@ export default function AuthRequired({ page }: IAuthRequired) {
 
     useEffect(() => {
         if (!user) {
-            navigate('/?to=' + location.pathname);
+            navigate(`/?to=${location.pathname}`);
         }
     }, []);
 

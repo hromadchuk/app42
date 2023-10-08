@@ -1,14 +1,5 @@
-import {
-    Button,
-    Container,
-    Divider,
-    Flex,
-    Group,
-    Notification,
-    Text,
-    UnstyledButton,
-    useMantineTheme
-} from '@mantine/core';
+import { Button, Container, Divider, Flex, Group, Notification, Text, UnstyledButton } from '@mantine/core';
+import { useColorScheme } from '@mantine/hooks';
 import {
     IconCalendarTime,
     IconHeart,
@@ -127,7 +118,7 @@ const ownersInfo = new Map<number, TOwner>();
 
 export const MessagesStat = () => {
     const { mt, md, needHideContent, getProgress, setProgress, setFinishBlock } = useContext(MethodContext);
-    const { colorScheme } = useMantineTheme();
+    const colorSchema = useColorScheme();
 
     const [ownerMessages, setOwnerMessages] = useState<Api.TypeMessage[]>([]);
     const [ownerPeriods, setOwnerPeriods] = useState<IPeriodData[]>([]);
@@ -642,7 +633,7 @@ export const MessagesStat = () => {
 
         const getRowBackground = (index: number): string => {
             if (index % 2) {
-                return colorScheme === 'dark' ? 'gray.9' : 'gray.1';
+                return colorSchema === 'dark' ? 'gray.9' : 'gray.1';
             }
 
             return '';
@@ -753,7 +744,7 @@ export const MessagesStat = () => {
                         </Text>
 
                         <Container p={0} mr={0}>
-                            <Text size={12} color="dimmed">
+                            <Text size="12px" c="dimmed">
                                 {item.value}
                             </Text>
                         </Container>
@@ -788,7 +779,7 @@ export const MessagesStat = () => {
                             style={{ opacity: period.disabled ? 0.5 : 1 }}
                             onClick={() => calcStatistic(period)}
                         >
-                            <Group spacing="sm" py={3}>
+                            <Group mt="xs" py={3}>
                                 <IconCalendarTime />
 
                                 <div>

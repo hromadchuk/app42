@@ -1,5 +1,5 @@
 import { JSX, useContext, useEffect, useState } from 'react';
-import { Badge, Box, Button, Card, Divider, Group, Modal } from '@mantine/core';
+import { Badge, Box, Button, Container, Divider, Group, Modal } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Api } from 'telegram';
 import dayjs from 'dayjs';
@@ -192,7 +192,7 @@ export const ContactsAnalysis = () => {
 
         return (
             <>
-                <Card.Section mt="md">
+                <Container px={0}>
                     <Divider
                         my="xs"
                         label={
@@ -211,7 +211,7 @@ export const ContactsAnalysis = () => {
                     {users.slice(0, 3).map((owner, key) => (
                         <div key={key}>{OwnerRow({ owner, description: getDescription(type, owner) })}</div>
                     ))}
-                </Card.Section>
+                </Container>
 
                 {users.length > 3 && (
                     <Group mt="xs">
