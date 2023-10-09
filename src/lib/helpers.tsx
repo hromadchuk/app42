@@ -114,3 +114,24 @@ export function classNames(...classes: (string | object)[]): string {
 
     return list.join(' ');
 }
+
+const apiEndpoint = location.hostname === 'localhost' ? 'http://localhost' : 'https://kit42.gromadchuk.com';
+
+export const Server = async (method: string, params: object = {}): Promise<object> => {
+    console.group(`SERVER /${method}`);
+    console.log('Request:', params);
+
+    const data = await fetch(`${apiEndpoint}/api/${method}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            authData: window.authData
+        },
+        body: JSON.stringify(params)
+    }).then((response) => response.json());
+
+    console.log('Result:', data);
+    console.groupEnd();
+
+    return data as object;
+};

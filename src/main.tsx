@@ -15,4 +15,8 @@ dayjs.extend(toObject);
 dayjs.extend(relativeTime);
 dayjs.locale(getAppLangCode());
 
-createRoot(document.getElementById('root') as HTMLElement).render(<App />);
+if (!new URLSearchParams(location.hash.slice(1)).get('tgWebAppData')) {
+    location.href = 'https://t.me/kit42bot/kit42';
+} else {
+    createRoot(document.getElementById('root') as HTMLElement).render(<App />);
+}
