@@ -63,7 +63,7 @@ export function AppHeader({ user }: IAppHeader) {
                 <LeftSide />
 
                 <Center mx="auto">
-                    <Logo size={28} color={themeParams.buttonColor} />
+                    <Logo size={28} color={themeParams.buttonColor as string} />
                 </Center>
 
                 <RightSide />
