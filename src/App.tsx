@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { AppShell, createTheme, MantineProvider } from '@mantine/core';
-import { useColorScheme } from '@mantine/hooks';
-import { HashRouter, Route, Routes } from 'react-router-dom';
+import { AppShell, createTheme, CSSVariablesResolver, MantineProvider } from '@mantine/core';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { Api, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
+import { SDKProvider, useLaunchParams } from '@tma.js/sdk-react';
 import { AppContext } from './components/AppContext.tsx';
 import { Constants } from './constants.tsx';
 import { clearOldCache } from './lib/cache.tsx';
+import { Server } from './lib/helpers.tsx';
 import { IRouter, routers } from './routes.tsx';
 
 import { AppHeader } from './components/AppHeader.tsx';
@@ -20,11 +21,18 @@ declare global {
         TelegramClient: TelegramClient;
         listenEvents: { [key: string]: (event: object) => void };
         userId: number;
+        authData: string;
     }
 }
 
 const App = () => {
     const [user, setUser] = useState<null | Api.User>(null);
+
+    const { initDataRaw, platform, themeParams } = useLaunchParams();
+
+    useEffect(() => {
+        window.authData = initDataRaw as string;
+    }, [initDataRaw]);
 
     useEffect(() => {
         clearOldCache();
@@ -54,27 +62,53 @@ const App = () => {
                     window.listenEvents[event.className](event);
                 }
             });
+
+            Server('init', { platform });
         }
     }, []);
 
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
 
     const theme = createTheme({
-        // primaryColor: 'cyan',
+        primaryColor: 'twa',
+        colors: {
+            twa: [
+                themeParams.buttonColor as string,
+                themeParams.buttonColor as string,
+                themeParams.buttonColor as string,
+                themeParams.buttonColor as string,
+                themeParams.buttonColor as string,
+                themeParams.buttonColor as string,
+                themeParams.buttonColor as string,
+                themeParams.buttonColor as string,
+                themeParams.buttonColor as string,
+                themeParams.buttonColor as string
+            ]
+        }
+    });
+
+    const resolver: CSSVariablesResolver = () => ({
+        variables: {
+            '--mantine-color-body': `${themeParams.backgroundColor} !important`
+        },
+        light: {},
+        dark: {}
     });
 
     return (
-        <MantineProvider theme={theme} forceColorScheme={useColorScheme()}>
+        <MantineProvider theme={theme} forceColorScheme={'dark'} cssVariablesResolver={resolver}>
             <AppContext.Provider value={{ user, setUser }}>
-                <HashRouter>
-                    <AppShell header={{ height: 56 }}>
-                        <AppHeader user={user} />
-                        <AppShell.Main>
-                            <Routes>{routers.map(GetRouter)}</Routes>
-                            <AppFooter />
-                        </AppShell.Main>
-                    </AppShell>
-                </HashRouter>
+                <MemoryRouter>
+                    <SDKProvider>
+                        <AppShell header={{ height: 56 }}>
+                            <AppHeader user={user} />
+                            <AppShell.Main>
+                                <Routes>{routers.map(GetRouter)}</Routes>
+                                <AppFooter />
+                            </AppShell.Main>
+                        </AppShell>
+                    </SDKProvider>
+                </MemoryRouter>
             </AppContext.Provider>
         </MantineProvider>
     );
