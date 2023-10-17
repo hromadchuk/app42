@@ -1,5 +1,5 @@
 import { JSX } from 'react';
-import { Center, Container, Flex, Text, UnstyledButton } from '@mantine/core';
+import { Center, Container, Flex, Group, Text, UnstyledButton } from '@mantine/core';
 import { Api } from 'telegram';
 import { IconCheck, IconChevronRight } from '@tabler/icons-react';
 import { classNames } from '../lib/helpers.tsx';
@@ -92,10 +92,12 @@ export function OwnerRow({ owner, description, withoutLink, callback, disabled }
             <OwnerAvatar owner={owner} />
 
             <div>
-                <Text size="sm" inline>
-                    {name.join(' ')}
+                <Group gap={0}>
+                    <Text size="sm" inline>
+                        {name.join(' ')}
+                    </Text>
                     {getBadge()}
-                </Text>
+                </Group>
                 <Text c="dimmed" fz="xs">
                     {description}
                 </Text>

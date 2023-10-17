@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Box, Center, Container, Notification, Progress, Text } from '@mantine/core';
 import { IconCircleCheck, IconExclamationCircle } from '@tabler/icons-react';
 
 import { IFinishBlock, IProgress, MethodContext } from '../components/MethodContext.tsx';
-import { Server } from '../lib/helpers.tsx';
 import { IRouter, routers } from '../routes.tsx';
 import { t, td } from '../lib/lang.tsx';
 
@@ -18,10 +17,6 @@ export const AbstractMethod = () => {
     const [finishBlock, _setFinishBlock] = useState<IFinishBlock>();
 
     const routerInfo = routers.find((router: IRouter) => router.path === location.pathname) as IRouter;
-
-    useEffect(() => {
-        Server('method', { method: routerInfo.id });
-    }, []);
 
     const needHideContent = (): boolean => {
         return [progress, finishBlock].some(Boolean);
