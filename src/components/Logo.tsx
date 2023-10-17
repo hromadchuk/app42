@@ -1,6 +1,6 @@
 interface LogoProps {
     size: number;
-    color: string;
+    color?: string;
 }
 
 export default function Logo({ size, color = '#439AEA' }: LogoProps) {

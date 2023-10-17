@@ -1,6 +1,5 @@
 import { ActionIcon, AppShell, Center, Group, UnstyledButton } from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
-import { useLaunchParams } from '@tma.js/sdk-react';
 import { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Api } from 'telegram';
@@ -19,7 +18,6 @@ const excludeBackButton = ['/', '/menu'];
 export function AppHeader({ user }: IAppHeader) {
     const location = useLocation();
     const navigate = useNavigate();
-    const { themeParams } = useLaunchParams();
 
     useEffect(() => {
         if (!isDev) {
@@ -63,7 +61,7 @@ export function AppHeader({ user }: IAppHeader) {
                 <LeftSide />
 
                 <Center mx="auto">
-                    <Logo size={28} color={themeParams.buttonColor as string} />
+                    <Logo size={28} />
                 </Center>
 
                 <RightSide />
