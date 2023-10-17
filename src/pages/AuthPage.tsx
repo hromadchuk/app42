@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { Button, Center, Container, Loader, TextInput } from '@mantine/core';
+import { useLocalStorage } from '@mantine/hooks';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Api } from 'telegram';
 import { computeCheck } from 'telegram/Password';
@@ -20,6 +21,7 @@ interface IInputItemRow {
     visibleStates: AuthState[];
     disabledStates?: AuthState[];
     error?: string;
+    defaultValue?: string;
     setValue: (value: string) => void;
     type?: string;
     label?: string;
@@ -37,18 +39,18 @@ const AuthPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [state, setSate] = useState(AuthState.loading);
+    const [state, setSate] = useLocalStorage<AuthState>({ key: 'AuthState:state', defaultValue: AuthState.loading });
     const [isLoading, setLoading] = useState(true);
 
-    const [number, setNumber] = useState('');
-    const [numberError, setNumberError] = useState('');
-    const [phoneCodeHash, setPhoneCodeHash] = useState('');
+    const [number, setNumber] = useLocalStorage({ key: 'AuthState:number', defaultValue: '' });
+    const [numberError, setNumberError] = useLocalStorage({ key: 'AuthState:numberError', defaultValue: '' });
+    const [phoneCodeHash, setPhoneCodeHash] = useLocalStorage({ key: 'AuthState:phoneCodeHash', defaultValue: '' });
 
-    const [code, setCode] = useState('');
-    const [codeError, setCodeError] = useState('');
+    const [code, setCode] = useLocalStorage({ key: 'AuthState:code', defaultValue: '' });
+    const [codeError, setCodeError] = useLocalStorage({ key: 'AuthState:codeError', defaultValue: '' });
 
-    const [password, setPassword] = useState('');
-    const [passwordError, setPasswordError] = useState('');
+    const [password, setPassword] = useLocalStorage({ key: 'AuthState:password', defaultValue: '' });
+    const [passwordError, setPasswordError] = useLocalStorage({ key: 'AuthState:passwordError', defaultValue: '' });
 
     useEffect(() => {
         (async () => {
@@ -57,7 +59,19 @@ const AuthPage = () => {
             await window.TelegramClient.connect();
 
             if (!session) {
-                setSate(AuthState.number);
+                // TODO need fix
+                // @ts-ignore
+                const realState = ((localStorage.getItem('AuthState:state') as string) || '').replaceAll(
+                    '"',
+                    ''
+                ) as AuthState;
+
+                if ([AuthState.number, AuthState.code, AuthState.password].includes(realState)) {
+                    setSate(realState);
+                } else {
+                    setSate(AuthState.number);
+                }
+
                 setLoading(false);
             } else {
                 await getCurrentUser();
@@ -89,18 +103,15 @@ const AuthPage = () => {
         setLoading(true);
         setNumberError('');
 
+        resetAuthData([AuthState.code, AuthState.password]);
+
         try {
             const result = (await CallAPI(
                 new Api.auth.SendCode({
                     phoneNumber: number,
                     apiId: Constants.API_ID,
                     apiHash: Constants.API_HASH,
-                    settings: new Api.CodeSettings({
-                        allowFlashcall: true,
-                        currentNumber: true,
-                        allowAppHash: true,
-                        allowMissedCall: true
-                    })
+                    settings: new Api.CodeSettings({})
                 })
             )) as Api.auth.SentCode;
 
@@ -117,6 +128,8 @@ const AuthPage = () => {
     async function confirmCode() {
         setLoading(true);
         setCodeError('');
+
+        resetAuthData([AuthState.password]);
 
         try {
             await CallAPI(
@@ -151,7 +164,7 @@ const AuthPage = () => {
         try {
             const dataLogin = await CallAPI(new Api.account.GetPassword());
 
-            await CallAPI(new Api.auth.CheckPassword({ password: await computeCheck(dataLogin, password) }));
+            await CallAPI(new Api.auth.CheckPassword({ password: await computeCheck(dataLogin, password || '') }));
 
             localStorage.setItem(Constants.SESSION_KEY, `${window.TelegramClient.session.save()}`);
 
@@ -163,8 +176,39 @@ const AuthPage = () => {
         setLoading(false);
     }
 
-    const InputItemRow = ({ visibleStates = [], disabledStates = [], error, setValue, type, label }: IInputItemRow) => {
-        if (!visibleStates.includes(state)) {
+    function resetAuthData(states: AuthState[]) {
+        if (states.includes(AuthState.number)) {
+            setNumber('');
+            setNumberError('');
+            setPhoneCodeHash('');
+        }
+
+        if (states.includes(AuthState.code)) {
+            setCode('');
+            setCodeError('');
+        }
+
+        if (states.includes(AuthState.password)) {
+            setPassword('');
+            setPasswordError('');
+        }
+
+        if (states.length === 3) {
+            setSate(AuthState.loading);
+            setTimeout(() => setSate(AuthState.number), 0);
+        }
+    }
+
+    const InputItemRow = ({
+        visibleStates = [],
+        disabledStates = [],
+        error,
+        setValue,
+        type,
+        label,
+        defaultValue
+    }: IInputItemRow) => {
+        if (!visibleStates.includes(state as AuthState)) {
             return null;
         }
 
@@ -173,14 +217,15 @@ const AuthPage = () => {
                 type={type}
                 label={label}
                 error={error}
-                disabled={disabledStates.includes(state)}
+                disabled={disabledStates.includes(state as AuthState)}
+                defaultValue={defaultValue}
                 onChange={(e) => setValue(e.target.value)}
             />
         );
     };
 
     const ButtonItemRow = ({ visibleStates = [], disabledValue = '', onClick, name }: IButtonItemRow) => {
-        if (!visibleStates.includes(state)) {
+        if (!visibleStates.includes(state as AuthState)) {
             return null;
         }
 
@@ -214,6 +259,7 @@ const AuthPage = () => {
                 visibleStates: [AuthState.number, AuthState.code, AuthState.password],
                 disabledStates: [AuthState.code, AuthState.password],
                 error: numberError,
+                defaultValue: number,
                 setValue: setNumber
             })}
             {InputItemRow({
@@ -221,6 +267,7 @@ const AuthPage = () => {
                 visibleStates: [AuthState.code, AuthState.password],
                 disabledStates: [AuthState.password],
                 error: codeError,
+                defaultValue: code,
                 setValue: setCode
             })}
             {InputItemRow({
@@ -229,6 +276,7 @@ const AuthPage = () => {
                 disabledStates: [],
                 type: 'password',
                 error: passwordError,
+                defaultValue: password,
                 setValue: setPassword
             })}
             {ButtonItemRow({
@@ -249,6 +297,20 @@ const AuthPage = () => {
                 onClick: confirmPassword,
                 name: t('auth_page.button_confirm_password')
             })}
+
+            {[AuthState.code, AuthState.password].includes(state as AuthState) && (
+                <Button
+                    fullWidth
+                    variant="subtle"
+                    mt="xs"
+                    onClick={() => {
+                        setSate(AuthState.number);
+                        resetAuthData([AuthState.number, AuthState.code, AuthState.password]);
+                    }}
+                >
+                    {t('auth_page.button_reset_form')}
+                </Button>
+            )}
         </Container>
     );
 };
