@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AppShell, MantineProvider } from '@mantine/core';
+import { useColorScheme } from '@mantine/hooks';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { Api, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
@@ -60,7 +61,7 @@ const App = () => {
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
 
     return (
-        <MantineProvider forceColorScheme={'dark'}>
+        <MantineProvider forceColorScheme={useColorScheme()}>
             <AppContext.Provider value={{ user, setUser }}>
                 <HashRouter>
                     <AppShell header={{ height: 56 }}>
