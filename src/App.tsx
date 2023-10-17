@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AppShell, createTheme, CSSVariablesResolver, MantineProvider } from '@mantine/core';
+import { AppShell, Button, createTheme, CSSVariablesResolver, MantineProvider, TextInput } from '@mantine/core';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { Api, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
@@ -7,7 +7,7 @@ import { SDKProvider, useLaunchParams } from '@tma.js/sdk-react';
 import { AppContext } from './components/AppContext.tsx';
 import { Constants } from './constants.tsx';
 import { clearOldCache } from './lib/cache.tsx';
-import { Server } from './lib/helpers.tsx';
+import { generateDimmerColors, Server } from './lib/helpers.tsx';
 import { IRouter, routers } from './routes.tsx';
 
 import { AppHeader } from './components/AppHeader.tsx';
@@ -72,24 +72,32 @@ const App = () => {
     const theme = createTheme({
         primaryColor: 'twa',
         colors: {
-            twa: [
-                themeParams.buttonColor as string,
-                themeParams.buttonColor as string,
-                themeParams.buttonColor as string,
-                themeParams.buttonColor as string,
-                themeParams.buttonColor as string,
-                themeParams.buttonColor as string,
-                themeParams.buttonColor as string,
-                themeParams.buttonColor as string,
-                themeParams.buttonColor as string,
-                themeParams.buttonColor as string
-            ]
+            // @ts-ignore
+            twa: generateDimmerColors(themeParams.buttonColor as string, 10)
+        },
+        components: {
+            Button: Button.extend({
+                styles: {
+                    label: { color: themeParams.buttonTextColor }
+                }
+            }),
+            TextInput: TextInput.extend({
+                styles: {
+                    input: {
+                        backgroundColor: themeParams.secondaryBackgroundColor,
+                        borderColor: themeParams.buttonColor
+                    }
+                }
+            })
         }
     });
 
     const resolver: CSSVariablesResolver = () => ({
         variables: {
-            '--mantine-color-body': `${themeParams.backgroundColor} !important`
+            '--mantine-color-text': `${themeParams.textColor} !important`,
+            '--mantine-color-body': `${themeParams.backgroundColor} !important`,
+            '--mantine-color-placeholder': `${themeParams.secondaryBackgroundColor} !important`,
+            '--mantine-color-default': `${themeParams.secondaryBackgroundColor} !important`
         },
         light: {},
         dark: {}

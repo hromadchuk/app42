@@ -2,7 +2,7 @@
 
 Kit 42 is a product with features for Telegram
 
-https://gromadchuk.github.io/kit-42 (recommended to run locally)
+https://t.me/kit42bot
 
 #### Available features:
 1. [Get account or channel ID](METHODS.md#get-account-or-channel-id)
@@ -11,13 +11,6 @@ https://gromadchuk.github.io/kit-42 (recommended to run locally)
 4. [Animated messages](METHODS.md#animated-messages)
 5. [Inactive channels and supergroups](METHODS.md#inactive-channels-and-supergroups)
 
-## 🛠️ Run locally
-#### Requirement: [Node.js](https://nodejs.org/en/) >= 18
-1. `git clone https://github.com/gromadchuk/kit-42.git`
-2. `cd kit-42`
-3. `npm install`
-4. `npm run dev`
-5. Open http://localhost:4242/ in your browser
 ## ⚠️ Deleting a session
 We recommend to remove active session after using Kit 42 to make sure that the service doesn't do something without your knowledge.
 

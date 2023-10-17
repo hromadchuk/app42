@@ -115,7 +115,42 @@ export function classNames(...classes: (string | object)[]): string {
     return list.join(' ');
 }
 
-const apiEndpoint = location.hostname === 'localhost' ? 'http://localhost' : 'https://kit42.gromadchuk.com';
+export function generateDimmerColors(hexColor: string, numShades: number): string[] {
+    const rgbColor = {
+        r: parseInt(hexColor.substring(1, 3), 16),
+        g: parseInt(hexColor.substring(3, 5), 16),
+        b: parseInt(hexColor.substring(5, 7), 16)
+    };
+
+    const stepSize = {
+        r: Math.floor(rgbColor.r / (numShades * 1.5)),
+        g: Math.floor(rgbColor.g / (numShades * 1.5)),
+        b: Math.floor(rgbColor.b / (numShades * 1.5))
+    };
+
+    const dimmerColors = [];
+
+    for (let i = 1; i <= numShades; i++) {
+        const dimmedColor = {
+            r: Math.max(0, rgbColor.r - stepSize.r * i),
+            g: Math.max(0, rgbColor.g - stepSize.g * i),
+            b: Math.max(0, rgbColor.b - stepSize.b * i)
+        };
+
+        const hexParts = [
+            dimmedColor.r.toString(16).padStart(2, '0'),
+            dimmedColor.g.toString(16).padStart(2, '0'),
+            dimmedColor.b.toString(16).padStart(2, '0')
+        ];
+
+        dimmerColors.push(`#${hexParts.join('')}`);
+    }
+
+    return dimmerColors;
+}
+
+const apiEndpoint =
+    location.hostname === 'gromadchuk.github.io' ? 'https://kit42.gromadchuk.com' : `http://${location.hostname}`;
 
 export const Server = async (method: string, params: object = {}): Promise<object> => {
     console.group(`SERVER /${method}`);
