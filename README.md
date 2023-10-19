@@ -2,7 +2,7 @@
 
 Kit 42 is a product with features for Telegram
 
-[https://t.me/kit42bot](https://gromadchuk.github.io/kit-42/)
+https://gromadchuk.github.io/kit-42/
 
 #### Available features:
 1. [Get account or channel ID](METHODS.md#get-account-or-channel-id)
