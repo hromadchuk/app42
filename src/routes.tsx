@@ -6,6 +6,7 @@ import {
     IconHourglassLow,
     IconKeyframes,
     IconMessageCircleSearch,
+    IconMessageCircleUp,
     TablerIconsProps
 } from '@tabler/icons-react';
 
@@ -77,6 +78,14 @@ export const routers: IRouter[] = [
         path: '/methods/inactive_channels',
         element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
         childElement: createElement(lazy(() => import('./methods/InactiveChannels.tsx')))
+    },
+    {
+        id: 'import_messages',
+        icon: IconMessageCircleUp,
+        isMethod: true,
+        path: '/methods/import_messages',
+        element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
+        childElement: createElement(lazy(() => import('./methods/ImportMessages.tsx')))
     }
 ].map((route: IRouter) => {
     if (route.id) {
