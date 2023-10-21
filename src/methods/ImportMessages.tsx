@@ -41,7 +41,7 @@ enum TImportMedia {
     PHOTO = 'photo'
 }
 
-interface IJSZipObject extends JSZip.JSZipObject{
+interface IJSZipObject extends JSZip.JSZipObject {
     _data: {
         compressedSize: number;
         compressedContent: Uint8Array;
@@ -176,7 +176,7 @@ export const ImportMessages = () => {
         return filesWithUsers;
     }
 
-    async function selectUserFrom(user: IFileUser) {
+    function selectUserFrom(user: IFileUser) {
         setSearchQuery('');
         setSelectedUserFrom(user);
     }
