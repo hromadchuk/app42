@@ -47,7 +47,7 @@ const App = () => {
                 {
                     connectionRetries: 5,
                     useWSS: true,
-                    floodSleepThreshold: 60
+                    floodSleepThreshold: 30
                 }
             );
 

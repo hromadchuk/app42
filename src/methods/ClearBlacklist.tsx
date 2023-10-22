@@ -11,6 +11,7 @@ export const ClearBlacklist = () => {
     const { mt, needHideContent, setFinishBlock, setProgress } = useContext(MethodContext);
 
     const [isLoading, setIsLoading] = useState(false);
+    const [isDisabled, setIsDisabled] = useState(false);
     const [blockedCount, setBlockedCount] = useState(0);
     const [offset, handlers] = useCounter(0);
 
@@ -20,8 +21,8 @@ export const ClearBlacklist = () => {
         (async () => {
             const owners = await getBlocked();
 
-            if (owners.count) {
-                setBlockedCount(owners.count);
+            if (owners.count || owners?.blocked?.length) {
+                setBlockedCount(owners.count || owners?.blocked?.length || 0);
                 setProgress(null);
             } else {
                 setFinishBlock({ text: mt('blacklist_empty') });
@@ -41,21 +42,27 @@ export const ClearBlacklist = () => {
     async function clearBlacklist() {
         setIsLoading(true);
 
-        while (offset < blockedCount) {
+        while (true) {
             const owners = await getBlocked();
 
-            if (!owners.blocked) {
+            if (!owners.blocked?.length) {
                 break;
             }
 
             for (const owner of owners.blocked) {
-                await sleep(1000);
+                await sleep(777);
 
-                await CallAPI(
-                    new Api.contacts.Unblock({
-                        id: owner.peerId
-                    })
-                );
+                try {
+                    await CallAPI(
+                        new Api.contacts.Unblock({
+                            id: owner.peerId
+                        })
+                    );
+                } catch (error) {
+                    setIsLoading(false);
+                    setIsDisabled(true);
+                    return;
+                }
 
                 handlers.increment();
             }
@@ -82,15 +89,18 @@ export const ClearBlacklist = () => {
                 />
 
                 <div>
-                    <Text color="dimmed" size="xs" transform="uppercase" weight={700}>
-                        {mt('title')}
-                    </Text>
-                    <Text weight={700} size="xl">
-                        {formatNumber(blockedCount - offset)}
-                    </Text>
+                    <Text size="md">{mt('title')}</Text>
+                    <Text size="xl">{formatNumber(blockedCount - offset)}</Text>
                 </div>
 
-                <Button fullWidth variant="outline" mt="xs" loading={isLoading} onClick={clearBlacklist}>
+                <Button
+                    fullWidth
+                    variant="outline"
+                    mt="xs"
+                    loading={isLoading}
+                    disabled={isDisabled}
+                    onClick={clearBlacklist}
+                >
                     {mt('button_clear')}
                 </Button>
             </Group>
