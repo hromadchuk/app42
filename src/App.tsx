@@ -5,6 +5,7 @@ import { HashRouter, Route, Routes } from 'react-router-dom';
 import { Api, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
 import { AppContext } from './components/AppContext.tsx';
+import { AppNotifications } from './components/AppNotifications.tsx';
 import { Constants } from './constants.tsx';
 import { clearOldCache } from './lib/cache.tsx';
 import { IRouter, routers } from './routes.tsx';
@@ -45,7 +46,8 @@ const App = () => {
                 Constants.API_HASH,
                 {
                     connectionRetries: 5,
-                    useWSS: true
+                    useWSS: true,
+                    floodSleepThreshold: 30
                 }
             );
 
@@ -70,6 +72,7 @@ const App = () => {
                             <Routes>{routers.map(GetRouter)}</Routes>
                             <AppFooter />
                         </AppShell.Main>
+                        <AppNotifications />
                     </AppShell>
                 </HashRouter>
             </AppContext.Provider>

@@ -12,6 +12,9 @@
     "progress": "Завантаження",
     "footer": "Зроблено з любов'ю",
     "done": "Готово!",
+    "errors": {
+      "api_rate_limit": "Ви досягли межі API запитів, вам потрібно зачекати {time} і повторити спробу"
+    },
     "time": {
       "days": [
         "день",
@@ -51,7 +54,9 @@
     "contacts_analysis": "Аналіз контактів",
     "messages_stat": "Статистика повідомлень",
     "animated_messages": "Анімовані повідомлення",
-    "inactive_channels": "Неактивні канали та супергрупи"
+    "inactive_channels": "Неактивні канали та супергрупи",
+    "import_messages": "Імпорт повідомлень",
+    "clear_blacklist": "Очистити чорний список"
   },
   "methods": {
     "get_id": {
@@ -159,6 +164,31 @@
     "inactive_channels": {
       "no_inactive": "У вас немає неактивних каналів і супергруп",
       "last_active": "Остання активність {diff_time}"
+    },
+    "import_messages": {
+      "read_warning": "Перед використанням методу необхідно ознайомитися з документацією",
+      "read_warning_link": "Прочитати документацію",
+      "button_import": "Виберіть ZIP-архів",
+      "select_move_message_from": "Виберіть користувача {network}, повідомлення якого ми будемо переносити",
+      "select_move_message_to": "Виберіть користувача Telegram, куди будуть перенесені повідомлення",
+      "search_placeholder": "Введіть для пошуку",
+      "uploading_media": "Завантаження медіа",
+      "networks": {
+        "title": "Виберіть соціальну мережу",
+        "vk": "ВКонтакті",
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "telegram": "Telegram"
+      },
+      "errors": {
+        "no_messages": "Немає повідомлень у архіві",
+        "no_users": "У вас немає користувачів в архіві"
+      }
+    },
+    "clear_blacklist": {
+      "blacklist_empty": "Ваш чорний список порожній",
+      "button_clear": "Очистити чорний список",
+      "title": "Заблоковано користувачів/ботів"
     }
   }
 }

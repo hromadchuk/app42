@@ -1,9 +1,9 @@
 import { Buffer } from 'buffer';
 import { useEffect, useState } from 'react';
-import { Avatar } from '@mantine/core';
 import { useIntersection } from '@mantine/hooks';
 import { Api } from 'telegram';
 import { getCache, setCache } from '../lib/cache.tsx';
+import { ExAvatar } from './ExAvatar.tsx';
 
 interface IOwnerAvatar {
     owner: null | Api.TypeUser | Api.TypeChat;
@@ -57,12 +57,12 @@ export function OwnerAvatar({ owner }: IOwnerAvatar) {
     }
 
     if (userAvatar) {
-        return <Avatar src={userAvatar} radius="xl" />;
+        return <ExAvatar src={userAvatar} radius="xl" />;
     }
 
     return (
-        <Avatar color="cyan" radius="xl" ref={ref}>
-            {name}
-        </Avatar>
+        <div ref={ref}>
+            <ExAvatar id={Number(owner?.id.valueOf())} letters={name} />
+        </div>
     );
 }

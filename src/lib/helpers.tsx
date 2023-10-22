@@ -1,7 +1,8 @@
+import { notifications } from '@mantine/notifications';
 import { Api } from 'telegram';
-import { getAppLangCode, LangType, td } from './lang';
+import { getAppLangCode, LangType, t, td } from './lang';
 
-export const isDev = window.location.hostname === 'localhost';
+export const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
 export function formatNumber(number: number): string {
     return `${number}`.replace(/(\d)(?=(\d{3})+$)/g, '$1\u00a0');
@@ -33,6 +34,14 @@ export function decline(number: number, titles: string[]): string {
 
 export function declineAndFormat(number: number, titles: string[]): string {
     return `${formatNumber(number)} ${decline(number, titles)}`;
+}
+
+export function getPercent(count: number, total: number): number {
+    if (count >= total) {
+        return 100;
+    }
+
+    return Math.floor((100 * count) / total);
 }
 
 export async function sleep(milliseconds: number): Promise<void> {
@@ -83,18 +92,42 @@ export function getTextTime(seconds: number): string {
     return result.join(' ');
 }
 
+function getErrorText(text: string): string {
+    const parseRateLimit = text.match(/A wait of (\d+) seconds is required \(caused by [\w.]+\)/);
+    if (parseRateLimit) {
+        const seconds = Number(parseRateLimit[1]);
+
+        return t('common.errors.api_rate_limit').replace('{time}', getTextTime(seconds));
+    }
+
+    return text;
+}
+
 export async function CallAPI<R extends Api.AnyRequest>(request: R): Promise<R['__response']> {
     const method = request.className;
 
     console.group(`API ${method}`);
     console.log('Request:', request);
 
-    const result = await window.TelegramClient.invoke(request);
+    try {
+        const result = await window.TelegramClient.invoke(request);
 
-    console.log('Result:', result);
-    console.groupEnd();
+        console.log('Result:', result);
+        console.groupEnd();
 
-    return result;
+        return result;
+    } catch (error) {
+        console.error('Error:', error);
+        console.groupEnd();
+
+        notifyError({
+            title: `API.${method} error`,
+            // @ts-ignore
+            message: getErrorText(error?.message as string)
+        });
+
+        throw error;
+    }
 }
 
 export function classNames(...classes: (string | object)[]): string {
@@ -113,4 +146,17 @@ export function classNames(...classes: (string | object)[]): string {
     }
 
     return list.join(' ');
+}
+
+export function notifyError({ title, message }: { title?: string; message?: string } = {}) {
+    notifications.show({
+        color: 'red',
+        title,
+        message,
+        autoClose: false
+    });
+}
+
+export function getDocLink(path: string): string {
+    return `https://wiki.kit42.app/v/${getAppLangCode()}/${path}`;
 }
