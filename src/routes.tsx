@@ -7,6 +7,7 @@ import {
     IconKeyframes,
     IconMessageCircleSearch,
     IconMessageCircleUp,
+    IconThumbDownOff,
     TablerIconsProps
 } from '@tabler/icons-react';
 
@@ -86,6 +87,14 @@ export const routers: IRouter[] = [
         path: '/methods/import_messages',
         element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
         childElement: createElement(lazy(() => import('./methods/ImportMessages.tsx')))
+    },
+    {
+        id: 'clear_blacklist',
+        icon: IconThumbDownOff,
+        isMethod: true,
+        path: '/methods/clear_blacklist',
+        element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
+        childElement: createElement(lazy(() => import('./methods/ClearBlacklist.tsx')))
     }
 ].map((route: IRouter) => {
     if (route.id) {
