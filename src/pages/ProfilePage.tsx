@@ -17,6 +17,9 @@ const ProfilePage = () => {
 
         setUser(null);
         navigate('/');
+
+        localStorage.clear();
+        location.reload();
     };
 
     const getUserDescription = (): string => {

@@ -1,4 +1,4 @@
-import { Notification } from '@mantine/core';
+import { Container, Notification } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Api } from 'telegram';
 import { Link } from 'react-router-dom';
@@ -37,7 +37,7 @@ const MenuPage = () => {
 
     return (
         <>
-            {links}
+            <Container p={5}>{links}</Container>
 
             {developer && (
                 <Notification withCloseButton={false} m="xs" color="gray">
