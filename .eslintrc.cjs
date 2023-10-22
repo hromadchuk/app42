@@ -63,7 +63,7 @@ module.exports = {
         'no-async-promise-executor': 2,
         'no-case-declarations': 0,
         'no-console': 0,
-        'no-constant-condition': 1,
+        'no-constant-condition': 2,
         'no-control-regex': 2,
         'no-debugger': 1,
         'no-duplicate-imports': 2,

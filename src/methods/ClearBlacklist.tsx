@@ -42,6 +42,7 @@ export const ClearBlacklist = () => {
     async function clearBlacklist() {
         setIsLoading(true);
 
+        // eslint-disable-next-line no-constant-condition
         while (true) {
             const owners = await getBlocked();
 
