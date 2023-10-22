@@ -12,6 +12,9 @@
     "progress": "Loading",
     "footer": "Made with love",
     "done": "Done!",
+    "errors": {
+      "api_rate_limit": "You have reached the limit of API requests, you need to wait {time} and try again"
+    },
     "time": {
       "days": [
         "day",
@@ -52,7 +55,8 @@
     "messages_stat": "Messages stat",
     "animated_messages": "Animated messages",
     "inactive_channels": "Inactive channels and supergroups",
-    "import_messages": "Import messages"
+    "import_messages": "Import messages",
+    "clear_blacklist": "Clear blacklist"
   },
   "methods": {
     "get_id": {
@@ -180,6 +184,11 @@
         "no_messages": "No messages in the archive",
         "no_users": "You don't have any users in the archive"
       }
+    },
+    "clear_blacklist": {
+      "blacklist_empty": "Your blacklist is empty",
+      "button_clear": "Clear blacklist",
+      "title": "Users/bots blocked"
     }
   }
 }
