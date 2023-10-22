@@ -61,7 +61,7 @@ export const GetId = () => {
                     rightSection={
                         <CopyButton value={ownerInfo.id.toString()} timeout={2000}>
                             {({ copied, copy }) => (
-                                <ActionIcon color={copied ? 'teal' : 'gray'} onClick={copy}>
+                                <ActionIcon variant="transparent" color={copied ? 'teal' : 'gray'} onClick={copy}>
                                     {copied ? <IconCheck /> : <IconCopy />}
                                 </ActionIcon>
                             )}
@@ -76,7 +76,7 @@ export const GetId = () => {
         <>
             <Input.Wrapper error={inputError}>
                 <Input
-                    icon={<IconAt />}
+                    leftSection={<IconAt />}
                     placeholder={mt('input_placeholder')}
                     onChange={(event) => setUsername(event.target.value)}
                     error={Boolean(inputError)}

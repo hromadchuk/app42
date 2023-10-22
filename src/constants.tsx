@@ -6,7 +6,7 @@ interface IConstants {
     SESSION_KEY: string;
 }
 
-const cacheVersion = 'V2';
+const cacheVersion = 'V3';
 
 export const Constants: IConstants = {
     API_ID: 21504958,

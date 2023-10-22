@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
-import { ActionIcon, Box, Center, Input, Loader } from '@mantine/core';
+import { Box, Center, CloseButton, Input, Loader } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
-import { IconSearch, IconUsersGroup, IconX } from '@tabler/icons-react';
+import { IconSearch, IconUsersGroup } from '@tabler/icons-react';
 import { Api } from 'telegram';
 import { CallAPI } from '../lib/helpers.tsx';
 import { t } from '../lib/lang.tsx';
@@ -111,17 +111,12 @@ function SelectOwner({ getOwners, onOwnerSelect, searchOwners }: IOptionsSelectO
     return (
         <>
             <Input
-                icon={<IconSearch />}
+                leftSection={<IconSearch />}
                 mb="sm"
                 placeholder={t('select_owner.search_placeholder')}
                 value={searchQuery}
-                rightSection={
-                    searchQuery && (
-                        <ActionIcon size="sm" onClick={() => setSearchQuery('')}>
-                            <IconX size="0.875rem" />
-                        </ActionIcon>
-                    )
-                }
+                rightSectionPointerEvents="all"
+                rightSection={searchQuery && <CloseButton onClick={() => setSearchQuery('')} />}
                 onChange={(event) => setSearchQuery(event.currentTarget.value)}
             />
             {UsersBlock()}

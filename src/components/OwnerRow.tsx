@@ -1,8 +1,12 @@
 import { JSX } from 'react';
-import { Center, Container, Flex, Text, UnstyledButton } from '@mantine/core';
+import { Center, Container, Flex, Group, Text, UnstyledButton } from '@mantine/core';
 import { Api } from 'telegram';
 import { IconCheck, IconChevronRight } from '@tabler/icons-react';
+import { classNames } from '../lib/helpers.tsx';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
+
+// @ts-ignore
+import classes from '../styles/OwnerRow.module.css';
 
 interface IOwnerRow {
     owner: null | Api.TypeUser | Api.TypeChat;
@@ -83,14 +87,17 @@ export function OwnerRow({ owner, description, withoutLink, callback, disabled }
             direction="row"
             wrap="nowrap"
             opacity={disabled ? 0.5 : 1}
+            className={classNames({ [classes.row]: linkProps.component })}
         >
             <OwnerAvatar owner={owner} />
 
             <div>
-                <Text size="sm" inline>
-                    {name.join(' ')}
+                <Group gap={0}>
+                    <Text size="sm" inline>
+                        {name.join(' ')}
+                    </Text>
                     {getBadge()}
-                </Text>
+                </Group>
                 <Text c="dimmed" fz="xs">
                     {description}
                 </Text>

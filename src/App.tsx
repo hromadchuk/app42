@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { MantineProvider } from '@mantine/core';
+import { AppShell, MantineProvider } from '@mantine/core';
 import { useColorScheme } from '@mantine/hooks';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { Api, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
 import { AppContext } from './components/AppContext.tsx';
+import { AppNotifications } from './components/AppNotifications.tsx';
 import { Constants } from './constants.tsx';
 import { clearOldCache } from './lib/cache.tsx';
 import { IRouter, routers } from './routes.tsx';
@@ -12,6 +13,7 @@ import { IRouter, routers } from './routes.tsx';
 import { AppHeader } from './components/AppHeader.tsx';
 import { AppFooter } from './components/AppFooter.tsx';
 
+import '@mantine/core/styles.css';
 import './App.css';
 
 declare global {
@@ -19,6 +21,7 @@ declare global {
         TelegramClient: TelegramClient;
         listenEvents: { [key: string]: (event: object) => void };
         userId: number;
+        authData: string;
     }
 }
 
@@ -43,7 +46,8 @@ const App = () => {
                 Constants.API_HASH,
                 {
                     connectionRetries: 5,
-                    useWSS: true
+                    useWSS: true,
+                    floodSleepThreshold: 60
                 }
             );
 
@@ -59,12 +63,17 @@ const App = () => {
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
 
     return (
-        <MantineProvider withGlobalStyles withNormalizeCSS theme={{ colorScheme: useColorScheme() }}>
+        <MantineProvider forceColorScheme={useColorScheme()}>
             <AppContext.Provider value={{ user, setUser }}>
                 <HashRouter>
-                    <AppHeader user={user} />
-                    <Routes>{routers.map(GetRouter)}</Routes>
-                    <AppFooter />
+                    <AppShell header={{ height: 56 }}>
+                        <AppHeader user={user} />
+                        <AppShell.Main>
+                            <Routes>{routers.map(GetRouter)}</Routes>
+                            <AppFooter />
+                        </AppShell.Main>
+                        <AppNotifications />
+                    </AppShell>
                 </HashRouter>
             </AppContext.Provider>
         </MantineProvider>

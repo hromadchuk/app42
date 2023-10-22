@@ -75,8 +75,8 @@ export const AbstractMethod = () => {
                             {progress.warningText}
                         </Notification>
                     )}
-                    <Progress value={percent} animate />
-                    <Text align="center" size="xs">
+                    <Progress value={percent} animated />
+                    <Text ta="center" size="xs">
                         {progress.text || t('common.progress')}
                         {counts.length > 0 && ` (${counts.join(' / ')})`}
                     </Text>

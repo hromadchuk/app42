@@ -1,4 +1,4 @@
-import { ActionIcon, Center, Container, createStyles, Header, rem, UnstyledButton } from '@mantine/core';
+import { ActionIcon, AppShell, Center, Group, UnstyledButton } from '@mantine/core';
 import { IconArrowLeft } from '@tabler/icons-react';
 import { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -9,15 +9,6 @@ import { isDev } from '../lib/helpers.tsx';
 import Logo from './Logo.tsx';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
 
-const useStyles = createStyles(() => ({
-    container: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        height: rem(56)
-    }
-}));
-
 interface IAppHeader {
     user: null | Api.User;
 }
@@ -27,7 +18,6 @@ const excludeBackButton = ['/', '/menu'];
 export function AppHeader({ user }: IAppHeader) {
     const location = useLocation();
     const navigate = useNavigate();
-    const { classes } = useStyles();
 
     useEffect(() => {
         if (!isDev) {
@@ -47,8 +37,8 @@ export function AppHeader({ user }: IAppHeader) {
         }
 
         return (
-            <ActionIcon onClick={() => navigate('/menu')}>
-                <IconArrowLeft size={20} />
+            <ActionIcon variant="transparent" size="xl" onClick={() => navigate('/menu')}>
+                <IconArrowLeft />
             </ActionIcon>
         );
     };
@@ -66,16 +56,16 @@ export function AppHeader({ user }: IAppHeader) {
     };
 
     return (
-        <Header height={56}>
-            <Container className={classes.container}>
-                {LeftSide()}
+        <AppShell.Header>
+            <Group h="100%" px="md">
+                <LeftSide />
 
                 <Center mx="auto">
-                    <Logo width={28} height={28} />
+                    <Logo size={28} />
                 </Center>
 
-                {RightSide()}
-            </Container>
-        </Header>
+                <RightSide />
+            </Group>
+        </AppShell.Header>
     );
 }

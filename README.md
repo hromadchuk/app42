@@ -2,15 +2,17 @@
 
 Kit 42 is a product with features for Telegram
 
-https://gromadchuk.github.io/kit-42
+https://gromadchuk.github.io/kit-42/
 
-## 🛠️ Run locally
-#### Requirement: [Node.js](https://nodejs.org/en/) >= 18
-1. `git clone https://github.com/gromadchuk/kit-42.git`
-2. `cd kit-42`
-3. `npm install`
-4. `npm run dev`
-5. Open http://localhost:4242/
+## ⚠️ Deleting a session
+We recommend to remove active session after using Kit 42 to make sure that the service doesn't do something without your knowledge.
+
+1. Open the settings tab
+2. Open «Devices» or «Active Sessions» (dependent by device)
+3. Find a session with «kit42»
+4. Click on session row
+5. Click on «Terminate session»
+6. Confirm your action
 
 ## 🌏 Translations
 We use [Crowdin](https://crowdin.com/project/kit-42) as a translation platform.

@@ -1,7 +1,8 @@
+import { notifications } from '@mantine/notifications';
 import { Api } from 'telegram';
 import { getAppLangCode, LangType, td } from './lang';
 
-export const isDev = window.location.hostname === 'localhost';
+export const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
 export function formatNumber(number: number): string {
     return `${number}`.replace(/(\d)(?=(\d{3})+$)/g, '$1\u00a0');
@@ -97,10 +98,54 @@ export async function CallAPI<R extends Api.AnyRequest>(request: R): Promise<R['
     console.group(`API ${method}`);
     console.log('Request:', request);
 
-    const result = await window.TelegramClient.invoke(request);
+    try {
+        const result = await window.TelegramClient.invoke(request);
 
-    console.log('Result:', result);
-    console.groupEnd();
+        console.log('Result:', result);
+        console.groupEnd();
 
-    return result;
+        return result;
+    } catch (error) {
+        console.error('Error:', error);
+        console.groupEnd();
+
+        notifyError({
+            title: `API.${method} error`,
+            // @ts-ignore
+            message: error?.message
+        });
+
+        throw error;
+    }
+}
+
+export function classNames(...classes: (string | object)[]): string {
+    const list: string[] = [];
+
+    for (const name of classes) {
+        if (typeof name === 'string') {
+            list.push(name);
+        } else {
+            for (const [key, value] of Object.entries(name)) {
+                if (value) {
+                    list.push(key);
+                }
+            }
+        }
+    }
+
+    return list.join(' ');
+}
+
+export function notifyError({ title, message }: { title?: string; message?: string } = {}) {
+    notifications.show({
+        color: 'red',
+        title,
+        message,
+        autoClose: false
+    });
+}
+
+export function getDocLink(path: string): string {
+    return `https://wiki.kit42.app/v/${getAppLangCode()}/${path}`;
 }

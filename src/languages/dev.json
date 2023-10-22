@@ -52,6 +52,7 @@
     "messages_stat": "Messages stat",
     "animated_messages": "Animated messages",
     "inactive_channels": "Inactive channels and supergroups",
+    "import_messages": "Import messages",
     "clear_blacklist": "Clear blacklist"
   },
   "methods": {
@@ -160,6 +161,26 @@
     "inactive_channels": {
       "no_inactive": "You don't have inactive channels and supergroups",
       "last_active": "Last active {diff_time}"
+    },
+    "import_messages": {
+      "read_warning": "Before using the method, you need to read the documentation",
+      "read_warning_link": "Read documentation",
+      "button_import": "Select ZIP archive",
+      "select_move_message_from": "Select the {network} user whose messages we will transfer",
+      "select_move_message_to": "Select the Telegram user where the messages will be transferred",
+      "search_placeholder": "Type to search",
+      "uploading_media": "Uploading media",
+      "networks": {
+        "title": "Select a social network",
+        "vk": "VK",
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "telegram": "Telegram"
+      },
+      "errors": {
+        "no_messages": "No messages in the archive",
+        "no_users": "You don't have any users in the archive"
+      }
     },
     "clear_blacklist": {
       "blacklist_empty": "Your blacklist is empty",
