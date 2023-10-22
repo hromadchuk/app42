@@ -1,17 +1,18 @@
-import { Container, Notification } from '@mantine/core';
+import { Avatar, Container, Divider, Notification, UnstyledButton } from '@mantine/core';
+import { IconBook2 } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { Api } from 'telegram';
 import { Link } from 'react-router-dom';
 import { OwnerRow } from '../components/OwnerRow.tsx';
-import { CallAPI } from '../lib/helpers.tsx';
+import { CallAPI, getDocLink } from '../lib/helpers.tsx';
 import { routers } from '../routes.tsx';
+import Logo from '../components/Logo.tsx';
 import { t } from '../lib/lang.tsx';
 
 // @ts-ignore
 import classes from '../styles/MenuPage.module.css';
 
 const MenuPage = () => {
-    // const { classes } = useStyles();
     const [developer, setDeveloper] = useState<null | Api.User>(null);
 
     useEffect(() => {
@@ -37,7 +38,23 @@ const MenuPage = () => {
 
     return (
         <>
-            <Container p={5}>{links}</Container>
+            <Container p={5}>
+                {links}
+
+                <Divider my="sm" />
+
+                <UnstyledButton className={classes.link} component="a" href={getDocLink('')} target="_blank">
+                    <IconBook2 className={classes.linkIcon} stroke={1.5} />
+                    <span>{t('menu.documentation')}</span>
+                </UnstyledButton>
+
+                <UnstyledButton className={classes.link} component="a" href="https://t.me/kit42_app" target="_blank">
+                    <Avatar size="sm" color="blue" radius="xl" mr="xs">
+                        <Logo size={14} />
+                    </Avatar>
+                    <span>{t('menu.telegram_channel')}</span>
+                </UnstyledButton>
+            </Container>
 
             {developer && (
                 <Notification withCloseButton={false} m="xs" color="gray">

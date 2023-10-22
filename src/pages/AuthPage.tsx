@@ -1,13 +1,18 @@
+import { IconBook2 } from '@tabler/icons-react';
 import { useContext, useEffect, useState } from 'react';
-import { Button, Center, Container, Loader, TextInput } from '@mantine/core';
+import { Avatar, Button, Center, Container, Divider, Loader, TextInput, UnstyledButton } from '@mantine/core';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Api } from 'telegram';
 import { computeCheck } from 'telegram/Password';
-import { CallAPI } from '../lib/helpers.tsx';
+import Logo from '../components/Logo.tsx';
+import { CallAPI, getDocLink } from '../lib/helpers.tsx';
 import { t } from '../lib/lang.tsx';
 
 import { Constants } from '../constants.tsx';
 import { AppContext } from '../components/AppContext.tsx';
+
+// @ts-ignore
+import classes from '../styles/MenuPage.module.css';
 
 enum AuthState {
     loading = 'loading',
@@ -92,7 +97,7 @@ const AuthPage = () => {
         try {
             const result = (await CallAPI(
                 new Api.auth.SendCode({
-                    phoneNumber: number,
+                    phoneNumber: number.trim(),
                     apiId: Constants.API_ID,
                     apiHash: Constants.API_HASH,
                     settings: new Api.CodeSettings({
@@ -121,7 +126,7 @@ const AuthPage = () => {
         try {
             await CallAPI(
                 new Api.auth.SignIn({
-                    phoneNumber: number,
+                    phoneNumber: number.trim(),
                     phoneCodeHash,
                     phoneCode: code
                 })
@@ -249,6 +254,29 @@ const AuthPage = () => {
                 onClick: confirmPassword,
                 name: t('auth_page.button_confirm_password')
             })}
+
+            {state === AuthState.number && (
+                <>
+                    <Divider my="sm" />
+
+                    <UnstyledButton className={classes.link} component="a" href={getDocLink('')} target="_blank">
+                        <IconBook2 className={classes.linkIcon} stroke={1.5} />
+                        <span>{t('menu.documentation')}</span>
+                    </UnstyledButton>
+
+                    <UnstyledButton
+                        className={classes.link}
+                        component="a"
+                        href="https://t.me/kit42_app"
+                        target="_blank"
+                    >
+                        <Avatar size="sm" color="blue" radius="xl" mr="xs">
+                            <Logo size={14} />
+                        </Avatar>
+                        <span>{t('menu.telegram_channel')}</span>
+                    </UnstyledButton>
+                </>
+            )}
         </Container>
     );
 };
