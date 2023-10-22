@@ -51,7 +51,8 @@
     "contacts_analysis": "Анализ контактов",
     "messages_stat": "Статистика сообщений",
     "animated_messages": "Анимированные сообщения",
-    "inactive_channels": "Неактивные каналы и супергруппы"
+    "inactive_channels": "Неактивные каналы и супергруппы",
+    "import_messages": "Импорт сообщений"
   },
   "methods": {
     "get_id": {
@@ -159,6 +160,26 @@
     "inactive_channels": {
       "no_inactive": "У вас нет неактивных каналов и супергрупп",
       "last_active": "Последняя активность {diff_time}"
+    },
+    "import_messages": {
+      "read_warning": "Перед использованием метода необходимо прочитать документацию",
+      "read_warning_link": "Читать документацию",
+      "button_import": "Выбрать ZIP архив",
+      "select_move_message_from": "Выберите пользователя {network}, чьи сообщения мы будем переносить",
+      "select_move_message_to": "Выберите пользователя Telegram, куда будут перенесены сообщения",
+      "search_placeholder": "Введите для поиска",
+      "uploading_media": "Загрузка медиа",
+      "networks": {
+        "title": "Выберите социальную сеть",
+        "vk": "ВКонтакте",
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "telegram": "Telegram"
+      },
+      "errors": {
+        "no_messages": "Нет сообщений в архиве",
+        "no_users": "У вас нет пользователей в архиве"
+      }
     }
   }
 }
