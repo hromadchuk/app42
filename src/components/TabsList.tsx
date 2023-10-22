@@ -31,7 +31,7 @@ export function TabsList({ tabs, onChange }: ITabsList) {
 
     return (
         <ScrollArea type="never" viewportRef={viewportRef} mb="xs">
-            <Tabs defaultValue={defaultTabId} onChange={handleTabChange} w={'max-content'}>
+            <Tabs defaultValue={defaultTabId} onChange={(value) => handleTabChange(value as string)} w={'max-content'}>
                 <Tabs.List>
                     {tabs.map((tab) => (
                         <Tabs.Tab key={tab.id} leftSection={<tab.icon size={14} />} value={tab.id}>
