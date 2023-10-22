@@ -2,7 +2,7 @@ import { notifications } from '@mantine/notifications';
 import { Api } from 'telegram';
 import { getAppLangCode, LangType, td } from './lang';
 
-export const isDev = window.location.hostname === 'localhost';
+export const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
 export function formatNumber(number: number): string {
     return `${number}`.replace(/(\d)(?=(\d{3})+$)/g, '$1\u00a0');
@@ -136,4 +136,8 @@ export function notifyError({ title, message }: { title?: string; message?: stri
         message,
         autoClose: false
     });
+}
+
+export function getDocLink(path: string): string {
+    return `https://wiki.kit42.app/v/${getAppLangCode()}/${path}`;
 }

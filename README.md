@@ -2,15 +2,6 @@
 
 Kit 42 is a product with features for Telegram
 
-https://t.me/kit42bot
-
-#### Available features:
-1. [Get account or channel ID](METHODS.md#get-account-or-channel-id)
-2. [Contact analysis](METHODS.md#contact-analysis)
-3. [Messages stat](METHODS.md#messages-stat)
-4. [Animated messages](METHODS.md#animated-messages)
-5. [Inactive channels and supergroups](METHODS.md#inactive-channels-and-supergroups)
-
 ## ⚠️ Deleting a session
 We recommend to remove active session after using Kit 42 to make sure that the service doesn't do something without your knowledge.
 

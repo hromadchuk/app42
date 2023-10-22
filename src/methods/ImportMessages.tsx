@@ -20,7 +20,7 @@ import { ExAvatar } from '../components/ExAvatar.tsx';
 
 import { MethodContext } from '../components/MethodContext.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
-import { CallAPI } from '../lib/helpers.tsx';
+import { CallAPI, getDocLink } from '../lib/helpers.tsx';
 import { t } from '../lib/lang.tsx';
 
 // @ts-ignore
@@ -410,7 +410,15 @@ export const ImportMessages = () => {
         <>
             <Notification withCloseButton={false} color="yellow">
                 {mt('read_warning')}
-                <Button variant="light" size="xs" mt="xs" fullWidth>
+                <Button
+                    variant="light"
+                    size="xs"
+                    mt="xs"
+                    fullWidth
+                    component="a"
+                    href={getDocLink('methods/import_messages')}
+                    target="_blank"
+                >
                     {mt('read_warning_link')}
                 </Button>
             </Notification>
