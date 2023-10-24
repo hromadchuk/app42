@@ -103,7 +103,14 @@ function getErrorText(text: string): string {
     return text;
 }
 
-export async function CallAPI<R extends Api.AnyRequest>(request: R): Promise<R['__response']> {
+interface ICallApiOptions {
+    hideErrorAlert?: boolean;
+}
+
+export async function CallAPI<R extends Api.AnyRequest>(
+    request: R,
+    options?: ICallApiOptions
+): Promise<R['__response']> {
     const method = request.className;
 
     console.group(`API ${method}`);
@@ -120,11 +127,13 @@ export async function CallAPI<R extends Api.AnyRequest>(request: R): Promise<R['
         console.error('Error:', error);
         console.groupEnd();
 
-        notifyError({
-            title: `API.${method} error`,
-            // @ts-ignore
-            message: getErrorText(error?.message as string)
-        });
+        if (!options?.hideErrorAlert) {
+            notifyError({
+                title: `API.${method} error`,
+                // @ts-ignore
+                message: getErrorText(error?.message as string)
+            });
+        }
 
         throw error;
     }
