@@ -76,7 +76,8 @@ const AuthPage = () => {
             const [user] = await CallAPI(
                 new Api.users.GetUsers({
                     id: [new Api.InputUserSelf()]
-                })
+                }),
+                { hideErrorAlert: true }
             );
 
             window.userId = user.id.valueOf();
@@ -106,7 +107,8 @@ const AuthPage = () => {
                         allowAppHash: true,
                         allowMissedCall: true
                     })
-                })
+                }),
+                { hideErrorAlert: true }
             )) as Api.auth.SentCode;
 
             setPhoneCodeHash(result.phoneCodeHash);
@@ -129,7 +131,8 @@ const AuthPage = () => {
                     phoneNumber: number.trim(),
                     phoneCodeHash,
                     phoneCode: code
-                })
+                }),
+                { hideErrorAlert: true }
             );
 
             localStorage.setItem(Constants.SESSION_KEY, `${window.TelegramClient.session.save()}`);
@@ -156,7 +159,9 @@ const AuthPage = () => {
         try {
             const dataLogin = await CallAPI(new Api.account.GetPassword());
 
-            await CallAPI(new Api.auth.CheckPassword({ password: await computeCheck(dataLogin, password) }));
+            await CallAPI(new Api.auth.CheckPassword({ password: await computeCheck(dataLogin, password) }), {
+                hideErrorAlert: true
+            });
 
             localStorage.setItem(Constants.SESSION_KEY, `${window.TelegramClient.session.save()}`);
 
