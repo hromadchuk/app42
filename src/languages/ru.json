@@ -177,6 +177,7 @@
       "select_move_message_to": "Выберите пользователя Telegram, куда будут перенесены сообщения",
       "search_placeholder": "Введите для поиска",
       "uploading_media": "Загрузка медиа",
+      "save_media": "Сохранение медиа",
       "networks": {
         "title": "Выберите социальную сеть",
         "vk": "ВКонтакте",

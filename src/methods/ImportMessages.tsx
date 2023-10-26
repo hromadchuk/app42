@@ -21,7 +21,7 @@ import { ExAvatar } from '../components/ExAvatar.tsx';
 import { MethodContext } from '../components/MethodContext.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { CallAPI, getDocLink } from '../lib/helpers.tsx';
-import { t } from '../lib/lang.tsx';
+import { getAppLangCode, LangType, t } from '../lib/lang.tsx';
 
 // @ts-ignore
 import classes from '../styles/MenuPage.module.css';
@@ -76,11 +76,29 @@ interface IMetaFileSchema {
     thread_path: string;
 }
 
+interface IVKFileSchema {
+    users: {
+        id: number;
+        name: string;
+        photo: string;
+    }[];
+    messages: {
+        date: number;
+        userId: number;
+        text: string;
+        photos: string[];
+    }[];
+}
+
 const icons = {
     [ImportType.VK]: IconBrandVk,
     [ImportType.Facebook]: IconBrandFacebook,
     [ImportType.Instagram]: IconBrandInstagram
 };
+
+const sortButtons = [LangType.RU, LangType.UK].includes(getAppLangCode())
+    ? [ImportType.VK, ImportType.Instagram, ImportType.Facebook]
+    : [ImportType.Instagram, ImportType.Facebook, ImportType.VK];
 
 export const ImportMessages = () => {
     const { mt, needHideContent, setProgress, getProgress, setFinishBlock } = useContext(MethodContext);
@@ -108,7 +126,7 @@ export const ImportMessages = () => {
         const archive = await new JSZip().loadAsync(uploadedFile);
         const files = Object.keys(archive.files);
 
-        const path = files.find((filePath) => filePath.endsWith('messages/'));
+        const path = files.includes('messages.json') || files.find((filePath) => filePath.endsWith('messages/'));
         if (!path) {
             setLoading(false);
             setErrorText(mt('errors.no_messages'));
@@ -124,11 +142,23 @@ export const ImportMessages = () => {
         }
 
         setLoading(false);
-        setFileUsers(users);
+
+        if (importType === ImportType.VK) {
+            selectUserFrom(users[0]);
+        } else {
+            setFileUsers(users);
+        }
     }
 
     async function getUsers(archive: JSZip, files: string[]) {
         const filesWithUsers: IFileUser[] = [];
+
+        if (importType === ImportType.VK) {
+            filesWithUsers.push({
+                filePath: 'messages.json',
+                name: ImportType.VK
+            });
+        }
 
         if (importType === ImportType.Instagram) {
             for (const filePath of files) {
@@ -193,9 +223,40 @@ export const ImportMessages = () => {
             (filePath) => filePath.startsWith(user.filePath) && filePath.length > user.filePath.length
         );
 
-        // if (importType === ImportType.VK) {
-        //
-        // }
+        if (importType === ImportType.VK) {
+            const content: IVKFileSchema = JSON.parse(
+                await (archive.file('messages.json') as JSZip.JSZipObject).async('string')
+            );
+
+            content.messages.sort((a, b) => a.date - b.date);
+
+            const usersInfo = new Map<number, string>();
+
+            content.users.forEach((vkUser) => {
+                usersInfo.set(vkUser.id, vkUser.name);
+            });
+
+            content.messages.forEach((message) => {
+                const date = dayjs(message.date * 1000).format('DD.MM.YYYY, HH:mm:ss');
+                const userName = usersInfo.get(message.userId) as string;
+                const prefix = `[${date}] ${userName}: `;
+
+                if (message.text) {
+                    data.rows.push(prefix + message.text);
+                }
+
+                if (message.photos) {
+                    message.photos.forEach((photoName) => {
+                        data.rows.push(prefix + `<attached: ${photoName}>`);
+                        data.media.push({
+                            name: photoName,
+                            path: photoName,
+                            type: TImportMedia.PHOTO
+                        });
+                    });
+                }
+            });
+        }
 
         if (importType === ImportType.Instagram || importType === ImportType.Facebook) {
             const messageFiles = userFiles.filter((filePath) => filePath.match(/\/message_\d+\.json$/));
@@ -273,18 +334,38 @@ export const ImportMessages = () => {
 
             const archive = await new JSZip().loadAsync(file as File);
 
+            const uploads = new Map<string, Api.InputFile | Api.InputFileBig>();
+            const uploadTasks = [];
+
             for (const media of importData.media) {
                 const mediaFile = archive.file(media.path) as IJSZipObject;
 
+                uploadTasks.push(
+                    (async () => {
+                        const data = await uploadFile(
+                            media.name,
+                            mediaFile._data.compressedSize,
+                            Buffer.from(mediaFile._data.compressedContent)
+                        );
+
+                        uploads.set(media.path, data);
+
+                        const currentProgress = getProgress();
+                        setProgress({ ...currentProgress, count: (currentProgress.count || 0) + 1 });
+                    })()
+                );
+            }
+
+            await Promise.all(uploadTasks);
+
+            setProgress({ text: mt('save_media'), total: importData.media.length });
+
+            for (const media of importData.media) {
                 let teMedia: Api.TypeInputMedia | undefined;
 
                 if (media.type === TImportMedia.PHOTO) {
                     teMedia = new Api.InputMediaUploadedPhoto({
-                        file: await uploadFile(
-                            media.name,
-                            mediaFile._data.compressedSize,
-                            Buffer.from(mediaFile._data.compressedContent)
-                        )
+                        file: uploads.get(media.path) as Api.InputFile | Api.InputFileBig
                     });
                 }
 
@@ -330,7 +411,7 @@ export const ImportMessages = () => {
         return window.TelegramClient.uploadFile({
             // @ts-ignore
             file: new CustomFile(name, size, '', data),
-            workers: 1
+            workers: 10
         });
     }
 
@@ -428,9 +509,9 @@ export const ImportMessages = () => {
             </Title>
 
             <Stack mt="xs" gap="xs">
-                {/* <RadioRow type={ImportType.VK} /> */}
-                <RadioRow type={ImportType.Instagram} />
-                <RadioRow type={ImportType.Facebook} />
+                {sortButtons.map((type) => (
+                    <RadioRow key={type} type={type} />
+                ))}
             </Stack>
 
             <FixFileButton />
