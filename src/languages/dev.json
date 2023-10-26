@@ -177,6 +177,7 @@
       "select_move_message_to": "Select the Telegram user where the messages will be transferred",
       "search_placeholder": "Type to search",
       "uploading_media": "Uploading media",
+      "save_media": "Uploading media",
       "networks": {
         "title": "Select a social network",
         "vk": "VK",
