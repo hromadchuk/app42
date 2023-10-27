@@ -42,8 +42,7 @@ const App = () => {
                 connectionRetries: 5,
                 useWSS: true,
                 floodSleepThreshold: 30,
-                langCode: getAppLangCode(),
-                testServers: true
+                langCode: getAppLangCode()
             }
         );
 
@@ -54,7 +53,10 @@ const App = () => {
         if (currentVersion !== version) {
             localStorage.clear();
             localStorage.setItem(versionKey, version);
-            location.reload();
+
+            setTimeout(() => {
+                location.reload();
+            }, 0);
         }
 
         window.listenEvents = {};
