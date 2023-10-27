@@ -8,6 +8,7 @@ import { AppContext } from './components/AppContext.tsx';
 import { AppNotifications } from './components/AppNotifications.tsx';
 import { Constants } from './constants.tsx';
 import { clearOldCache } from './lib/cache.tsx';
+import { getAppLangCode } from './lib/lang.tsx';
 import { IRouter, routers } from './routes.tsx';
 
 import { AppHeader } from './components/AppHeader.tsx';
@@ -31,33 +32,37 @@ const App = () => {
     useEffect(() => {
         clearOldCache();
 
+        const session = localStorage.getItem(Constants.SESSION_KEY);
+
+        window.TelegramClient = new TelegramClient(
+            new StringSession(session || ''),
+            Constants.API_ID,
+            Constants.API_HASH,
+            {
+                connectionRetries: 5,
+                useWSS: true,
+                floodSleepThreshold: 30,
+                langCode: getAppLangCode(),
+                testServers: true
+            }
+        );
+
+        const version = window.TelegramClient.__version__;
         const versionKey = 'KIT_42_CACHE_VERSION';
         const currentVersion = localStorage.getItem(versionKey);
-        if (currentVersion !== Constants.KIT_42_CACHE_VERSION) {
+
+        if (currentVersion !== version) {
             localStorage.clear();
-            localStorage.setItem(versionKey, Constants.KIT_42_CACHE_VERSION);
+            localStorage.setItem(versionKey, version);
             location.reload();
-        } else {
-            const session = localStorage.getItem(Constants.SESSION_KEY);
-
-            window.TelegramClient = new TelegramClient(
-                new StringSession(session || ''),
-                Constants.API_ID,
-                Constants.API_HASH,
-                {
-                    connectionRetries: 5,
-                    useWSS: true,
-                    floodSleepThreshold: 30
-                }
-            );
-
-            window.listenEvents = {};
-            window.TelegramClient.addEventHandler((event) => {
-                if (window.listenEvents[event.className]) {
-                    window.listenEvents[event.className](event);
-                }
-            });
         }
+
+        window.listenEvents = {};
+        window.TelegramClient.addEventHandler((event) => {
+            if (window.listenEvents[event.className]) {
+                window.listenEvents[event.className](event);
+            }
+        });
     }, []);
 
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;

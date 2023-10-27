@@ -55,7 +55,7 @@ export const ContactsAnalysis = () => {
 
         const result = (await CallAPI(new Api.contacts.GetContacts({}))) as Api.contacts.Contacts;
 
-        if (!result.users) {
+        if (!result.users?.length) {
             setProgress(null);
             setFinishBlock({ state: 'error', text: mt('no_contacts') });
             return;
