@@ -46,17 +46,14 @@ const App = () => {
             }
         );
 
+        const versionKey = 'TGLibVersion';
         const version = window.TelegramClient.__version__;
-        const versionKey = 'KIT_42_CACHE_VERSION';
         const currentVersion = localStorage.getItem(versionKey);
 
         if (currentVersion !== version) {
             localStorage.clear();
             localStorage.setItem(versionKey, version);
-
-            setTimeout(() => {
-                location.reload();
-            }, 0);
+            location.reload();
         }
 
         window.listenEvents = {};

@@ -169,3 +169,26 @@ export function notifyError({ title, message }: { title?: string; message?: stri
 export function getDocLink(path: string): string {
     return `https://wiki.kit42.app/v/${getAppLangCode()}/${path}`;
 }
+
+export async function parallelLimit(limit: number, tasks: Function[]): Promise<void> {
+    const copyTasks = tasks.slice(0);
+
+    const runTask = async () => {
+        if (!copyTasks.length) {
+            return;
+        }
+
+        const task = copyTasks.shift() as Function;
+
+        await task();
+        await runTask();
+    };
+
+    const promises = [];
+
+    for (let i = 0; i < limit; i++) {
+        promises.push(runTask());
+    }
+
+    await Promise.all(promises);
+}

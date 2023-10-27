@@ -20,7 +20,7 @@ import { ExAvatar } from '../components/ExAvatar.tsx';
 
 import { MethodContext } from '../components/MethodContext.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
-import { CallAPI, getDocLink } from '../lib/helpers.tsx';
+import { CallAPI, getDocLink, parallelLimit } from '../lib/helpers.tsx';
 import { getAppLangCode, LangType, t } from '../lib/lang.tsx';
 
 // @ts-ignore
@@ -335,52 +335,56 @@ export const ImportMessages = () => {
             const archive = await new JSZip().loadAsync(file as File);
 
             const uploads = new Map<string, Api.InputFile | Api.InputFileBig>();
-            const uploadTasks = [];
+            const uploadTasks: Function[] = [];
 
             for (const media of importData.media) {
                 const mediaFile = archive.file(media.path) as IJSZipObject;
 
-                uploadTasks.push(
-                    (async () => {
-                        const data = await uploadFile(
-                            media.name,
-                            mediaFile._data.compressedSize,
-                            Buffer.from(mediaFile._data.compressedContent)
-                        );
+                uploadTasks.push(async () => {
+                    const data = await uploadFile(
+                        media.name,
+                        mediaFile._data.compressedSize,
+                        Buffer.from(mediaFile._data.compressedContent)
+                    );
 
-                        uploads.set(media.path, data);
+                    uploads.set(media.path, data);
 
-                        const currentProgress = getProgress();
-                        setProgress({ ...currentProgress, count: (currentProgress.count || 0) + 1 });
-                    })()
-                );
+                    const currentProgress = getProgress();
+                    setProgress({ ...currentProgress, count: (currentProgress.count || 0) + 1 });
+                });
             }
 
-            await Promise.all(uploadTasks);
+            await parallelLimit(10, uploadTasks);
 
             setProgress({ text: mt('save_media'), total: importData.media.length });
 
+            const saveTasks: Function[] = [];
+
             for (const media of importData.media) {
-                let teMedia: Api.TypeInputMedia | undefined;
+                saveTasks.push(async () => {
+                    let tgMedia: Api.TypeInputMedia | undefined;
 
-                if (media.type === TImportMedia.PHOTO) {
-                    teMedia = new Api.InputMediaUploadedPhoto({
-                        file: uploads.get(media.path) as Api.InputFile | Api.InputFileBig
-                    });
-                }
+                    if (media.type === TImportMedia.PHOTO) {
+                        tgMedia = new Api.InputMediaUploadedPhoto({
+                            file: uploads.get(media.path) as Api.InputFile | Api.InputFileBig
+                        });
+                    }
 
-                await CallAPI(
-                    new Api.messages.UploadImportedMedia({
-                        peer: user,
-                        importId: init.id,
-                        fileName: media.name,
-                        media: teMedia
-                    })
-                );
+                    await CallAPI(
+                        new Api.messages.UploadImportedMedia({
+                            peer: user,
+                            importId: init.id,
+                            fileName: media.name,
+                            media: tgMedia
+                        })
+                    );
 
-                const currentProgress = getProgress();
-                setProgress({ ...currentProgress, count: (currentProgress.count || 0) + 1 });
+                    const currentProgress = getProgress();
+                    setProgress({ ...currentProgress, count: (currentProgress.count || 0) + 1 });
+                });
             }
+
+            await parallelLimit(10, saveTasks);
         }
 
         await CallAPI(
@@ -411,7 +415,7 @@ export const ImportMessages = () => {
         return window.TelegramClient.uploadFile({
             // @ts-ignore
             file: new CustomFile(name, size, '', data),
-            workers: 10
+            workers: 3
         });
     }
 
