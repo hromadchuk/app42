@@ -5,7 +5,6 @@ interface IConstants {
     SESSION_KEY: string;
 }
 
-
 export const Constants: IConstants = {
     API_ID: 21504958,
     API_HASH: 'd4384e436536198944078fafd63aa051',
