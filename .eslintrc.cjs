@@ -51,7 +51,7 @@ module.exports = {
         'func-name-matching': 1,
         'func-names': 2,
         'func-style': [2, 'declaration', { allowArrowFunctions: true }],
-        indent: [2, 4, { SwitchCase: 2 }],
+        indent: [2, 4, { SwitchCase: 1 }],
         'key-spacing': 2,
         'keyword-spacing': 2,
         'linebreak-style': 2,

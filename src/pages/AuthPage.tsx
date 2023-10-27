@@ -173,6 +173,20 @@ const AuthPage = () => {
         setLoading(false);
     }
 
+    async function submitForm() {
+        switch (state) {
+            case AuthState.number:
+                await confirmNumber();
+                break;
+            case AuthState.code:
+                await confirmCode();
+                break;
+            case AuthState.password:
+                await confirmPassword();
+                break;
+        }
+    }
+
     const InputItemRow = ({ visibleStates = [], disabledStates = [], error, setValue, type, label }: IInputItemRow) => {
         if (!visibleStates.includes(state)) {
             return null;
@@ -189,7 +203,7 @@ const AuthPage = () => {
         );
     };
 
-    const ButtonItemRow = ({ visibleStates = [], disabledValue = '', onClick, name }: IButtonItemRow) => {
+    const ButtonItemRow = ({ visibleStates = [], disabledValue = '', name }: IButtonItemRow) => {
         if (!visibleStates.includes(state)) {
             return null;
         }
@@ -199,7 +213,7 @@ const AuthPage = () => {
                 fullWidth
                 variant="outline"
                 mt="xs"
-                onClick={onClick}
+                type="submit"
                 disabled={(disabledValue || '').length === 0 || isLoading}
             >
                 {name}
@@ -218,47 +232,45 @@ const AuthPage = () => {
     return (
         <Container>
             <Center py={10}>{t('auth_page.description')}</Center>
-
-            {InputItemRow({
-                label: t('auth_page.input_number'),
-                visibleStates: [AuthState.number, AuthState.code, AuthState.password],
-                disabledStates: [AuthState.code, AuthState.password],
-                error: numberError,
-                setValue: setNumber
-            })}
-            {InputItemRow({
-                label: t('auth_page.input_code'),
-                visibleStates: [AuthState.code, AuthState.password],
-                disabledStates: [AuthState.password],
-                error: codeError,
-                setValue: setCode
-            })}
-            {InputItemRow({
-                label: t('auth_page.input_password'),
-                visibleStates: [AuthState.password],
-                disabledStates: [],
-                type: 'password',
-                error: passwordError,
-                setValue: setPassword
-            })}
-            {ButtonItemRow({
-                visibleStates: [AuthState.number],
-                disabledValue: number,
-                onClick: confirmNumber,
-                name: t('auth_page.button_send_code')
-            })}
-            {ButtonItemRow({
-                visibleStates: [AuthState.code],
-                disabledValue: code,
-                onClick: confirmCode,
-                name: t('auth_page.button_confirm_code')
-            })}
-            {ButtonItemRow({
-                visibleStates: [AuthState.password],
-                disabledValue: password,
-                onClick: confirmPassword,
-                name: t('auth_page.button_confirm_password')
-            })}
+            <form onSubmit={submitForm}>
+                {InputItemRow({
+                    label: t('auth_page.input_number'),
+                    visibleStates: [AuthState.number, AuthState.code, AuthState.password],
+                    disabledStates: [AuthState.code, AuthState.password],
+                    error: numberError,
+                    setValue: setNumber
+                })}
+                {InputItemRow({
+                    label: t('auth_page.input_code'),
+                    visibleStates: [AuthState.code, AuthState.password],
+                    disabledStates: [AuthState.password],
+                    error: codeError,
+                    setValue: setCode
+                })}
+                {InputItemRow({
+                    label: t('auth_page.input_password'),
+                    visibleStates: [AuthState.password],
+                    disabledStates: [],
+                    type: 'password',
+                    error: passwordError,
+                    setValue: setPassword
+                })}
+                {ButtonItemRow({
+                    visibleStates: [AuthState.number],
+                    disabledValue: number,
+                    name: t('auth_page.button_send_code')
+                })}
+                {ButtonItemRow({
+                    visibleStates: [AuthState.code],
+                    disabledValue: code,
+                    name: t('auth_page.button_confirm_code')
+                })}
+                {ButtonItemRow({
+                    visibleStates: [AuthState.password],
+                    disabledValue: password,
+                    name: t('auth_page.button_confirm_password')
+                })}
+            </form>
 
             {state === AuthState.number && (
                 <>
