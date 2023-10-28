@@ -6,7 +6,8 @@
     "input_password": "Пароль",
     "button_send_code": "Надіслати код",
     "button_confirm_code": "Підтвердити код",
-    "button_confirm_password": "Підтвердити пароль"
+    "button_confirm_password": "Підтвердити пароль",
+    "search_placeholder": "Введіть для пошуку"
   },
   "common": {
     "progress": "Завантаження",
