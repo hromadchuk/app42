@@ -192,3 +192,36 @@ export async function parallelLimit(limit: number, tasks: Function[]): Promise<v
 
     await Promise.all(promises);
 }
+
+const apiEndpoint =
+    location.hostname === 'gromadchuk.github.io' ? 'https://kit42.gromadchuk.com' : `http://${location.hostname}`;
+
+export const Server = async (method: string, params: object = {}): Promise<object> => {
+    console.group(`SERVER /${method}`);
+    console.log('Request:', params);
+
+    if (!window.authData) {
+        console.log('No auth data');
+    }
+
+    if (isDev) {
+        console.log('Dev mode, skip request');
+        console.groupEnd();
+    } else {
+        const data = await fetch(`${apiEndpoint}/api/${method}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                authData: window.authData
+            },
+            body: JSON.stringify(params)
+        }).then((response) => response.json());
+
+        console.log('Result:', data);
+        console.groupEnd();
+
+        return data as object;
+    }
+
+    return {};
+};
