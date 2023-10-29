@@ -28,7 +28,7 @@ export const InactiveChannels = () => {
         const owners = await CallAPI(new Api.channels.GetInactiveChannels());
 
         if (!owners.chats.length) {
-            setFinishBlock({ state: 'error', text: mt('no_inactive') });
+            setFinishBlock({ state: 'done', text: mt('no_inactive') });
             return;
         }
 
