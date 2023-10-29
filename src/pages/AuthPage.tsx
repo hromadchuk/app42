@@ -17,6 +17,7 @@ import {
     useCombobox
 } from '@mantine/core';
 import { IconBook2, IconSelector } from '@tabler/icons-react';
+import { useOs } from '@mantine/hooks';
 import { IMaskInput } from 'react-imask';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Api } from 'telegram';
@@ -55,10 +56,15 @@ interface IInputCountry {
     pattern?: string;
 }
 
+// TODO need fix this strange hack
+let userPlatform = 'kit42';
+
 const AuthPage = () => {
     const { setUser } = useContext(AppContext);
     const navigate = useNavigate();
     const location = useLocation();
+
+    userPlatform = useOs();
 
     const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
     const [searchCountry, setSearchCountry] = useState('');
@@ -145,7 +151,7 @@ const AuthPage = () => {
 
                 window.authData = new URLSearchParams(url.split('#')[1]).get('tgWebAppData') as string;
 
-                await Server('init', { platform: 'kit42' });
+                await Server('init', { platform: userPlatform });
             } catch (error) {
                 console.error(`Error init app: ${error}`);
             }
