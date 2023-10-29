@@ -174,12 +174,20 @@ const AuthPage = () => {
 
         countries.forEach((country) => {
             country.countryCodes.forEach((countryCode) => {
-                initInputCountries.push({
+                const data: IInputCountry = {
                     name: country.name || country.defaultName,
                     code: country.iso2,
-                    prefix: Number(countryCode.countryCode),
-                    pattern: (countryCode.patterns || []).pop()
-                });
+                    prefix: Number(countryCode.countryCode)
+                };
+
+                // strange fix for Estonia
+                if (countryCode.countryCode === '372') {
+                    data.pattern = 'XXXX XXXX';
+                } else if (countryCode.patterns?.length) {
+                    data.pattern = countryCode.patterns.pop();
+                }
+
+                initInputCountries.push(data);
             });
         });
 
