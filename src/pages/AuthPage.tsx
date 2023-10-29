@@ -23,7 +23,7 @@ import { Api } from 'telegram';
 import { computeCheck } from 'telegram/Password';
 import { CountryFlag } from '../components/CountryFlag.tsx';
 import Logo from '../components/Logo.tsx';
-import { CallAPI, getDocLink } from '../lib/helpers.tsx';
+import { CallAPI, getDocLink, Server } from '../lib/helpers.tsx';
 import { getAppLangCode, t } from '../lib/lang.tsx';
 
 import { Constants } from '../constants.tsx';
@@ -95,48 +95,8 @@ const AuthPage = () => {
 
             await window.TelegramClient.connect();
 
-            const config = await CallAPI(new Api.help.GetNearestDc());
-            setSelectedCountry(config.country);
-
-            const { countries } = (await CallAPI(
-                new Api.help.GetCountriesList({
-                    langCode: getAppLangCode()
-                })
-            )) as Api.help.CountriesList;
-
-            const initInputCountries: IInputCountry[] = [];
-
-            countries.forEach((country) => {
-                country.countryCodes.forEach((countryCode) => {
-                    initInputCountries.push({
-                        name: country.name || country.defaultName,
-                        code: country.iso2,
-                        prefix: Number(countryCode.countryCode),
-                        pattern: (countryCode.patterns || []).pop()
-                    });
-                });
-            });
-
-            const anonymousNumberCountry = initInputCountries.find((country) => country.prefix === 888);
-            // skip some strange codes with problems
-            const ignorePrefixes = [
-                888, // Anonymous number
-                881, // International network
-                882, // International network
-                883, // International network
-                42 // Y-land ??
-            ];
-            const otherCountries = initInputCountries
-                .filter((country) => !ignorePrefixes.includes(country.prefix))
-                .sort((a, b) => a.name.localeCompare(b.name));
-
-            if (anonymousNumberCountry) {
-                otherCountries.unshift(anonymousNumberCountry);
-            }
-
-            setInputCountries(otherCountries);
-
             if (!session) {
+                await getAuthData();
                 setSate(AuthState.number);
                 setLoading(false);
             } else {
@@ -148,22 +108,99 @@ const AuthPage = () => {
     async function getCurrentUser() {
         try {
             const query = new URLSearchParams(location.search);
-            const [user] = await CallAPI(
+            const users = (await CallAPI(
                 new Api.users.GetUsers({
-                    id: [new Api.InputUserSelf()]
+                    id: [new Api.InputUserSelf(), Constants.BOT_USERNAME]
                 }),
                 { hideErrorAlert: true }
-            );
+            )) as Api.User[];
+
+            const bot = users.find((findUser) => findUser.username === Constants.BOT_USERNAME) as Api.User;
+            const user = users.find((findUser) => findUser.username !== Constants.BOT_USERNAME) as Api.User;
 
             window.userId = user.id.valueOf();
+
+            try {
+                const botApp = (
+                    await CallAPI(
+                        new Api.messages.GetBotApp({
+                            app: new Api.InputBotAppShortName({
+                                shortName: 'kit42',
+                                botId: new Api.InputUser({ userId: bot.id, accessHash: bot.accessHash as Api.long })
+                            })
+                        })
+                    )
+                ).app as Api.BotApp;
+
+                const { url } = await CallAPI(
+                    new Api.messages.RequestAppWebView({
+                        peer: Constants.BOT_USERNAME,
+                        app: new Api.InputBotAppID({
+                            id: botApp.id,
+                            accessHash: botApp.accessHash
+                        }),
+                        platform: 'kit42'
+                    })
+                );
+
+                window.authData = new URLSearchParams(url.split('#')[1]).get('tgWebAppData') as string;
+
+                await Server('init', { platform: 'kit42' });
+            } catch (error) {
+                console.error(`Error init app: ${error}`);
+            }
 
             setUser(user as Api.User);
             setLoading(false);
             navigate(query.get('to') || '/menu');
         } catch (error) {
+            await getAuthData();
             setSate(AuthState.number);
             setLoading(false);
         }
+    }
+
+    async function getAuthData() {
+        const config = await CallAPI(new Api.help.GetNearestDc());
+        setSelectedCountry(config.country);
+
+        const { countries } = (await CallAPI(
+            new Api.help.GetCountriesList({
+                langCode: getAppLangCode()
+            })
+        )) as Api.help.CountriesList;
+
+        const initInputCountries: IInputCountry[] = [];
+
+        countries.forEach((country) => {
+            country.countryCodes.forEach((countryCode) => {
+                initInputCountries.push({
+                    name: country.name || country.defaultName,
+                    code: country.iso2,
+                    prefix: Number(countryCode.countryCode),
+                    pattern: (countryCode.patterns || []).pop()
+                });
+            });
+        });
+
+        const anonymousNumberCountry = initInputCountries.find((country) => country.prefix === 888);
+        // skip some strange codes with problems
+        const ignorePrefixes = [
+            888, // Anonymous number
+            881, // International network
+            882, // International network
+            883, // International network
+            42 // Y-land ??
+        ];
+        const otherCountries = initInputCountries
+            .filter((country) => !ignorePrefixes.includes(country.prefix))
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+        if (anonymousNumberCountry) {
+            otherCountries.unshift(anonymousNumberCountry);
+        }
+
+        setInputCountries(otherCountries);
     }
 
     async function confirmNumber() {
