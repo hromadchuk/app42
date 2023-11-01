@@ -58,14 +58,6 @@ export const routers: IRouter[] = [
         childElement: createElement(lazy(() => import('./methods/ContactsAnalysis.tsx')))
     },
     {
-        id: 'common_chats_top',
-        icon: IconCreativeCommonsNd,
-        isMethod: true,
-        path: '/methods/common_chats_top',
-        element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
-        childElement: createElement(lazy(() => import('./methods/CommonChatsTop.tsx')))
-    },
-    {
         id: 'messages_stat',
         icon: IconMessageCircleSearch,
         isMethod: true,
@@ -104,6 +96,14 @@ export const routers: IRouter[] = [
         path: '/methods/clear_blacklist',
         element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
         childElement: createElement(lazy(() => import('./methods/ClearBlacklist.tsx')))
+    },
+    {
+        id: 'common_chats_top',
+        icon: IconCreativeCommonsNd,
+        isMethod: true,
+        path: '/methods/common_chats_top',
+        element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
+        childElement: createElement(lazy(() => import('./methods/CommonChatsTop.tsx')))
     }
 ].map((route: IRouter) => {
     if (route.id) {
