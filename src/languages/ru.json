@@ -57,7 +57,6 @@
   "routes": {
     "get_id": "Узнать ID аккаунта или канала",
     "contacts_analysis": "Анализ контактов",
-    "common_chats_top": "Топ контактов по количеству общих чатов",
     "messages_stat": "Статистика сообщений",
     "animated_messages": "Анимированные сообщения",
     "inactive_channels": "Неактивные каналы и супергруппы",
@@ -88,10 +87,6 @@
         "hide_online": "Скрытый онлайн",
         "recent_online": "По времени последнего онлайна"
       }
-    },
-    "common_chats_top": {
-      "chats_count": "Количество чатов",
-      "no_contacts": "У вас нет контактов"
     },
     "messages_stat": {
       "loading_dialogs": "Получение диалогов",

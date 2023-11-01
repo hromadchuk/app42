@@ -32,13 +32,15 @@ export const ContactsAnalysis = () => {
         }
 
         const users = (result.users as Api.User[]).filter((user) => !user.self);
-        const usersWithCommonChatsCount = await Promise.all(
-            users.map(async (user, index) => {
-                setProgress({ count: index, total: result.users.length });
 
-                return { user, common_chats_count: await getContactCommonChatsCount(user) };
-            })
-        );
+        const usersWithCommonChatsCount = [];
+
+        for (const user of users) {
+            setProgress({ count: users.indexOf(user), total: result.users.length });
+
+            const commonChatsCount = await getContactCommonChatsCount(user);
+            usersWithCommonChatsCount.push({ user, common_chats_count: commonChatsCount });
+        }
 
         usersWithCommonChatsCount.sort(
             (userDataA, userDataB) => userDataB.common_chats_count - userDataA.common_chats_count
@@ -58,21 +60,20 @@ export const ContactsAnalysis = () => {
         return result.chats.length;
     }
 
-    function SectionBlock(users: IUserData[]): JSX.Element | null {
-        if (!users.length) {
+    function SectionBlock(): JSX.Element | null {
+        if (!usersData.length) {
             return null;
         }
 
         return (
             <>
                 <Container px={0}>
-                    {users.map((owner, key) => (
-                        <div key={key}>
-                            {OwnerRow({
-                                owner: owner.user,
-                                description: `${mt('chats_count')}: ${owner.common_chats_count}`
-                            })}
-                        </div>
+                    {usersData.map((owner, key) => (
+                        <OwnerRow
+                            key={key}
+                            owner={owner.user}
+                            description={`${mt('chats_count')}: ${owner.common_chats_count}`}
+                        />
                     ))}
                 </Container>
             </>
@@ -81,7 +82,7 @@ export const ContactsAnalysis = () => {
 
     if (needHideContent()) return null;
 
-    return <>{SectionBlock(usersData)}</>;
+    return <SectionBlock />;
 };
 
 export default ContactsAnalysis;
