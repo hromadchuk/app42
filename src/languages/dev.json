@@ -57,12 +57,12 @@
   "routes": {
     "get_id": "Get account or channel ID",
     "contacts_analysis": "Contact analysis",
-    "common_chats_top": "Top of contacts by number of common chats",
     "messages_stat": "Messages stat",
     "animated_messages": "Animated messages",
     "inactive_channels": "Inactive channels and supergroups",
     "import_messages": "Import messages",
-    "clear_blacklist": "Clear blacklist"
+    "clear_blacklist": "Clear blacklist",
+    "common_chats_top": "Top of contacts by number of common chats"
   },
   "methods": {
     "get_id": {
@@ -88,10 +88,6 @@
         "hide_online": "Hidden online",
         "recent_online": "By last seen"
       }
-    },
-    "common_chats_top": {
-      "chats_count": "Chats count",
-      "no_contacts": "You don't have any contacts"
     },
     "messages_stat": {
       "loading_dialogs": "Getting dialogs",
@@ -200,6 +196,10 @@
       "blacklist_empty": "Your blacklist is empty",
       "button_clear": "Clear blacklist",
       "title": "Users/bots blocked"
+    },
+    "common_chats_top": {
+      "chats_count": "Chats count",
+      "no_contacts": "You don't have any contacts"
     }
   }
 }
