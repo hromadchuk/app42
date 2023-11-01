@@ -11,7 +11,7 @@ interface IUserData {
     common_chats_count: Api.int;
 }
 
-export const ContactsAnalysis = () => {
+export const CommonChatsTop = () => {
     const { mt, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
 
     const [usersData, setUsersData] = useState<IUserData[]>([]);
@@ -66,17 +66,15 @@ export const ContactsAnalysis = () => {
         }
 
         return (
-            <>
-                <Container px={0}>
-                    {usersData.map((owner, key) => (
-                        <OwnerRow
-                            key={key}
-                            owner={owner.user}
-                            description={`${mt('chats_count')}: ${owner.common_chats_count}`}
-                        />
-                    ))}
-                </Container>
-            </>
+            <Container px={0}>
+                {usersData.map((owner, key) => (
+                    <OwnerRow
+                        key={key}
+                        owner={owner.user}
+                        description={`${mt('chats_count')}: ${owner.common_chats_count}`}
+                    />
+                ))}
+            </Container>
         );
     }
 
@@ -85,4 +83,4 @@ export const ContactsAnalysis = () => {
     return <SectionBlock />;
 };
 
-export default ContactsAnalysis;
+export default CommonChatsTop;
