@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Box, Center, Container, Notification, Progress, Text } from '@mantine/core';
 import { IconCircleCheck, IconExclamationCircle } from '@tabler/icons-react';
+import { Api } from 'telegram';
 
-import { IFinishBlock, IProgress, MethodContext } from '../components/MethodContext.tsx';
-import { Server } from '../lib/helpers.tsx';
+import { IFinishBlock, IGetDialogOption, IProgress, MethodContext, TDialogType } from '../components/MethodContext.tsx';
+import { CallAPI, formatNumber, Server } from '../lib/helpers.tsx';
 import { IRouter, routers } from '../routes.tsx';
 import { t, td } from '../lib/lang.tsx';
 
@@ -54,6 +55,71 @@ export const AbstractMethod = () => {
         return td(`methods.${routerInfo.id}.${key}`);
     };
 
+    const getDialogs = async (options: IGetDialogOption): Promise<TDialogType[]> => {
+        const { types } = options;
+
+        const allDialogs: TDialogType[] = [];
+
+        setProgress({ text: t('common.getting_dialogs') });
+
+        const params = {
+            offsetPeer: window.userId,
+            limit: 100,
+            offsetDate: 0
+        };
+
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+            const { count, chats, users, dialogs, messages } = (await CallAPI(
+                new Api.messages.GetDialogs(params)
+            )) as Api.messages.DialogsSlice;
+
+            const currentProgress = getProgress();
+            setProgress({
+                ...currentProgress,
+                total: count || dialogs.length,
+                count: (currentProgress.count || 0) + dialogs.length
+            });
+
+            if (dialogs.length) {
+                dialogs.forEach((dialog) => {
+                    if (dialog.peer instanceof Api.PeerUser && types.includes(Api.User)) {
+                        const findUser = users.find(
+                            (user) => user.id.valueOf() === (dialog.peer as Api.PeerUser).userId.valueOf()
+                        ) as Api.User;
+
+                        allDialogs.push(findUser);
+                    } else if (dialog.peer instanceof Api.PeerChat && types.includes(Api.Chat)) {
+                        const findChat = chats.find(
+                            (chat) => chat.id.valueOf() === (dialog.peer as Api.PeerChat).chatId.valueOf()
+                        ) as Api.Chat;
+
+                        // skip system chats
+                        if (findChat.migratedTo) {
+                            return;
+                        }
+
+                        allDialogs.push(findChat);
+                    } else if (dialog.peer instanceof Api.PeerChannel && types.includes(Api.Channel)) {
+                        const findChannel = chats.find(
+                            (channel) => channel.id.valueOf() === (dialog.peer as Api.PeerChannel).channelId.valueOf()
+                        ) as Api.Channel;
+
+                        allDialogs.push(findChannel);
+                    }
+                });
+
+                params.offsetDate = (messages[messages.length - 1] as Api.Message).date;
+            } else {
+                break;
+            }
+        }
+
+        setProgress(null);
+
+        return allDialogs;
+    };
+
     const HelperBlock = () => {
         if (progress) {
             let percent = 100;
@@ -83,7 +149,7 @@ export const AbstractMethod = () => {
                     <Progress value={percent} animated />
                     <Text ta="center" size="xs">
                         {progress.text || t('common.progress')}
-                        {counts.length > 0 && ` (${counts.join(' / ')})`}
+                        {counts.length > 0 && ` (${counts.map(formatNumber).join(' / ')})`}
                     </Text>
                 </>
             );
@@ -117,7 +183,8 @@ export const AbstractMethod = () => {
                 mt,
                 md,
                 t,
-                td
+                td,
+                getDialogs
             }}
         >
             <Container mt="xs" p="xs">
