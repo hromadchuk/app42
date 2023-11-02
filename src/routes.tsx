@@ -5,6 +5,7 @@ import {
     IconAddressBook,
     IconHourglassLow,
     IconKeyframes,
+    IconMessageCircleCog,
     IconMessageCircleSearch,
     IconMessageCircleUp,
     IconThumbDownOff,
@@ -95,6 +96,14 @@ export const routers: IRouter[] = [
         path: '/methods/clear_blacklist',
         element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
         childElement: createElement(lazy(() => import('./methods/ClearBlacklist.tsx')))
+    },
+    {
+        id: 'administered',
+        icon: IconMessageCircleCog,
+        isMethod: true,
+        path: '/methods/administered',
+        element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
+        childElement: createElement(lazy(() => import('./methods/Administered.tsx')))
     }
 ].map((route: IRouter) => {
     if (route.id) {

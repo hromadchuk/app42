@@ -1,4 +1,5 @@
 import { createContext } from 'react';
+import { Api } from 'telegram';
 
 export interface IProgress {
     count?: number;
@@ -10,6 +11,12 @@ export interface IProgress {
 export interface IFinishBlock {
     state?: 'done' | 'error';
     text?: string;
+}
+
+export type TDialogType = Api.Chat | Api.Channel | Api.User;
+
+export interface IGetDialogOption {
+    types: (typeof Api.Chat | typeof Api.Channel | typeof Api.User)[];
 }
 
 export interface IMethodContext {
@@ -24,6 +31,7 @@ export interface IMethodContext {
     td: (key: string) => string[];
     mt: (key: string) => string;
     md: (key: string) => string[];
+    getDialogs: (options: IGetDialogOption) => Promise<TDialogType[]>;
 }
 
 // @ts-ignore
