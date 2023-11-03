@@ -63,7 +63,7 @@ export const AbstractMethod = () => {
         setProgress({ text: t('common.getting_dialogs') });
 
         const params = {
-            offsetPeer: window.userId,
+            offsetPeer: new Api.InputPeerEmpty(),
             limit: 100,
             offsetDate: 0
         };
@@ -109,7 +109,14 @@ export const AbstractMethod = () => {
                     }
                 });
 
-                params.offsetDate = (messages[messages.length - 1] as Api.Message).date;
+                const lastDialog = dialogs[dialogs.length - 1];
+                const dialogPeer = JSON.stringify(lastDialog.peer.toJSON());
+
+                const lastMessage = messages.find((message) => {
+                    return JSON.stringify((message as Api.Message).peerId.toJSON()) === dialogPeer;
+                }) as Api.Message;
+
+                params.offsetDate = lastMessage.date;
             } else {
                 break;
             }
