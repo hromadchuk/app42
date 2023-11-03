@@ -113,6 +113,8 @@ export async function CallAPI<R extends Api.AnyRequest>(
 ): Promise<R['__response']> {
     const method = request.className;
 
+    await sleep(100);
+
     console.group(`API ${method}`);
     console.log('Request:', request);
 

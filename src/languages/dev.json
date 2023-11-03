@@ -13,6 +13,7 @@
     "progress": "Loading",
     "footer": "Made with love",
     "done": "Done!",
+    "getting_dialogs": "Getting dialogs",
     "errors": {
       "api_rate_limit": "You have reached the limit of API requests, you need to wait {time} and try again"
     },
@@ -62,6 +63,7 @@
     "inactive_channels": "Inactive channels and supergroups",
     "import_messages": "Import messages",
     "clear_blacklist": "Clear blacklist",
+    "administered": "Administrated chats and channels",
     "common_chats_top": "Top of contacts by number of common chats"
   },
   "methods": {
@@ -196,6 +198,12 @@
       "blacklist_empty": "Your blacklist is empty",
       "button_clear": "Clear blacklist",
       "title": "Users/bots blocked"
+    },
+    "administered": {
+      "no_admins": "Administrated chats or channels not found",
+      "title": "Administered {count}",
+      "creator": "Creator",
+      "admin": "Administrator"
     },
     "common_chats_top": {
       "chats_count": "Chats count",
