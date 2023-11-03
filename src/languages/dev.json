@@ -199,7 +199,8 @@
     },
     "common_chats_top": {
       "chats_count": "Chats count",
-      "no_contacts": "You don't have any contacts"
+      "no_contacts": "You don't have any contacts",
+      "members_count": "Members count"
     }
   }
 }
