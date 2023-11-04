@@ -50,8 +50,6 @@ const mergeDeep = (target: ILang, ...sources: ILang[]): Object => {
 export const getAppLangCode = (): LangType => {
     const selectedLang = localStorage.getItem('lang') as LangType;
 
-    return LangType.RU;
-
     if (selectedLang && appLangSources[selectedLang]) {
         return selectedLang;
     }
