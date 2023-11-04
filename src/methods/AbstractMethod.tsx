@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Box, Center, Container, Notification, Progress, Text } from '@mantine/core';
 import { IconCircleCheck, IconExclamationCircle } from '@tabler/icons-react';
 import { Api } from 'telegram';
 
+import { AppContext } from '../components/AppContext.tsx';
 import { IFinishBlock, IGetDialogOption, IProgress, MethodContext, TDialogType } from '../components/MethodContext.tsx';
 import { CallAPI, formatNumber, Server } from '../lib/helpers.tsx';
 import { IRouter, routers } from '../routes.tsx';
@@ -14,6 +15,7 @@ let progressSafe: IProgress | null = null;
 
 export const AbstractMethod = () => {
     const location = useLocation();
+    const { setLoading } = useContext(AppContext);
 
     const [progress, _setProgress] = useState<IProgress | null>();
     const [finishBlock, _setFinishBlock] = useState<IFinishBlock>();
@@ -30,6 +32,8 @@ export const AbstractMethod = () => {
 
     const setProgress = (data: IProgress | null): void => {
         progressSafe = data;
+
+        setLoading(Boolean(data));
 
         _setProgress(data);
     };
@@ -122,9 +126,21 @@ export const AbstractMethod = () => {
             }
         }
 
+        const filteredDialogs = allDialogs.reduce(
+            (result, dialog) => {
+                if (!result.ids.includes(dialog.id.valueOf())) {
+                    result.list.push(dialog);
+                    result.ids.push(dialog.id.valueOf());
+                }
+
+                return result;
+            },
+            { list: [], ids: [] } as { list: TDialogType[]; ids: number[] }
+        );
+
         setProgress(null);
 
-        return allDialogs;
+        return filteredDialogs.list;
     };
 
     const HelperBlock = () => {
