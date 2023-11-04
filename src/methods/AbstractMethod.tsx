@@ -15,7 +15,7 @@ let progressSafe: IProgress | null = null;
 
 export const AbstractMethod = () => {
     const location = useLocation();
-    const { setLoading } = useContext(AppContext);
+    const { setAppLoading } = useContext(AppContext);
 
     const [progress, _setProgress] = useState<IProgress | null>();
     const [finishBlock, _setFinishBlock] = useState<IFinishBlock>();
@@ -33,7 +33,7 @@ export const AbstractMethod = () => {
     const setProgress = (data: IProgress | null): void => {
         progressSafe = data;
 
-        setLoading(Boolean(data));
+        setAppLoading(Boolean(data));
 
         _setProgress(data);
     };

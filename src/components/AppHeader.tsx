@@ -24,7 +24,7 @@ const excludeBackButton = ['/', '/menu'];
 export function AppHeader({ user }: IAppHeader) {
     const location = useLocation();
     const navigate = useNavigate();
-    const { isLoading } = useContext(AppContext);
+    const { isAppLoading } = useContext(AppContext);
 
     const logoRef = useRef<LottieRefCurrentProps>(null);
 
@@ -41,12 +41,12 @@ export function AppHeader({ user }: IAppHeader) {
     }, [location]);
 
     useEffect(() => {
-        if (isLoading) {
+        if (isAppLoading) {
             logoRef.current?.play();
         } else {
             logoRef.current?.stop();
         }
-    }, [isLoading]);
+    }, [isAppLoading]);
 
     const LeftSide = () => {
         if (excludeBackButton.includes(location.pathname)) {
@@ -60,7 +60,7 @@ export function AppHeader({ user }: IAppHeader) {
                 onClick={() => {
                     navigate('/menu');
 
-                    if (isLoading) {
+                    if (isAppLoading) {
                         // need for stop all requests
                         window.location.reload();
                     }
