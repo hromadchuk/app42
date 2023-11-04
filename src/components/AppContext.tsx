@@ -4,8 +4,8 @@ import { Api } from 'telegram';
 export interface IAppContext {
     user: null | Api.User;
     setUser: (user: null | Api.User) => void;
-    isLoading: boolean;
-    setLoading: (state: boolean) => void;
+    isAppLoading: boolean;
+    setAppLoading: (state: boolean) => void;
 }
 
 // @ts-ignore
