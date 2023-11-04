@@ -98,7 +98,7 @@ function getErrorText(text: string): string {
     if (parseRateLimit) {
         const seconds = Number(parseRateLimit[1]);
 
-        return t('common.errors.api_rate_limit').replace('{time}', getTextTime(seconds));
+        return t('common.errors.api_rate_limit.message', { time: getTextTime(seconds) });
     }
 
     return text;
@@ -153,8 +153,8 @@ async function handleFloodWaitError(error: FloodWaitError, request: Api.AnyReque
 
     const id = notifications.show({
         loading: true,
-        title: t('common.errors.api_wait_title'),
-        message: t(`common.errors.api_wait_message`).replace('{seconds}', totalWaitSeconds.toString()),
+        title: t('common.errors.api_rate_limit.title'),
+        message: t(`common.errors.api_rate_limit.message`, { time: getTextTime(totalWaitSeconds) }),
         autoClose: false,
         withCloseButton: false
     });
@@ -169,8 +169,8 @@ async function handleFloodWaitError(error: FloodWaitError, request: Api.AnyReque
 
         notifications.update({
             id,
-            title: t('common.errors.api_wait_title'),
-            message: t(`common.errors.api_wait_message`).replace('{seconds}', secondsToRetry.toString()),
+            title: t('common.errors.api_rate_limit.title'),
+            message: t(`common.errors.api_rate_limit.message`, { time: getTextTime(secondsToRetry) }),
             loading: true
         });
     }, 1000);
