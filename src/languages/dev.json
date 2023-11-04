@@ -15,7 +15,9 @@
     "done": "Done!",
     "getting_dialogs": "Getting dialogs",
     "errors": {
-      "api_rate_limit": "You have reached the limit of API requests, you need to wait {time} and try again"
+      "api_rate_limit": "You have reached the limit of API requests, you need to wait {time} and try again",
+      "api_wait_title": "Wait some time",
+      "api_wait_message": "Wait {seconds} seconds before next request"
     },
     "time": {
       "days": [

@@ -1,6 +1,7 @@
 import { notifications } from '@mantine/notifications';
 import { Api } from 'telegram';
 import { getAppLangCode, LangType, t, td } from './lang';
+import { FloodWaitError } from 'telegram/errors';
 
 export const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
@@ -129,6 +130,10 @@ export async function CallAPI<R extends Api.AnyRequest>(
         console.error('Error:', error);
         console.groupEnd();
 
+        if (error instanceof FloodWaitError) {
+            return await handleFloodWaitError(error, request, options);
+        }
+
         if (!options?.hideErrorAlert) {
             notifyError({
                 title: `API.${method} error`,
@@ -139,6 +144,40 @@ export async function CallAPI<R extends Api.AnyRequest>(
 
         throw error;
     }
+}
+
+async function handleFloodWaitError(error: FloodWaitError, request: Api.AnyRequest, options?: ICallApiOptions) {
+    const totalWaitSeconds = error.seconds;
+
+    console.warn(error.message);
+
+    const id = notifications.show({
+        loading: true,
+        title: t('common.errors.api_wait_title'),
+        message: t(`common.errors.api_wait_message`).replace('{seconds}', totalWaitSeconds.toString()),
+        autoClose: false,
+        withCloseButton: false
+    });
+
+    let secondsToRetry = totalWaitSeconds;
+    const updatedInterval = setInterval(() => {
+        secondsToRetry -= 1;
+        if (secondsToRetry <= 0) {
+            notifications.hide(id);
+            clearInterval(updatedInterval);
+        }
+
+        notifications.update({
+            id,
+            title: t('common.errors.api_wait_title'),
+            message: t(`common.errors.api_wait_message`).replace('{seconds}', secondsToRetry.toString()),
+            loading: true
+        });
+    }, 1000);
+
+    await sleep(secondsToRetry * 1000);
+
+    return CallAPI(request, options);
 }
 
 export function classNames(...classes: (string | object)[]): string {
