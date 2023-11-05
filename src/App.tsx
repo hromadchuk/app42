@@ -28,6 +28,7 @@ declare global {
 
 const App = () => {
     const [user, setUser] = useState<null | Api.User>(null);
+    const [isAppLoading, setAppLoading] = useState<boolean>(false);
 
     useEffect(() => {
         clearOldCache();
@@ -41,7 +42,7 @@ const App = () => {
             {
                 connectionRetries: 5,
                 useWSS: true,
-                floodSleepThreshold: 30,
+                floodSleepThreshold: 0,
                 langCode: getAppLangCode()
             }
         );
@@ -68,7 +69,7 @@ const App = () => {
 
     return (
         <MantineProvider forceColorScheme={useColorScheme()}>
-            <AppContext.Provider value={{ user, setUser }}>
+            <AppContext.Provider value={{ user, setUser, isAppLoading, setAppLoading }}>
                 <HashRouter>
                     <AppShell header={{ height: 56 }}>
                         <AppHeader user={user} />

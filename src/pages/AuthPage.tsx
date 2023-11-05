@@ -60,7 +60,7 @@ interface IInputCountry {
 let userPlatform = 'kit42';
 
 const AuthPage = () => {
-    const { setUser } = useContext(AppContext);
+    const { setUser, setAppLoading } = useContext(AppContext);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -96,6 +96,8 @@ const AuthPage = () => {
     });
 
     useEffect(() => {
+        setAppLoading(true);
+
         (async () => {
             const session = localStorage.getItem(Constants.SESSION_KEY);
 
@@ -105,6 +107,7 @@ const AuthPage = () => {
                 await getAuthData();
                 setSate(AuthState.number);
                 setLoading(false);
+                setAppLoading(false);
             } else {
                 await getCurrentUser();
             }
@@ -158,11 +161,13 @@ const AuthPage = () => {
 
             setUser(user as Api.User);
             setLoading(false);
+            setAppLoading(false);
             navigate(query.get('to') || '/menu');
         } catch (error) {
             await getAuthData();
             setSate(AuthState.number);
             setLoading(false);
+            setAppLoading(false);
         }
     }
 
@@ -219,6 +224,7 @@ const AuthPage = () => {
 
     async function confirmNumber() {
         setLoading(true);
+        setAppLoading(true);
         setNumberError('');
 
         const country = getSelectCountry();
@@ -250,10 +256,12 @@ const AuthPage = () => {
         }
 
         setLoading(false);
+        setAppLoading(false);
     }
 
     async function confirmCode() {
         setLoading(true);
+        setAppLoading(true);
         setCodeError('');
 
         const country = getSelectCountry();
@@ -277,6 +285,7 @@ const AuthPage = () => {
             if (error?.message.includes('SESSION_PASSWORD_NEEDED')) {
                 setSate(AuthState.password);
                 setLoading(false);
+                setAppLoading(false);
             } else {
                 // @ts-ignore
                 setCodeError(error.message);
@@ -284,10 +293,12 @@ const AuthPage = () => {
         }
 
         setLoading(false);
+        setAppLoading(false);
     }
 
     async function confirmPassword() {
         setLoading(true);
+        setAppLoading(true);
         setPasswordError('');
 
         try {
@@ -305,6 +316,7 @@ const AuthPage = () => {
             setPasswordError(error.message);
         }
         setLoading(false);
+        setAppLoading(false);
     }
 
     function hasState(states: AuthState[]) {
