@@ -31,10 +31,13 @@ export function OwnerAvatar({ owner }: IOwnerAvatar) {
             } else {
                 window.TelegramClient.downloadProfilePhoto(owner.id).then((buffer) => {
                     // @ts-ignore - Buffer is not defined
-                    const imageBase64 = `data:image/jpeg;base64,${Buffer.from(buffer).toString('base64')}`;
+                    const imageCode = Buffer.from(buffer).toString('base64');
+                    if (imageCode) {
+                        const imageBase64 = `data:image/jpeg;base64,${imageCode}`;
 
-                    setCache(cacheKey, imageBase64, 30);
-                    setUserAvatar(imageBase64);
+                        setCache(cacheKey, imageBase64, 30);
+                        setUserAvatar(imageBase64);
+                    }
                 });
             }
         }
@@ -42,7 +45,7 @@ export function OwnerAvatar({ owner }: IOwnerAvatar) {
 
     let name = '';
 
-    if (owner?.className === 'User') {
+    if (owner instanceof Api.User) {
         if (owner.firstName) {
             name += owner.firstName[0];
         }
@@ -50,7 +53,7 @@ export function OwnerAvatar({ owner }: IOwnerAvatar) {
         if (owner.lastName) {
             name += owner.lastName[0];
         }
-    } else if (owner?.className === 'Chat' || owner?.className === 'Channel') {
+    } else if (owner instanceof Api.Chat || owner instanceof Api.Channel) {
         if (owner.title) {
             name += owner.title[0];
         }
