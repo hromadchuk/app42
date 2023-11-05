@@ -3,6 +3,7 @@ import { createElement, JSX, lazy, Suspense } from 'react';
 import {
     Icon123,
     IconAddressBook,
+    IconCreativeCommonsNd,
     IconHourglassLow,
     IconKeyframes,
     IconMessageCircleCog,
@@ -104,6 +105,14 @@ export const routers: IRouter[] = [
         path: '/methods/administered',
         element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
         childElement: createElement(lazy(() => import('./methods/Administered.tsx')))
+    },
+    {
+        id: 'common_chats_top',
+        icon: IconCreativeCommonsNd,
+        isMethod: true,
+        path: '/methods/common_chats_top',
+        element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
+        childElement: createElement(lazy(() => import('./methods/CommonChatsTop.tsx')))
     }
 ].map((route: IRouter) => {
     if (route.id) {

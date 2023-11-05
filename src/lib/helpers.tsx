@@ -1,6 +1,7 @@
 import { notifications } from '@mantine/notifications';
 import { Api } from 'telegram';
 import { getAppLangCode, LangType, t, td } from './lang';
+import { FloodWaitError } from 'telegram/errors';
 
 export const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
@@ -92,15 +93,12 @@ export function getTextTime(seconds: number): string {
     return result.join(' ');
 }
 
-function getErrorText(text: string): string {
-    const parseRateLimit = text.match(/A wait of (\d+) seconds is required \(caused by [\w.]+\)/);
-    if (parseRateLimit) {
-        const seconds = Number(parseRateLimit[1]);
-
-        return t('common.errors.api_rate_limit').replace('{time}', getTextTime(seconds));
+function getErrorMessage(error: Error): string {
+    if (error instanceof FloodWaitError) {
+        return getFloodWaitErrorMessage(error.seconds);
     }
 
-    return text;
+    return error?.message;
 }
 
 interface ICallApiOptions {
@@ -125,20 +123,57 @@ export async function CallAPI<R extends Api.AnyRequest>(
         console.groupEnd();
 
         return result;
-    } catch (error) {
+    } catch (error: unknown) {
         console.error('Error:', error);
         console.groupEnd();
+
+        if (error instanceof FloodWaitError && error.seconds < 60) {
+            return await handleFloodWaitError(error, request, options);
+        }
 
         if (!options?.hideErrorAlert) {
             notifyError({
                 title: `API.${method} error`,
-                // @ts-ignore
-                message: getErrorText(error?.message as string)
+                message: getErrorMessage(error as Error)
             });
         }
 
         throw error;
     }
+}
+
+function getFloodWaitErrorMessage(seconds: number): string {
+    return t('common.errors.api_rate_limit').replace('{time}', getTextTime(seconds));
+}
+
+async function handleFloodWaitError(error: FloodWaitError, request: Api.AnyRequest, options?: ICallApiOptions) {
+    const totalWaitSeconds = error.seconds + 1; // +1 for safety
+
+    const id = notifications.show({
+        loading: true,
+        message: getFloodWaitErrorMessage(totalWaitSeconds),
+        autoClose: false,
+        withCloseButton: false
+    });
+
+    let secondsToRetry = totalWaitSeconds;
+    const updatedInterval = setInterval(() => {
+        secondsToRetry -= 1;
+        if (secondsToRetry <= 0) {
+            notifications.hide(id);
+            clearInterval(updatedInterval);
+        } else {
+            notifications.update({
+                id,
+                message: getFloodWaitErrorMessage(secondsToRetry),
+                loading: true
+            });
+        }
+    }, 1000);
+
+    await sleep(secondsToRetry * 1000);
+
+    return CallAPI(request, options);
 }
 
 export function classNames(...classes: (string | object)[]): string {
