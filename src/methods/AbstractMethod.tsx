@@ -185,7 +185,7 @@ export const AbstractMethod = () => {
                         {finishBlock.state === 'error' && <IconExclamationCircle size={50} color="#E03131" />}
                         {finishBlock.state === 'done' && <IconCircleCheck size={50} color="#2F9E44" />}
                     </Center>
-                    <Center>{finishBlock.text}</Center>
+                    <Center ta="center">{finishBlock.text}</Center>
                 </Box>
             );
         }

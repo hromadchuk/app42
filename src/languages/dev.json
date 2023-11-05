@@ -64,7 +64,8 @@
     "import_messages": "Import messages",
     "clear_blacklist": "Clear blacklist",
     "administered": "Administrated chats and channels",
-    "common_chats_top": "Top of contacts by common chats"
+    "common_chats_top": "Top of contacts by common chats",
+    "calls_stat": "Calls stat"
   },
   "methods": {
     "get_id": {
@@ -213,6 +214,9 @@
         "chats": ["chat", "chats", "chats"],
         "members": ["member", "members", "members"]
       }
+    },
+    "calls_stat": {
+      "get_calls": "Getting calls"
     }
   }
 }
