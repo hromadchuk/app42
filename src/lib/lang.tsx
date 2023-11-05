@@ -100,21 +100,14 @@ const findLevel = (path: string): null | ILang => {
     return null;
 };
 
-export const t = (path: string, replacers: Record<string, string> | null = null): string => {
+export const t = (path: string): string => {
     const found = findLevel(path);
 
     if (!found) {
         return path;
     }
 
-    let foundedString = found.toString();
-    if (replacers !== null) {
-        Object.keys(replacers).forEach((replace) => {
-            foundedString = foundedString.replace(`{${replace}}`, replacers[replace]);
-        });
-    }
-
-    return foundedString;
+    return found.toString();
 };
 
 export const td = (path: string): string[] => {
