@@ -64,7 +64,7 @@
     "import_messages": "Import messages",
     "clear_blacklist": "Clear blacklist",
     "administered": "Administrated chats and channels",
-    "common_chats_top": "Top of contacts by number of common chats"
+    "common_chats_top": "Top of contacts by common chats"
   },
   "methods": {
     "get_id": {
@@ -206,9 +206,13 @@
       "admin": "Administrator"
     },
     "common_chats_top": {
-      "chats_count": "Chats count",
+      "modal_title": "Common chats",
       "no_contacts": "You don't have any contacts",
-      "members_count": "Members count"
+      "no_common_chats": "You don't have contacts with common chats",
+      "decline": {
+        "chats": ["chat", "chats", "chats"],
+        "members": ["member", "members", "members"]
+      }
     }
   }
 }
