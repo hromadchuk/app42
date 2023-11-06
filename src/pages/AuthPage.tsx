@@ -191,10 +191,7 @@ const AuthPage = () => {
                     prefix: Number(countryCode.countryCode)
                 };
 
-                // strange fix for Estonia
-                if (countryCode.countryCode === '372') {
-                    data.pattern = 'XXXX XXXX';
-                } else if (countryCode.patterns?.length) {
+                if (countryCode.patterns?.length) {
                     data.pattern = countryCode.patterns.pop();
                 }
 
@@ -409,7 +406,7 @@ const AuthPage = () => {
                     </Combobox>
                     <Input
                         component={IMaskInput}
-                        mask={getInputMask() || Number}
+                        mask={[getInputMask(), Number]}
                         placeholder={getInputMask() || '000 000 0000'}
                         className={authClasses.selectCountryInput}
                         disabled={hasState([AuthState.code, AuthState.password])}
