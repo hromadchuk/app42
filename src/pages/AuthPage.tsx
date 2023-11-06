@@ -338,6 +338,19 @@ const AuthPage = () => {
         return undefined;
     }
 
+    function getInputMasks(): (string | NumberConstructor)[] {
+        const result = [];
+
+        const mask = getInputMask();
+        if (mask) {
+            result.push(mask);
+        }
+
+        result.push(Number);
+
+        return result;
+    }
+
     function NumberInputRow() {
         if (!hasState([AuthState.number, AuthState.code, AuthState.password])) {
             return null;
@@ -406,7 +419,7 @@ const AuthPage = () => {
                     </Combobox>
                     <Input
                         component={IMaskInput}
-                        mask={[getInputMask(), Number]}
+                        mask={getInputMasks()}
                         placeholder={getInputMask() || '000 000 0000'}
                         className={authClasses.selectCountryInput}
                         disabled={hasState([AuthState.code, AuthState.password])}
