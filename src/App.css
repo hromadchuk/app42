@@ -16,7 +16,8 @@ body {
 }
 
 @media (pointer: fine) {
-    #root {
+    #root,
+    header {
         max-width: 450px;
         margin: 0 auto;
     }

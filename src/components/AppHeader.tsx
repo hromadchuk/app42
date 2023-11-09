@@ -85,12 +85,14 @@ export function AppHeader({ user }: IAppHeader) {
 
     return (
         <AppShell.Header>
+            <Center mx="auto" className={classes.logoBlock}>
+                <Lottie lottieRef={logoRef} animationData={LogoLottie} className={classes.logo} autoplay={false} />
+            </Center>
+
             <Group h="100%" px="md">
                 <LeftSide />
 
-                <Center mx="auto">
-                    <Lottie lottieRef={logoRef} animationData={LogoLottie} className={classes.logo} autoplay={false} />
-                </Center>
+                <Center mx="auto" />
 
                 <RightSide />
             </Group>
