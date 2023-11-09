@@ -1,5 +1,6 @@
 import { notifications } from '@mantine/notifications';
 import { Api } from 'telegram';
+import { getHideUser, isHideMode } from './hide.ts';
 import { getAppLangCode, LangType, t, td } from './lang';
 import { FloodWaitError } from 'telegram/errors';
 
@@ -121,6 +122,18 @@ export async function CallAPI<R extends Api.AnyRequest>(
 
         console.log('Result:', result);
         console.groupEnd();
+
+        if (isHideMode && Object.prototype.hasOwnProperty.call(result, 'users')) {
+            // @ts-ignore super cringe code
+            for (const user of result.users) {
+                if (user instanceof Api.User) {
+                    const hideUser = await getHideUser(user.id.valueOf());
+
+                    user.firstName = hideUser.name;
+                    user.lastName = '';
+                }
+            }
+        }
 
         return result;
     } catch (error: unknown) {
