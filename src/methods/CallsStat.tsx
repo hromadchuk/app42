@@ -101,9 +101,6 @@ export const CallsStat = () => {
                 }
             } while (work);
 
-            console.log('allMessages', allMessages);
-            console.log('users', users);
-
             const userActionsByTime = new CalculateActivityTime();
 
             if (!allMessages.length) {
@@ -134,8 +131,6 @@ export const CallsStat = () => {
                     maxDuration: Math.max(currentStat.maxDuration, action.duration || 0)
                 });
             });
-
-            console.log('usersStat', usersStat);
 
             // totals
             const totalCalls = Array.from(usersStat.values()).reduce((res, user) => res + user.calls, 0);
