@@ -18,7 +18,7 @@ import { Api } from 'telegram';
 import { CustomFile } from 'telegram/client/uploads';
 import { ExAvatar } from '../components/ExAvatar.tsx';
 
-import { MethodContext } from '../components/MethodContext.tsx';
+import { MethodContext } from '../contexts/MethodContext.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { CallAPI, getDocLink, parallelLimit } from '../lib/helpers.tsx';
 import { getAppLangCode, LangType, t } from '../lib/lang.tsx';

@@ -1,6 +1,6 @@
 import { JSX, useContext, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { AppContext } from './AppContext.tsx';
+import { AppContext } from '../contexts/AppContext.tsx';
 
 interface IAuthRequired {
     page: JSX.Element;

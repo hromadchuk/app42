@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Text } from '@mantine/core';
 import { Api } from 'telegram';
 
-import { MethodContext, TDialogType } from '../components/MethodContext.tsx';
+import { MethodContext, TDialogType } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 
 export const Administered = () => {

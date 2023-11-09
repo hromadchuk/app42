@@ -9,6 +9,7 @@ import {
     IconMessageCircleCog,
     IconMessageCircleSearch,
     IconMessageCircleUp,
+    IconPhoneCall,
     IconThumbDownOff,
     TablerIconsProps
 } from '@tabler/icons-react';
@@ -113,6 +114,14 @@ export const routers: IRouter[] = [
         path: '/methods/common_chats_top',
         element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
         childElement: createElement(lazy(() => import('./methods/CommonChatsTop.tsx')))
+    },
+    {
+        id: 'calls_stat',
+        icon: IconPhoneCall,
+        isMethod: true,
+        path: '/methods/calls_stat',
+        element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
+        childElement: createElement(lazy(() => import('./methods/CallsStat.tsx')))
     }
 ].map((route: IRouter) => {
     if (route.id) {

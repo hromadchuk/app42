@@ -17,7 +17,7 @@ import dayjs from 'dayjs';
 import { JSX, useContext, useState } from 'react';
 import { Api } from 'telegram';
 
-import { MethodContext } from '../components/MethodContext.tsx';
+import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';

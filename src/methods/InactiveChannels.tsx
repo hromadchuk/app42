@@ -3,7 +3,7 @@ import { Api } from 'telegram';
 import { CallAPI } from '../lib/helpers.tsx';
 import dayjs from 'dayjs';
 
-import { MethodContext } from '../components/MethodContext.tsx';
+import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 
 type TOwner = Api.Channel | Api.Chat;

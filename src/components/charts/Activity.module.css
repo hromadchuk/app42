@@ -1,0 +1,47 @@
+.header {
+    display: flex;
+    font-size: var(--mantine-font-size-xs);
+}
+
+.levels {
+    display: flex;
+    margin-top: 10px;
+}
+
+.levelsCell {
+    height: 10px;
+    width: 100%;
+}
+
+.row {
+    display: flex;
+}
+
+.dayCell {
+    width: 30px;
+    height: 20px;
+    font-size: var(--mantine-font-size-xs);
+    text-align: right;
+    padding-right: 3px;
+}
+
+.cell {
+    width: 100%;
+    height: 20px;
+    padding: 1px;
+}
+
+.cellBox {
+    width: 100%;
+    height: 17px;
+    padding-left: 2px;
+}
+
+.minMaxBlock {
+    display: flex;
+    font-size: var(--mantine-font-size-xs);
+
+    & :first-child {
+        width: 100%;
+    }
+}

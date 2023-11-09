@@ -5,7 +5,7 @@ import { Api } from 'telegram';
 import dayjs from 'dayjs';
 import { CallAPI } from '../lib/helpers.tsx';
 
-import { MethodContext } from '../components/MethodContext.tsx';
+import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 
 enum EFilerType {

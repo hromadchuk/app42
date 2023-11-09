@@ -10,7 +10,7 @@ import { isDev } from '../lib/helpers.tsx';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
 import LogoLottie from '../assets/logo_lottie.json';
 
-import { AppContext } from './AppContext.tsx';
+import { AppContext } from '../contexts/AppContext.tsx';
 
 // @ts-ignore
 import classes from '../styles/AppHeader.module.css';

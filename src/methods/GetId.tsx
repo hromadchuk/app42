@@ -4,7 +4,7 @@ import { IconAt, IconCheck, IconCopy } from '@tabler/icons-react';
 import { Api } from 'telegram';
 import { CallAPI } from '../lib/helpers.tsx';
 
-import { MethodContext } from '../components/MethodContext.tsx';
+import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 
 type TOwnerInfo = null | Api.TypeUser | Api.TypeChat;
