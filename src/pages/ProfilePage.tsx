@@ -2,7 +2,7 @@ import { Button, Container } from '@mantine/core';
 import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Api } from 'telegram';
-import { AppContext } from '../components/AppContext.tsx';
+import { AppContext } from '../contexts/AppContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { SelectLanguage } from '../components/SelectLanguage.tsx';
 import { CallAPI } from '../lib/helpers.tsx';

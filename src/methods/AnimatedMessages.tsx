@@ -7,7 +7,7 @@ import { Api } from 'telegram';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { CallAPI, getTextTime, sleep } from '../lib/helpers.tsx';
 
-import { MethodContext } from '../components/MethodContext.tsx';
+import { MethodContext } from '../contexts/MethodContext.tsx';
 
 // @ts-ignore
 import classes from '../styles/AnimatedMessages.module.css';

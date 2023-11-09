@@ -64,7 +64,16 @@
     "import_messages": "Import messages",
     "clear_blacklist": "Clear blacklist",
     "administered": "Administrated chats and channels",
-    "common_chats_top": "Top of contacts by common chats"
+    "common_chats_top": "Top of contacts by common chats",
+    "calls_stat": "Calls stat"
+  },
+  "charts": {
+    "activity": {
+      "title": "Activity by time",
+      "description": "The graph displays events activity. The side scale is the day of the event, the top scale is the time of the event.",
+      "min": "No activity",
+      "max": "Maximum"
+    }
   },
   "methods": {
     "get_id": {
@@ -220,6 +229,27 @@
           "members",
           "members"
         ]
+      }
+    },
+    "calls_stat": {
+      "get_calls": "Getting calls",
+      "no_calls": "You don't have any calls",
+      "calls_decline": [
+        "call",
+        "calls",
+        "calls"
+      ],
+      "modal_title": "More details",
+      "counts": {
+        "calls": "Total calls",
+        "participants": "Participants",
+        "duration": "Total duration",
+        "max_duration": "Maximum duration"
+      },
+      "tops": {
+        "calls": "Calls",
+        "duration": "Duration",
+        "max_duration": "Maximum duration"
       }
     }
   }

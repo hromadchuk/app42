@@ -5,7 +5,7 @@ import { IconSearch, IconUsersGroup } from '@tabler/icons-react';
 import { Api } from 'telegram';
 import { CallAPI } from '../lib/helpers.tsx';
 import { t } from '../lib/lang.tsx';
-import { AppContext } from './AppContext.tsx';
+import { AppContext } from '../contexts/AppContext.tsx';
 import { OwnerRow } from './OwnerRow.tsx';
 
 export enum EOwnerType {
@@ -125,7 +125,7 @@ function SelectOwner({ getOwners, onOwnerSelect, searchOwners }: IOptionsSelectO
 }
 
 export function SelectDialog(options: IOptionsSelectDialog) {
-    const { user } = useContext(AppContext);
+    const { user, setAppLoading } = useContext(AppContext);
 
     function filterOwner(row: IOwnerRow): boolean {
         if (row.owner instanceof Api.User) {
@@ -176,12 +176,16 @@ export function SelectDialog(options: IOptionsSelectDialog) {
     }
 
     async function getOwners(): Promise<IOwnerRow[]> {
+        setAppLoading(true);
+
         const result = (await CallAPI(
             new Api.messages.GetDialogs({
                 offsetPeer: user?.id.valueOf(),
                 limit: 100
             })
         )) as Api.messages.Dialogs;
+
+        setAppLoading(false);
 
         return formatRows(
             result.dialogs.map((dialog) => dialog.peer),
@@ -193,12 +197,16 @@ export function SelectDialog(options: IOptionsSelectDialog) {
     }
 
     async function searchOwners(query: string): Promise<IOwnerRow[]> {
+        setAppLoading(true);
+
         const result = await CallAPI(
             new Api.contacts.Search({
                 q: query,
                 limit: 100
             })
         );
+
+        setAppLoading(false);
 
         return formatRows(result.myResults, result.users as Api.User[], result.chats as (Api.Chat | Api.Channel)[])
             .filter(filterOwner)
