@@ -4,7 +4,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { Api } from 'telegram';
 
 import { CallAPI, declineAndFormat } from '../lib/helpers.tsx';
-import { MethodContext } from '../components/MethodContext.tsx';
+import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 
 interface ICommonChats {

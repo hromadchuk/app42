@@ -4,7 +4,7 @@ import { useColorScheme } from '@mantine/hooks';
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { Api, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
-import { AppContext } from './components/AppContext.tsx';
+import { AppContext } from './contexts/AppContext.tsx';
 import { AppNotifications } from './components/AppNotifications.tsx';
 import { Constants } from './constants.tsx';
 import { clearOldCache } from './lib/cache.tsx';

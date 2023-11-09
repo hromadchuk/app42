@@ -4,8 +4,8 @@ import { Box, Center, Container, Notification, Progress, Text } from '@mantine/c
 import { IconCircleCheck, IconExclamationCircle } from '@tabler/icons-react';
 import { Api } from 'telegram';
 
-import { AppContext } from '../components/AppContext.tsx';
-import { IFinishBlock, IGetDialogOption, IProgress, MethodContext, TDialogType } from '../components/MethodContext.tsx';
+import { AppContext } from '../contexts/AppContext.tsx';
+import { IFinishBlock, IGetDialogOption, IProgress, MethodContext, TDialogType } from '../contexts/MethodContext.tsx';
 import { CallAPI, formatNumber, Server } from '../lib/helpers.tsx';
 import { IRouter, routers } from '../routes.tsx';
 import { t, td } from '../lib/lang.tsx';

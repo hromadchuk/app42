@@ -5,7 +5,7 @@ import { IconUsersGroup } from '@tabler/icons-react';
 import { Api } from 'telegram';
 import { CallAPI, formatNumber, getPercent, sleep } from '../lib/helpers.tsx';
 
-import { MethodContext } from '../components/MethodContext.tsx';
+import { MethodContext } from '../contexts/MethodContext.tsx';
 
 export const ClearBlacklist = () => {
     const { mt, needHideContent, setFinishBlock, setProgress } = useContext(MethodContext);

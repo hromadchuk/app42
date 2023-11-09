@@ -28,7 +28,7 @@ import { CallAPI, getDocLink, Server } from '../lib/helpers.tsx';
 import { getAppLangCode, t } from '../lib/lang.tsx';
 
 import { Constants } from '../constants.tsx';
-import { AppContext } from '../components/AppContext.tsx';
+import { AppContext } from '../contexts/AppContext.tsx';
 
 // @ts-ignore
 import menuClasses from '../styles/MenuPage.module.css';
