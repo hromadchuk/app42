@@ -1,6 +1,8 @@
+import { Buffer } from 'buffer';
 import { notifications } from '@mantine/notifications';
 import { Api } from 'telegram';
-import { getHideUser, isHideMode } from './hide.ts';
+import { getCache, setCache } from './cache.tsx';
+import { getHideUser, isHideMode } from './hide.tsx';
 import { getAppLangCode, LangType, t, td } from './lang';
 import { FloodWaitError } from 'telegram/errors';
 
@@ -72,6 +74,10 @@ export function getTime(time: number): ITime {
 }
 
 export function getTextTime(seconds: number): string {
+    return getStringsTimeArray(seconds).join(' ');
+}
+
+export function getStringsTimeArray(seconds: number): string[] {
     const period = getTime(seconds);
     const result: string[] = [];
 
@@ -91,7 +97,7 @@ export function getTextTime(seconds: number): string {
         result.push(`${period.seconds} ${decline(period.seconds, td('common.time.seconds'))}`);
     }
 
-    return result.join(' ');
+    return result;
 }
 
 function getErrorMessage(error: Error): string {
@@ -246,7 +252,7 @@ export async function parallelLimit(limit: number, tasks: Function[]): Promise<v
 const apiEndpoint =
     location.hostname === 'gromadchuk.github.io' ? 'https://kit42.gromadchuk.com' : `http://${location.hostname}`;
 
-export const Server = async (method: string, params: object = {}): Promise<object> => {
+export async function Server(method: string, params: object = {}): Promise<object> {
     console.group(`SERVER /${method}`);
     console.log('Request:', params);
 
@@ -274,4 +280,47 @@ export const Server = async (method: string, params: object = {}): Promise<objec
     }
 
     return {};
-};
+}
+
+export async function getAvatar(owner: Api.User | Api.Channel | Api.Chat): Promise<string | null> {
+    if (isHideMode) {
+        const hideUser = await getHideUser(owner.id.valueOf());
+        if (hideUser.photo) {
+            return hideUser.photo;
+        }
+    }
+
+    const userPhoto = owner.photo as Api.UserProfilePhoto;
+    const cacheKey = `owner-avatar-${userPhoto?.photoId}`;
+    const cache = getCache(cacheKey);
+    if (cache) {
+        return cache as string;
+    }
+
+    const buffer = await window.TelegramClient.downloadProfilePhoto(owner.id);
+    // @ts-ignore
+    const imageCode = Buffer.from(buffer).toString('base64');
+    if (imageCode) {
+        const imageBase64 = `data:image/jpeg;base64,${imageCode}`;
+
+        setCache(cacheKey, imageBase64, 30);
+
+        return imageBase64;
+    }
+
+    return null;
+}
+
+export function dataUrlToFile(dataUrl: string, fileName: string) {
+    const [mimePart, base64Data] = dataUrl.split(',');
+    const mime = (mimePart.match(/:(.*?);/) as string[])[1];
+
+    const binaryString = atob(base64Data);
+    const arrayBuffer = new ArrayBuffer(binaryString.length);
+    const uint8Array = new Uint8Array(arrayBuffer);
+    for (let i = 0; i < binaryString.length; i++) {
+        uint8Array[i] = binaryString.charCodeAt(i);
+    }
+
+    return new File([uint8Array], fileName, { type: mime });
+}

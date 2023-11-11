@@ -1,10 +1,8 @@
-import { Buffer } from 'buffer';
 import { useEffect, useState } from 'react';
 import { useIntersection } from '@mantine/hooks';
 import { Api } from 'telegram';
-import { getCache, setCache } from '../lib/cache.tsx';
+import { getAvatar } from '../lib/helpers.tsx';
 import { ExAvatar } from './ExAvatar.tsx';
-import { getHideUser, isHideMode } from '../lib/hide.ts';
 
 interface IOwnerAvatar {
     owner: null | Api.TypeUser | Api.TypeChat;
@@ -16,37 +14,18 @@ export function OwnerAvatar({ owner }: IOwnerAvatar) {
     const [userAvatar, setUserAvatar] = useState<null | string>(null);
 
     useEffect(() => {
-        if (isHideMode) {
-            setAlreadyRequested(true);
-
-            getHideUser(owner?.id.valueOf() as number).then((user) => {
-                setUserAvatar(user.photo as string);
-            });
-        } else if (
+        if (
             (owner instanceof Api.User || owner instanceof Api.Chat || owner instanceof Api.Channel) &&
             owner.photo &&
             entry?.isIntersecting &&
             !alreadyRequested
         ) {
             setAlreadyRequested(true);
-
-            const userPhoto = owner.photo as Api.UserProfilePhoto;
-            const cacheKey = `owner-avatar-${userPhoto?.photoId}`;
-            const cache = getCache(cacheKey);
-            if (cache) {
-                setUserAvatar(cache as string);
-            } else {
-                window.TelegramClient.downloadProfilePhoto(owner.id).then((buffer) => {
-                    // @ts-ignore - Buffer is not defined
-                    const imageCode = Buffer.from(buffer).toString('base64');
-                    if (imageCode) {
-                        const imageBase64 = `data:image/jpeg;base64,${imageCode}`;
-
-                        setCache(cacheKey, imageBase64, 30);
-                        setUserAvatar(imageBase64);
-                    }
-                });
-            }
+            getAvatar(owner).then((photo) => {
+                if (photo) {
+                    setUserAvatar(photo);
+                }
+            });
         }
     }, [entry?.isIntersecting]);
 
