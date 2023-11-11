@@ -1,5 +1,20 @@
-import { Button, Container, Divider, Flex, Group, Notification, Text, UnstyledButton } from '@mantine/core';
-import { useColorScheme } from '@mantine/hooks';
+import {
+    Button,
+    Container,
+    Divider,
+    Flex,
+    Group,
+    Image,
+    Modal,
+    Notification,
+    Radio,
+    SegmentedControl,
+    Text,
+    Textarea,
+    Title,
+    UnstyledButton
+} from '@mantine/core';
+import { useColorScheme, useDisclosure } from '@mantine/hooks';
 import {
     IconCalendarTime,
     IconHeart,
@@ -21,7 +36,16 @@ import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
-import { CallAPI, declineAndFormat, formatNumber, getTextTime, sleep } from '../lib/helpers.tsx';
+import {
+    CallAPI,
+    declineAndFormat,
+    formatNumber,
+    getAvatar,
+    getStringsTimeArray,
+    getTextTime,
+    sleep
+} from '../lib/helpers.tsx';
+import { MessagesStatSharingGenerator } from '../sharing/MessagesStatSharingGenerator.ts';
 
 type TOwner = Api.User | Api.Chat | Api.Channel;
 
@@ -72,7 +96,6 @@ interface IScanDataCalculation {
 
 interface ITopItem {
     count: number;
-    description: string;
     owner: TOwner;
 }
 
@@ -107,6 +130,16 @@ enum ETabId {
     roundDuration = 'roundDuration'
 }
 
+enum ENameImageType {
+    firstName = 'firstName',
+    username = 'username'
+}
+
+enum EModalType {
+    text = 'text',
+    image = 'image'
+}
+
 interface ITabTops {
     id: ETabId;
     lang: string;
@@ -115,17 +148,27 @@ interface ITabTops {
 }
 
 const ownersInfo = new Map<number, TOwner>();
+const sharingImages = new Map<string, string>();
 
 export const MessagesStat = () => {
     const { mt, md, needHideContent, getProgress, setProgress, setFinishBlock } = useContext(MethodContext);
     const colorSchema = useColorScheme();
+    const [isModalOpened, { open, close }] = useDisclosure(false);
 
     const [ownerMessages, setOwnerMessages] = useState<Api.TypeMessage[]>([]);
     const [ownerPeriods, setOwnerPeriods] = useState<IPeriodData[]>([]);
     const [selectedOwner, setSelectedOwner] = useState<TOwner | null>(null);
     const [statResult, setStatResult] = useState<IScanDataResult | null>(null);
     const [selectedTab, setSelectedTab] = useState<ETabId>(ETabId.messages);
+
+    // sharing vars
+    const [sharingNameType, setSharingNameType] = useState<ENameImageType>(ENameImageType.firstName);
+    const [sharingTopType, setSharingTopType] = useState<ETabId>(ETabId.messages);
+    const [isSharingImagesLoading, setSharingImagesLoading] = useState<boolean>(true);
+    const [isSharingButtonVisible, setSharingButtonVisible] = useState<boolean>(true);
+    const [messageText, setMessageText] = useState<string>('');
     const [isSentToChat, setSentToChat] = useState<boolean>(false);
+    const [modalType, setModalType] = useState<EModalType>(EModalType.text);
 
     async function getOptions(owner: TOwner) {
         setProgress({ text: mt('loading_messages') });
@@ -478,7 +521,6 @@ export const MessagesStat = () => {
             .map((peer) => {
                 return {
                     count: peer.count,
-                    description: declineAndFormat(peer.count, md('decline.messages')),
                     owner: ownersInfo.get(peer.peerId)
                 } as ITopItem;
             })
@@ -489,7 +531,6 @@ export const MessagesStat = () => {
             .map((peer) => {
                 return {
                     count: peer.uniqCount,
-                    description: declineAndFormat(peer.uniqCount, md('decline.uniq_messages')),
                     owner: ownersInfo.get(peer.peerId)
                 } as ITopItem;
             })
@@ -500,7 +541,6 @@ export const MessagesStat = () => {
             .map((peer) => {
                 return {
                     count: peer.reactions,
-                    description: declineAndFormat(peer.reactions, md('decline.reactions')),
                     owner: ownersInfo.get(peer.peerId)
                 } as ITopItem;
             })
@@ -511,7 +551,6 @@ export const MessagesStat = () => {
             .map((peer) => {
                 return {
                     count: peer.attachments,
-                    description: declineAndFormat(peer.attachments, md('decline.attachments')),
                     owner: ownersInfo.get(peer.peerId)
                 } as ITopItem;
             })
@@ -522,7 +561,6 @@ export const MessagesStat = () => {
             .map((peer) => {
                 return {
                     count: peer.stickers,
-                    description: declineAndFormat(peer.stickers, md('decline.stickers')),
                     owner: ownersInfo.get(peer.peerId)
                 } as ITopItem;
             })
@@ -533,7 +571,6 @@ export const MessagesStat = () => {
             .map((peer) => {
                 return {
                     count: peer.voiceDuration,
-                    description: getTextTime(peer.voiceDuration),
                     owner: ownersInfo.get(peer.peerId)
                 } as ITopItem;
             })
@@ -544,7 +581,6 @@ export const MessagesStat = () => {
             .map((peer) => {
                 return {
                     count: peer.roundDuration,
-                    description: getTextTime(peer.roundDuration),
                     owner: ownersInfo.get(peer.peerId)
                 } as ITopItem;
             })
@@ -552,6 +588,297 @@ export const MessagesStat = () => {
 
         setStatResult(stat);
         setProgress(null);
+        prepareImages(stat);
+    }
+
+    function getImageName(type: ENameImageType, owner: TOwner): string {
+        if (type === ENameImageType.username) {
+            let username = '';
+
+            if ((owner instanceof Api.User || owner instanceof Api.Channel) && owner.username) {
+                username = owner.username;
+            }
+
+            if ((owner instanceof Api.User || owner instanceof Api.Channel) && owner.usernames?.length) {
+                username = owner.usernames[0].username;
+            }
+
+            if (username) {
+                return `@${username.toLowerCase()}`;
+            }
+        }
+
+        if (owner instanceof Api.User && owner.firstName) {
+            return owner.firstName;
+        }
+
+        if (owner instanceof Api.Chat || owner instanceof Api.Channel) {
+            return owner.title;
+        }
+
+        return 'unknown name';
+    }
+
+    async function prepareImages(stat: IScanDataResult) {
+        const tabs = getImageTabs(stat);
+
+        if (tabs.length === 0) {
+            setSharingButtonVisible(false);
+            setSharingImagesLoading(false);
+            return;
+        }
+
+        // load avatars to cache
+        const allUsers = new Map<number, TOwner>();
+        for (const tab of tabs) {
+            for (const item of tab.owners) {
+                if (!allUsers.has(item.owner.id.valueOf())) {
+                    allUsers.set(item.owner.id.valueOf(), item.owner);
+                }
+            }
+        }
+        await Promise.all(Array.from(allUsers.values()).map((user) => getAvatar(user as Api.User)));
+
+        const imagesTasks = [];
+        for (const imaneNameType of Object.values(ENameImageType)) {
+            for (const tab of tabs) {
+                imagesTasks.push(
+                    (async () => {
+                        const data = await new MessagesStatSharingGenerator().getMessageImage({
+                            title: mt('sharing.image_title'),
+                            users: tab.owners.map((item) => ({
+                                info: item.owner as Api.User,
+                                name: getImageName(imaneNameType, item.owner),
+                                description: getDescription(tab.id, item.count, true)
+                            })),
+                            description: mt('sharing.image_period').replace('{period}', stat.period),
+                            subDescription: getImageSubDescription(tab.id)
+                        });
+
+                        sharingImages.set(`${imaneNameType}_${tab.id}`, data);
+                    })()
+                );
+            }
+        }
+
+        await Promise.all(imagesTasks);
+
+        setSharingImagesLoading(false);
+    }
+
+    function getImageTabs(stat: IScanDataResult) {
+        return getTabs(stat).filter((tab) => {
+            if (tab.id === ETabId.uniqMessages) {
+                return false;
+            }
+
+            return tab.owners.length >= 3;
+        });
+    }
+
+    function getTabs(stat: IScanDataResult) {
+        const tabs: ITabTops[] = [
+            {
+                id: ETabId.messages,
+                lang: 'count',
+                icon: IconMessage,
+                owners: stat.tops.messages
+            },
+            {
+                id: ETabId.uniqMessages,
+                lang: 'uniq_count',
+                icon: IconMessage2Bolt,
+                owners: stat.tops.uniqMessages
+            },
+            {
+                id: ETabId.reactions,
+                lang: 'reactions',
+                icon: IconMoodSmile,
+                owners: stat.tops.reactions
+            },
+            {
+                id: ETabId.attachments,
+                lang: 'attachments',
+                icon: IconPaperclip,
+                owners: stat.tops.attachments
+            },
+            {
+                id: ETabId.stickers,
+                lang: 'stickers',
+                icon: IconSticker,
+                owners: stat.tops.stickers
+            },
+            {
+                id: ETabId.voiceDuration,
+                lang: 'voice_duration',
+                icon: IconMicrophone,
+                owners: stat.tops.voiceDuration
+            },
+            {
+                id: ETabId.roundDuration,
+                lang: 'round_duration',
+                icon: IconVideo,
+                owners: stat.tops.roundDuration
+            }
+        ].filter((tab) => {
+            if (
+                tab.id === ETabId.uniqMessages &&
+                (selectedOwner instanceof Api.Channel || selectedOwner instanceof Api.User)
+            ) {
+                return false;
+            }
+
+            return tab.owners.length;
+        });
+
+        return tabs;
+    }
+
+    function getDescription(tabId: ETabId, count: number, isSharing: boolean): string {
+        if (tabId === ETabId.messages) {
+            return declineAndFormat(count, md('decline.messages'));
+        }
+
+        if (tabId === ETabId.uniqMessages) {
+            return declineAndFormat(count, md('decline.uniq_messages'));
+        }
+
+        if (tabId === ETabId.reactions) {
+            return declineAndFormat(count, md('decline.reactions'));
+        }
+
+        if (tabId === ETabId.attachments) {
+            return declineAndFormat(count, md('decline.attachments'));
+        }
+
+        if (tabId === ETabId.stickers) {
+            return declineAndFormat(count, md('decline.stickers'));
+        }
+
+        if (tabId === ETabId.voiceDuration || tabId === ETabId.roundDuration) {
+            if (isSharing) {
+                const part = getStringsTimeArray(count);
+
+                return part.slice(0, 2).join(' ');
+            }
+
+            return getTextTime(count);
+        }
+
+        return '';
+    }
+
+    function getImageSubDescription(tabId: ETabId): string {
+        if (tabId === ETabId.messages) {
+            return mt('sharing.by.messages');
+        }
+
+        if (tabId === ETabId.uniqMessages) {
+            return mt('sharing.by.uniq_messages');
+        }
+
+        if (tabId === ETabId.reactions) {
+            return mt('sharing.by.reactions');
+        }
+
+        if (tabId === ETabId.attachments) {
+            return mt('sharing.by.attachments');
+        }
+
+        if (tabId === ETabId.stickers) {
+            return mt('sharing.by.stickers');
+        }
+
+        if (tabId === ETabId.voiceDuration) {
+            return mt('sharing.by.voice_duration');
+        }
+
+        if (tabId === ETabId.roundDuration) {
+            return mt('sharing.by.round_duration');
+        }
+
+        return '';
+    }
+
+    function ModalContent() {
+        if (modalType === EModalType.text) {
+            return (
+                <>
+                    {mt('sharing.text_description')}
+
+                    <Textarea autosize value={messageText} readOnly />
+
+                    <Button
+                        fullWidth
+                        size="xs"
+                        mt="xs"
+                        onClick={() => {
+                            CallAPI(
+                                new Api.messages.SendMessage({
+                                    peer: selectedOwner?.id,
+                                    message: messageText
+                                })
+                            );
+
+                            setSentToChat(true);
+                            close();
+                        }}
+                    >
+                        {mt('button_send')}
+                    </Button>
+                </>
+            );
+        }
+
+        const imageKey = `${sharingNameType}_${sharingTopType}`;
+        const image = sharingImages.get(imageKey) as string;
+        const tabs = getImageTabs(statResult as IScanDataResult);
+
+        return (
+            <>
+                <Image key={imageKey} radius="md" src={image} />
+
+                <Title mt="xs" order={6}>
+                    {mt('sharing.image_name_type')}
+                </Title>
+
+                <SegmentedControl
+                    fullWidth
+                    value={sharingNameType}
+                    onChange={(type) => setSharingNameType(type as ENameImageType)}
+                    data={[
+                        { label: mt('sharing.names_type.name'), value: ENameImageType.firstName },
+                        { label: mt('sharing.names_type.username'), value: ENameImageType.username }
+                    ]}
+                />
+
+                <Title mt="xs" order={6}>
+                    {mt('sharing.image_type')}
+                </Title>
+                <Radio.Group value={sharingTopType} onChange={(type) => setSharingTopType(type as ETabId)}>
+                    {tabs.map((tab, key) => (
+                        <Radio key={key} value={tab.id} label={mt(`headers.${tab.lang}`)} mt={5} />
+                    ))}
+                </Radio.Group>
+
+                <Button
+                    fullWidth
+                    size="xs"
+                    mt="xs"
+                    loading={isSharingImagesLoading}
+                    onClick={async () => {
+                        setSharingImagesLoading(true);
+
+                        await MessagesStatSharingGenerator.sendMessage(image, selectedOwner as TOwner);
+
+                        setSharingImagesLoading(false);
+                        close();
+                    }}
+                >
+                    {mt('button_send_image')}
+                </Button>
+            </>
+        );
     }
 
     if (needHideContent()) return null;
@@ -568,60 +895,7 @@ export const MessagesStat = () => {
             { icon: IconPhone, label: mt('headers.call_duration'), value: getTextTime(statResult.callDuration) }
         ].filter((item) => Boolean(item.value) && item.value !== '0');
 
-        const tabs: ITabTops[] = [
-            {
-                id: ETabId.messages,
-                lang: 'count',
-                icon: IconMessage,
-                owners: statResult.tops.messages
-            },
-            {
-                id: ETabId.uniqMessages,
-                lang: 'uniq_count',
-                icon: IconMessage2Bolt,
-                owners: statResult.tops.uniqMessages
-            },
-            {
-                id: ETabId.reactions,
-                lang: 'reactions',
-                icon: IconMoodSmile,
-                owners: statResult.tops.reactions
-            },
-            {
-                id: ETabId.attachments,
-                lang: 'attachments',
-                icon: IconPaperclip,
-                owners: statResult.tops.attachments
-            },
-            {
-                id: ETabId.stickers,
-                lang: 'stickers',
-                icon: IconSticker,
-                owners: statResult.tops.stickers
-            },
-            {
-                id: ETabId.voiceDuration,
-                lang: 'voice_duration',
-                icon: IconMicrophone,
-                owners: statResult.tops.voiceDuration
-            },
-            {
-                id: ETabId.roundDuration,
-                lang: 'round_duration',
-                icon: IconVideo,
-                owners: statResult.tops.roundDuration
-            }
-        ].filter((tab) => {
-            if (
-                tab.id === ETabId.uniqMessages &&
-                (selectedOwner instanceof Api.Channel || selectedOwner instanceof Api.User)
-            ) {
-                return false;
-            }
-
-            return tab.owners.length;
-        });
-
+        const tabs = getTabs(statResult);
         const tabsList = tabs.map(
             (tab) =>
                 ({
@@ -634,38 +908,6 @@ export const MessagesStat = () => {
         const getRowBackground = (index: number): string => {
             if (index % 2) {
                 return colorSchema === 'dark' ? 'gray.9' : 'gray.1';
-            }
-
-            return '';
-        };
-
-        const getDescription = (tabId: ETabId, count: number): string => {
-            if (tabId === ETabId.messages) {
-                return declineAndFormat(count, md('decline.messages'));
-            }
-
-            if (tabId === ETabId.uniqMessages) {
-                return declineAndFormat(count, md('decline.uniq_messages'));
-            }
-
-            if (tabId === ETabId.reactions) {
-                return declineAndFormat(count, md('decline.reactions'));
-            }
-
-            if (tabId === ETabId.attachments) {
-                return declineAndFormat(count, md('decline.attachments'));
-            }
-
-            if (tabId === ETabId.stickers) {
-                return declineAndFormat(count, md('decline.stickers'));
-            }
-
-            if (tabId === ETabId.voiceDuration) {
-                return getTextTime(count);
-            }
-
-            if (tabId === ETabId.roundDuration) {
-                return getTextTime(count);
             }
 
             return '';
@@ -694,35 +936,51 @@ export const MessagesStat = () => {
         };
 
         const sendToChat = () => {
-            setSentToChat(true);
-
             const lines = [mt('stat_date').replace('{date}', statResult.period), ''];
 
             counts.forEach(({ label, value }) => {
                 lines.push(`* ${label} — ${value}`);
             });
 
-            CallAPI(
-                new Api.messages.SendMessage({
-                    peer: selectedOwner?.id,
-                    message: lines.join('\n')
-                })
-            );
+            setMessageText(lines.join('\n'));
+            setModalType(EModalType.text);
+
+            open();
+        };
+
+        const sendToChatImage = () => {
+            setModalType(EModalType.image);
+            open();
         };
 
         const topOwners = tabs.find((tab) => tab.id === selectedTab)?.owners || [];
 
         return (
             <>
+                <Modal opened={isModalOpened} onClose={close} title={mt('sharing.modal_title')}>
+                    {ModalContent()}
+                </Modal>
+
                 <OwnerRow
                     owner={selectedOwner}
                     withoutLink={true}
                     description={mt('stat_date').replace('{date}', statResult.period)}
                 />
 
-                {(selectedOwner instanceof Api.User || selectedOwner instanceof Api.Chat) && (
-                    <Button fullWidth size="xs" mt="xs" onClick={sendToChat} disabled={isSentToChat}>
-                        {isSentToChat ? mt('button_send_done') : mt('button_send')}
+                <Button fullWidth size="xs" mt="xs" onClick={sendToChat} disabled={isSentToChat}>
+                    {isSentToChat ? mt('button_send_done') : mt('button_send')}
+                </Button>
+
+                {isSharingButtonVisible && (
+                    <Button
+                        fullWidth
+                        size="xs"
+                        mt="xs"
+                        onClick={sendToChatImage}
+                        loading={isSharingImagesLoading}
+                        disabled={isSharingImagesLoading}
+                    >
+                        {mt('button_send_image')}
                     </Button>
                 )}
 
@@ -758,7 +1016,7 @@ export const MessagesStat = () => {
                     <OwnerRow
                         key={selectedTab + top.owner.id.valueOf()}
                         owner={top.owner}
-                        description={getDescription(selectedTab, top.count)}
+                        description={getDescription(selectedTab, top.count, false)}
                     />
                 ))}
             </>

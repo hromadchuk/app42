@@ -40,7 +40,7 @@ export function ActivityChart({ data }: IActivityChartProps) {
     }
 
     function getDayName(day: number): string {
-        return dayjs().day(day).format('dd').toLowerCase();
+        return dayjs().day(day).format('ddd').toLowerCase();
     }
 
     function getLevel(total: number, value: number): number {

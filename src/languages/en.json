@@ -107,6 +107,7 @@
       "no_messages": "No messages in the dialogue",
       "stat_date": "Stats for {date}",
       "button_send": "Send stats to the dialog",
+      "button_send_image": "Send image of top to the dialog",
       "button_send_done": "Sent",
       "headers": {
         "period": "Select the period for stats",
@@ -160,6 +161,27 @@
           "reactions",
           "reactions"
         ]
+      },
+      "sharing": {
+        "modal_title": "Share stats",
+        "text_description": "A message will be sent with the text",
+        "image_title": "Messages stat",
+        "image_period": "Statistics for {period}",
+        "image_name_type": "Name display",
+        "image_type": "Statistics type",
+        "by": {
+          "messages": "Statistics by messages",
+          "uniq_messages": "Statistics by uniq messages",
+          "reactions": "Statistics by reactions",
+          "attachments": "Statistics by attachments",
+          "stickers": "Statistics by stickers",
+          "voice_duration": "Statistics by voice duration",
+          "round_duration": "Statistics by round duration"
+        },
+        "names_type": {
+          "name": "First name",
+          "username": "Username"
+        }
       }
     },
     "animated_messages": {
@@ -217,7 +239,7 @@
     "common_chats_top": {
       "modal_title": "Common chats",
       "no_contacts": "You don't have any contacts",
-      "no_common_chats": "You don't have contacts with common chats",
+      "no_common_chats": "You don't have any contacts with common chats",
       "decline": {
         "chats": [
           "chat",
