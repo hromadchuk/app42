@@ -74,9 +74,7 @@ export function ActivityChart({ data }: IActivityChartProps) {
 
         for (let i = 0; i < 7; i++) {
             for (let j = 0; j < 24; j++) {
-                const rowIndex = i === 0 ? 6 : i - 1;
-
-                rows[rowIndex].push(getLevel(maxValue, data[i][j]));
+                rows[i].push(getLevel(maxValue, data[i][j]));
             }
         }
 
