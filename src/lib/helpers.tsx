@@ -135,8 +135,10 @@ export async function CallAPI<R extends Api.AnyRequest>(
                 if (user instanceof Api.User) {
                     const hideUser = await getHideUser(user.id.valueOf());
 
-                    user.firstName = hideUser.name;
-                    user.lastName = '';
+                    const [firstName, lastName] = (hideUser.name as string).split(' ');
+
+                    user.firstName = firstName;
+                    user.lastName = lastName || '';
                 }
             }
         }

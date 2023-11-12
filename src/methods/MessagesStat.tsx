@@ -36,15 +36,7 @@ import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
-import {
-    CallAPI,
-    declineAndFormat,
-    formatNumber,
-    getAvatar,
-    getStringsTimeArray,
-    getTextTime,
-    sleep
-} from '../lib/helpers.tsx';
+import { CallAPI, declineAndFormat, formatNumber, getStringsTimeArray, getTextTime, sleep } from '../lib/helpers.tsx';
 import { MessagesStatSharingGenerator } from '../sharing/MessagesStatSharingGenerator.ts';
 
 type TOwner = Api.User | Api.Chat | Api.Channel;
@@ -628,16 +620,15 @@ export const MessagesStat = () => {
             return;
         }
 
-        // load avatars to cache
-        const allUsers = new Map<number, TOwner>();
+        const tabsOwners = [];
+
         for (const tab of tabs) {
             for (const item of tab.owners) {
-                if (!allUsers.has(item.owner.id.valueOf())) {
-                    allUsers.set(item.owner.id.valueOf(), item.owner);
-                }
+                tabsOwners.push(item.owner);
             }
         }
-        await Promise.all(Array.from(allUsers.values()).map((user) => getAvatar(user as Api.User)));
+
+        await MessagesStatSharingGenerator.prepareImages(tabsOwners);
 
         const imagesTasks = [];
         for (const imaneNameType of Object.values(ENameImageType)) {
@@ -844,6 +835,7 @@ export const MessagesStat = () => {
 
                 <SegmentedControl
                     fullWidth
+                    size="xs"
                     value={sharingNameType}
                     onChange={(type) => setSharingNameType(type as ENameImageType)}
                     data={[

@@ -33,6 +33,20 @@ export class SharingGenerator {
         );
     }
 
+    static async prepareImages(owners: (Api.User | Api.Channel | Api.Chat)[]) {
+        const uniqOwners = new Map<number, Api.User | Api.Channel | Api.Chat>();
+
+        for (const owner of owners) {
+            if (!uniqOwners.has(owner.id.valueOf())) {
+                uniqOwners.set(owner.id.valueOf(), owner);
+            }
+        }
+
+        const tasks = Array.from(uniqOwners.values()).map((owner) => getAvatar(owner));
+
+        await Promise.all(tasks);
+    }
+
     async init() {
         await this.loadFont(this.fontFamily, fontFamilyUrl);
         await this.loadFont(this.fontFamilyBold, fontFamilyBoldUrl);
