@@ -1,5 +1,5 @@
 import { Avatar, Container, Divider, Notification, UnstyledButton } from '@mantine/core';
-import { IconBook2 } from '@tabler/icons-react';
+import { IconBook2, IconPigMoney } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { Api } from 'telegram';
 import { Link } from 'react-router-dom';
@@ -46,6 +46,11 @@ const MenuPage = () => {
                 <UnstyledButton className={classes.link} component="a" href={getDocLink('')} target="_blank">
                     <IconBook2 className={classes.linkIcon} stroke={1.5} />
                     <span>{t('menu.documentation')}</span>
+                </UnstyledButton>
+
+                <UnstyledButton className={classes.link} component="a" href={getDocLink('donate')} target="_blank">
+                    <IconPigMoney className={classes.linkIcon} stroke={1.5} />
+                    <span>{t('menu.donate')}</span>
                 </UnstyledButton>
 
                 <UnstyledButton className={classes.link} component="a" href="https://t.me/kit42_app" target="_blank">
