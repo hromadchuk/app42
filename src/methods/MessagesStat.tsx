@@ -36,26 +36,19 @@ import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
-import { CallAPI, declineAndFormat, formatNumber, getStringsTimeArray, getTextTime, sleep } from '../lib/helpers.tsx';
+import {
+    calculatePeriodsMessagesCount,
+    filterMessages,
+    getMessages,
+    getTotalMessagesCount,
+    IGetMessagesCallbackArguments,
+    IPeriodData,
+    TPeer
+} from '../lib/methods/messages.ts';
+import { CallAPI, declineAndFormat, formatNumber, getStringsTimeArray, getTextTime } from '../lib/helpers.tsx';
 import { MessagesStatSharingGenerator } from '../sharing/MessagesStatSharingGenerator.ts';
 
-type TOwner = Api.User | Api.Chat | Api.Channel;
-
 type TCorrectMessage = Api.Message | Api.MessageService;
-
-interface IGetHistoryParams {
-    peer: Api.TypeEntityLike;
-    limit: number;
-    offsetId?: number;
-}
-
-interface IPeriodData {
-    period: number;
-    disabled: boolean;
-    count: number;
-    periodDate: number;
-    circa?: boolean;
-}
 
 interface IPeerData {
     peerId: number;
@@ -88,7 +81,7 @@ interface IScanDataCalculation {
 
 interface ITopItem {
     count: number;
-    owner: TOwner;
+    owner: TPeer;
 }
 
 interface IScanDataResult {
@@ -139,7 +132,7 @@ interface ITabTops {
     owners: ITopItem[];
 }
 
-const ownersInfo = new Map<number, TOwner>();
+const ownersInfo = new Map<number, TPeer>();
 const sharingImages = new Map<string, string>();
 
 export const MessagesStat = () => {
@@ -149,7 +142,7 @@ export const MessagesStat = () => {
 
     const [ownerMessages, setOwnerMessages] = useState<Api.TypeMessage[]>([]);
     const [ownerPeriods, setOwnerPeriods] = useState<IPeriodData[]>([]);
-    const [selectedOwner, setSelectedOwner] = useState<TOwner | null>(null);
+    const [selectedOwner, setSelectedOwner] = useState<TPeer | null>(null);
     const [statResult, setStatResult] = useState<IScanDataResult | null>(null);
     const [selectedTab, setSelectedTab] = useState<ETabId>(ETabId.messages);
 
@@ -162,16 +155,11 @@ export const MessagesStat = () => {
     const [isSentToChat, setSentToChat] = useState<boolean>(false);
     const [modalType, setModalType] = useState<EModalType>(EModalType.text);
 
-    async function getOptions(owner: TOwner) {
+    async function getOptions(owner: TPeer) {
         setProgress({ text: mt('loading_messages') });
         setSelectedOwner(owner);
 
-        const { count } = (await CallAPI(
-            new Api.messages.GetHistory({
-                peer: owner.id,
-                limit: 1
-            })
-        )) as Api.messages.MessagesSlice;
+        const count = await getTotalMessagesCount(owner.id);
 
         if (!count) {
             setFinishBlock({ text: mt('no_messages'), state: 'error' });
@@ -188,45 +176,8 @@ export const MessagesStat = () => {
             180, // 6 months
             365 // 1 year
         ];
-        const periodsData: IPeriodData[] = [];
 
-        if (count < 3_000) {
-            const messages = await getMessages(owner, count, 0);
-
-            for (const period of periods) {
-                const periodDate = Math.round(Number(dayjs().add(-period, 'days')) / 1000);
-                const periodMessages = messages.filter((message) => message.date > periodDate);
-
-                periodsData.push({
-                    period,
-                    disabled: periodMessages.length === 0,
-                    count: periodMessages.length,
-                    periodDate
-                });
-            }
-        } else {
-            for (const period of periods) {
-                const periodDate = Math.round(Number(dayjs().add(-period, 'days')) / 1000);
-
-                const { offsetIdOffset } = (await CallAPI(
-                    new Api.messages.Search({
-                        peer: owner.id,
-                        q: '',
-                        filter: new Api.InputMessagesFilterEmpty(),
-                        maxDate: periodDate,
-                        limit: 1
-                    })
-                )) as Api.messages.MessagesSlice;
-
-                periodsData.push({
-                    period,
-                    circa: true,
-                    disabled: !offsetIdOffset,
-                    count: (offsetIdOffset || 0) + 1,
-                    periodDate
-                });
-            }
-        }
+        const periodsData = await calculatePeriodsMessagesCount(count, periods, owner, getMessagesDecorator);
 
         periodsData.push({
             period: 0,
@@ -237,20 +188,6 @@ export const MessagesStat = () => {
 
         setOwnerPeriods(periodsData);
         setProgress(null);
-    }
-
-    function filterMessages(messages: Api.TypeMessage[], endTime: number): TCorrectMessage[] {
-        const correctMessages: TCorrectMessage[] = messages.filter((message) => {
-            return !(message instanceof Api.MessageEmpty);
-        }) as TCorrectMessage[];
-
-        if (endTime) {
-            return correctMessages.filter((message) => {
-                return message.date > endTime;
-            });
-        }
-
-        return correctMessages;
     }
 
     function getAuthorId(message: TCorrectMessage): number {
@@ -267,47 +204,32 @@ export const MessagesStat = () => {
         return author.channelId.valueOf();
     }
 
-    async function getMessages(owner: TOwner, total: number, endTime: number): Promise<TCorrectMessage[]> {
+    async function getMessagesDecorator({
+        peer,
+        total,
+        endTime
+    }: IGetMessagesCallbackArguments): Promise<TCorrectMessage[]> {
         if (ownerMessages.length) {
             return filterMessages(ownerMessages, endTime);
         }
 
-        const processMessages: TCorrectMessage[] = [];
-
         setProgress({ text: mt('loading_messages'), total });
 
-        const params: IGetHistoryParams = {
-            peer: owner.id,
-            limit: 100
-        };
+        const getMessagesGenerator = getMessages({
+            peer,
+            total,
+            endTime,
+            peerInfo: ownersInfo
+        });
 
-        let working = true;
-        while (working) {
-            if (total > 3_000) {
-                await sleep(777);
-            }
-
-            const { messages, chats, users } = (await CallAPI(
-                new Api.messages.GetHistory(params)
-            )) as Api.messages.MessagesSlice;
-
-            for (const dialogOwner of [...users, ...chats]) {
-                ownersInfo.set(dialogOwner.id.valueOf(), dialogOwner as TOwner);
-            }
-
-            const partMessages = filterMessages(messages, endTime);
-
-            if (partMessages.length) {
-                processMessages.push(...partMessages);
-
-                setProgress({ ...getProgress(), count: processMessages.length });
-
-                params.offsetId = partMessages[partMessages.length - 1].id;
-            } else {
-                working = false;
-            }
+        let messagesCount;
+        // "for of" doesn't work because we need return value
+        while ((messagesCount = await getMessagesGenerator.next()).done === false) {
+            setProgress({ ...getProgress(), count: messagesCount.value });
         }
 
+        // @ts-ignore
+        const processMessages: TCorrectMessage[] = messagesCount.value;
         setOwnerMessages(processMessages);
 
         return processMessages;
@@ -325,7 +247,11 @@ export const MessagesStat = () => {
     }
 
     async function calcStatistic(period: IPeriodData) {
-        const messages = await getMessages(selectedOwner as TOwner, period.count, period.periodDate);
+        const messages = await getMessagesDecorator({
+            peer: selectedOwner as TPeer,
+            total: period.count,
+            endTime: period.periodDate
+        });
 
         setProgress({ text: mt('loading_calculation') });
 
@@ -583,7 +509,7 @@ export const MessagesStat = () => {
         prepareImages(stat);
     }
 
-    function getImageName(type: ENameImageType, owner: TOwner): string {
+    function getImageName(type: ENameImageType, owner: TPeer): string {
         if (type === ENameImageType.username) {
             let username = '';
 
@@ -861,7 +787,7 @@ export const MessagesStat = () => {
                     onClick={async () => {
                         setSharingImagesLoading(true);
 
-                        await MessagesStatSharingGenerator.sendMessage(image, selectedOwner as TOwner);
+                        await MessagesStatSharingGenerator.sendMessage(image, selectedOwner as TPeer);
 
                         setSharingImagesLoading(false);
                         close();
