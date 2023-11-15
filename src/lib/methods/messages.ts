@@ -97,7 +97,7 @@ export async function calculatePeriodsMessagesCount(
     return periodsData;
 }
 
-export async function* getMessages({ peer, total, endTime, startDate = null, peerInfo }: IGetMessagesArguments) {
+export async function getMessages({ peer, total, endTime, startDate = null, peerInfo }: IGetMessagesArguments) {
     const processMessages: TCorrectMessage[] = [];
 
     const params: IGetHistoryParams = {
@@ -109,7 +109,6 @@ export async function* getMessages({ peer, total, endTime, startDate = null, pee
         params.offsetDate = startDate;
     }
 
-    // eslint-disable-next-line no-constant-condition
     while (true) {
         if (total > 3_000) {
             await sleep(777);
@@ -130,7 +129,8 @@ export async function* getMessages({ peer, total, endTime, startDate = null, pee
         }
 
         processMessages.push(...partMessages);
-        yield processMessages.length;
+        console.log(`count: ${processMessages.length}`);
+        // setProgress({ ...getProgress(), count: processMessages.length });
 
         params.offsetId = partMessages[partMessages.length - 1].id;
     }
@@ -164,7 +164,7 @@ export async function calculateEstimatedNumberOfPeriodMessages({
     periodTo
 }: {
     peerId: Api.long;
-    periodFrom?: number | undefined;
+    periodFrom?: number;
     periodTo: number;
 }): Promise<number> {
     const messagesSearchParams = {
@@ -179,7 +179,7 @@ export async function calculateEstimatedNumberOfPeriodMessages({
         new Api.messages.Search(messagesSearchParams)
     )) as Api.messages.MessagesSlice;
 
-    if (!offsetIdOffset && !periodFrom) {
+    if (!offsetIdOffset && periodFrom !== 0 && !periodFrom) {
         return 0;
     }
 

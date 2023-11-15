@@ -136,7 +136,7 @@ const ownersInfo = new Map<number, TPeer>();
 const sharingImages = new Map<string, string>();
 
 export const MessagesStat = () => {
-    const { mt, md, needHideContent, getProgress, setProgress, setFinishBlock } = useContext(MethodContext);
+    const { mt, md, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
     const colorSchema = useColorScheme();
     const [isModalOpened, { open, close }] = useDisclosure(false);
 
@@ -215,24 +215,16 @@ export const MessagesStat = () => {
 
         setProgress({ text: mt('loading_messages'), total });
 
-        const getMessagesGenerator = getMessages({
+        const messages = await getMessages({
             peer,
             total,
             endTime,
             peerInfo: ownersInfo
         });
 
-        let messagesCount;
-        // "for of" doesn't work because we need return value
-        while ((messagesCount = await getMessagesGenerator.next()).done === false) {
-            setProgress({ ...getProgress(), count: messagesCount.value });
-        }
+        setOwnerMessages(messages);
 
-        // @ts-ignore
-        const processMessages: TCorrectMessage[] = messagesCount.value;
-        setOwnerMessages(processMessages);
-
-        return processMessages;
+        return messages;
     }
 
     function getSelectedPeriod(firstMessage: TCorrectMessage, lastMessage: TCorrectMessage): string {

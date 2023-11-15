@@ -5,12 +5,13 @@ import { formatNumber } from '../lib/helpers.tsx';
 
 interface IInfoRow {
     title: string;
+    titleLineClamp?: number;
     description?: string;
     icon?: (props: TablerIconsProps) => JSX.Element;
     count?: number;
 }
 
-export function InfoRow({ title, description, icon, count }: IInfoRow) {
+export function InfoRow({ title, titleLineClamp, description, icon, count }: IInfoRow) {
     return (
         <Container p={0}>
             <Flex gap="md" p={5} justify="flex-start" align="center" direction="row" wrap="nowrap">
@@ -18,7 +19,9 @@ export function InfoRow({ title, description, icon, count }: IInfoRow) {
 
                 <div>
                     <Group gap={0}>
-                        <Text inline>{title}</Text>
+                        <Text lineClamp={titleLineClamp} inline>
+                            {title}
+                        </Text>
                     </Group>
                     <Text c="dimmed" fz="xs">
                         {description}

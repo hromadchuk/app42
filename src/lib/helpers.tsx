@@ -313,6 +313,29 @@ export async function getAvatar(owner: Api.User | Api.Channel | Api.Chat): Promi
     return null;
 }
 
+export async function getMessagePhoto(photo: Api.TypePhoto): Promise<string | null> {
+    const cacheKey = `message-photo-${photo.id}`;
+    const cache = getCache(cacheKey);
+    if (cache) {
+        return cache as string;
+    }
+
+    // @ts-ignore
+    const buffer = await window.TelegramClient.downloadMedia(photo);
+    console.log(buffer);
+    // @ts-ignore
+    const imageCode = Buffer.from(buffer).toString('base64');
+    if (imageCode) {
+        const imageBase64 = `data:image/jpeg;base64,${imageCode}`;
+
+        setCache(cacheKey, imageBase64, 30);
+
+        return imageBase64;
+    }
+
+    return null;
+}
+
 export function dataUrlToFile(dataUrl: string, fileName: string) {
     const [mimePart, base64Data] = dataUrl.split(',');
     const mime = (mimePart.match(/:(.*?);/) as string[])[1];

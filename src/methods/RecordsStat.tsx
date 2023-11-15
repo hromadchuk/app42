@@ -1,11 +1,12 @@
-import { Button, Center, Divider, Flex, Notification, Text } from '@mantine/core';
+import { Badge, Button, Center, Divider, Flex, Group, Text } from '@mantine/core';
 import { DatePicker } from '@mantine/dates';
 import {
     IconCalendarTime,
+    IconEye,
     IconHeart,
     IconMessage,
+    IconMessagePlus,
     IconMicrophone,
-    IconMoodSmile,
     IconPaperclip,
     IconPhone,
     IconSticker,
@@ -34,29 +35,57 @@ import {
     IPeriodData,
     TCorrectMessage
 } from '../lib/methods/messages.ts';
+import { RecordRow } from '../components/RecordRow.tsx';
 
 type TPeriodType = [Date | null, Date | null];
+
+type DocumentAttributeType =
+    | typeof Api.DocumentAttributeSticker
+    | typeof Api.DocumentAttributeAudio
+    | typeof Api.DocumentAttributeVideo;
+
+interface IStatsRecords {
+    [recordStatCount: string]: TCorrectMessage[];
+}
+
+interface ITopRecords {
+    count: number;
+    records: IStatsRecords;
+}
+
+interface IScanReactions {
+    total: ITopRecords;
+    reactions: { [reactionEmoji: string]: ITopRecords };
+}
 
 interface IScanDataCalculation {
     firstMessage: TCorrectMessage;
     lastMessage: TCorrectMessage;
-    messages: number;
+    records: number;
     voiceDuration: number;
     roundDuration: number;
     callDuration: number;
     attachmentsTotal: number;
+    commentsTotal: number;
+    viewsTotal: number;
     stickersTotal: number;
-    reactionsTotal: number;
+    reactions: IScanReactions;
+    comments: IStatsRecords;
+    views: IStatsRecords;
 }
 
 interface IScanDataResult {
-    messages: number;
+    records: number;
     voiceDuration: number;
     roundDuration: number;
     callDuration: number;
     attachmentsTotal: number;
+    commentsTotal: number;
+    viewsTotal: number;
     stickersTotal: number;
-    reactionsTotal: number;
+    views: IStatsRecords;
+    comments: IStatsRecords;
+    reactions: IScanReactions;
 }
 
 interface IStatRow {
@@ -66,19 +95,30 @@ interface IStatRow {
     isInteger: boolean;
 }
 enum ETabId {
-    reactions = 'reactions'
+    reactions = 'reactions',
+    comments = 'comments',
+    views = 'views'
 }
 
 interface ITabTops {
-    id: ETabId;
+    id: ETabId | string;
     lang: string;
-    icon: (props: TablerIconsProps) => JSX.Element;
+    parentTab?: ETabId;
+    icon?: (props: TablerIconsProps) => JSX.Element;
+    records: IStatsRecords;
+}
+
+class ValidationError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'ValidationError';
+    }
 }
 
 const channelsInfo = new Map<number, Api.Channel>();
 
 export const RecordsStat = () => {
-    const { mt, md, needHideContent, getProgress, setProgress, setFinishBlock } = useContext(MethodContext);
+    const { mt, md, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
 
     const [channelRecords, setChannelRecords] = useState<Api.TypeMessage[]>([]);
     const [channelPeriods, setChannelPeriods] = useState<IPeriodData[]>([]);
@@ -86,7 +126,7 @@ export const RecordsStat = () => {
     const [recordsByTime, setRecordsByTime] = useState<CalculateActivityTime>(new CalculateActivityTime());
     const [selectedChannel, setSelectedChannel] = useState<Api.Channel | null>(null);
     const [statResult, setStatResult] = useState<IScanDataResult | null>(null);
-    const [selectedTab, setSelectedTab] = useState<ETabId>(ETabId.reactions);
+    const [selectedTab, setSelectedTab] = useState<string | ETabId>(ETabId.views);
 
     async function calculateEmbeddedPeriods(channel: Api.Channel) {
         setProgress({ text: mt('loading_records') });
@@ -110,7 +150,7 @@ export const RecordsStat = () => {
             365 // 1 year
         ];
 
-        const periodsData = await calculatePeriodsMessagesCount(recordsCount, periods, channel, getRecords);
+        const periodsData = await calculatePeriodsMessagesCount(recordsCount, periods, channel, getRecordsDecorator);
         periodsData.unshift({
             period: 0,
             disabled: false,
@@ -122,7 +162,43 @@ export const RecordsStat = () => {
         setProgress(null);
     }
 
-    async function getRecords({
+    async function getRecords() {
+        const dateFrom = recordsPeriod[0]?.getTime();
+        const dateTo = recordsPeriod[1]?.getTime();
+
+        if (dateFrom === null || dateFrom === undefined || !dateTo) {
+            throw new ValidationError(mt('incorrect_period'));
+        }
+
+        if (selectedChannel === null) {
+            throw new ValidationError(mt('channel_not_selected'));
+        }
+
+        const recordsCountInPeriod = await calculateEstimatedNumberOfPeriodMessages({
+            peerId: selectedChannel.id,
+            periodFrom: dateFrom / 1000,
+            periodTo: dateTo / 1000
+        });
+
+        if (!recordsCountInPeriod) {
+            throw new ValidationError(mt('no_records_for_period'));
+        }
+
+        const records = await getRecordsDecorator({
+            peer: selectedChannel as Api.Channel,
+            total: recordsCountInPeriod + 1,
+            endTime: dateFrom / 1000,
+            startDate: dateTo / 1000
+        });
+
+        if (records.length === 0) {
+            throw new ValidationError(mt('no_records_for_period'));
+        }
+
+        return records;
+    }
+
+    async function getRecordsDecorator({
         peer,
         total,
         endTime,
@@ -134,7 +210,7 @@ export const RecordsStat = () => {
 
         setProgress({ text: mt('loading_records'), total });
 
-        const getMessagesGenerator = getMessages({
+        const records = await getMessages({
             peer,
             total,
             startDate,
@@ -142,17 +218,8 @@ export const RecordsStat = () => {
             peerInfo: channelsInfo
         });
 
-        let messagesCount;
-        // "for of" doesn't work because we need return value
-        while ((messagesCount = await getMessagesGenerator.next()).done === false) {
-            setProgress({ ...getProgress(), count: messagesCount.value });
-        }
-
-        // @ts-ignore
-        const processMessages: TCorrectMessage[] = messagesCount.value;
-        setChannelRecords(processMessages);
-
-        return processMessages;
+        setChannelRecords(records);
+        return records;
     }
 
     function setDatePeriod(period: IPeriodData) {
@@ -160,38 +227,15 @@ export const RecordsStat = () => {
     }
 
     async function calcStatistic() {
-        const dateFrom = recordsPeriod[0]?.getTime();
-        const dateTo = recordsPeriod[1]?.getTime();
+        let records;
+        try {
+            records = await getRecords();
+        } catch (error) {
+            if (!(error instanceof ValidationError)) {
+                throw error;
+            }
 
-        if (dateFrom === null || dateFrom === undefined || !dateTo) {
-            notifyError({ message: mt('incorrect_period') });
-            return;
-        }
-
-        if (selectedChannel === null) {
-            return;
-        }
-
-        const recordsCountInPeriod = await calculateEstimatedNumberOfPeriodMessages({
-            peerId: selectedChannel.id,
-            periodFrom: dateFrom / 1000,
-            periodTo: dateTo / 1000
-        });
-
-        if (!recordsCountInPeriod) {
-            notifyError({ message: mt('no_records_for_period') });
-            return;
-        }
-
-        const messages = await getRecords({
-            peer: selectedChannel as Api.Channel,
-            total: recordsCountInPeriod + 1,
-            endTime: dateFrom / 1000,
-            startDate: dateTo / 1000
-        });
-
-        if (messages.length === 0) {
-            notifyError({ message: mt('no_records_for_period') });
+            notifyError({ message: error.message });
             return;
         }
 
@@ -199,98 +243,280 @@ export const RecordsStat = () => {
 
         const groupedIds = new Set<number>();
         const statData: IScanDataCalculation = {
-            firstMessage: messages.reduce((prev, current) => {
+            firstMessage: records.reduce((prev, current) => {
                 return prev.date < current.date ? prev : current;
             }),
-            lastMessage: messages.reduce((prev, current) => {
+            lastMessage: records.reduce((prev, current) => {
                 return prev.date > current.date ? prev : current;
             }),
-            messages: 0,
+            records: 0,
             voiceDuration: 0,
             roundDuration: 0,
             callDuration: 0,
             attachmentsTotal: 0,
+            commentsTotal: 0,
+            viewsTotal: 0,
             stickersTotal: 0,
-            reactionsTotal: 0
+            comments: {},
+            views: {},
+            reactions: {
+                total: {
+                    count: 0,
+                    records: {}
+                },
+                reactions: {}
+            }
         };
 
         const activityTime = new CalculateActivityTime();
-        messages.forEach((message) => {
-            activityTime.add(Number(selectedChannel.id.valueOf()), message.date);
+        records.forEach((record) => {
+            // @ts-ignore
+            activityTime.add(Number(selectedChannel.id.valueOf()), record.date);
 
-            if (message.reactions) {
-                message.reactions.results.forEach(({ reaction }) => {
-                    if (reaction instanceof Api.ReactionEmoji) {
-                        statData.reactionsTotal++;
-                    }
-                });
-            }
-
-            if (message instanceof Api.MessageService) {
-                const action = message.action;
+            if (record instanceof Api.MessageService) {
+                const action = record.action;
                 if (action instanceof Api.MessageActionGroupCall && action.duration) {
                     statData.callDuration += action.duration;
                 }
             }
 
-            if (message.media) {
-                statData.attachmentsTotal++;
+            getRecordReactionsStats(record, statData);
+            getRecordMediaStats(record, statData);
+            getRecordViewsStats(record, statData);
+            getRecordCommentsStats(record, statData);
 
-                const isDocument = message.media instanceof Api.MessageMediaDocument;
-                if (isDocument) {
-                    const media = message.media as Api.MessageMediaDocument;
-
-                    if (media.document instanceof Api.Document) {
-                        const attributes = media.document.attributes;
-
-                        const sticker = attributes.find(
-                            (attribute) => attribute instanceof Api.DocumentAttributeSticker
-                        ) as Api.DocumentAttributeSticker | undefined;
-                        if (sticker && sticker.stickerset instanceof Api.InputStickerSetID) {
-                            statData.stickersTotal++;
-                        }
-
-                        const voice = attributes.find(
-                            (attribute) => attribute instanceof Api.DocumentAttributeAudio
-                        ) as Api.DocumentAttributeAudio | undefined;
-                        if (voice) {
-                            statData.voiceDuration += voice.duration;
-                        }
-
-                        const round = attributes.find(
-                            (attribute) => attribute instanceof Api.DocumentAttributeVideo
-                        ) as Api.DocumentAttributeVideo | undefined;
-                        if (round) {
-                            statData.roundDuration += round.duration;
-                        }
-                    }
-                }
+            const recordCommentsCount = record.replies?.replies;
+            if (recordCommentsCount) {
+                statData.commentsTotal += recordCommentsCount;
             }
 
-            if (message.groupedId) {
-                if (groupedIds.has(message.groupedId.valueOf())) {
-                    return; // skip duplicate
+            if (record.groupedId) {
+                if (groupedIds.has(record.groupedId.valueOf())) {
+                    return;
                 }
 
-                groupedIds.add(message.groupedId.valueOf());
+                groupedIds.add(record.groupedId.valueOf());
             }
 
-            statData.messages++;
+            statData.records++;
         });
+
         setRecordsByTime(activityTime);
 
         const stat: IScanDataResult = {
-            messages: statData.messages,
+            records: statData.records,
             voiceDuration: statData.voiceDuration,
             roundDuration: statData.roundDuration,
             callDuration: statData.callDuration,
             attachmentsTotal: statData.attachmentsTotal,
+            commentsTotal: statData.commentsTotal,
+            viewsTotal: statData.viewsTotal,
             stickersTotal: statData.stickersTotal,
-            reactionsTotal: statData.reactionsTotal
+            reactions: statData.reactions,
+            comments: statData.comments,
+            views: statData.views
         };
 
         setStatResult(stat);
         setProgress(null);
+    }
+
+    function getTabs(stats: IScanDataResult): ITabTops[] {
+        return [
+            {
+                id: ETabId.views,
+                lang: 'views',
+                icon: IconEye,
+                records: stats.views
+            },
+            {
+                id: ETabId.comments,
+                lang: 'comments',
+                icon: IconMessagePlus,
+                records: stats.comments
+            },
+            {
+                id: ETabId.reactions,
+                lang: 'reactions',
+                icon: IconHeart,
+                records: stats.reactions.total.records
+            }
+        ];
+    }
+
+    function getRecordReactionsStats(record: TCorrectMessage, statData: IScanDataCalculation): void {
+        let recordReactionsCount = 0;
+        const recordReactions: { [reaction: string]: number } = {};
+
+        if (!record.reactions) {
+            return;
+        }
+
+        record.reactions.results.forEach((reactionCount: Api.ReactionCount) => {
+            const reaction = reactionCount.reaction;
+            if (!(reaction instanceof Api.ReactionEmoji)) {
+                return;
+            }
+
+            recordReactionsCount += reactionCount.count;
+            statData.reactions.total.count += reactionCount.count;
+
+            const emoticon = reaction.emoticon;
+            const statReaction = statData.reactions.reactions[emoticon];
+            if (!statReaction) {
+                statData.reactions.reactions[emoticon] = {
+                    count: 0,
+                    records: {}
+                };
+            }
+
+            statData.reactions.reactions[emoticon].count += reactionCount.count;
+            recordReactions[emoticon] = (recordReactions[emoticon] || 0) + reactionCount.count;
+        });
+
+        pushStatCountToStatRecords(statData.reactions.total.records, recordReactionsCount, record);
+        Object.keys(recordReactions).forEach((reaction) => {
+            pushStatCountToStatRecords(
+                statData.reactions.reactions[reaction].records,
+                recordReactions[reaction],
+                record
+            );
+        });
+    }
+
+    function pushStatCountToStatRecords(
+        statRecords: IStatsRecords,
+        recordReactionsCount: number,
+        record: TCorrectMessage
+    ) {
+        if (!statRecords[recordReactionsCount]) {
+            statRecords[recordReactionsCount] = [];
+        }
+
+        statRecords[recordReactionsCount].push(record);
+    }
+
+    function getRecordMediaStats(record: TCorrectMessage, statData: IScanDataCalculation) {
+        if (record.media) {
+            statData.attachmentsTotal++;
+
+            const isDocument = record.media instanceof Api.MessageMediaDocument;
+            if (isDocument) {
+                const media = record.media as Api.MessageMediaDocument;
+
+                if (media.document instanceof Api.Document) {
+                    const attributes = media.document.attributes;
+
+                    const sticker = getMediaFromAttributes(attributes, Api.DocumentAttributeSticker) as
+                        | Api.DocumentAttributeSticker
+                        | undefined;
+                    if (sticker && sticker.stickerset instanceof Api.InputStickerSetID) {
+                        statData.stickersTotal++;
+                    }
+
+                    const voice = getMediaFromAttributes(attributes, Api.DocumentAttributeAudio) as
+                        | Api.DocumentAttributeAudio
+                        | undefined;
+                    if (voice) {
+                        statData.voiceDuration += voice.duration;
+                    }
+
+                    const round = getMediaFromAttributes(attributes, Api.DocumentAttributeVideo) as
+                        | Api.DocumentAttributeVideo
+                        | undefined;
+                    if (round) {
+                        statData.roundDuration += round.duration;
+                    }
+                }
+            }
+        }
+    }
+
+    function getRecordViewsStats(record: TCorrectMessage, statData: IScanDataCalculation) {
+        const recordViewsCount = record.views || 0;
+        statData.viewsTotal += recordViewsCount;
+        pushStatCountToStatRecords(statData.views, recordViewsCount, record);
+    }
+
+    function getRecordCommentsStats(record: TCorrectMessage, statData: IScanDataCalculation) {
+        const recordCommentsCount = record.replies?.replies;
+        if (recordCommentsCount) {
+            statData.commentsTotal += recordCommentsCount;
+            pushStatCountToStatRecords(statData.views, recordCommentsCount, record);
+        }
+    }
+
+    function getMediaFromAttributes(attributes: Api.TypeDocumentAttribute[], mediaType: DocumentAttributeType) {
+        return attributes.find((attribute) => attribute instanceof mediaType);
+    }
+
+    function prepareRecordsStatsToDisplay(records?: IStatsRecords): string[] {
+        return Object.keys(records || [])
+            .sort((a: string, b: string) => Number(b) - Number(a))
+            .slice(0, 99);
+    }
+
+    function getEmojiTabsList(stats: IScanDataResult): ITabItem[] {
+        const emojiTabs: ITabItem[] = [];
+        emojiTabs.push(
+            ...Object.keys(stats.reactions.reactions).map((emoji) => ({
+                id: emoji,
+                name: emoji
+            }))
+        );
+
+        return emojiTabs;
+    }
+
+    function getEmojiTabs(stats: IScanDataResult): ITabTops[] {
+        const emojiTabs: ITabTops[] = [];
+        emojiTabs.push(
+            ...Object.keys(stats.reactions.reactions).map((emoji) => ({
+                id: emoji,
+                lang: emoji,
+                records: stats.reactions.reactions[emoji].records,
+                parentTab: ETabId.reactions
+            }))
+        );
+
+        return emojiTabs;
+    }
+
+    function getTabDescription(tabs: ITabTops[], recordStatCount: number): string | undefined {
+        if (selectedTab === ETabId.views) {
+            return declineAndFormat(recordStatCount, md('decline.views'));
+        }
+
+        if (selectedTab === ETabId.comments) {
+            return declineAndFormat(recordStatCount, md('decline.comments'));
+        }
+
+        if (selectedTab === ETabId.reactions || getSelectedTabObject(tabs)) {
+            return declineAndFormat(recordStatCount, md('decline.reactions'));
+        }
+
+        return undefined;
+    }
+
+    function getReactionsElement(stats: IScanDataResult): JSX.Element {
+        const reactions = stats.reactions.reactions;
+        const reactionsEmoticons = Object.keys(reactions).sort(
+            (reactionA, reactionB) => reactions[reactionB].count - reactions[reactionA].count
+        );
+
+        return (
+            <Group pt={10}>
+                {reactionsEmoticons.map((reaction) => (
+                    <Badge key={reaction} leftSection={reaction} size="lg" color="gray">
+                        {formatNumber(reactions[reaction].count)}
+                    </Badge>
+                ))}
+            </Group>
+        );
+    }
+
+    function getSelectedTabObject(tabs: ITabTops[]) {
+        return tabs.find((tab) => tab.id === selectedTab);
     }
 
     if (needHideContent()) return null;
@@ -300,25 +526,37 @@ export const RecordsStat = () => {
             {
                 icon: IconMessage,
                 label: mt('headers.count'),
-                value: formatNumber(statResult.messages),
+                value: statResult.records,
                 isInteger: true
             },
             {
                 icon: IconPaperclip,
                 label: mt('headers.attachments'),
-                value: formatNumber(statResult.attachmentsTotal),
+                value: statResult.attachmentsTotal,
+                isInteger: true
+            },
+            {
+                icon: IconMessagePlus,
+                label: mt('headers.comments'),
+                value: statResult.commentsTotal,
+                isInteger: true
+            },
+            {
+                icon: IconEye,
+                label: mt('headers.views'),
+                value: statResult.viewsTotal,
                 isInteger: true
             },
             {
                 icon: IconSticker,
                 label: mt('headers.stickers'),
-                value: formatNumber(statResult.stickersTotal),
+                value: statResult.stickersTotal,
                 isInteger: true
             },
             {
                 icon: IconHeart,
                 label: mt('headers.reactions'),
-                value: formatNumber(statResult.reactionsTotal),
+                value: statResult.reactions.total.count,
                 isInteger: true
             },
             {
@@ -341,14 +579,7 @@ export const RecordsStat = () => {
             }
         ].filter((item) => Boolean(item.value) && item.value !== '0');
 
-        const tabs: ITabTops[] = [
-            {
-                id: ETabId.reactions,
-                lang: 'reactions',
-                icon: IconMoodSmile
-            }
-        ];
-
+        const tabs: ITabTops[] = getTabs(statResult);
         const tabsList: ITabItem[] = tabs.map(
             (tab) =>
                 ({
@@ -358,24 +589,12 @@ export const RecordsStat = () => {
                 }) as ITabItem
         );
 
-        const getTabDescription = () => {
-            let langKey = null;
+        tabs.push(...getEmojiTabs(statResult));
+        tabsList.push(...getEmojiTabsList(statResult));
 
-            if (selectedTab === ETabId.reactions) {
-                langKey = 'reactions_description';
-            }
+        const tabRecords = getSelectedTabObject(tabs)?.records;
 
-            if (langKey) {
-                return (
-                    <Notification withCloseButton={false} my="xs" color="gray">
-                        {mt(langKey)}
-                    </Notification>
-                );
-            }
-
-            return null;
-        };
-
+        // @ts-ignore
         return (
             <>
                 <OwnerRow
@@ -398,10 +617,21 @@ export const RecordsStat = () => {
                         icon={item.icon}
                     />
                 ))}
+                {getReactionsElement(statResult)}
 
                 <ActivityChart data={recordsByTime?.get(Number(selectedChannel?.id.valueOf()))} />
-                <TabsList tabs={tabsList} onChange={(tabId) => setSelectedTab(tabId as ETabId)} />
-                {getTabDescription()}
+                <TabsList tabs={tabsList} onChange={(tabId) => setSelectedTab(tabId as ETabId | string)} />
+
+                {prepareRecordsStatsToDisplay(tabRecords).map((statCount: string) =>
+                    // @ts-ignore
+                    tabRecords[statCount].map((record: TCorrectMessage) => (
+                        <RecordRow
+                            key={selectedTab + record.id}
+                            record={record}
+                            description={getTabDescription(tabs, Number(statCount))}
+                        />
+                    ))
+                )}
             </>
         );
     }
@@ -450,7 +680,7 @@ export const RecordsStat = () => {
                                     </Text>
                                     <Text c="dimmed" fz="xs">
                                         {period.circa ? '~' : ''}(
-                                        {declineAndFormat(period.count, md('decline.messages'))})
+                                        {declineAndFormat(period.count, md('decline.records'))})
                                     </Text>
                                 </Flex>
                             </Button>
