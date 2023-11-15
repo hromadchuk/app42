@@ -109,6 +109,7 @@ export async function getMessages({ peer, total, endTime, startDate = null, peer
         params.offsetDate = startDate;
     }
 
+    // eslint-disable-next-line no-constant-condition
     while (true) {
         if (total > 3_000) {
             await sleep(777);
