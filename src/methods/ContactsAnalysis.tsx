@@ -3,7 +3,7 @@ import { Badge, Box, Button, Container, Divider, Group, Modal } from '@mantine/c
 import { useDisclosure } from '@mantine/hooks';
 import { Api } from 'telegram';
 import dayjs from 'dayjs';
-import { CallAPI } from '../lib/helpers.tsx';
+import { CallAPI } from '../lib/helpers.ts';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';

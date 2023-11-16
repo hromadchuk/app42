@@ -6,9 +6,9 @@ import { Api } from 'telegram';
 
 import { AppContext } from '../contexts/AppContext.tsx';
 import { IFinishBlock, IGetDialogOption, IProgress, MethodContext, TDialogType } from '../contexts/MethodContext.tsx';
-import { CallAPI, formatNumber, Server } from '../lib/helpers.tsx';
+import { CallAPI, formatNumber, Server } from '../lib/helpers.ts';
 import { IRouter, routers } from '../routes.tsx';
-import { t, td } from '../lib/lang.tsx';
+import { t, td } from '../lib/lang.ts';
 
 // TODO need fix this, progress always null in child components
 let progressSafe: IProgress | null = null;

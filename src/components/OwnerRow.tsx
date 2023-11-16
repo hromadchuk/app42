@@ -2,7 +2,7 @@ import { createElement, JSX } from 'react';
 import { Center, Container, Flex, Group, Text, UnstyledButton } from '@mantine/core';
 import { Api } from 'telegram';
 import { IconCheck, IconChevronRight, TablerIconsProps } from '@tabler/icons-react';
-import { classNames } from '../lib/helpers.tsx';
+import { classNames } from '../lib/helpers.ts';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
 
 // @ts-ignore

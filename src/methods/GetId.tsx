@@ -2,7 +2,7 @@ import { useContext, useState } from 'react';
 import { ActionIcon, Button, CopyButton, Input, Space, TextInput } from '@mantine/core';
 import { IconAt, IconCheck, IconCopy } from '@tabler/icons-react';
 import { Api } from 'telegram';
-import { CallAPI } from '../lib/helpers.tsx';
+import { CallAPI } from '../lib/helpers.ts';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';

@@ -1,5 +1,5 @@
 import { Api } from 'telegram';
-import { CallAPI, dataUrlToFile, getAvatar } from '../lib/helpers.tsx';
+import { CallAPI, dataUrlToFile, getAvatar } from '../lib/helpers.ts';
 import { getHideUser } from '../lib/hide.tsx';
 // @ts-ignore
 import fontFamilyUrl from './fonts/SFProText-Regular.ttf';

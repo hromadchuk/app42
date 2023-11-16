@@ -5,7 +5,7 @@ import { IconHeart, IconMail, TablerIconsProps } from '@tabler/icons-react';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { Api } from 'telegram';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
-import { CallAPI, getTextTime, sleep } from '../lib/helpers.tsx';
+import { CallAPI, getTextTime, sleep } from '../lib/helpers.ts';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
 

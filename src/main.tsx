@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
 
-import { getAppLangCode } from './lib/lang.tsx';
+import { getAppLangCode } from './lib/lang.ts';
 
 import dayjs from 'dayjs';
 import toObject from 'dayjs/plugin/toObject';

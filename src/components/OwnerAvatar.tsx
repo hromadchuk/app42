@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useIntersection } from '@mantine/hooks';
 import { Api } from 'telegram';
-import { getAvatar } from '../lib/helpers.tsx';
+import { getAvatar } from '../lib/helpers.ts';
 import { ExAvatar } from './ExAvatar.tsx';
 
 interface IOwnerAvatar {

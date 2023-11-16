@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Api } from 'telegram';
 import ReactGA from 'react-ga4';
 import Lottie, { LottieRefCurrentProps } from 'lottie-react';
-import { isDev } from '../lib/helpers.tsx';
+import { isDev } from '../lib/helpers.ts';
 
 import { OwnerAvatar } from './OwnerAvatar.tsx';
 import LogoLottie from '../assets/logo_lottie.json';

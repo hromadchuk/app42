@@ -10,7 +10,7 @@ import { ITabItem, TabsList } from '../components/TabsList.tsx';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
-import { CallAPI, declineAndFormat, getTextTime } from '../lib/helpers.tsx';
+import { CallAPI, declineAndFormat, getTextTime } from '../lib/helpers.ts';
 
 enum ETabId {
     calls = 'calls',

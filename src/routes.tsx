@@ -15,7 +15,7 @@ import {
     TablerIconsProps
 } from '@tabler/icons-react';
 
-import { t } from './lib/lang.tsx';
+import { t } from './lib/lang.ts';
 
 const AuthRequired = lazy(() => import('./components/AuthRequired.tsx'));
 

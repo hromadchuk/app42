@@ -3,7 +3,7 @@ import { Button, Center, Group, RingProgress, Text } from '@mantine/core';
 import { useCounter } from '@mantine/hooks';
 import { IconUsersGroup } from '@tabler/icons-react';
 import { Api } from 'telegram';
-import { CallAPI, formatNumber, getPercent, sleep } from '../lib/helpers.tsx';
+import { CallAPI, formatNumber, getPercent, sleep } from '../lib/helpers.ts';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
 

@@ -1,5 +1,5 @@
 import { Center, Text } from '@mantine/core';
-import { t } from '../lib/lang.tsx';
+import { t } from '../lib/lang.ts';
 
 export function AppFooter() {
     return (

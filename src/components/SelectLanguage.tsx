@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Group, Image, Menu, UnstyledButton } from '@mantine/core';
 import { IconChevronDown } from '@tabler/icons-react';
-import { classNames } from '../lib/helpers.tsx';
-import { getAppLangCode, LangType } from '../lib/lang.tsx';
+import { classNames } from '../lib/helpers.ts';
+import { getAppLangCode, LangType } from '../lib/lang.ts';
 
 import ENIcon from '../assets/languages/en.svg';
 import UKIcon from '../assets/languages/uk.svg';

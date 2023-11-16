@@ -20,8 +20,8 @@ import { ExAvatar } from '../components/ExAvatar.tsx';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
-import { CallAPI, getDocLink, parallelLimit } from '../lib/helpers.tsx';
-import { getAppLangCode, LangType, t } from '../lib/lang.tsx';
+import { CallAPI, getDocLink, parallelLimit } from '../lib/helpers.ts';
+import { getAppLangCode, LangType, t } from '../lib/lang.ts';
 
 // @ts-ignore
 import classes from '../styles/MenuPage.module.css';
