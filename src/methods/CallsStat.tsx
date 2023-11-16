@@ -45,7 +45,7 @@ interface IStatResult {
 }
 
 export const CallsStat = () => {
-    const { mt, md, needHideContent, setFinishBlock, setProgress, getProgress } = useContext(MethodContext);
+    const { mt, md, needHideContent, setFinishBlock, setProgress } = useContext(MethodContext);
 
     const [isModalOpened, { open, close }] = useDisclosure(false);
     const [stat, setStat] = useState<IStatResult | null>(null);
@@ -97,7 +97,7 @@ export const CallsStat = () => {
                     params.addOffset += params.limit;
                     work = params.addOffset < data.count;
 
-                    setProgress({ ...getProgress(), total: data.count, count: allMessages.length });
+                    setProgress({ total: data.count, count: allMessages.length });
                 }
             } while (work);
 

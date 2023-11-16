@@ -101,7 +101,7 @@ const sortButtons = [LangType.RU, LangType.UK].includes(getAppLangCode())
     : [ImportType.Instagram, ImportType.Facebook, ImportType.VK];
 
 export const ImportMessages = () => {
-    const { mt, needHideContent, setProgress, getProgress, setFinishBlock } = useContext(MethodContext);
+    const { mt, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
 
     const [importType, setImportType] = useState<ImportType | null>(null);
     const [fileUsers, setFileUsers] = useState<IFileUser[]>([]);
@@ -349,8 +349,7 @@ export const ImportMessages = () => {
 
                     uploads.set(media.path, data);
 
-                    const currentProgress = getProgress();
-                    setProgress({ ...currentProgress, count: (currentProgress.count || 0) + 1 });
+                    setProgress({ addCount: 1 });
                 });
             }
 
@@ -379,8 +378,7 @@ export const ImportMessages = () => {
                         })
                     );
 
-                    const currentProgress = getProgress();
-                    setProgress({ ...currentProgress, count: (currentProgress.count || 0) + 1 });
+                    setProgress({ addCount: 1 });
                 });
             }
 

@@ -31,15 +31,24 @@ export const AbstractMethod = () => {
     };
 
     const setProgress = (data: IProgress | null): void => {
-        progressSafe = data;
+        if (data) {
+            const current = progressSafe || {};
 
-        setAppLoading(Boolean(data));
+            if (data.addCount) {
+                data.count = (current.count || 0) + data.addCount;
+            }
 
-        _setProgress(data);
-    };
+            progressSafe = {
+                ...current,
+                ...data
+            };
+        } else {
+            progressSafe = data;
+        }
 
-    const getProgress = (): IProgress => {
-        return progressSafe as IProgress;
+        setAppLoading(Boolean(progressSafe));
+
+        _setProgress(progressSafe);
     };
 
     const setFinishBlock = ({ text, state }: IFinishBlock): void => {
@@ -78,11 +87,9 @@ export const AbstractMethod = () => {
                 new Api.messages.GetDialogs(params)
             )) as Api.messages.DialogsSlice;
 
-            const currentProgress = getProgress();
             setProgress({
-                ...currentProgress,
                 total: count || dialogs.length,
-                count: (currentProgress.count || 0) + dialogs.length
+                addCount: dialogs.length
             });
 
             if (dialogs.length) {
@@ -199,7 +206,6 @@ export const AbstractMethod = () => {
                 progress,
                 progressSafe,
                 setProgress,
-                getProgress,
                 finishBlock,
                 setFinishBlock,
                 needHideContent,
