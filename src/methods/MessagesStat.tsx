@@ -36,7 +36,7 @@ import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
-import { CallAPI, declineAndFormat, formatNumber, getStringsTimeArray, getTextTime, sleep } from '../lib/helpers.tsx';
+import { CallAPI, declineAndFormat, formatNumber, getStringsTimeArray, getTextTime, sleep } from '../lib/helpers.ts';
 import { MessagesStatSharingGenerator } from '../sharing/MessagesStatSharingGenerator.ts';
 
 type TOwner = Api.User | Api.Chat | Api.Channel;
@@ -143,7 +143,7 @@ const ownersInfo = new Map<number, TOwner>();
 const sharingImages = new Map<string, string>();
 
 export const MessagesStat = () => {
-    const { mt, md, needHideContent, getProgress, setProgress, setFinishBlock } = useContext(MethodContext);
+    const { mt, md, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
     const colorSchema = useColorScheme();
     const [isModalOpened, { open, close }] = useDisclosure(false);
 
@@ -300,7 +300,7 @@ export const MessagesStat = () => {
             if (partMessages.length) {
                 processMessages.push(...partMessages);
 
-                setProgress({ ...getProgress(), count: processMessages.length });
+                setProgress({ count: processMessages.length });
 
                 params.offsetId = partMessages[partMessages.length - 1].id;
             } else {

@@ -6,9 +6,9 @@ import { Api } from 'telegram';
 
 import { AppContext } from '../contexts/AppContext.tsx';
 import { IFinishBlock, IGetDialogOption, IProgress, MethodContext, TDialogType } from '../contexts/MethodContext.tsx';
-import { CallAPI, formatNumber, Server } from '../lib/helpers.tsx';
+import { CallAPI, formatNumber, Server } from '../lib/helpers.ts';
 import { IRouter, routers } from '../routes.tsx';
-import { t, td } from '../lib/lang.tsx';
+import { t, td } from '../lib/lang.ts';
 
 // TODO need fix this, progress always null in child components
 let progressSafe: IProgress | null = null;
@@ -31,15 +31,24 @@ export const AbstractMethod = () => {
     };
 
     const setProgress = (data: IProgress | null): void => {
-        progressSafe = data;
+        if (data) {
+            const current = progressSafe || {};
 
-        setAppLoading(Boolean(data));
+            if (data.addCount) {
+                data.count = (current.count || 0) + data.addCount;
+            }
 
-        _setProgress(data);
-    };
+            progressSafe = {
+                ...current,
+                ...data
+            };
+        } else {
+            progressSafe = data;
+        }
 
-    const getProgress = (): IProgress => {
-        return progressSafe as IProgress;
+        setAppLoading(Boolean(progressSafe));
+
+        _setProgress(progressSafe);
     };
 
     const setFinishBlock = ({ text, state }: IFinishBlock): void => {
@@ -78,11 +87,9 @@ export const AbstractMethod = () => {
                 new Api.messages.GetDialogs(params)
             )) as Api.messages.DialogsSlice;
 
-            const currentProgress = getProgress();
             setProgress({
-                ...currentProgress,
                 total: count || dialogs.length,
-                count: (currentProgress.count || 0) + dialogs.length
+                addCount: dialogs.length
             });
 
             if (dialogs.length) {
@@ -199,7 +206,6 @@ export const AbstractMethod = () => {
                 progress,
                 progressSafe,
                 setProgress,
-                getProgress,
                 finishBlock,
                 setFinishBlock,
                 needHideContent,

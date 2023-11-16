@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import { Api } from 'telegram';
 import { Link } from 'react-router-dom';
 import { OwnerRow } from '../components/OwnerRow.tsx';
-import { CallAPI, getDocLink } from '../lib/helpers.tsx';
+import { CallAPI, getDocLink } from '../lib/helpers.ts';
 import { routers } from '../routes.tsx';
 import Logo from '../components/Logo.tsx';
-import { t } from '../lib/lang.tsx';
+import { t } from '../lib/lang.ts';
 
 // @ts-ignore
 import classes from '../styles/MenuPage.module.css';

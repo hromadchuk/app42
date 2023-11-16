@@ -5,7 +5,7 @@ import { IconHeart, IconMail, TablerIconsProps } from '@tabler/icons-react';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { Api } from 'telegram';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
-import { CallAPI, getTextTime, sleep } from '../lib/helpers.tsx';
+import { CallAPI, getTextTime, sleep } from '../lib/helpers.ts';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
 
@@ -29,7 +29,7 @@ const FRAME_TIME = 100;
 const stateReadMessages = new Map<number, number>();
 
 export const AnimatedMessages = () => {
-    const { mt, needHideContent, setProgress, setFinishBlock, getProgress } = useContext(MethodContext);
+    const { mt, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
     const [opened, { open, close }] = useDisclosure(false);
 
     const [selectedOwner, setSelectedOwner] = useState<Api.User | null>(null);
@@ -101,8 +101,7 @@ export const AnimatedMessages = () => {
                 })
             );
 
-            const currentProgress = getProgress();
-            setProgress({ ...currentProgress, count: (currentProgress.count || 0) + 1 });
+            setProgress({ addCount: 1 });
 
             await sleep(FRAME_TIME);
         }

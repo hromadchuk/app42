@@ -3,7 +3,7 @@ import { Divider, Modal } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Api } from 'telegram';
 
-import { CallAPI, declineAndFormat } from '../lib/helpers.tsx';
+import { CallAPI, declineAndFormat } from '../lib/helpers.ts';
 import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 

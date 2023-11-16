@@ -1,8 +1,8 @@
 import { Buffer } from 'buffer';
 import { notifications } from '@mantine/notifications';
 import { Api } from 'telegram';
-import { getCache, setCache } from './cache.tsx';
-import { getHideUser, isHideMode } from './hide.tsx';
+import { getCache, setCache } from './cache.ts';
+import { getHideUser, isHideMode } from './hide.ts';
 import { getAppLangCode, LangType, t, td } from './lang';
 import { FloodWaitError } from 'telegram/errors';
 
@@ -63,7 +63,7 @@ export interface ITime {
 
 export function getTime(time: number): ITime {
     const years = Math.floor(time / 31557600); // 365.25 days per year
-    const months = Math.floor((time % 31557600) / 2629800); // Average month length in seconds
+    const months = Math.floor((time % 31557600) / 2629800);
     const days = Math.floor((time % 2629800) / 86400);
     const hours = Math.floor((time % 86400) / 3600);
     const minutes = Math.floor(((time % 86400) % 3600) / 60);
@@ -311,7 +311,7 @@ export async function getAvatar(owner: Api.User | Api.Channel | Api.Chat): Promi
 
     const userPhoto = owner.photo as Api.UserProfilePhoto;
     const cacheKey = `owner-avatar-${userPhoto?.photoId}`;
-    const cache = getCache(cacheKey);
+    const cache = await getCache(cacheKey);
     if (cache) {
         return cache as string;
     }
@@ -322,7 +322,7 @@ export async function getAvatar(owner: Api.User | Api.Channel | Api.Chat): Promi
     if (imageCode) {
         const imageBase64 = `data:image/jpeg;base64,${imageCode}`;
 
-        setCache(cacheKey, imageBase64, 30);
+        await setCache(cacheKey, imageBase64, 30);
 
         return imageBase64;
     }

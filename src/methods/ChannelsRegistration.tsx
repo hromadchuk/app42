@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { Api } from 'telegram';
-import { CallAPI, getTextTime } from '../lib/helpers.tsx';
+import { CallAPI, getTextTime } from '../lib/helpers.ts';
 import dayjs from 'dayjs';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';

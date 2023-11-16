@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { t } from '../../lib/lang.tsx';
+import { t } from '../../lib/lang.ts';
 
 export class CalculateActivityTime {
     data = new Map<number, number[][]>();
