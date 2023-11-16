@@ -18,6 +18,16 @@
       "api_rate_limit": "You have reached the limit of API requests, you need to wait {time} and try again"
     },
     "time": {
+      "years": [
+        "year",
+        "years",
+        "years"
+      ],
+      "months": [
+        "month",
+        "months",
+        "months"
+      ],
       "days": [
         "day",
         "days",
@@ -66,7 +76,8 @@
     "clear_blacklist": "Clear blacklist",
     "administered": "Administrated chats and channels",
     "common_chats_top": "Top of contacts by common chats",
-    "calls_stat": "Calls stat"
+    "calls_stat": "Calls stat",
+    "channels_registration": "Channels registration"
   },
   "charts": {
     "activity": {
@@ -274,6 +285,10 @@
         "duration": "Duration",
         "max_duration": "Maximum duration"
       }
+    },
+    "channels_registration": {
+      "no_created": "You don't have any created channels",
+      "created": "{time} ago"
     }
   }
 }

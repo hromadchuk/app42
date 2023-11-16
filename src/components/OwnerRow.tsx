@@ -1,7 +1,7 @@
-import { JSX } from 'react';
+import { createElement, JSX } from 'react';
 import { Center, Container, Flex, Group, Text, UnstyledButton } from '@mantine/core';
 import { Api } from 'telegram';
-import { IconCheck, IconChevronRight } from '@tabler/icons-react';
+import { IconCheck, IconChevronRight, TablerIconsProps } from '@tabler/icons-react';
 import { classNames } from '../lib/helpers.tsx';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
 
@@ -11,6 +11,7 @@ import classes from '../styles/OwnerRow.module.css';
 interface IOwnerRow {
     owner: null | Api.TypeUser | Api.TypeChat;
     description?: string;
+    rightIcon?: (props: TablerIconsProps) => JSX.Element;
     withoutLink?: boolean;
     disabled?: boolean;
     callback?: () => void;
@@ -23,7 +24,7 @@ interface ILinkProps {
     component?: 'a' | 'button';
 }
 
-export function OwnerRow({ owner, description, withoutLink, callback, disabled }: IOwnerRow) {
+export function OwnerRow({ owner, description, rightIcon, withoutLink, callback, disabled }: IOwnerRow) {
     const name: string[] = [];
     const linkProps: ILinkProps = {};
     const isUser = owner instanceof Api.User;
@@ -104,7 +105,7 @@ export function OwnerRow({ owner, description, withoutLink, callback, disabled }
             </div>
 
             <Container p={0} mr={0}>
-                {linkProps.component && <IconChevronRight size="0.9rem" stroke={1.5} />}
+                {linkProps.component && createElement(rightIcon || IconChevronRight, { size: '0.9rem', stroke: 1.5 })}
             </Container>
         </Flex>
     );
