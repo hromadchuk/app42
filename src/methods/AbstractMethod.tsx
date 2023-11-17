@@ -7,7 +7,7 @@ import { Api } from 'telegram';
 import { AppContext } from '../contexts/AppContext.tsx';
 import { IFinishBlock, IGetDialogOption, IProgress, MethodContext, TDialogType } from '../contexts/MethodContext.tsx';
 import { CallAPI, formatNumber, Server } from '../lib/helpers.ts';
-import { IRouter, routers } from '../routes.tsx';
+import { IRouter, routes } from '../routes.tsx';
 import { t, td } from '../lib/lang.ts';
 
 // TODO need fix this, progress always null in child components
@@ -20,7 +20,7 @@ export const AbstractMethod = () => {
     const [progress, _setProgress] = useState<IProgress | null>();
     const [finishBlock, _setFinishBlock] = useState<IFinishBlock>();
 
-    const routerInfo = routers.find((router: IRouter) => router.path === location.pathname) as IRouter;
+    const routerInfo = routes.find((router: IRouter) => router.path === location.pathname) as IRouter;
 
     useEffect(() => {
         Server('method', { method: routerInfo.id });

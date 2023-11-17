@@ -5,7 +5,7 @@ import { Api } from 'telegram';
 import { Link } from 'react-router-dom';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { CallAPI, getDocLink } from '../lib/helpers.ts';
-import { routers } from '../routes.tsx';
+import { routes } from '../routes.tsx';
 import Logo from '../components/Logo.tsx';
 import { t } from '../lib/lang.ts';
 
@@ -27,7 +27,7 @@ const MenuPage = () => {
         });
     }, []);
 
-    const links = routers
+    const links = routes
         .filter((item) => item.isMethod)
         .map((item, key) => (
             <Link key={key} className={classes.link} to={item.path}>
