@@ -36,6 +36,7 @@ import {
     TCorrectMessage
 } from '../lib/methods/messages.ts';
 import { RecordRow } from '../components/RecordRow.tsx';
+import dayjs from 'dayjs';
 
 type TPeriodType = [Date | null, Date | null];
 
@@ -75,6 +76,7 @@ interface IScanDataCalculation {
 }
 
 interface IScanDataResult {
+    period: string;
     records: number;
     voiceDuration: number;
     roundDuration: number;
@@ -270,14 +272,30 @@ export const RecordsStat = () => {
         };
 
         const activityTime = new CalculateActivityTime();
+        const messageMediaGroupsIds: number[] = [];
         records.forEach((record) => {
             activityTime.add(Number(selectedChannel?.id.valueOf()), record.date);
+
+            if (record.groupedId) {
+                const groupId = record.groupedId.valueOf();
+                if (messageMediaGroupsIds.includes(groupId)) {
+                    return;
+                }
+
+                messageMediaGroupsIds.push(groupId);
+            }
+
+            if (record.media instanceof Api.MessageMediaUnsupported) {
+                return;
+            }
 
             if (record instanceof Api.MessageService) {
                 const action = record.action;
                 if (action instanceof Api.MessageActionGroupCall && action.duration) {
                     statData.callDuration += action.duration;
                 }
+
+                return;
             }
 
             getRecordReactionsStats(record, statData);
@@ -304,6 +322,7 @@ export const RecordsStat = () => {
         setRecordsByTime(activityTime);
 
         const stat: IScanDataResult = {
+            period: getSelectedPeriod(statData.firstMessage, statData.lastMessage),
             records: statData.records,
             voiceDuration: statData.voiceDuration,
             roundDuration: statData.roundDuration,
@@ -341,7 +360,7 @@ export const RecordsStat = () => {
                 icon: IconHeart,
                 records: stats.reactions.total.records
             }
-        ];
+        ].filter((tab) => Object.values(tab.records).length);
     }
 
     function getRecordReactionsStats(record: TCorrectMessage, statData: IScanDataCalculation): void {
@@ -442,7 +461,7 @@ export const RecordsStat = () => {
         const recordCommentsCount = record.replies?.replies;
         if (recordCommentsCount) {
             statData.commentsTotal += recordCommentsCount;
-            pushStatCountToStatRecords(statData.views, recordCommentsCount, record);
+            pushStatCountToStatRecords(statData.comments, recordCommentsCount, record);
         }
     }
 
@@ -498,6 +517,17 @@ export const RecordsStat = () => {
         return undefined;
     }
 
+    function getSelectedPeriod(firstMessage: TCorrectMessage, lastMessage: TCorrectMessage): string {
+        const firstMessageDate = dayjs.unix(firstMessage.date).format('DD.MM.YYYY');
+        const lastMessageDate = dayjs.unix(lastMessage.date).format('DD.MM.YYYY');
+
+        if (firstMessageDate === lastMessageDate) {
+            return firstMessageDate;
+        }
+
+        return `${firstMessageDate} - ${lastMessageDate}`;
+    }
+
     function getReactionsElement(stats: IScanDataResult): JSX.Element {
         const reactions = stats.reactions.reactions;
         const reactionsEmoticons = Object.keys(reactions).sort(
@@ -505,7 +535,7 @@ export const RecordsStat = () => {
         );
 
         return (
-            <Group pt={10}>
+            <Group pt={10} gap={8}>
                 {reactionsEmoticons.map((reaction) => (
                     <Badge key={reaction} leftSection={reaction} size="lg" color="gray">
                         {formatNumber(reactions[reaction].count)}
@@ -599,9 +629,7 @@ export const RecordsStat = () => {
                 <OwnerRow
                     owner={selectedChannel}
                     withoutLink={true}
-                    description={mt('stat_date')
-                        .replace('{dateFrom}', (recordsPeriod[0] as Date).toLocaleDateString())
-                        .replace('{dateTo}', (recordsPeriod[1] as Date).toLocaleDateString())}
+                    description={mt('stat_date').replace('{period}', statResult.period)}
                 />
                 <Divider my="xs" />
 

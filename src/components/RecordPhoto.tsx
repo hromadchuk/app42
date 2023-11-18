@@ -3,7 +3,7 @@ import { useIntersection } from '@mantine/hooks';
 import { getMessagePhoto } from '../lib/helpers.ts';
 import { ExAvatar } from './ExAvatar.tsx';
 import { Api } from 'telegram';
-import { IconPhotoMinus } from '@tabler/icons-react';
+import { IconPhoto } from '@tabler/icons-react';
 
 export function RecordPhoto({ photo }: { photo?: Api.TypePhoto }) {
     const { ref, entry } = useIntersection();
@@ -36,7 +36,7 @@ export function RecordPhoto({ photo }: { photo?: Api.TypePhoto }) {
     return (
         <div ref={ref}>
             <Avatar>
-                <IconPhotoMinus size="1.5rem" />
+                <IconPhoto size="1.5rem" />
             </Avatar>
         </div>
     );
