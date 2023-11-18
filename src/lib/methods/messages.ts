@@ -140,7 +140,7 @@ export async function getMessages({
         }
 
         processMessages.push(...partMessages);
-        setProgress({ addCount: limit });
+        setProgress({ addCount: partMessages.length });
 
         params.offsetId = partMessages[partMessages.length - 1].id;
     }

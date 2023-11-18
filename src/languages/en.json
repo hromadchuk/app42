@@ -299,7 +299,7 @@
       "incorrect_period": "You have selected the wrong period for the channel",
       "channel_not_selected": "You are not select any channel yet",
       "get_stats": "Get stats for period",
-      "stat_date": "Stats from {dateFrom} to {dateTo}",
+      "stat_date": "Statistics for {period}",
       "headers": {
         "period": "Select the period for stats",
         "count": "Records",
