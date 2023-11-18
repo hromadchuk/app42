@@ -979,5 +979,4 @@ export const MessagesStat = () => {
     );
 };
 
-// @ts-ignore
 export default MessagesStat;

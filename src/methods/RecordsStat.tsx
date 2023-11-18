@@ -271,8 +271,7 @@ export const RecordsStat = () => {
 
         const activityTime = new CalculateActivityTime();
         records.forEach((record) => {
-            // @ts-ignore
-            activityTime.add(Number(selectedChannel.id.valueOf()), record.date);
+            activityTime.add(Number(selectedChannel?.id.valueOf()), record.date);
 
             if (record instanceof Api.MessageService) {
                 const action = record.action;
@@ -593,19 +592,16 @@ export const RecordsStat = () => {
         tabs.push(...getEmojiTabs(statResult));
         tabsList.push(...getEmojiTabsList(statResult));
 
-        const tabRecords = getSelectedTabObject(tabs)?.records;
+        const tabRecords = (getSelectedTabObject(tabs) as ITabTops).records;
 
-        // @ts-ignore
         return (
             <>
                 <OwnerRow
                     owner={selectedChannel}
                     withoutLink={true}
                     description={mt('stat_date')
-                        // @ts-ignore
-                        .replace('{dateFrom}', recordsPeriod[0]?.toLocaleDateString())
-                        // @ts-ignore
-                        .replace('{dateTo}', recordsPeriod[1]?.toLocaleDateString())}
+                        .replace('{dateFrom}', (recordsPeriod[0] as Date).toLocaleDateString())
+                        .replace('{dateTo}', (recordsPeriod[1] as Date).toLocaleDateString())}
                 />
                 <Divider my="xs" />
 
@@ -618,13 +614,13 @@ export const RecordsStat = () => {
                         icon={item.icon}
                     />
                 ))}
+
                 {getReactionsElement(statResult)}
 
-                <ActivityChart data={recordsByTime?.get(Number(selectedChannel?.id.valueOf()))} />
+                <ActivityChart data={recordsByTime.get(Number(selectedChannel?.id.valueOf()))} />
                 <TabsList tabs={tabsList} onChange={(tabId) => setSelectedTab(tabId as ETabId | string)} />
 
                 {prepareRecordsStatsToDisplay(tabRecords).map((statCount: string) =>
-                    // @ts-ignore
                     tabRecords[statCount].map((record: TCorrectMessage) => (
                         <RecordRow
                             key={selectedTab + record.id}

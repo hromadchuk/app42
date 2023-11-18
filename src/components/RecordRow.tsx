@@ -1,14 +1,13 @@
 import { Container, Flex, Group, UnstyledButton } from '@mantine/core';
 import { IconChevronRight } from '@tabler/icons-react';
+import { Api } from 'telegram';
 import { classNames } from '../lib/helpers.ts';
+import { TCorrectMessage } from '../lib/methods/messages.ts';
+import { InfoRow } from './InfoRow.tsx';
+import { RecordPhoto } from './RecordPhoto.tsx';
 
 // @ts-ignore
 import classes from '../styles/OwnerRow.module.css';
-import { TCorrectMessage } from '../lib/methods/messages.ts';
-import { InfoRow } from './InfoRow.tsx';
-import { Api } from 'telegram';
-import PeerChannel = Api.PeerChannel;
-import { RecordPhoto } from './RecordPhoto.tsx';
 
 interface IRecordRow {
     record: TCorrectMessage;
@@ -30,7 +29,7 @@ export function RecordRow({ record, description, callback }: IRecordRow) {
 
     if (callback) {
         linkProps.onClick = () => callback();
-    } else if (record.peerId instanceof PeerChannel && record.peerId?.channelId.valueOf()) {
+    } else if (record.peerId instanceof Api.PeerChannel && record.peerId?.channelId.valueOf()) {
         linkProps.href = `https://t.me/c/${record.peerId.channelId.valueOf()}/${record.id}`;
         linkProps.target = '_blank';
     }

@@ -337,9 +337,7 @@ export async function getMessagePhoto(photo: Api.TypePhoto): Promise<string | nu
         return cache as string;
     }
 
-    // @ts-ignore
-    const buffer = await window.TelegramClient.downloadMedia(photo);
-    console.log(buffer);
+    const buffer = await window.TelegramClient.downloadMedia(photo as unknown as Api.TypeMessageMedia);
     // @ts-ignore
     const imageCode = Buffer.from(buffer).toString('base64');
     if (imageCode) {
