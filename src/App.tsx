@@ -6,10 +6,10 @@ import { Api, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
 import { AppContext } from './contexts/AppContext.tsx';
 import { AppNotifications } from './components/AppNotifications.tsx';
-import { Constants } from './constants.tsx';
-import { clearOldCache } from './lib/cache.tsx';
-import { getAppLangCode } from './lib/lang.tsx';
-import { IRouter, routers } from './routes.tsx';
+import { Constants } from './constants.ts';
+import { clearOldCache } from './lib/cache.ts';
+import { getAppLangCode } from './lib/lang.ts';
+import { IRouter, routes } from './routes.tsx';
 
 import { AppHeader } from './components/AppHeader.tsx';
 import { AppFooter } from './components/AppFooter.tsx';
@@ -75,7 +75,7 @@ const App = () => {
                     <AppShell header={{ height: 56 }}>
                         <AppHeader user={user} />
                         <AppShell.Main>
-                            <Routes>{routers.map(GetRouter)}</Routes>
+                            <Routes>{routes.map(GetRouter)}</Routes>
                             <AppFooter />
                         </AppShell.Main>
                         <AppNotifications />

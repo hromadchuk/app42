@@ -5,8 +5,8 @@ import { Api } from 'telegram';
 import { AppContext } from '../contexts/AppContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { SelectLanguage } from '../components/SelectLanguage.tsx';
-import { CallAPI } from '../lib/helpers.tsx';
-import { t } from '../lib/lang.tsx';
+import { CallAPI } from '../lib/helpers.ts';
+import { t } from '../lib/lang.ts';
 
 const ProfilePage = () => {
     const { user, setUser } = useContext(AppContext);

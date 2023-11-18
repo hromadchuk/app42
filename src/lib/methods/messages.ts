@@ -1,7 +1,7 @@
 import { Api } from 'telegram';
-import { CallAPI, sleep } from '../helpers.tsx';
+import { CallAPI, sleep } from '../helpers.ts';
 import dayjs from 'dayjs';
-import { Constants } from '../../constants.tsx';
+import { Constants } from '../../constants.ts';
 
 export type TCorrectMessage = Api.Message | Api.MessageService;
 export type TPeer = Api.User | Api.Chat | Api.Channel;

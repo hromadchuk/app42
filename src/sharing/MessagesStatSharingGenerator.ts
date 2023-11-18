@@ -23,7 +23,7 @@ export class MessagesStatSharingGenerator extends SharingGenerator {
         canvas.height = 1724;
         context.textAlign = 'center';
 
-        context.drawImage(await this.getImage('bg_box'), 0, 0);
+        context.drawImage(await this.getImage('bg_message'), 0, 0);
 
         const center = canvas.width / 2;
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Text, useMantineTheme } from '@mantine/core';
 import dayjs from 'dayjs';
-import { getPercent } from '../../lib/helpers.tsx';
+import { getPercent } from '../../lib/helpers.ts';
 import { chartLang } from './chart_helpers.ts';
 
 // @ts-ignore

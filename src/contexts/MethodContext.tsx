@@ -3,6 +3,7 @@ import { Api } from 'telegram';
 
 export interface IProgress {
     count?: number;
+    addCount?: number;
     total?: number;
     text?: string;
     warningText?: string;
@@ -23,7 +24,6 @@ export interface IMethodContext {
     progress?: IProgress | null;
     progressSafe?: IProgress | null;
     setProgress: (progress: IProgress | null) => void;
-    getProgress: () => IProgress;
     finishBlock?: IFinishBlock;
     setFinishBlock: (finishBlock: IFinishBlock) => void;
     needHideContent: () => boolean;

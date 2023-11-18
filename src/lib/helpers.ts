@@ -1,8 +1,8 @@
 import { Buffer } from 'buffer';
 import { notifications } from '@mantine/notifications';
 import { Api } from 'telegram';
-import { getCache, setCache } from './cache.tsx';
-import { getHideUser, isHideMode } from './hide.tsx';
+import { getCache, setCache } from './cache.ts';
+import { getHideUser, isHideMode } from './hide.ts';
 import { getAppLangCode, LangType, t, td } from './lang';
 import { FloodWaitError } from 'telegram/errors';
 
@@ -53,6 +53,8 @@ export async function sleep(milliseconds: number): Promise<void> {
 }
 
 export interface ITime {
+    years: number;
+    months: number;
     days: number;
     hours: number;
     minutes: number;
@@ -60,12 +62,16 @@ export interface ITime {
 }
 
 export function getTime(time: number): ITime {
-    const days = Math.floor(time / 86400);
+    const years = Math.floor(time / 31557600); // 365.25 days per year
+    const months = Math.floor((time % 31557600) / 2629800);
+    const days = Math.floor((time % 2629800) / 86400);
     const hours = Math.floor((time % 86400) / 3600);
     const minutes = Math.floor(((time % 86400) % 3600) / 60);
     const seconds = Math.floor(((time % 86400) % 3600) % 60);
 
     return {
+        years,
+        months,
         days,
         hours,
         minutes,
@@ -73,28 +79,38 @@ export function getTime(time: number): ITime {
     };
 }
 
-export function getTextTime(seconds: number): string {
-    return getStringsTimeArray(seconds).join(' ');
+export function getTextTime(seconds: number, isStrong?: boolean): string {
+    return getStringsTimeArray(seconds, isStrong).join(' ');
 }
 
-export function getStringsTimeArray(seconds: number): string[] {
+export function getStringsTimeArray(seconds: number, isStrong?: boolean): string[] {
     const period = getTime(seconds);
     const result: string[] = [];
+
+    if (period.years) {
+        result.push(`${period.years} ${decline(period.years, td('common.time.years'))}`);
+    }
+
+    if (period.months) {
+        result.push(`${period.months} ${decline(period.months, td('common.time.months'))}`);
+    }
 
     if (period.days) {
         result.push(`${period.days} ${decline(period.days, td('common.time.days'))}`);
     }
 
-    if (period.hours) {
-        result.push(`${period.hours} ${decline(period.hours, td('common.time.hours'))}`);
-    }
+    if (!isStrong) {
+        if (period.hours) {
+            result.push(`${period.hours} ${decline(period.hours, td('common.time.hours'))}`);
+        }
 
-    if (period.minutes) {
-        result.push(`${period.minutes} ${decline(period.minutes, td('common.time.minutes'))}`);
-    }
+        if (period.minutes) {
+            result.push(`${period.minutes} ${decline(period.minutes, td('common.time.minutes'))}`);
+        }
 
-    if (period.seconds) {
-        result.push(`${period.seconds} ${decline(period.seconds, td('common.time.seconds'))}`);
+        if (period.seconds) {
+            result.push(`${period.seconds} ${decline(period.seconds, td('common.time.seconds'))}`);
+        }
     }
 
     return result;
@@ -120,12 +136,11 @@ export async function CallAPI<R extends Api.AnyRequest>(
 
     await sleep(100);
 
-    console.group(`API ${method}`);
-    console.log('Request:', request);
-
     try {
         const result = await window.TelegramClient.invoke(request);
 
+        console.group(`API.${method}`);
+        console.log('Request:', request);
         console.log('Result:', result);
         console.groupEnd();
 
@@ -145,6 +160,8 @@ export async function CallAPI<R extends Api.AnyRequest>(
 
         return result;
     } catch (error: unknown) {
+        console.group(`API.${method}`);
+        console.log('Request:', request);
         console.error('Error:', error);
         console.groupEnd();
 
@@ -294,7 +311,7 @@ export async function getAvatar(owner: Api.User | Api.Channel | Api.Chat): Promi
 
     const userPhoto = owner.photo as Api.UserProfilePhoto;
     const cacheKey = `owner-avatar-${userPhoto?.photoId}`;
-    const cache = getCache(cacheKey);
+    const cache = await getCache(cacheKey);
     if (cache) {
         return cache as string;
     }
@@ -305,7 +322,7 @@ export async function getAvatar(owner: Api.User | Api.Channel | Api.Chat): Promi
     if (imageCode) {
         const imageBase64 = `data:image/jpeg;base64,${imageCode}`;
 
-        setCache(cacheKey, imageBase64, 30);
+        await setCache(cacheKey, imageBase64, 30);
 
         return imageBase64;
     }

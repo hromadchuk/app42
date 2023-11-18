@@ -24,10 +24,10 @@ import { Api } from 'telegram';
 import { computeCheck } from 'telegram/Password';
 import { CountryFlag } from '../components/CountryFlag.tsx';
 import Logo from '../components/Logo.tsx';
-import { CallAPI, getDocLink, Server } from '../lib/helpers.tsx';
-import { getAppLangCode, t } from '../lib/lang.tsx';
+import { CallAPI, getDocLink, Server } from '../lib/helpers.ts';
+import { getAppLangCode, t } from '../lib/lang.ts';
 
-import { Constants } from '../constants.tsx';
+import { Constants } from '../constants.ts';
 import { AppContext } from '../contexts/AppContext.tsx';
 
 // @ts-ignore

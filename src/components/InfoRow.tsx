@@ -1,7 +1,7 @@
 import { createElement, JSX } from 'react';
 import { Container, Flex, Group, Text } from '@mantine/core';
 import { TablerIconsProps } from '@tabler/icons-react';
-import { formatNumber } from '../lib/helpers.tsx';
+import { formatNumber } from '../lib/helpers.ts';
 
 interface IInfoRow {
     title: string;

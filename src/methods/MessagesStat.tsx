@@ -45,7 +45,7 @@ import {
     IPeriodData,
     TPeer
 } from '../lib/methods/messages.ts';
-import { CallAPI, declineAndFormat, formatNumber, getStringsTimeArray, getTextTime } from '../lib/helpers.tsx';
+import { CallAPI, declineAndFormat, formatNumber, getStringsTimeArray, getTextTime } from '../lib/helpers.ts';
 import { MessagesStatSharingGenerator } from '../sharing/MessagesStatSharingGenerator.ts';
 
 type TCorrectMessage = Api.Message | Api.MessageService;
@@ -978,4 +978,5 @@ export const MessagesStat = () => {
     );
 };
 
+// @ts-ignore
 export default MessagesStat;

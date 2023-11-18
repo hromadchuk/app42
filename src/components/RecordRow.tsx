@@ -1,6 +1,6 @@
 import { Container, Flex, Group, UnstyledButton } from '@mantine/core';
 import { IconChevronRight } from '@tabler/icons-react';
-import { classNames } from '../lib/helpers.tsx';
+import { classNames } from '../lib/helpers.ts';
 
 // @ts-ignore
 import classes from '../styles/OwnerRow.module.css';
