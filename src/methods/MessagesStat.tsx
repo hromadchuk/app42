@@ -219,7 +219,8 @@ export const MessagesStat = () => {
             peer,
             total,
             endTime,
-            peerInfo: ownersInfo
+            peerInfo: ownersInfo,
+            setProgress
         });
 
         setOwnerMessages(messages);

@@ -215,7 +215,8 @@ export const RecordsStat = () => {
             total,
             startDate,
             endTime,
-            peerInfo: channelsInfo
+            peerInfo: channelsInfo,
+            setProgress
         });
 
         setChannelRecords(records);

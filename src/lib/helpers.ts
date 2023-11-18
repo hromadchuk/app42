@@ -332,7 +332,7 @@ export async function getAvatar(owner: Api.User | Api.Channel | Api.Chat): Promi
 
 export async function getMessagePhoto(photo: Api.TypePhoto): Promise<string | null> {
     const cacheKey = `message-photo-${photo.id}`;
-    const cache = getCache(cacheKey);
+    const cache = await getCache(cacheKey);
     if (cache) {
         return cache as string;
     }

@@ -2,6 +2,7 @@ import { Api } from 'telegram';
 import { CallAPI, sleep } from '../helpers.ts';
 import dayjs from 'dayjs';
 import { Constants } from '../../constants.ts';
+import { IProgress } from '../../contexts/MethodContext.tsx';
 
 export type TCorrectMessage = Api.Message | Api.MessageService;
 export type TPeer = Api.User | Api.Chat | Api.Channel;
@@ -30,6 +31,7 @@ export interface IGetMessagesCallbackArguments {
 
 export interface IGetMessagesArguments extends IGetMessagesCallbackArguments {
     peerInfo: Map<number, TPeer>;
+    setProgress: (progress: IProgress | null) => void;
 }
 
 export async function getTotalMessagesCount(channelId: Api.long): Promise<number> {
@@ -97,12 +99,20 @@ export async function calculatePeriodsMessagesCount(
     return periodsData;
 }
 
-export async function getMessages({ peer, total, endTime, startDate = null, peerInfo }: IGetMessagesArguments) {
+export async function getMessages({
+    peer,
+    total,
+    endTime,
+    startDate = null,
+    peerInfo,
+    setProgress
+}: IGetMessagesArguments) {
     const processMessages: TCorrectMessage[] = [];
+    const limit = 100;
 
     const params: IGetHistoryParams = {
         peer: peer.id,
-        limit: 100
+        limit
     };
 
     if (startDate !== null) {
@@ -130,8 +140,7 @@ export async function getMessages({ peer, total, endTime, startDate = null, peer
         }
 
         processMessages.push(...partMessages);
-        console.log(`count: ${processMessages.length}`);
-        // setProgress({ ...getProgress(), count: processMessages.length });
+        setProgress({ addCount: limit });
 
         params.offsetId = partMessages[partMessages.length - 1].id;
     }
