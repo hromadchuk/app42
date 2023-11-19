@@ -5,7 +5,7 @@ import { TablerIconsProps } from '@tabler/icons-react';
 export interface ITabItem {
     id: string;
     name: string;
-    icon: (props: TablerIconsProps) => JSX.Element;
+    icon?: (props: TablerIconsProps) => JSX.Element;
 }
 
 export interface ITabsList {
@@ -34,7 +34,7 @@ export function TabsList({ tabs, onChange }: ITabsList) {
             <Tabs defaultValue={defaultTabId} onChange={(value) => handleTabChange(value as string)} w={'max-content'}>
                 <Tabs.List>
                     {tabs.map((tab) => (
-                        <Tabs.Tab key={tab.id} leftSection={<tab.icon size={14} />} value={tab.id}>
+                        <Tabs.Tab key={tab.id} leftSection={tab.icon ? <tab.icon size={14} /> : ''} value={tab.id}>
                             {tab.name}
                         </Tabs.Tab>
                     ))}
