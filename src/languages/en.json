@@ -54,6 +54,9 @@
     "no_dialogs": "Dialogs not found",
     "search_placeholder": "Type to search"
   },
+  "record_row": {
+    "record": "Record"
+  },
   "menu": {
     "documentation": "Documentation",
     "donate": "Support the project",
@@ -77,7 +80,8 @@
     "administered": "Administrated chats and channels",
     "common_chats_top": "Top of contacts by common chats",
     "calls_stat": "Calls stat",
-    "channels_registration": "Channels registration"
+    "channels_registration": "Channels registration",
+    "records_stat": "Records stat"
   },
   "charts": {
     "activity": {
@@ -289,6 +293,62 @@
     "channels_registration": {
       "no_created": "You don't have any created channels",
       "created": "{time} ago"
+    },
+    "records_stat": {
+      "loading_records": "Getting records",
+      "loading_calculation": "Calculating stats",
+      "no_records": "No records in the channel",
+      "no_records_for_period": "No records in the channel for selected period",
+      "incorrect_period": "You have selected the wrong period for the channel",
+      "channel_not_selected": "You are not select any channel yet",
+      "get_stats": "Get stats for period",
+      "stat_date": "Statistics for {period}",
+      "headers": {
+        "period": "Select the period for stats",
+        "count": "Records",
+        "reactions": "Reactions",
+        "attachments": "Attachments",
+        "comments": "Comments",
+        "views": "Views",
+        "stickers": "Stickers",
+        "voice_duration": "Voices duration",
+        "round_duration": "Videos duration",
+        "call_duration": "Calls duration"
+      },
+      "reactions_description": "Collected reactions on messages",
+      "periods": {
+        "0": "All time",
+        "1": "Day",
+        "3": "3 days",
+        "7": "Week",
+        "14": "2 weeks",
+        "30": "Month",
+        "90": "Quarter",
+        "180": "6 months",
+        "365": "Year"
+      },
+      "decline": {
+        "records": [
+          "record",
+          "records",
+          "records"
+        ],
+        "reactions": [
+          "reaction",
+          "reactions",
+          "reactions"
+        ],
+        "views": [
+          "view",
+          "views",
+          "views"
+        ],
+        "comments": [
+          "comment",
+          "comments",
+          "comments"
+        ]
+      }
     }
   }
 }

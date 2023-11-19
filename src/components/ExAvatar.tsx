@@ -6,7 +6,7 @@ interface ILettersAvatar extends AvatarProps {
     letters?: string;
 }
 
-export function ExAvatar({ id, letters, src, ...props }: ILettersAvatar) {
+export function ExAvatar({ id, letters, src, children, ...props }: ILettersAvatar) {
     const theme = useMantineTheme();
 
     function getAvatarColor(): string {
@@ -21,7 +21,7 @@ export function ExAvatar({ id, letters, src, ...props }: ILettersAvatar) {
 
     return (
         <Avatar color={getAvatarColor()} radius="xl" {...props}>
-            {letters}
+            {letters || children}
         </Avatar>
     );
 }

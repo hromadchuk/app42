@@ -11,6 +11,7 @@ import {
     IconMessageCircleSearch,
     IconMessageCircleUp,
     IconPhoneCall,
+    IconReportAnalytics,
     IconThumbDownOff,
     TablerIconsProps
 } from '@tabler/icons-react';
@@ -115,6 +116,11 @@ const appRoutes: IAppRouter[] = [
                 id: 'channels_registration',
                 icon: IconCalendarPlus,
                 element: createElement(lazy(() => import('./methods/ChannelsRegistration.tsx')))
+            },
+            {
+                id: 'records_stat',
+                icon: IconReportAnalytics,
+                element: createElement(lazy(() => import('./methods/RecordsStat.tsx')))
             }
         ]
     }
