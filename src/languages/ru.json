@@ -54,6 +54,9 @@
     "no_dialogs": "Диалоги не найдены",
     "search_placeholder": "Введите для поиска"
   },
+  "record_row": {
+    "record": "Запись"
+  },
   "menu": {
     "documentation": "Документация",
     "donate": "Поддержать проект",

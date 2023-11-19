@@ -54,6 +54,9 @@
     "no_dialogs": "Dialogs not found",
     "search_placeholder": "Type to search"
   },
+  "record_row": {
+    "record": "Record"
+  },
   "menu": {
     "documentation": "Documentation",
     "donate": "Support the project",

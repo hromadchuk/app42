@@ -2,6 +2,7 @@ import { Container, Flex, Group, UnstyledButton } from '@mantine/core';
 import { IconChevronRight } from '@tabler/icons-react';
 import { Api } from 'telegram';
 import { classNames } from '../lib/helpers.ts';
+import { t } from '../lib/lang.ts';
 import { TCorrectMessage } from '../lib/methods/messages.ts';
 import { InfoRow } from './InfoRow.tsx';
 import { RecordPhoto } from './RecordPhoto.tsx';
@@ -46,7 +47,11 @@ export function RecordRow({ record, description, callback }: IRecordRow) {
         >
             <Group wrap="nowrap">
                 <RecordPhoto photo={record.photo} />
-                <InfoRow title={record.message || ''} titleLineClamp={2} description={description} />
+                <InfoRow
+                    title={record.message || t('record_row.record')}
+                    titleLineClamp={2}
+                    description={description}
+                />
             </Group>
 
             <Container p={0} mr={0}>

@@ -231,6 +231,7 @@ export const RecordsStat = () => {
 
     async function calcStatistic() {
         let records;
+
         try {
             records = await getRecords();
         } catch (error) {
@@ -244,7 +245,6 @@ export const RecordsStat = () => {
 
         setProgress({ text: mt('loading_calculation') });
 
-        const groupedIds = new Set<number>();
         const statData: IScanDataCalculation = {
             firstMessage: records.reduce((prev, current) => {
                 return prev.date < current.date ? prev : current;
@@ -272,21 +272,36 @@ export const RecordsStat = () => {
         };
 
         const activityTime = new CalculateActivityTime();
-        const messageMediaGroupsIds: number[] = [];
+
+        // find first grouped message
+        const groupedMessagesIds = new Map<number, number>();
+        records.forEach((record) => {
+            if (record.groupedId) {
+                const recordId = record.id.valueOf();
+                const groupId = record.groupedId.valueOf();
+                const currentValue = groupedMessagesIds.get(groupId) || 0;
+
+                if (!currentValue || currentValue > recordId) {
+                    groupedMessagesIds.set(groupId, recordId);
+                }
+            }
+        });
+
         records.forEach((record) => {
             activityTime.add(Number(selectedChannel?.id.valueOf()), record.date);
 
-            if (record.groupedId) {
-                const groupId = record.groupedId.valueOf();
-                if (messageMediaGroupsIds.includes(groupId)) {
-                    return;
-                }
-
-                messageMediaGroupsIds.push(groupId);
-            }
-
             if (record.media instanceof Api.MessageMediaUnsupported) {
                 return;
+            }
+
+            // skip second and next messages in group
+            if (record.groupedId) {
+                const groupId = record.groupedId.valueOf();
+                const groupedFirstMessageId = groupedMessagesIds.get(groupId) as number;
+
+                if (groupedFirstMessageId !== record.id.valueOf()) {
+                    return;
+                }
             }
 
             if (record instanceof Api.MessageService) {
@@ -306,14 +321,6 @@ export const RecordsStat = () => {
             const recordCommentsCount = record.replies?.replies;
             if (recordCommentsCount) {
                 statData.commentsTotal += recordCommentsCount;
-            }
-
-            if (record.groupedId) {
-                if (groupedIds.has(record.groupedId.valueOf())) {
-                    return;
-                }
-
-                groupedIds.add(record.groupedId.valueOf());
             }
 
             statData.records++;
@@ -720,10 +727,8 @@ export const RecordsStat = () => {
         <SelectDialog
             allowTypes={[EOwnerType.channel]}
             onOwnerSelect={(channel) => {
-                // @ts-ignore
-                setSelectedChannel(channel);
-                // @ts-ignore
-                calculateEmbeddedPeriods(channel);
+                setSelectedChannel(channel as Api.Channel);
+                calculateEmbeddedPeriods(channel as Api.Channel);
             }}
         />
     );
