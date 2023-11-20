@@ -1,8 +1,13 @@
 import { CacheDataType, ICacheData, Kit42Database } from './database.ts';
+import { Constants } from '../constants.ts';
 
 const db = new Kit42Database();
 
 function getPrefix(key: string): string {
+    if ([Constants.AUTH_STATE_NUMBER_KEY].includes(key)) {
+        return key;
+    }
+
     return `${window.userId}:${key}`;
 }
 

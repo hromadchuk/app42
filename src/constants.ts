@@ -3,6 +3,7 @@ interface IConstants {
     API_HASH: string;
     SESSION_KEY: string;
     BOT_USERNAME: string;
+    AUTH_STATE_NUMBER_KEY: string;
     TELEGRAM_FOUNDATION_DATE: number;
 }
 
@@ -11,5 +12,6 @@ export const Constants: IConstants = {
     API_HASH: 'd4384e436536198944078fafd63aa051',
     SESSION_KEY: 'kit42Session',
     BOT_USERNAME: 'kit42bot',
+    AUTH_STATE_NUMBER_KEY: 'authStateNumber',
     TELEGRAM_FOUNDATION_DATE: 1376352000
 };
