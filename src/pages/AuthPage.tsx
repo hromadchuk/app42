@@ -24,6 +24,7 @@ import { Api } from 'telegram';
 import { computeCheck } from 'telegram/Password';
 import { CountryFlag } from '../components/CountryFlag.tsx';
 import Logo from '../components/Logo.tsx';
+import { getCache, removeCache, setCache } from '../lib/cache.ts';
 import { CallAPI, getDocLink, Server } from '../lib/helpers.ts';
 import { getAppLangCode, t } from '../lib/lang.ts';
 
@@ -54,6 +55,13 @@ interface IInputCountry {
     code: string;
     prefix: number;
     pattern?: string;
+}
+
+interface IAuthStateNumber {
+    countryCode: string;
+    numberSuffix: string;
+    phoneCodeHash: string;
+    phoneCode: number;
 }
 
 // TODO need fix this strange hack
@@ -95,6 +103,8 @@ const AuthPage = () => {
         }
     });
 
+    const save = () => localStorage.setItem(Constants.SESSION_KEY, `${window.TelegramClient.session.save()}`);
+
     useEffect(() => {
         setAppLoading(true);
 
@@ -103,7 +113,17 @@ const AuthPage = () => {
 
             await window.TelegramClient.connect();
 
-            if (!session) {
+            const authStateNumber = (await getCache(Constants.AUTH_STATE_NUMBER_KEY)) as IAuthStateNumber;
+            if (authStateNumber) {
+                await getAuthData();
+                setSelectedCountry(authStateNumber.countryCode);
+                setPhoneCodeHash(authStateNumber.phoneCodeHash);
+                setCodeLength(authStateNumber.phoneCode);
+                setNumber(authStateNumber.numberSuffix);
+                setSate(AuthState.code);
+                setLoading(false);
+                setAppLoading(false);
+            } else if (!session) {
                 await getAuthData();
                 setSate(AuthState.number);
                 setLoading(false);
@@ -243,9 +263,22 @@ const AuthPage = () => {
                 { hideErrorAlert: true }
             )) as Api.auth.SentCode;
 
-            setPhoneCodeHash(result.phoneCodeHash);
+            const phoneCodeHashResult = result.phoneCodeHash as string;
             // @ts-ignore
-            setCodeLength(result.type?.length);
+            const phoneCodeLengthResult = result.type?.length;
+
+            const setData: IAuthStateNumber = {
+                countryCode: country.code,
+                numberSuffix: number,
+                phoneCodeHash: phoneCodeHashResult,
+                phoneCode: phoneCodeLengthResult
+            };
+
+            await setCache(Constants.AUTH_STATE_NUMBER_KEY, setData, 15);
+            save();
+
+            setPhoneCodeHash(phoneCodeHashResult);
+            setCodeLength(phoneCodeLengthResult);
             setSate(AuthState.code);
         } catch (error) {
             // @ts-ignore
@@ -274,7 +307,7 @@ const AuthPage = () => {
                 { hideErrorAlert: true }
             );
 
-            localStorage.setItem(Constants.SESSION_KEY, `${window.TelegramClient.session.save()}`);
+            save();
 
             await getCurrentUser();
         } catch (error) {
@@ -288,6 +321,8 @@ const AuthPage = () => {
                 setCodeError(error.message);
             }
         }
+
+        await removeCache(Constants.AUTH_STATE_NUMBER_KEY);
 
         setLoading(false);
         setAppLoading(false);
@@ -305,7 +340,7 @@ const AuthPage = () => {
                 hideErrorAlert: true
             });
 
-            localStorage.setItem(Constants.SESSION_KEY, `${window.TelegramClient.session.save()}`);
+            save();
 
             await getCurrentUser();
         } catch (error) {
@@ -423,6 +458,7 @@ const AuthPage = () => {
                         placeholder={getInputMask() || '000 000 0000'}
                         className={authClasses.selectCountryInput}
                         disabled={hasState([AuthState.code, AuthState.password])}
+                        value={number}
                         // @ts-ignore
                         onChange={(e) => setNumber(e.target.value)}
                     />
@@ -512,6 +548,19 @@ const AuthPage = () => {
                 onClick: confirmPassword,
                 name: t('auth_page.button_confirm_password')
             })}
+            {[AuthState.code, AuthState.password].includes(state) && (
+                <Button
+                    fullWidth
+                    variant="transparent"
+                    mt="xs"
+                    onClick={async () => {
+                        await removeCache(Constants.AUTH_STATE_NUMBER_KEY);
+                        window.location.reload();
+                    }}
+                >
+                    Reset auth
+                </Button>
+            )}
 
             {state === AuthState.number && (
                 <>
