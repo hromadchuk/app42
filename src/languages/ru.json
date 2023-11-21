@@ -7,7 +7,10 @@
     "button_send_code": "Отправить код",
     "button_confirm_code": "Подтвердить код",
     "button_confirm_password": "Подтвердить пароль",
-    "search_placeholder": "Введите для поиска"
+    "search_placeholder": "Введите для поиска",
+    "reset_auth_button": "Сбросить авторизацию",
+    "code_description": "Код должен прийти на сервисный аккаунт с номером +42777",
+    "code_account_button": "Открыть сервисный аккаунт"
   },
   "common": {
     "progress": "Загрузка",

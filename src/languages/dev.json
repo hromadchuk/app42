@@ -7,7 +7,10 @@
     "button_send_code": "Send code",
     "button_confirm_code": "Confirm code",
     "button_confirm_password": "Confirm password",
-    "search_placeholder": "Type to search"
+    "search_placeholder": "Type to search",
+    "reset_auth_button": "Reset authorization",
+    "code_description": "The code should come to the service account with +42777 number",
+    "code_account_button": "Open service account"
   },
   "common": {
     "progress": "Loading",

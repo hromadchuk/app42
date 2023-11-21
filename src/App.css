@@ -12,7 +12,7 @@ body {
 * {
     touch-action: manipulation;
     -webkit-touch-callout: none;
-    -webkit-user-select: none;
+    /*-webkit-user-select: none;*/
 }
 
 @media (pointer: fine) {

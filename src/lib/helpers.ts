@@ -12,6 +12,10 @@ export function formatNumber(number: number): string {
     return `${number}`.replace(/(\d)(?=(\d{3})+$)/g, '$1\u00a0');
 }
 
+export function getParams() {
+    return new URLSearchParams(location.hash.slice(1));
+}
+
 export function decline(number: number, titles: string[]): string {
     const langCode = getAppLangCode();
 
@@ -272,33 +276,27 @@ const apiEndpoint =
     location.hostname === 'gromadchuk.github.io' ? 'https://kit42.gromadchuk.com' : `http://${location.hostname}`;
 
 export async function Server(method: string, params: object = {}): Promise<object> {
-    console.group(`SERVER /${method}`);
-    console.log('Request:', params);
+    const authData = getParams().get('tgWebAppData');
 
-    if (!window.authData) {
+    if (!authData) {
         console.log('No auth data');
     }
 
-    if (isDev) {
-        console.log('Dev mode, skip request');
-        console.groupEnd();
-    } else {
-        const data = await fetch(`${apiEndpoint}/api/${method}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                authData: window.authData
-            },
-            body: JSON.stringify(params)
-        }).then((response) => response.json());
+    const data = await fetch(`${apiEndpoint}/api/${method}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            authData: authData as string
+        },
+        body: JSON.stringify(params)
+    }).then((response) => response.json());
 
-        console.log('Result:', data);
-        console.groupEnd();
+    console.group(`SERVER /${method}`);
+    console.log('Request:', params);
+    console.log('Result:', data);
+    console.groupEnd();
 
-        return data as object;
-    }
-
-    return {};
+    return data as object;
 }
 
 export async function getAvatar(owner: Api.User | Api.Channel | Api.Chat): Promise<string | null> {

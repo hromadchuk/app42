@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { AppShell, MantineProvider } from '@mantine/core';
 import { useColorScheme } from '@mantine/hooks';
-import { HashRouter, Route, Routes } from 'react-router-dom';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { Api, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
 import { AppContext } from './contexts/AppContext.tsx';
 import { AppNotifications } from './components/AppNotifications.tsx';
 import { Constants } from './constants.ts';
 import { clearOldCache } from './lib/cache.ts';
+import { getParams, isDev, Server } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
 import { IRouter, routes } from './routes.tsx';
 
@@ -23,7 +24,7 @@ declare global {
         TelegramClient: TelegramClient;
         listenEvents: { [key: string]: (event: object) => void };
         userId: number;
-        authData: string;
+        eruda: { init: () => void };
     }
 }
 
@@ -56,6 +57,7 @@ const App = () => {
             localStorage.clear();
             localStorage.setItem(versionKey, version);
             location.reload();
+            return;
         }
 
         window.listenEvents = {};
@@ -64,6 +66,23 @@ const App = () => {
                 window.listenEvents[event.className](event);
             }
         });
+
+        try {
+            Server('init', { platform: getParams().get('tgWebAppPlatform') });
+        } catch (error) {
+            console.error(`Error init app: ${error}`);
+        }
+
+        if (isDev) {
+            (() => {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/eruda';
+                document.body.append(script);
+                script.onload = () => {
+                    window.eruda.init();
+                };
+            })();
+        }
     }, []);
 
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
@@ -71,7 +90,7 @@ const App = () => {
     return (
         <MantineProvider forceColorScheme={useColorScheme()}>
             <AppContext.Provider value={{ user, setUser, isAppLoading, setAppLoading }}>
-                <HashRouter>
+                <MemoryRouter>
                     <AppShell header={{ height: 56 }}>
                         <AppHeader user={user} />
                         <AppShell.Main>
@@ -80,7 +99,7 @@ const App = () => {
                         </AppShell.Main>
                         <AppNotifications />
                     </AppShell>
-                </HashRouter>
+                </MemoryRouter>
             </AppContext.Provider>
         </MantineProvider>
     );
