@@ -9,6 +9,7 @@ import {
     Flex,
     Input,
     Loader,
+    Notification,
     PasswordInput,
     PinInput,
     ScrollArea,
@@ -17,7 +18,6 @@ import {
     useCombobox
 } from '@mantine/core';
 import { IconBook2, IconSelector } from '@tabler/icons-react';
-import { useOs } from '@mantine/hooks';
 import { IMaskInput } from 'react-imask';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Api } from 'telegram';
@@ -25,7 +25,7 @@ import { computeCheck } from 'telegram/Password';
 import { CountryFlag } from '../components/CountryFlag.tsx';
 import Logo from '../components/Logo.tsx';
 import { getCache, removeCache, setCache } from '../lib/cache.ts';
-import { CallAPI, getDocLink, Server } from '../lib/helpers.ts';
+import { CallAPI, getDocLink } from '../lib/helpers.ts';
 import { getAppLangCode, t } from '../lib/lang.ts';
 
 import { Constants } from '../constants.ts';
@@ -64,15 +64,10 @@ interface IAuthStateNumber {
     phoneCode: number;
 }
 
-// TODO need fix this strange hack
-let userPlatform = 'kit42';
-
 const AuthPage = () => {
     const { setUser, setAppLoading } = useContext(AppContext);
     const navigate = useNavigate();
     const location = useLocation();
-
-    userPlatform = useOs();
 
     const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
     const [searchCountry, setSearchCountry] = useState('');
@@ -137,47 +132,14 @@ const AuthPage = () => {
     async function getCurrentUser() {
         try {
             const query = new URLSearchParams(location.search);
-            const users = (await CallAPI(
+            const [user] = (await CallAPI(
                 new Api.users.GetUsers({
-                    id: [new Api.InputUserSelf(), Constants.BOT_USERNAME]
+                    id: [new Api.InputUserSelf()]
                 }),
                 { hideErrorAlert: true }
             )) as Api.User[];
 
-            const bot = users.find((findUser) => findUser.username === Constants.BOT_USERNAME) as Api.User;
-            const user = users.find((findUser) => findUser.username !== Constants.BOT_USERNAME) as Api.User;
-
             window.userId = user.id.valueOf();
-
-            try {
-                const botApp = (
-                    await CallAPI(
-                        new Api.messages.GetBotApp({
-                            app: new Api.InputBotAppShortName({
-                                shortName: 'kit42',
-                                botId: new Api.InputUser({ userId: bot.id, accessHash: bot.accessHash as Api.long })
-                            })
-                        })
-                    )
-                ).app as Api.BotApp;
-
-                const { url } = await CallAPI(
-                    new Api.messages.RequestAppWebView({
-                        peer: Constants.BOT_USERNAME,
-                        app: new Api.InputBotAppID({
-                            id: botApp.id,
-                            accessHash: botApp.accessHash
-                        }),
-                        platform: 'kit42'
-                    })
-                );
-
-                window.authData = new URLSearchParams(url.split('#')[1]).get('tgWebAppData') as string;
-
-                await Server('init', { platform: userPlatform });
-            } catch (error) {
-                console.error(`Error init app: ${error}`);
-            }
 
             setUser(user as Api.User);
             setLoading(false);
@@ -496,6 +458,44 @@ const AuthPage = () => {
         );
     }
 
+    function WarningCodeRow() {
+        if (!hasState([AuthState.code])) {
+            return null;
+        }
+
+        return (
+            <>
+                <Notification mt="xs" withCloseButton={false} color="yellow">
+                    {t('auth_page.code_description')}
+                </Notification>
+
+                <Button fullWidth mt="xs" component="a" href="https://t.me/+42777" target="_blank">
+                    {t('auth_page.code_account_button')}
+                </Button>
+            </>
+        );
+    }
+
+    function ResetAuthRow() {
+        if (!hasState([AuthState.code, AuthState.password])) {
+            return null;
+        }
+
+        return (
+            <Button
+                fullWidth
+                variant="transparent"
+                mt="xs"
+                onClick={async () => {
+                    await removeCache(Constants.AUTH_STATE_NUMBER_KEY);
+                    window.location.reload();
+                }}
+            >
+                {t('auth_page.reset_auth_button')}
+            </Button>
+        );
+    }
+
     const ButtonItemRow = ({ visibleStates = [], disabledValue = '', onClick, name }: IButtonItemRow) => {
         if (!visibleStates.includes(state)) {
             return null;
@@ -548,19 +548,9 @@ const AuthPage = () => {
                 onClick: confirmPassword,
                 name: t('auth_page.button_confirm_password')
             })}
-            {[AuthState.code, AuthState.password].includes(state) && (
-                <Button
-                    fullWidth
-                    variant="transparent"
-                    mt="xs"
-                    onClick={async () => {
-                        await removeCache(Constants.AUTH_STATE_NUMBER_KEY);
-                        window.location.reload();
-                    }}
-                >
-                    Reset auth
-                </Button>
-            )}
+
+            {WarningCodeRow()}
+            {ResetAuthRow()}
 
             {state === AuthState.number && (
                 <>

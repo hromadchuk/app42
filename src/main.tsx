@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-
+import { getParams } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
 
 import dayjs from 'dayjs';
@@ -17,4 +17,10 @@ dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 dayjs.locale(getAppLangCode());
 
-createRoot(document.getElementById('root') as HTMLElement).render(<App />);
+const tgWebAppData = getParams().get('tgWebAppData');
+
+if (!tgWebAppData) {
+    location.href = 'https://t.me/kit42bot/kit42';
+} else {
+    createRoot(document.getElementById('root') as HTMLElement).render(<App />);
+}
