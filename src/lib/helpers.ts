@@ -315,33 +315,52 @@ export async function getAvatar(owner: Api.User | Api.Channel | Api.Chat): Promi
     }
 
     const buffer = await window.TelegramClient.downloadProfilePhoto(owner.id);
-    // @ts-ignore
-    const imageCode = Buffer.from(buffer).toString('base64');
-    if (imageCode) {
-        const imageBase64 = `data:image/jpeg;base64,${imageCode}`;
 
-        await setCache(cacheKey, imageBase64, 30);
-
-        return imageBase64;
-    }
-
-    return null;
+    return await getImageStringFromBuffer(buffer, cacheKey);
 }
 
-export async function getMessagePhoto(photo: Api.TypePhoto): Promise<string | null> {
-    const cacheKey = `message-photo-${photo.id}`;
+export async function getMediaPhoto(photo: Api.TypePhoto): Promise<string | null> {
+    const cacheKey = `media-photo-${photo.id}`;
     const cache = await getCache(cacheKey);
     if (cache) {
         return cache as string;
     }
 
     const buffer = await window.TelegramClient.downloadMedia(photo as unknown as Api.TypeMessageMedia);
+
+    return await getImageStringFromBuffer(buffer, cacheKey);
+}
+
+export async function getMediaVideoPreview(video: Api.Document): Promise<string | null> {
+    const cacheKey = `media-video-preview-${video.id}`;
+    const cache = await getCache(cacheKey);
+    if (cache) {
+        return cache as string;
+    }
+
+    const videoThumbsLength = video.thumbs?.length || 0;
+    if (videoThumbsLength <= 0) {
+        return null;
+    }
+
+    const buffer = await window.TelegramClient.downloadMedia(video as unknown as Api.TypeMessageMedia, {
+        thumb: videoThumbsLength - 1
+    });
+    // @ts-ignore
+
+    return await getImageStringFromBuffer(buffer, cacheKey);
+}
+
+async function getImageStringFromBuffer(
+    buffer: string | ArrayBuffer | undefined,
+    cacheKey: string
+): Promise<null | string> {
     // @ts-ignore
     const imageCode = Buffer.from(buffer).toString('base64');
     if (imageCode) {
         const imageBase64 = `data:image/jpeg;base64,${imageCode}`;
 
-        setCache(cacheKey, imageBase64, 30);
+        await setCache(cacheKey, imageBase64, 30);
 
         return imageBase64;
     }

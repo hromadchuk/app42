@@ -11,6 +11,7 @@ import {
     IconMessageCircleSearch,
     IconMessageCircleUp,
     IconPhoneCall,
+    IconPhotoPentagon,
     IconReportAnalytics,
     IconThumbDownOff,
     TablerIconsProps
@@ -121,6 +122,11 @@ const appRoutes: IAppRouter[] = [
                 id: 'records_stat',
                 icon: IconReportAnalytics,
                 element: createElement(lazy(() => import('./methods/RecordsStat.tsx')))
+            },
+            {
+                id: 'stories_stat',
+                icon: IconPhotoPentagon,
+                element: createElement(lazy(() => import('./methods/StoriesStat.tsx')))
             }
         ]
     }

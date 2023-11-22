@@ -84,7 +84,8 @@
     "common_chats_top": "Top of contacts by common chats",
     "calls_stat": "Calls stat",
     "channels_registration": "Channels registration",
-    "records_stat": "Records stat"
+    "records_stat": "Records stat",
+    "stories_stat": "Stories stat"
   },
   "charts": {
     "activity": {
@@ -351,6 +352,23 @@
           "comments",
           "comments"
         ]
+      }
+    },
+    "stories_stat": {
+      "get_stories_list": "Getting a list of your stories",
+      "get_stories_reactions": "Getting a list of your stories reactions",
+      "no_stories": "You haven't stories yet",
+      "counts": {
+        "photos": "Total photo stories",
+        "videos": "Total video stories",
+        "views": "Total views",
+        "reactions": "Total reactions",
+        "geo_media_areas": "Total geo story tags",
+        "reaction_media_areas": "Total reaction story tags"
+      },
+      "tops": {
+        "views": "Views",
+        "reaction": "Reactions"
       }
     }
   }

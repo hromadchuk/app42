@@ -17,6 +17,7 @@ import { AppFooter } from './components/AppFooter.tsx';
 
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
+import '@mantine/carousel/styles.css';
 import './App.css';
 
 declare global {
