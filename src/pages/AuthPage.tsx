@@ -74,6 +74,7 @@ const AuthPage = () => {
     const [inputCountries, setInputCountries] = useState<IInputCountry[]>([]);
 
     const [state, setSate] = useState(AuthState.loading);
+    const [dataLogin, setDataLogin] = useState<Api.account.Password | null>(null);
     const [isLoading, setLoading] = useState(true);
 
     const [number, setNumber] = useState('');
@@ -275,6 +276,7 @@ const AuthPage = () => {
         } catch (error) {
             // @ts-ignore
             if (error?.message.includes('SESSION_PASSWORD_NEEDED')) {
+                setDataLogin(await CallAPI(new Api.account.GetPassword()));
                 setSate(AuthState.password);
                 setLoading(false);
                 setAppLoading(false);
@@ -295,9 +297,11 @@ const AuthPage = () => {
         setAppLoading(true);
         setPasswordError('');
 
-        try {
-            const dataLogin = await CallAPI(new Api.account.GetPassword());
+        if (!dataLogin) {
+            return;
+        }
 
+        try {
             await CallAPI(new Api.auth.CheckPassword({ password: await computeCheck(dataLogin, password) }), {
                 hideErrorAlert: true
             });
@@ -437,6 +441,9 @@ const AuthPage = () => {
         return (
             <Input.Wrapper label={t('auth_page.input_code')} error={codeError}>
                 <PinInput
+                    styles={{
+                        root: { justifyContent: 'space-between' }
+                    }}
                     length={codeLength}
                     type="number"
                     onChange={setCode}
@@ -451,8 +458,13 @@ const AuthPage = () => {
             return null;
         }
 
+        const passwordHint = dataLogin?.hint;
+
         return (
-            <Input.Wrapper label={t('auth_page.input_password')} error={passwordError}>
+            <Input.Wrapper
+                label={t('auth_page.input_password') + (passwordHint ? ` (${passwordHint})` : '')}
+                error={passwordError}
+            >
                 <PasswordInput onChange={(e) => setPassword(e.currentTarget.value)} />
             </Input.Wrapper>
         );
