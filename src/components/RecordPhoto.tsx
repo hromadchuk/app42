@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { IconPhoto } from '@tabler/icons-react';
 import { useIntersection } from '@mantine/hooks';
-import { getMessagePhoto } from '../lib/helpers.ts';
+import { getMediaPhoto } from '../lib/helpers.ts';
 import { ExAvatar } from './ExAvatar.tsx';
 import { Api } from 'telegram';
 
@@ -13,7 +13,7 @@ export function RecordPhoto({ photo }: { photo?: Api.TypePhoto }) {
     useEffect(() => {
         if (photo && entry?.isIntersecting && !alreadyRequested) {
             setAlreadyRequested(true);
-            getMessagePhoto(photo).then((photoBase64) => {
+            getMediaPhoto(photo).then((photoBase64) => {
                 if (photoBase64) {
                     setMediaPhoto(photoBase64);
                 }
