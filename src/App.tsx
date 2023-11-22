@@ -49,8 +49,6 @@ const App = () => {
     useEffect(() => {
         clearOldCache();
 
-        postEvent('web_app_expand');
-
         const session = localStorage.getItem(Constants.SESSION_KEY);
 
         window.TelegramClient = new TelegramClient(
@@ -88,6 +86,10 @@ const App = () => {
         } catch (error) {
             console.error(`Error init app: ${error}`);
         }
+
+        setTimeout(() => {
+            postEvent('web_app_expand');
+        }, 500);
     }, []);
 
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
