@@ -8,23 +8,25 @@ import classes from '../styles/OwnerRow.module.css';
 interface IStoriesCarousel {
     story: Api.StoryItem;
     actionCount: number;
-    peer: string;
+    peer?: string | null;
 }
 
 interface ILinkProps {
     onClick?: () => void;
     href?: string;
     target?: string;
-    component: 'a';
+    component: 'a' | 'button';
 }
 
 export function StoryCard({ story, actionCount, peer }: IStoriesCarousel) {
-    const linkProps: ILinkProps = {
-        component: 'a'
-    };
+    const linkProps: ILinkProps = { component: 'button' };
 
-    linkProps.href = `https://t.me/${peer}/s/${story.id}`;
-    linkProps.target = '_blank';
+    if (peer) {
+        linkProps.component = 'a';
+
+        linkProps.href = `https://t.me/${peer}/s/${story.id}`;
+        linkProps.target = '_blank';
+    }
 
     let storyMediaDocument = undefined;
     if (story.media instanceof Api.MessageMediaPhoto) {
