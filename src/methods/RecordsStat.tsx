@@ -1,4 +1,4 @@
-import { Badge, Button, Center, Divider, Flex, Group, Text } from '@mantine/core';
+import { Button, Center, Divider, Flex, Text } from '@mantine/core';
 import { DatePicker } from '@mantine/dates';
 import {
     IconCalendarTime,
@@ -20,7 +20,7 @@ import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
-import { declineAndFormat, formatNumber, getTextTime, notifyError } from '../lib/helpers.ts';
+import { declineAndFormat, getTextTime, notifyError } from '../lib/helpers.ts';
 import { getAppLangCode } from '../lib/lang.ts';
 import { InfoRow } from '../components/InfoRow.tsx';
 import { ActivityChart } from '../components/charts/Activity.tsx';
@@ -37,6 +37,7 @@ import {
 } from '../lib/methods/messages.ts';
 import { RecordRow } from '../components/RecordRow.tsx';
 import dayjs from 'dayjs';
+import { ReactionsList } from '../components/ReactionsList.tsx';
 
 type TPeriodType = [Date | null, Date | null];
 
@@ -536,20 +537,15 @@ export const RecordsStat = () => {
     }
 
     function getReactionsElement(stats: IScanDataResult): JSX.Element {
-        const reactions = stats.reactions.reactions;
-        const reactionsEmoticons = Object.keys(reactions).sort(
-            (reactionA, reactionB) => reactions[reactionB].count - reactions[reactionA].count
+        const reactions = new Map(
+            Object.keys(stats.reactions.reactions).map((reaction) => {
+                const reactionsCount = stats.reactions.reactions[reaction].count;
+
+                return [reaction, reactionsCount];
+            })
         );
 
-        return (
-            <Group pt={10} gap={8}>
-                {reactionsEmoticons.map((reaction) => (
-                    <Badge key={reaction} leftSection={reaction} size="lg" color="gray">
-                        {formatNumber(reactions[reaction].count)}
-                    </Badge>
-                ))}
-            </Group>
-        );
+        return <ReactionsList reactions={reactions} />;
     }
 
     function getSelectedTabObject(tabs: ITabTops[]) {
