@@ -2,7 +2,7 @@ import { createContext } from 'react';
 import { Api } from 'telegram';
 
 export interface IAppContext {
-    user: null | Api.User;
+    user: Api.User | null;
     setUser: (user: null | Api.User) => void;
     isAppLoading: boolean;
     setAppLoading: (state: boolean) => void;
