@@ -12,7 +12,7 @@ import { getParams, isDev, Server } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
 import { IRouter, routes } from './routes.tsx';
 
-import { AppHeader } from './components/AppHeader.tsx';
+import { EmptyHeader } from './components/EmptyHeader.tsx';
 import { AppFooter } from './components/AppFooter.tsx';
 
 import '@mantine/core/styles.css';
@@ -25,8 +25,20 @@ declare global {
         TelegramClient: TelegramClient;
         listenEvents: { [key: string]: (event: object) => void };
         userId: number;
+        isProgress: boolean;
         eruda: { init: () => void };
     }
+}
+
+if (isDev) {
+    (() => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/eruda';
+        document.body.append(script);
+        script.onload = () => {
+            window.eruda.init();
+        };
+    })();
 }
 
 const App = () => {
@@ -73,17 +85,6 @@ const App = () => {
         } catch (error) {
             console.error(`Error init app: ${error}`);
         }
-
-        if (isDev) {
-            (() => {
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/eruda';
-                document.body.append(script);
-                script.onload = () => {
-                    window.eruda.init();
-                };
-            })();
-        }
     }, []);
 
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
@@ -92,8 +93,8 @@ const App = () => {
         <MantineProvider forceColorScheme={useColorScheme()}>
             <AppContext.Provider value={{ user, setUser, isAppLoading, setAppLoading }}>
                 <MemoryRouter>
-                    <AppShell header={{ height: 56 }}>
-                        <AppHeader user={user} />
+                    <AppShell>
+                        <EmptyHeader />
                         <AppShell.Main>
                             <Routes>{routes.map(GetRouter)}</Routes>
                             <AppFooter />

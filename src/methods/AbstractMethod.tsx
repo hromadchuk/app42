@@ -31,6 +31,8 @@ export const AbstractMethod = () => {
     };
 
     const setProgress = (data: IProgress | null): void => {
+        window.isProgress = Boolean(data);
+
         if (data) {
             const current = progressSafe || {};
 

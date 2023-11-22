@@ -12,12 +12,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mantine/carousel": "7.1.5",
     "@mantine/core": "^7.1.2",
     "@mantine/dates": "7.1.5",
-    "@mantine/carousel": "7.1.5",
     "@mantine/hooks": "7.1.5",
     "@mantine/notifications": "7.1.5",
     "@tabler/icons-react": "^2.38.0",
+    "@tma.js/bridge": "^1.4.1",
     "dayjs": "^1.11.10",
     "dexie": "^3.2.4",
     "jszip": "^3.10.1",
