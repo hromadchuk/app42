@@ -33,7 +33,6 @@ declare global {
 const App = () => {
     const [user, setUser] = useState<null | Api.User>(null);
     const [isAppLoading, setAppLoading] = useState<boolean>(false);
-    const [colorScheme, setColorScheme] = useState<'light' | 'dark'>('light');
 
     useEffect(() => {
         clearOldCache();
@@ -81,11 +80,10 @@ const App = () => {
         }, 500);
 
         window.addEventListener('message', ({ data }) => {
-            const { eventType, eventData } = JSON.parse(data);
+            const { eventType } = JSON.parse(data);
 
             if (eventType === 'theme_changed') {
-                const newSet = eventData.theme_params.text_color === '#FFFFFF' ? 'dark' : 'light';
-                const backgroundColor = newSet === 'dark' ? '#1a1b1e' : '#ffffff';
+                const backgroundColor = '#1a1b1e';
 
                 postEvent('web_app_set_header_color', {
                     color: backgroundColor
@@ -94,8 +92,6 @@ const App = () => {
                 postEvent('web_app_set_background_color', {
                     color: backgroundColor
                 });
-
-                setColorScheme(newSet);
             }
         });
     }, []);
@@ -103,7 +99,7 @@ const App = () => {
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
 
     return (
-        <MantineProvider forceColorScheme={colorScheme}>
+        <MantineProvider forceColorScheme="dark">
             <AppContext.Provider value={{ user, setUser, isAppLoading, setAppLoading }}>
                 <MemoryRouter>
                     <AppShell>
