@@ -3,7 +3,7 @@ import { Box, Center, CloseButton, Input, Loader } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import { IconSearch, IconUsersGroup } from '@tabler/icons-react';
 import { Api } from 'telegram';
-import { CallAPI } from '../lib/helpers.ts';
+import { CallAPI, getPeerId } from '../lib/helpers.ts';
 import { t } from '../lib/lang.ts';
 import { AppContext } from '../contexts/AppContext.tsx';
 import { OwnerRow } from './OwnerRow.tsx';
@@ -152,13 +152,7 @@ export function SelectDialog(options: IOptionsSelectDialog) {
     function formatRows(peers: Api.TypePeer[], users: Api.User[], chats: (Api.Chat | Api.Channel)[]): IOwnerRow[] {
         return peers.map((peer): IOwnerRow => {
             let ownerId = 0;
-            if (peer instanceof Api.PeerUser) {
-                ownerId = peer.userId.valueOf();
-            } else if (peer instanceof Api.PeerChat) {
-                ownerId = peer.chatId.valueOf();
-            } else {
-                ownerId = peer.channelId.valueOf();
-            }
+            ownerId = getPeerId(peer);
 
             const owner =
                 peer instanceof Api.PeerUser

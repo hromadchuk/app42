@@ -381,3 +381,13 @@ export function dataUrlToFile(dataUrl: string, fileName: string) {
 
     return new File([uint8Array], fileName, { type: mime });
 }
+
+export function getPeerId(peer: Api.TypePeer) {
+    if (peer instanceof Api.PeerUser) {
+        return peer.userId.valueOf();
+    } else if (peer instanceof Api.PeerChat) {
+        return peer.chatId.valueOf();
+    }
+
+    return peer.channelId.valueOf();
+}
