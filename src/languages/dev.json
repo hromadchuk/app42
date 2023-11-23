@@ -142,6 +142,9 @@
         "round_duration": "Videos duration",
         "call_duration": "Calls duration"
       },
+      "user_activity": {
+        "modal_title": "Selected user activity for this period"
+      },
       "uniq_description": "Several messages in a row, inseparable by other interlocutor, will be considered unique",
       "reactions_description": "Collected reactions on messages",
       "periods": {
