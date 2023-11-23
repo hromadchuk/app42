@@ -34,6 +34,7 @@ import { Api } from 'telegram';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
+import { ActivityChart } from '../components/charts/Activity.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
 import {
@@ -45,8 +46,16 @@ import {
     IPeriodData,
     TPeer
 } from '../lib/methods/messages.ts';
-import { CallAPI, declineAndFormat, formatNumber, getStringsTimeArray, getTextTime } from '../lib/helpers.ts';
+import {
+    CallAPI,
+    declineAndFormat,
+    formatNumber,
+    getPeerId,
+    getStringsTimeArray,
+    getTextTime
+} from '../lib/helpers.ts';
 import { MessagesStatSharingGenerator } from '../sharing/MessagesStatSharingGenerator.ts';
+import { CalculateActivityTime } from '../components/charts/chart_helpers.ts';
 
 type TCorrectMessage = Api.Message | Api.MessageService;
 
@@ -82,9 +91,11 @@ interface IScanDataCalculation {
 interface ITopItem {
     count: number;
     owner: TPeer;
+    activity?: number[][];
 }
 
 interface IScanDataResult {
+    activity: number[][];
     period: string;
     messages: number;
     uniqMessages: number;
@@ -140,6 +151,10 @@ export const MessagesStat = () => {
     const colorSchema = useColorScheme();
     const [isModalOpened, { open, close }] = useDisclosure(false);
 
+    const [userActivityModalData, setUserActivityModalData] = useState<ITopItem | null>(null);
+    const [isUserActivityModalOpened, { open: openUserActivityModal, close: closeUserActivityModal }] =
+        useDisclosure(false);
+
     const [ownerMessages, setOwnerMessages] = useState<Api.TypeMessage[]>([]);
     const [ownerPeriods, setOwnerPeriods] = useState<IPeriodData[]>([]);
     const [selectedOwner, setSelectedOwner] = useState<TPeer | null>(null);
@@ -193,15 +208,7 @@ export const MessagesStat = () => {
     function getAuthorId(message: TCorrectMessage): number {
         const author = message.fromId || message.peerId;
 
-        if (author instanceof Api.PeerUser) {
-            return author.userId.valueOf();
-        }
-
-        if (author instanceof Api.PeerChat) {
-            return author.chatId.valueOf();
-        }
-
-        return author.channelId.valueOf();
+        return getPeerId(author);
     }
 
     async function getMessagesDecorator({
@@ -273,6 +280,7 @@ export const MessagesStat = () => {
             reactions: {}
         };
 
+        const usersMessagesByTime = new CalculateActivityTime();
         messages.forEach((message) => {
             const peerId = getAuthorId(message);
 
@@ -392,6 +400,11 @@ export const MessagesStat = () => {
                 groupedIds.add(message.groupedId.valueOf());
             }
 
+            if (!(message instanceof Api.MessageService)) {
+                usersMessagesByTime.add(0, message.date);
+                usersMessagesByTime.add(getAuthorId(message), message.date);
+            }
+
             if (peerId !== lastPeerId) {
                 statData.uniqMessages++;
                 peersData[peerId].uniqCount++;
@@ -403,6 +416,7 @@ export const MessagesStat = () => {
         });
 
         const stat: IScanDataResult = {
+            activity: usersMessagesByTime.get(0),
             period: getSelectedPeriod(statData.firstMessage, statData.lastMessage),
             messages: statData.messages,
             uniqMessages: statData.uniqMessages,
@@ -432,7 +446,8 @@ export const MessagesStat = () => {
             .map((peer) => {
                 return {
                     count: peer.count,
-                    owner: ownersInfo.get(peer.peerId)
+                    owner: ownersInfo.get(peer.peerId),
+                    activity: usersMessagesByTime.get(peer.peerId)
                 } as ITopItem;
             })
             .filter(({ count }) => Boolean(count));
@@ -872,6 +887,20 @@ export const MessagesStat = () => {
                     {ModalContent()}
                 </Modal>
 
+                <Modal
+                    opened={isUserActivityModalOpened}
+                    onClose={closeUserActivityModal}
+                    title={mt('user_activity.modal_title')}
+                >
+                    {userActivityModalData && (
+                        <>
+                            <OwnerRow owner={userActivityModalData.owner as Api.User} />
+                            <Divider my="sm" />
+                            {userActivityModalData.activity && <ActivityChart data={userActivityModalData.activity} />}
+                        </>
+                    )}
+                </Modal>
+
                 <OwnerRow
                     owner={selectedOwner}
                     withoutLink={true}
@@ -920,6 +949,8 @@ export const MessagesStat = () => {
                     </Flex>
                 ))}
 
+                <ActivityChart data={statResult.activity} />
+
                 <Divider my="xs" label={mt('headers.tops')} labelPosition="center" mb={0} />
                 <TabsList tabs={tabsList} onChange={(tabId) => setSelectedTab(tabId as ETabId)} />
                 {getTabDescription()}
@@ -928,6 +959,10 @@ export const MessagesStat = () => {
                         key={selectedTab + top.owner.id.valueOf()}
                         owner={top.owner}
                         description={getDescription(selectedTab, top.count, false)}
+                        callback={() => {
+                            setUserActivityModalData(top);
+                            openUserActivityModal();
+                        }}
                     />
                 ))}
             </>
