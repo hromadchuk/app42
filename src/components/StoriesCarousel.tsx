@@ -15,15 +15,14 @@ export function StoriesCarousel({ storiesStats }: ICarouselProps) {
         return null;
     }
 
+    const storyPeer =
+        user?.username || (user?.usernames ? user?.usernames.find((username) => username.active)?.username : null);
+
     return (
-        <Carousel slideSize={{ base: 'auto' }} slideGap={{ base: 0 }} withControls={false} align="start">
+        <Carousel slideSize={{ base: 'auto' }} slideGap={{ base: 0 }} withControls={false} align="start" dragFree>
             {storiesStats.map((storyStat) => (
                 <Carousel.Slide key={storyStat.story.id}>
-                    <StoryCard
-                        story={storyStat.story}
-                        actionCount={storyStat.count}
-                        peer={user?.username || String(user.id.valueOf())}
-                    />
+                    <StoryCard story={storyStat.story} actionCount={storyStat.count} peer={storyPeer} />
                 </Carousel.Slide>
             ))}
         </Carousel>
