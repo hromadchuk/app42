@@ -276,6 +276,11 @@ const apiEndpoint =
     location.hostname === 'gromadchuk.github.io' ? 'https://kit42.gromadchuk.com' : `http://${location.hostname}`;
 
 export async function Server(method: string, params: object = {}): Promise<object> {
+    if (isDev) {
+        console.log('skip Server', method, params);
+        return {};
+    }
+
     const authData = getParams().get('tgWebAppData');
 
     if (!authData) {
