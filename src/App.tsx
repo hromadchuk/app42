@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { AppShell, MantineProvider } from '@mantine/core';
-import { useColorScheme } from '@mantine/hooks';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { Api, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
@@ -9,7 +8,7 @@ import { postEvent } from '@tma.js/bridge';
 import { AppNotifications } from './components/AppNotifications.tsx';
 import { Constants } from './constants.ts';
 import { clearOldCache } from './lib/cache.ts';
-import { getParams, isDev, Server } from './lib/helpers.ts';
+import { getParams, Server } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
 import { IRouter, routes } from './routes.tsx';
 
@@ -31,20 +30,10 @@ declare global {
     }
 }
 
-if (isDev) {
-    (() => {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/eruda';
-        document.body.append(script);
-        script.onload = () => {
-            window.eruda.init();
-        };
-    })();
-}
-
 const App = () => {
     const [user, setUser] = useState<null | Api.User>(null);
     const [isAppLoading, setAppLoading] = useState<boolean>(false);
+    const [colorScheme, setColorScheme] = useState<'light' | 'dark'>('light');
 
     useEffect(() => {
         clearOldCache();
@@ -90,12 +79,31 @@ const App = () => {
         setTimeout(() => {
             postEvent('web_app_expand');
         }, 500);
+
+        window.addEventListener('message', ({ data }) => {
+            const { eventType, eventData } = JSON.parse(data);
+
+            if (eventType === 'theme_changed') {
+                const newSet = eventData.theme_params.text_color === '#FFFFFF' ? 'dark' : 'light';
+                const backgroundColor = newSet === 'dark' ? '#1a1b1e' : '#ffffff';
+
+                postEvent('web_app_set_header_color', {
+                    color: backgroundColor
+                });
+
+                postEvent('web_app_set_background_color', {
+                    color: backgroundColor
+                });
+
+                setColorScheme(newSet);
+            }
+        });
     }, []);
 
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
 
     return (
-        <MantineProvider forceColorScheme={useColorScheme()}>
+        <MantineProvider forceColorScheme={colorScheme}>
             <AppContext.Provider value={{ user, setUser, isAppLoading, setAppLoading }}>
                 <MemoryRouter>
                     <AppShell>
