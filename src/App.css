@@ -22,3 +22,23 @@ body {
         margin: 0 auto;
     }
 }
+
+body {
+    /* init tg vars for IDE, they will be replaced in src/lib/theme.ts setColors() */
+    --tg-color-accent-text-color: transparent;
+    --tg-color-bg-color: transparent;
+    --tg-color-button-color: transparent;
+    --tg-color-button-text-color: transparent;
+    --tg-color-destructive-text-color: transparent;
+    --tg-color-header-bg-color: transparent;
+    --tg-color-hint-color: transparent;
+    --tg-color-link-color: transparent;
+    --tg-color-secondary-bg-color: transparent;
+    --tg-color-section-bg-color: transparent;
+    --tg-color-section-header-text-color: transparent;
+    --tg-color-subtitle-text-color: transparent;
+    --tg-color-text-color: transparent;
+
+    /* override Mantine vars */
+    --mantine-color-body: var(--tg-color-bg-color);
+}
