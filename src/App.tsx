@@ -55,7 +55,9 @@ const App = () => {
         const version = window.TelegramClient.__version__;
         const currentVersion = localStorage.getItem(versionKey);
 
-        if (currentVersion !== version) {
+        if (!currentVersion) {
+            localStorage.setItem(versionKey, version);
+        } else if (currentVersion !== version) {
             localStorage.clear();
             localStorage.setItem(versionKey, version);
             location.reload();
