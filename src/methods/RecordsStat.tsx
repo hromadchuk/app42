@@ -1,7 +1,5 @@
-import { Button, Center, Divider, Flex, Text } from '@mantine/core';
-import { DatePicker } from '@mantine/dates';
+import { Divider } from '@mantine/core';
 import {
-    IconCalendarTime,
     IconEye,
     IconHeart,
     IconMessage,
@@ -21,25 +19,25 @@ import { OwnerRow } from '../components/OwnerRow.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
 import { declineAndFormat, getTextTime, notifyError } from '../lib/helpers.ts';
-import { getAppLangCode } from '../lib/lang.ts';
 import { InfoRow } from '../components/InfoRow.tsx';
 import { ActivityChart } from '../components/charts/Activity.tsx';
 import { CalculateActivityTime } from '../components/charts/chart_helpers.ts';
 import {
-    calculateEstimatedNumberOfPeriodMessages,
     calculatePeriodsMessagesCount,
     filterMessages,
     getMessages,
+    getMessagesByPeriod,
     getTotalMessagesCount,
     IGetMessagesCallbackArguments,
     IPeriodData,
-    TCorrectMessage
+    TCorrectMessage,
+    TPeriodType,
+    ValidationError
 } from '../lib/methods/messages.ts';
 import { RecordRow } from '../components/RecordRow.tsx';
 import dayjs from 'dayjs';
 import { ReactionsList } from '../components/ReactionsList.tsx';
-
-type TPeriodType = [Date | null, Date | null];
+import { StatsPeriodPicker } from '../components/StatsPeriodPicker.tsx';
 
 type DocumentAttributeType =
     | typeof Api.DocumentAttributeSticker
@@ -111,13 +109,6 @@ interface ITabTops {
     records: IStatsRecords;
 }
 
-class ValidationError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = 'ValidationError';
-    }
-}
-
 const channelsInfo = new Map<number, Api.Channel>();
 
 export const RecordsStat = () => {
@@ -165,42 +156,6 @@ export const RecordsStat = () => {
         setProgress(null);
     }
 
-    async function getRecords() {
-        const dateFrom = recordsPeriod[0]?.getTime();
-        const dateTo = recordsPeriod[1]?.getTime();
-
-        if (dateFrom === null || dateFrom === undefined || !dateTo) {
-            throw new ValidationError(mt('incorrect_period'));
-        }
-
-        if (selectedChannel === null) {
-            throw new ValidationError(mt('channel_not_selected'));
-        }
-
-        const recordsCountInPeriod = await calculateEstimatedNumberOfPeriodMessages({
-            peerId: selectedChannel.id,
-            periodFrom: dateFrom / 1000,
-            periodTo: dateTo / 1000
-        });
-
-        if (!recordsCountInPeriod) {
-            throw new ValidationError(mt('no_records_for_period'));
-        }
-
-        const records = await getRecordsDecorator({
-            peer: selectedChannel as Api.Channel,
-            total: recordsCountInPeriod + 1,
-            endTime: dateFrom / 1000,
-            startDate: dateTo / 1000
-        });
-
-        if (records.length === 0) {
-            throw new ValidationError(mt('no_records_for_period'));
-        }
-
-        return records;
-    }
-
     async function getRecordsDecorator({
         peer,
         total,
@@ -226,21 +181,17 @@ export const RecordsStat = () => {
         return records;
     }
 
-    function setDatePeriod(period: IPeriodData) {
-        setRecordsPeriod([new Date(period.periodDate * 1000), new Date()]);
-    }
-
     async function calcStatistic() {
         let records;
 
         try {
-            records = await getRecords();
+            records = await getMessagesByPeriod(recordsPeriod, selectedChannel, getRecordsDecorator);
         } catch (error) {
             if (!(error instanceof ValidationError)) {
                 throw error;
             }
 
-            notifyError({ message: error.message });
+            notifyError({ message: mt(error.message) });
             return;
         }
 
@@ -666,56 +617,13 @@ export const RecordsStat = () => {
 
     if (channelPeriods.length) {
         return (
-            <>
-                <OwnerRow owner={selectedChannel} withoutLink={true} />
-
-                <Divider my="xs" label={mt('headers.period')} labelPosition="center" mb={0} />
-                <Flex direction="column" gap="xl">
-                    <Center>
-                        <DatePicker
-                            type="range"
-                            value={recordsPeriod}
-                            onChange={setRecordsPeriod}
-                            locale={getAppLangCode()}
-                        />
-                    </Center>
-
-                    <Flex direction="column" gap="xs">
-                        <Button
-                            size="md"
-                            fullWidth
-                            component="button"
-                            disabled={!recordsPeriod.filter((period) => period !== null).length}
-                            onClick={() => calcStatistic()}
-                        >
-                            {mt('get_stats')}
-                        </Button>
-                        {channelPeriods.map((period, key) => (
-                            <Button
-                                leftSection={<IconCalendarTime />}
-                                size="md"
-                                fullWidth
-                                variant="default"
-                                justify="space-between"
-                                component="button"
-                                key={key}
-                                disabled={period.disabled}
-                                onClick={() => setDatePeriod(period)}
-                            >
-                                <Flex gap="xs">
-                                    <Text lineClamp={1} span fz="sm" fw={500}>
-                                        {mt(`periods.${period.period}`)}
-                                    </Text>
-                                    <Text c="dimmed" fz="xs">
-                                        {period.circa ? '~' : ''}(
-                                        {declineAndFormat(period.count, md('decline.records'))})
-                                    </Text>
-                                </Flex>
-                            </Button>
-                        ))}
-                    </Flex>
-                </Flex>
-            </>
+            <StatsPeriodPicker
+                selectedPeer={selectedChannel}
+                statsPeriods={channelPeriods}
+                statsPeriod={recordsPeriod}
+                setStatsPeriod={setRecordsPeriod}
+                calcStatistic={calcStatistic}
+            />
         );
     }
 

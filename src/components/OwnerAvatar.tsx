@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useIntersection } from '@mantine/hooks';
 import { Api } from 'telegram';
-import { getAvatar } from '../lib/helpers.ts';
+import { getAvatar, TOwnerInfo } from '../lib/helpers.ts';
 import { ExAvatar } from './ExAvatar.tsx';
 
 interface IOwnerAvatar {
-    owner: null | Api.TypeUser | Api.TypeChat;
+    owner: TOwnerInfo;
 }
 
 export function OwnerAvatar({ owner }: IOwnerAvatar) {

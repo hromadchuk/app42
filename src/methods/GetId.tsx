@@ -2,12 +2,10 @@ import { useContext, useState } from 'react';
 import { ActionIcon, Button, CopyButton, Input, Space, TextInput } from '@mantine/core';
 import { IconAt, IconCheck, IconCopy } from '@tabler/icons-react';
 import { Api } from 'telegram';
-import { CallAPI } from '../lib/helpers.ts';
+import { CallAPI, TOwnerInfo } from '../lib/helpers.ts';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
-
-type TOwnerInfo = null | Api.TypeUser | Api.TypeChat;
 
 export const GetId = () => {
     const { mt, needHideContent } = useContext(MethodContext);

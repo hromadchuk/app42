@@ -6,6 +6,8 @@ import { getHideUser, isHideMode } from './hide.ts';
 import { getAppLangCode, LangType, t, td } from './lang';
 import { FloodWaitError } from 'telegram/errors';
 
+export type TOwnerInfo = null | Api.TypeUser | Api.TypeChat;
+
 export const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
 export function formatNumber(number: number): string {
