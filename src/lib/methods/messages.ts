@@ -7,6 +7,8 @@ import { IProgress } from '../../contexts/MethodContext.tsx';
 export type TCorrectMessage = Api.Message | Api.MessageService;
 export type TPeer = Api.User | Api.Chat | Api.Channel;
 
+export type TPeriodType = [Date | null, Date | null];
+
 export interface IPeriodData {
     period: number;
     disabled: boolean;
@@ -32,6 +34,13 @@ export interface IGetMessagesCallbackArguments {
 export interface IGetMessagesArguments extends IGetMessagesCallbackArguments {
     peerInfo: Map<number, TPeer>;
     setProgress: (progress: IProgress | null) => void;
+}
+
+export class ValidationError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'ValidationError';
+    }
 }
 
 export async function getTotalMessagesCount(channelId: Api.long): Promise<number> {
@@ -213,6 +222,46 @@ export async function calculateEstimatedNumberOfPeriodMessages({
     }
 
     return offsetIdOffset || 0;
+}
+
+export async function getMessagesByPeriod(
+    period: TPeriodType,
+    selectedPeer: TPeer | null,
+    getMessagesDecorator: (args: IGetMessagesCallbackArguments) => Promise<TCorrectMessage[]>
+) {
+    const dateFrom = period[0]?.getTime();
+    const dateTo = period[1]?.getTime();
+
+    if (dateFrom === null || dateFrom === undefined || !dateTo) {
+        throw new ValidationError('incorrect_period');
+    }
+
+    if (selectedPeer === null) {
+        throw new ValidationError('channel_not_selected');
+    }
+
+    const messagesCountInPeriod = await calculateEstimatedNumberOfPeriodMessages({
+        peerId: selectedPeer.id,
+        periodFrom: dateFrom / 1000,
+        periodTo: dateTo / 1000
+    });
+
+    if (!messagesCountInPeriod) {
+        throw new ValidationError('no_messages_for_period');
+    }
+
+    const messages = await getMessagesDecorator({
+        peer: selectedPeer as Api.Channel,
+        total: messagesCountInPeriod + 1,
+        endTime: dateFrom / 1000,
+        startDate: dateTo / 1000
+    });
+
+    if (messages.length === 0) {
+        throw new ValidationError('no_messages_for_period');
+    }
+
+    return messages;
 }
 
 export function calculatePeriodTimestamp(period: number) {
