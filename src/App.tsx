@@ -11,7 +11,7 @@ import { Constants } from './constants.ts';
 import { clearOldCache } from './lib/cache.ts';
 import { getParams, Server } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
-import { setColors } from './lib/theme.ts';
+import { getParamsTheme, setColors } from './lib/theme.ts';
 import { IRouter, routes } from './routes.tsx';
 
 import { EmptyHeader } from './components/EmptyHeader.tsx';
@@ -31,6 +31,8 @@ declare global {
         eruda: { init: () => void };
     }
 }
+
+setColors(getParamsTheme());
 
 const App = () => {
     const [user, setUser] = useState<null | Api.User>(null);
