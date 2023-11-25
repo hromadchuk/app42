@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Text, useMantineTheme } from '@mantine/core';
+import { Text } from '@mantine/core';
 import dayjs from 'dayjs';
 import { getPercent } from '../../lib/helpers.ts';
 import { chartLang } from './chart_helpers.ts';
@@ -14,7 +14,6 @@ interface IActivityChartProps {
 export function ActivityChart({ data }: IActivityChartProps) {
     const [cellWidth, setCellWidth] = useState<number>(0);
     const graphRef = useRef<HTMLDivElement>(null);
-    const theme = useMantineTheme();
     const lang = chartLang('activity');
 
     useEffect(() => {
@@ -34,9 +33,7 @@ export function ActivityChart({ data }: IActivityChartProps) {
     }
 
     function getColorStyle(level: number): { backgroundColor: string } {
-        const currentTheme = theme.colors[theme.primaryColor];
-
-        return { backgroundColor: currentTheme[level * 2] };
+        return { backgroundColor: `var(--mantine-color-blue-${level * 2})` };
     }
 
     function getDayName(day: number): string {
