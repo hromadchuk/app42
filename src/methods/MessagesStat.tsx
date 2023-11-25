@@ -14,7 +14,7 @@ import {
     Title,
     UnstyledButton
 } from '@mantine/core';
-import { useColorScheme, useDisclosure } from '@mantine/hooks';
+import { useDisclosure } from '@mantine/hooks';
 import {
     IconCalendarTime,
     IconHeart,
@@ -148,7 +148,6 @@ const sharingImages = new Map<string, string>();
 
 export const MessagesStat = () => {
     const { mt, md, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
-    const colorSchema = useColorScheme();
     const [isModalOpened, { open, close }] = useDisclosure(false);
 
     const [userActivityModalData, setUserActivityModalData] = useState<ITopItem | null>(null);
@@ -833,7 +832,7 @@ export const MessagesStat = () => {
 
         const getRowBackground = (index: number): string => {
             if (index % 2) {
-                return colorSchema === 'dark' ? 'gray.9' : 'gray.1';
+                return `var(--tg-color-secondary-bg-color)`;
             }
 
             return '';

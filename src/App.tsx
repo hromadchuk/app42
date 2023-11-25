@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AppShell, createTheme, MantineProvider } from '@mantine/core';
+import { AppShell, MantineProvider } from '@mantine/core';
 import { useColorScheme } from '@mantine/hooks';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { Api, TelegramClient } from 'telegram';
@@ -31,13 +31,6 @@ declare global {
         eruda: { init: () => void };
     }
 }
-
-const theme = createTheme({
-    colors: {
-        tg: ['aqua', 'teal', 'blue', 'navy', 'yellow', 'olive', 'lime', 'fuchsia', 'purple', 'maroon']
-    },
-    primaryColor: 'tg'
-});
 
 const App = () => {
     const [user, setUser] = useState<null | Api.User>(null);
@@ -100,7 +93,7 @@ const App = () => {
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
 
     return (
-        <MantineProvider forceColorScheme={useColorScheme()} theme={theme}>
+        <MantineProvider forceColorScheme={useColorScheme()}>
             <AppContext.Provider value={{ user, setUser, isAppLoading, setAppLoading }}>
                 <MemoryRouter>
                     <AppShell>

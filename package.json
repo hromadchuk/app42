@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@mantine/carousel": "7.1.5",
+    "@mantine/colors-generator": "^7.2.2",
     "@mantine/core": "^7.1.2",
     "@mantine/dates": "7.1.5",
     "@mantine/hooks": "7.1.5",
