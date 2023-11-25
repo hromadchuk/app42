@@ -3,7 +3,6 @@ import {
     Container,
     Divider,
     Flex,
-    Group,
     Image,
     Modal,
     Notification,
@@ -11,12 +10,10 @@ import {
     SegmentedControl,
     Text,
     Textarea,
-    Title,
-    UnstyledButton
+    Title
 } from '@mantine/core';
-import { useColorScheme, useDisclosure } from '@mantine/hooks';
+import { useDisclosure } from '@mantine/hooks';
 import {
-    IconCalendarTime,
     IconHeart,
     IconMessage,
     IconMessage2Bolt,
@@ -41,10 +38,13 @@ import {
     calculatePeriodsMessagesCount,
     filterMessages,
     getMessages,
+    getMessagesByPeriod,
     getTotalMessagesCount,
     IGetMessagesCallbackArguments,
     IPeriodData,
-    TPeer
+    TPeer,
+    TPeriodType,
+    ValidationError
 } from '../lib/methods/messages.ts';
 import {
     CallAPI,
@@ -52,9 +52,11 @@ import {
     formatNumber,
     getPeerId,
     getStringsTimeArray,
-    getTextTime
+    getTextTime,
+    notifyError
 } from '../lib/helpers.ts';
 import { MessagesStatSharingGenerator } from '../sharing/MessagesStatSharingGenerator.ts';
+import { StatsPeriodPicker } from '../components/StatsPeriodPicker.tsx';
 import { CalculateActivityTime } from '../components/charts/chart_helpers.ts';
 
 type TCorrectMessage = Api.Message | Api.MessageService;
@@ -148,7 +150,6 @@ const sharingImages = new Map<string, string>();
 
 export const MessagesStat = () => {
     const { mt, md, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
-    const colorSchema = useColorScheme();
     const [isModalOpened, { open, close }] = useDisclosure(false);
 
     const [userActivityModalData, setUserActivityModalData] = useState<ITopItem | null>(null);
@@ -157,6 +158,7 @@ export const MessagesStat = () => {
 
     const [ownerMessages, setOwnerMessages] = useState<Api.TypeMessage[]>([]);
     const [ownerPeriods, setOwnerPeriods] = useState<IPeriodData[]>([]);
+    const [recordsPeriod, setRecordsPeriod] = useState<TPeriodType>([null, null]);
     const [selectedOwner, setSelectedOwner] = useState<TPeer | null>(null);
     const [statResult, setStatResult] = useState<IScanDataResult | null>(null);
     const [selectedTab, setSelectedTab] = useState<ETabId>(ETabId.messages);
@@ -246,12 +248,19 @@ export const MessagesStat = () => {
         return `${firstMessageDate} - ${lastMessageDate}`;
     }
 
-    async function calcStatistic(period: IPeriodData) {
-        const messages = await getMessagesDecorator({
-            peer: selectedOwner as TPeer,
-            total: period.count,
-            endTime: period.periodDate
-        });
+    async function calcStatistic() {
+        let messages;
+
+        try {
+            messages = await getMessagesByPeriod(recordsPeriod, selectedOwner, getMessagesDecorator);
+        } catch (error) {
+            if (!(error instanceof ValidationError)) {
+                throw error;
+            }
+
+            notifyError({ message: mt(error.message) });
+            return;
+        }
 
         setProgress({ text: mt('loading_calculation') });
 
@@ -833,7 +842,7 @@ export const MessagesStat = () => {
 
         const getRowBackground = (index: number): string => {
             if (index % 2) {
-                return colorSchema === 'dark' ? 'gray.9' : 'gray.1';
+                return `var(--tg-color-secondary-bg-color)`;
             }
 
             return '';
@@ -971,35 +980,13 @@ export const MessagesStat = () => {
 
     if (ownerPeriods.length) {
         return (
-            <>
-                <OwnerRow owner={selectedOwner} withoutLink={true} />
-
-                <Divider my="xs" label={mt('headers.period')} labelPosition="center" mb={0} />
-                {ownerPeriods.map((period, key) => (
-                    <div key={key}>
-                        <UnstyledButton
-                            component="button"
-                            disabled={period.disabled}
-                            style={{ opacity: period.disabled ? 0.5 : 1 }}
-                            onClick={() => calcStatistic(period)}
-                        >
-                            <Group mt="xs" py={3}>
-                                <IconCalendarTime />
-
-                                <div>
-                                    <Text lineClamp={1} span fz="sm" fw={500}>
-                                        {mt(`periods.${period.period}`)}
-                                    </Text>
-                                    <Text c="dimmed" fz="xs">
-                                        {period.circa ? '~' : ''}
-                                        {declineAndFormat(period.count, md('decline.messages'))}
-                                    </Text>
-                                </div>
-                            </Group>
-                        </UnstyledButton>
-                    </div>
-                ))}
-            </>
+            <StatsPeriodPicker
+                selectedPeer={selectedOwner}
+                statsPeriods={ownerPeriods}
+                statsPeriod={recordsPeriod}
+                setStatsPeriod={setRecordsPeriod}
+                calcStatistic={calcStatistic}
+            />
         );
     }
 

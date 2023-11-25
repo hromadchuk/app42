@@ -2,14 +2,14 @@ import { createElement, JSX } from 'react';
 import { Center, Container, Flex, Group, Text, UnstyledButton } from '@mantine/core';
 import { Api } from 'telegram';
 import { IconCheck, IconChevronRight, TablerIconsProps } from '@tabler/icons-react';
-import { classNames } from '../lib/helpers.ts';
+import { classNames, TOwnerInfo } from '../lib/helpers.ts';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
 
 // @ts-ignore
 import classes from '../styles/OwnerRow.module.css';
 
 interface IOwnerRow {
-    owner: null | Api.TypeUser | Api.TypeChat;
+    owner: TOwnerInfo;
     description?: string;
     rightIcon?: (props: TablerIconsProps) => JSX.Element;
     withoutLink?: boolean;

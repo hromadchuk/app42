@@ -129,6 +129,7 @@
       "button_send": "Send stats to the dialog",
       "button_send_image": "Send image of top to the dialog",
       "button_send_done": "Sent",
+      "get_stats": "Get stats for period",
       "headers": {
         "period": "Select the period for stats",
         "counts": "Counts",
@@ -159,6 +160,11 @@
         "365": "Year"
       },
       "decline": {
+        "stats": [
+          "message",
+          "messages",
+          "messages"
+        ],
         "messages": [
           "message",
           "messages",
@@ -323,7 +329,7 @@
         "365": "Year"
       },
       "decline": {
-        "records": [
+        "stats": [
           "record",
           "records",
           "records"

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AppShell, MantineProvider } from '@mantine/core';
+import { useColorScheme } from '@mantine/hooks';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { Api, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
@@ -10,6 +11,7 @@ import { Constants } from './constants.ts';
 import { clearOldCache } from './lib/cache.ts';
 import { getParams, Server } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
+import { setColors } from './lib/theme.ts';
 import { IRouter, routes } from './routes.tsx';
 
 import { EmptyHeader } from './components/EmptyHeader.tsx';
@@ -55,7 +57,9 @@ const App = () => {
         const version = window.TelegramClient.__version__;
         const currentVersion = localStorage.getItem(versionKey);
 
-        if (currentVersion !== version) {
+        if (!currentVersion) {
+            localStorage.setItem(versionKey, version);
+        } else if (currentVersion !== version) {
             localStorage.clear();
             localStorage.setItem(versionKey, version);
             location.reload();
@@ -80,18 +84,10 @@ const App = () => {
         }, 500);
 
         window.addEventListener('message', ({ data }) => {
-            const { eventType } = JSON.parse(data);
+            const { eventType, eventData } = JSON.parse(data);
 
             if (eventType === 'theme_changed') {
-                const backgroundColor = '#1a1b1e';
-
-                postEvent('web_app_set_header_color', {
-                    color: backgroundColor
-                });
-
-                postEvent('web_app_set_background_color', {
-                    color: backgroundColor
-                });
+                setColors(eventData.theme_params);
             }
         });
     }, []);
@@ -99,7 +95,7 @@ const App = () => {
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
 
     return (
-        <MantineProvider forceColorScheme="dark">
+        <MantineProvider forceColorScheme={useColorScheme()}>
             <AppContext.Provider value={{ user, setUser, isAppLoading, setAppLoading }}>
                 <MemoryRouter>
                     <AppShell>
