@@ -11,7 +11,8 @@ import { OwnerRow } from './OwnerRow.tsx';
 export enum EOwnerType {
     user = 'user',
     chat = 'chat',
-    channel = 'channel'
+    channel = 'channel',
+    supergroup = 'supergroup'
 }
 
 type TOwnerType = Api.User | Api.Chat | Api.Channel;
@@ -142,7 +143,12 @@ export function SelectDialog(options: IOptionsSelectDialog) {
             return true;
         }
 
-        if (options.allowTypes.includes(EOwnerType.chat) && row.owner instanceof Api.Chat) {
+        if (
+            (options.allowTypes.includes(EOwnerType.chat) && row.owner instanceof Api.Chat) ||
+            (options.allowTypes.includes(EOwnerType.supergroup) &&
+                row.owner instanceof Api.Channel &&
+                row.owner.megagroup)
+        ) {
             return true;
         }
 
