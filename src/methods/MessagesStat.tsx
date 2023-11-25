@@ -58,6 +58,7 @@ import {
 import { MessagesStatSharingGenerator } from '../sharing/MessagesStatSharingGenerator.ts';
 import { StatsPeriodPicker } from '../components/StatsPeriodPicker.tsx';
 import { CalculateActivityTime } from '../components/charts/chart_helpers.ts';
+import { ReactionsList } from '../components/ReactionsList.tsx';
 
 type TCorrectMessage = Api.Message | Api.MessageService;
 
@@ -107,6 +108,7 @@ interface IScanDataResult {
     attachmentsTotal: number;
     stickersTotal: number;
     reactionsTotal: number;
+    reactions: Map<string, number>;
     tops: {
         messages: ITopItem[];
         uniqMessages: ITopItem[];
@@ -307,16 +309,16 @@ export const MessagesStat = () => {
             }
 
             if (message.reactions) {
-                message.reactions.results.forEach(({ reaction }) => {
+                message.reactions.results.forEach((reactionCount: Api.ReactionCount) => {
+                    const reaction = reactionCount.reaction;
                     if (reaction instanceof Api.ReactionEmoji) {
-                        statData.reactionsTotal++;
-
+                        statData.reactionsTotal += reactionCount.count;
                         if (!statData.reactions[reaction.emoticon]) {
                             statData.reactions[reaction.emoticon] = 0;
                         }
 
-                        statData.reactions[reaction.emoticon]++;
-                        peersData[peerId].reactions++;
+                        statData.reactions[reaction.emoticon] += reactionCount.count;
+                        peersData[peerId].reactions += reactionCount.count;
                     }
                 });
             }
@@ -435,6 +437,7 @@ export const MessagesStat = () => {
             attachmentsTotal: statData.attachmentsTotal,
             stickersTotal: statData.stickersTotal,
             reactionsTotal: statData.reactionsTotal,
+            reactions: new Map(Object.entries(statData.reactions)),
             tops: {
                 messages: [],
                 uniqMessages: [],
@@ -883,6 +886,11 @@ export const MessagesStat = () => {
             open();
         };
 
+        const onTopOwnerClick = (top: ITopItem) => {
+            setUserActivityModalData(top);
+            openUserActivityModal();
+        };
+
         const sendToChatImage = () => {
             setModalType(EModalType.image);
             open();
@@ -958,6 +966,7 @@ export const MessagesStat = () => {
                     </Flex>
                 ))}
 
+                <ReactionsList reactions={statResult.reactions} />
                 <ActivityChart data={statResult.activity} />
 
                 <Divider my="xs" label={mt('headers.tops')} labelPosition="center" mb={0} />
@@ -968,10 +977,7 @@ export const MessagesStat = () => {
                         key={selectedTab + top.owner.id.valueOf()}
                         owner={top.owner}
                         description={getDescription(selectedTab, top.count, false)}
-                        callback={() => {
-                            setUserActivityModalData(top);
-                            openUserActivityModal();
-                        }}
+                        callback={top.activity ? () => onTopOwnerClick(top) : undefined}
                     />
                 ))}
             </>
@@ -992,7 +998,7 @@ export const MessagesStat = () => {
 
     return (
         <SelectDialog
-            allowTypes={[EOwnerType.user, EOwnerType.chat, EOwnerType.channel]}
+            allowTypes={[EOwnerType.user, EOwnerType.chat, EOwnerType.supergroup]}
             onOwnerSelect={(owner) => {
                 setSelectedOwner(owner);
                 getOptions(owner);

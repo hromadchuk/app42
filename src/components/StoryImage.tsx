@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Image } from '@mantine/core';
 import { useIntersection } from '@mantine/hooks';
-import { getMediaPhoto, getMediaVideoPreview } from '../lib/helpers.ts';
+import { getDocumentThumb, getMediaPhoto, getMediaVideoPreview } from '../lib/helpers.ts';
 import { Api } from 'telegram';
 
 interface StoryPhotoProps {
@@ -30,7 +30,7 @@ export function StoryImage({ storyDocument }: { storyDocument?: Api.TypePhoto | 
 
     function StoryPhoto({ src }: StoryPhotoProps) {
         return (
-            <Image radius="md" h={200} w={112} fit="contain" src={src} fallbackSrc="./src/assets/stubs/StoryStub.svg" />
+            <Image radius="md" h={200} w={112} fit="contain" src={src} fallbackSrc={getDocumentThumb(storyDocument)} />
         );
     }
 
