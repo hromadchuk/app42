@@ -15,6 +15,9 @@ interface IOwnerRow {
     withoutLink?: boolean;
     disabled?: boolean;
     callback?: () => void;
+    ml?: string | number;
+    mr?: string | number;
+    styles?: object;
 }
 
 interface ILinkProps {
@@ -24,7 +27,17 @@ interface ILinkProps {
     component?: 'a' | 'button';
 }
 
-export function OwnerRow({ owner, description, rightIcon, withoutLink, callback, disabled }: IOwnerRow) {
+export function OwnerRow({
+    owner,
+    description,
+    rightIcon,
+    withoutLink,
+    callback,
+    disabled,
+    ml,
+    mr,
+    styles
+}: IOwnerRow) {
     const name: string[] = [];
     const linkProps: ILinkProps = {};
     const isUser = owner instanceof Api.User;
@@ -111,7 +124,7 @@ export function OwnerRow({ owner, description, rightIcon, withoutLink, callback,
     );
 
     return (
-        <Container p={0}>
+        <Container p={0} ml={ml ?? 'auto'} mr={mr ?? 'auto'} styles={styles ?? {}}>
             {!linkProps.component ? (
                 Row
             ) : (

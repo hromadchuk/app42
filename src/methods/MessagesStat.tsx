@@ -6,8 +6,10 @@ import {
     Image,
     Modal,
     Notification,
+    NumberInput,
     Radio,
     SegmentedControl,
+    Switch,
     Text,
     Textarea,
     Title
@@ -26,7 +28,7 @@ import {
     TablerIconsProps
 } from '@tabler/icons-react';
 import dayjs from 'dayjs';
-import { JSX, useContext, useState } from 'react';
+import { JSX, useContext, useEffect, useState } from 'react';
 import { Api } from 'telegram';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
@@ -59,8 +61,13 @@ import { MessagesStatSharingGenerator } from '../sharing/MessagesStatSharingGene
 import { StatsPeriodPicker } from '../components/StatsPeriodPicker.tsx';
 import { CalculateActivityTime } from '../components/charts/chart_helpers.ts';
 import { ReactionsList } from '../components/ReactionsList.tsx';
+import { on, PopupClosedPayload, postEvent } from '@tma.js/bridge';
 
 type TCorrectMessage = Api.Message | Api.MessageService;
+type TFilteredChannelParticipant = Exclude<
+    Api.TypeChannelParticipant,
+    Api.ChannelParticipantBanned | Api.ChannelParticipantLeft | Api.ChannelParticipantCreator
+>;
 
 interface IPeerData {
     peerId: number;
@@ -149,6 +156,7 @@ interface ITabTops {
 
 const ownersInfo = new Map<number, TPeer>();
 const sharingImages = new Map<string, string>();
+const kickInactiveUsersEventName = 'kick_inactive_users_from_chat';
 
 export const MessagesStat = () => {
     const { mt, md, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
@@ -161,8 +169,12 @@ export const MessagesStat = () => {
     const [ownerMessages, setOwnerMessages] = useState<Api.TypeMessage[]>([]);
     const [ownerPeriods, setOwnerPeriods] = useState<IPeriodData[]>([]);
     const [recordsPeriod, setRecordsPeriod] = useState<TPeriodType>([null, null]);
+    const [minMessagesCountForKick, setMinMessagesCountForKick] = useState<number>(1);
     const [selectedOwner, setSelectedOwner] = useState<TPeer | null>(null);
+    const [isSelectedChatLoading, setIsSelectedChatLoading] = useState<boolean>(false);
+    const [selectedChat, setSelectedChat] = useState<Api.messages.ChatFull | null>(null);
     const [statResult, setStatResult] = useState<IScanDataResult | null>(null);
+    const [usersForKick, setUsersForKick] = useState<Api.User[] | null>(null);
     const [selectedTab, setSelectedTab] = useState<ETabId>(ETabId.messages);
 
     // sharing vars
@@ -173,6 +185,155 @@ export const MessagesStat = () => {
     const [messageText, setMessageText] = useState<string>('');
     const [isSentToChat, setSentToChat] = useState<boolean>(false);
     const [modalType, setModalType] = useState<EModalType>(EModalType.text);
+
+    useEffect(() => {
+        async function onPopupClose({ button_id: eventName }: PopupClosedPayload) {
+            if (
+                eventName !== kickInactiveUsersEventName ||
+                !statResult?.tops.messages ||
+                !(
+                    (selectedOwner instanceof Api.Channel && selectedOwner?.participantsCount) ||
+                    (selectedOwner instanceof Api.Chat && selectedChat)
+                )
+            ) {
+                notifyError({ message: mt('incorrect_participants_data') });
+                return;
+            }
+
+            const isSuperGroup = selectedOwner instanceof Api.Channel;
+
+            let participantsForKick;
+            if (isSuperGroup) {
+                participantsForKick = await processChannelParticipants();
+            } else {
+                participantsForKick = processChatParticipants();
+            }
+
+            if ((participantsForKick || []).length === 0) {
+                notifyError({ message: mt('no_users_for_kick') });
+                setUsersForKick(null);
+                return;
+            }
+
+            setUsersForKick(participantsForKick);
+        }
+
+        function processChatParticipants(): null | Api.User[] {
+            if (
+                !(selectedOwner instanceof Api.Chat) ||
+                !selectedChat ||
+                !(selectedChat.fullChat instanceof Api.ChatFull)
+            ) {
+                notifyError({ message: mt('incorrect_participants_data') });
+                return null;
+            }
+
+            const participants = selectedChat.fullChat.participants;
+
+            if (!participants || !(participants instanceof Api.ChatParticipants)) {
+                return null;
+            }
+
+            const participantsList = participants.participants.filter(
+                (participant) => !(participant instanceof Api.ChatParticipantCreator)
+            );
+
+            return processParticipants(participantsList, Api.ChatParticipantAdmin, selectedChat.users);
+        }
+
+        async function processChannelParticipants(): Promise<null | Api.User[]> {
+            if (!(selectedOwner instanceof Api.Channel)) {
+                return null;
+            }
+
+            const participants = await getChannelParticipants();
+
+            if (!participants || participants instanceof Api.channels.ChannelParticipantsNotModified) {
+                return null;
+            }
+
+            const participantsList = participants.participants.filter(
+                (participant) =>
+                    !(
+                        participant instanceof Api.ChannelParticipantBanned ||
+                        participant instanceof Api.ChannelParticipantLeft ||
+                        participant instanceof Api.ChannelParticipantCreator
+                    )
+            ) as TFilteredChannelParticipant[];
+
+            return processParticipants(participantsList, Api.ChannelParticipantAdmin, participants.users);
+        }
+
+        return on('popup_closed', onPopupClose);
+    }, [selectedOwner, minMessagesCountForKick, statResult, selectedChat]);
+
+    function processParticipants(
+        participantsList: TFilteredChannelParticipant[] | Api.TypeChatParticipant[],
+        participantAdminClass: typeof Api.ChatParticipantAdmin | typeof Api.ChannelParticipantAdmin,
+        chatUsersList: Api.TypeUser[]
+    ) {
+        if (selectedOwner instanceof Api.User || !selectedOwner?.participantsCount) {
+            return [];
+        }
+
+        if (participantsList.length + 1 !== selectedOwner.participantsCount) {
+            notifyError({ message: mt('incorrect_participants_data') });
+            return null;
+        }
+
+        const remainingUsers = statResult?.tops.messages
+            .filter((ownerInfo) => ownerInfo.count >= minMessagesCountForKick)
+            .map(({ owner }) => owner.id.valueOf());
+        // @ts-ignore
+        const selfAsParticipant = participantsList.find(
+            (participant: TFilteredChannelParticipant | Api.TypeChatParticipant) =>
+                Number(participant.userId) === window.userId
+        );
+
+        if (!selfAsParticipant && !selectedOwner.creator) {
+            notifyError({ message: mt('self_not_in_chat') });
+            return null;
+        }
+
+        // @ts-ignore
+        let participantsForKick = participantsList.filter(
+            (participant: TFilteredChannelParticipant | Api.TypeChatParticipant) =>
+                participant.userId !== selfAsParticipant?.userId &&
+                !remainingUsers?.includes(participant.userId.valueOf())
+        );
+
+        if (!selectedOwner.creator) {
+            participantsForKick = participantsForKick.filter(
+                (participant: TFilteredChannelParticipant | Api.TypeChatParticipant) =>
+                    !(participant instanceof participantAdminClass)
+            );
+        }
+
+        const participantsForKickIds = participantsForKick.map(
+            (participant: TFilteredChannelParticipant | Api.TypeChatParticipant) => participant.userId.valueOf()
+        );
+
+        return chatUsersList.filter(
+            (user) => participantsForKickIds.includes(user.id.valueOf()) && user instanceof Api.User
+        ) as Api.User[];
+    }
+
+    useEffect(() => {
+        if (!selectedOwner?.id || !(selectedOwner instanceof Api.Chat)) {
+            setSelectedChat(null);
+            setIsSelectedChatLoading(false);
+            return;
+        }
+
+        setIsSelectedChatLoading(true);
+
+        CallAPI(new Api.messages.GetFullChat({ chatId: selectedOwner.id })).then(
+            (selectedChatFull: Api.messages.ChatFull) => {
+                setIsSelectedChatLoading(false);
+                setSelectedChat(selectedChatFull as Api.messages.ChatFull);
+            }
+        );
+    }, [selectedOwner]);
 
     async function getOptions(owner: TPeer) {
         setProgress({ text: mt('loading_messages') });
@@ -209,6 +370,21 @@ export const MessagesStat = () => {
         setProgress(null);
     }
 
+    async function getChannelParticipants(): Promise<Api.channels.TypeChannelParticipants | null> {
+        if (!(selectedOwner instanceof Api.Channel)) {
+            return null;
+        }
+
+        return await CallAPI(
+            new Api.channels.GetParticipants({
+                channel: selectedOwner,
+                limit: 200,
+                offset: 0,
+                filter: new Api.ChannelParticipantsRecent()
+            })
+        );
+    }
+
     function getAuthorId(message: TCorrectMessage): number {
         const author = message.fromId || message.peerId;
 
@@ -218,10 +394,11 @@ export const MessagesStat = () => {
     async function getMessagesDecorator({
         peer,
         total,
-        endTime
+        endTime,
+        startDate = null
     }: IGetMessagesCallbackArguments): Promise<TCorrectMessage[]> {
         if (ownerMessages.length) {
-            return filterMessages(ownerMessages, endTime);
+            return filterMessages(ownerMessages, endTime, startDate);
         }
 
         setProgress({ text: mt('loading_messages'), total });
@@ -229,6 +406,7 @@ export const MessagesStat = () => {
         const messages = await getMessages({
             peer,
             total,
+            startDate,
             endTime,
             peerInfo: ownersInfo,
             setProgress
@@ -737,6 +915,86 @@ export const MessagesStat = () => {
         return '';
     }
 
+    function kickInactiveUsers() {
+        if (!statResult) {
+            return;
+        }
+
+        postEvent('web_app_open_popup', {
+            title: mt('kick_inactive_users'),
+            message: mt('kick_inactive_users_popup')
+                .replace('{period}', statResult.period)
+                .replace('{messages_count}', declineAndFormat(minMessagesCountForKick, md('decline.messages'))),
+            buttons: [
+                {
+                    id: kickInactiveUsersEventName,
+                    type: 'destructive',
+                    text: mt('yes')
+                },
+                {
+                    id: 'save_chat_inactive_users_lives',
+                    type: 'cancel'
+                }
+            ]
+        });
+    }
+
+    function DeleteInactiveUsers() {
+        if (selectedOwner instanceof Api.Chat) {
+            if (!selectedChat) {
+                if (!isSelectedChatLoading) {
+                    return null;
+                }
+            } else {
+                const chat = selectedChat.chats.find(
+                    (chatFromChatsList) => chatFromChatsList instanceof Api.Chat
+                ) as Api.Chat;
+
+                if (!chat.creator && !chat.adminRights?.banUsers) {
+                    return null;
+                }
+            }
+        } else if (selectedOwner instanceof Api.Channel) {
+            if (
+                !selectedOwner.megagroup ||
+                !selectedOwner.adminRights?.banUsers ||
+                !selectedOwner.participantsCount ||
+                selectedOwner.participantsCount > 200
+            ) {
+                return null;
+            }
+        } else {
+            return null;
+        }
+
+        return (
+            <>
+                <Divider my="xs" label={mt('headers.clear')} labelPosition="center" mb={0} />
+
+                <NumberInput
+                    disabled={isSelectedChatLoading}
+                    min={1}
+                    defaultValue={minMessagesCountForKick}
+                    onChange={(messagesCount) => setMinMessagesCountForKick(Number(messagesCount))}
+                    clampBehavior="strict"
+                    thousandSeparator=" "
+                    allowDecimal={false}
+                    label={mt('delete_messages_input_label')}
+                    placeholder={mt('delete_messages_input_placeholder')}
+                />
+
+                <Button
+                    fullWidth={true}
+                    mt={5}
+                    onClick={isSelectedChatLoading ? () => {} : kickInactiveUsers}
+                    disabled={isSelectedChatLoading}
+                >
+                    {mt('kick_inactive_users')}
+                </Button>
+            </>
+        );
+    }
+
     function ModalContent() {
         if (modalType === EModalType.text) {
             return (
@@ -821,7 +1079,7 @@ export const MessagesStat = () => {
 
     if (needHideContent()) return null;
 
-    if (statResult) {
+    if (statResult && !usersForKick) {
         const counts = [
             { icon: IconMessage, label: mt('headers.count'), value: formatNumber(statResult.messages) },
             { icon: IconMessage2Bolt, label: mt('headers.uniq_count'), value: formatNumber(statResult.uniqMessages) },
@@ -968,6 +1226,7 @@ export const MessagesStat = () => {
 
                 <ReactionsList reactions={statResult.reactions} />
                 <ActivityChart data={statResult.activity} />
+                <DeleteInactiveUsers />
 
                 <Divider my="xs" label={mt('headers.tops')} labelPosition="center" mb={0} />
                 <TabsList tabs={tabsList} onChange={(tabId) => setSelectedTab(tabId as ETabId)} />
@@ -979,6 +1238,112 @@ export const MessagesStat = () => {
                         description={getDescription(selectedTab, top.count, false)}
                         callback={top.activity ? () => onTopOwnerClick(top) : undefined}
                     />
+                ))}
+            </>
+        );
+    }
+
+    async function kickUsers(usersForKickMap: Map<number, boolean>) {
+        if (!usersForKick) {
+            return;
+        }
+
+        const willKickedUsers = usersForKick.filter((user) => usersForKickMap.get(user.id.valueOf()) === true);
+        if (willKickedUsers.length === 0) {
+            notifyError({ message: mt('no_users_for_kick') });
+            return;
+        }
+
+        if (!selectedChat) {
+            await kickChannelUsers(willKickedUsers);
+        } else {
+            await kickChatUsers(willKickedUsers);
+        }
+
+        setSelectedChat(null);
+        setProgress(null);
+        setUsersForKick(null);
+    }
+
+    async function kickChatUsers(users: Api.User[]) {
+        if (!selectedOwner?.id) {
+            return;
+        }
+
+        setProgress({
+            text: mt('kick_users')
+        });
+
+        for (const user of users) {
+            await CallAPI(
+                new Api.messages.DeleteChatUser({
+                    chatId: selectedOwner.id,
+                    userId: user.id
+                })
+            );
+        }
+    }
+
+    async function kickChannelUsers(users: Api.User[]) {
+        if (!selectedOwner?.id) {
+            return;
+        }
+
+        setProgress({
+            text: mt('kick_users')
+        });
+
+        for (const user of users) {
+            await CallAPI(
+                new Api.channels.EditBanned({
+                    channel: selectedOwner.id.valueOf(),
+                    participant: user.id.valueOf(),
+                    bannedRights: new Api.ChatBannedRights({
+                        untilDate: 1,
+                        viewMessages: true,
+                        sendMessages: true,
+                        sendMedia: true,
+                        sendStickers: true,
+                        sendGifs: true,
+                        sendGames: true,
+                        sendInline: true,
+                        sendPolls: true,
+                        changeInfo: true,
+                        inviteUsers: true,
+                        pinMessages: true
+                    })
+                })
+            );
+        }
+    }
+
+    if (usersForKick) {
+        const usersForKickMap = new Map();
+        usersForKick.map((userForKick) => usersForKickMap.set(userForKick.id.valueOf(), true));
+
+        return (
+            <>
+                <Text>{mt('kick_confirm')}</Text>
+                <Flex mt={10} mb={20} gap={5}>
+                    <Button fullWidth variant="default" onClick={() => setUsersForKick(null)}>
+                        {mt('no')}
+                    </Button>
+                    <Button fullWidth variant="danger" onClick={async () => await kickUsers(usersForKickMap)}>
+                        {mt('yes')}
+                    </Button>
+                </Flex>
+
+                {usersForKick.map((user) => (
+                    <Flex justify="space-between" align="center" key={user.id.valueOf()}>
+                        <OwnerRow ml={0} owner={user} mr={0} styles={{ root: { width: '100%' } }} />
+                        <Switch
+                            defaultChecked
+                            size="lg"
+                            onLabel={mt('kick')}
+                            offLabel={mt('save')}
+                            onChange={(selected) => usersForKickMap.set(user.id.valueOf(), selected.target.checked)}
+                        />
+                    </Flex>
                 ))}
             </>
         );
