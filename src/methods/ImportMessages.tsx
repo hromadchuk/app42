@@ -303,7 +303,7 @@ export const ImportMessages = () => {
         setProgress({});
 
         const importData = await getImportData(selectedUserFrom as IFileUser);
-        const testData = importData.rows.slice(0, 100).join('\n');
+        const testData = importData.rows.slice(0, 100).join('\n') + '\n';
 
         try {
             await CallAPI(
@@ -319,7 +319,7 @@ export const ImportMessages = () => {
             return;
         }
 
-        const bufferText = Buffer.from(importData.rows.join('\n'), 'utf-8');
+        const bufferText = Buffer.from(importData.rows.join('\n') + '\n', 'utf-8');
 
         const init = await CallAPI(
             new Api.messages.InitHistoryImport({
@@ -355,7 +355,7 @@ export const ImportMessages = () => {
 
             await parallelLimit(10, uploadTasks);
 
-            setProgress({ text: mt('save_media'), total: importData.media.length });
+            setProgress({ text: mt('save_media'), count: 0, total: importData.media.length });
 
             const saveTasks: Function[] = [];
 
