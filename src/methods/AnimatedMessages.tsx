@@ -1,7 +1,7 @@
 import { useDisclosure } from '@mantine/hooks';
 import { JSX, useContext, useEffect, useState } from 'react';
 import { Badge, Button, Card, Group, Image, Input, Modal, Notification, Space, Text } from '@mantine/core';
-import { IconHeart, IconMail, TablerIconsProps } from '@tabler/icons-react';
+import { IconHeart, IconMail, IconRocket, TablerIconsProps } from '@tabler/icons-react';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { Api } from 'telegram';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
@@ -13,13 +13,17 @@ import { MethodContext } from '../contexts/MethodContext.tsx';
 import classes from '../styles/AnimatedMessages.module.css';
 
 import HeartAnimation from '../assets/animated_messages/heart.tsx';
+import SpaceInvadersAnimation from '../assets/animated_messages/space-invaders.tsx';
 // @ts-ignore
 import HeartAnimationGif from '../assets/animated_messages/examples/heart.gif';
+// @ts-ignore
+import SpaceInvadersGif from '../assets/animated_messages/examples/space-invaders.gif';
 
 interface IOption {
     id: string;
     icon: (props: TablerIconsProps) => JSX.Element;
     withEndText?: boolean;
+    gif: String;
     title: string;
     frames: string[];
 }
@@ -40,9 +44,18 @@ export const AnimatedMessages = () => {
         {
             id: 'heart',
             icon: IconHeart,
+            gif: HeartAnimationGif,
             withEndText: true,
             title: mt('titles.heart'),
             frames: HeartAnimation().split('\n\n')
+        },
+        {
+            id: 'space_invaders',
+            icon: IconRocket,
+            gif: SpaceInvadersGif,
+            withEndText: true,
+            title: mt('titles.space_invaders'),
+            frames: SpaceInvadersAnimation().split('\n\n')
         }
     ];
 
@@ -155,7 +168,7 @@ export const AnimatedMessages = () => {
         const seconds = Math.round(option.frames.length / (1000 / FRAME_TIME));
 
         return (
-            <Card withBorder radius="md" key={key} className={classes.card} onClick={() => showModal(option)}>
+            <Card mb={5} withBorder radius="md" key={key} className={classes.card} onClick={() => showModal(option)}>
                 <Group>
                     <div>
                         <Text fw={500}>{option.title}</Text>
@@ -177,7 +190,7 @@ export const AnimatedMessages = () => {
         return (
             <>
                 <Modal opened={opened} onClose={close} title={selectedOption?.title}>
-                    <Image maw={240} mx="auto" mb="xs" radius="md" src={HeartAnimationGif} alt="Random image" />
+                    <Image maw={240} mx="auto" mb="xs" radius="md" src={selectedOption?.gif} alt="Random image" />
 
                     {selectedOption?.withEndText && (
                         <Input
