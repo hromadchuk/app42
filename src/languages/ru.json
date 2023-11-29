@@ -243,7 +243,8 @@
       "has_message_after_animation": "Есть сообщение после анимации",
       "message_after_animation": "Сообщение после анимации",
       "titles": {
-        "heart": "Анимационное сердце"
+        "heart": "Анимационное сердце",
+        "space_invaders": "Анимация космические захватчики"
       }
     },
     "inactive_channels": {

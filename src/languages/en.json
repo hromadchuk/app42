@@ -243,7 +243,8 @@
       "has_message_after_animation": "Has custom message after animation",
       "message_after_animation": "Custom message after animation",
       "titles": {
-        "heart": "Animation heart"
+        "heart": "Animation heart",
+        "space_invaders": "Animation space invaders"
       }
     },
     "inactive_channels": {

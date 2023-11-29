@@ -243,7 +243,8 @@
       "has_message_after_animation": "Є повідомлення після анімації",
       "message_after_animation": "Повідомлення після анімації",
       "titles": {
-        "heart": "Анімаційне серце"
+        "heart": "Анімаційне серце",
+        "space_invaders": "Анімація космічні загарбники"
       }
     },
     "inactive_channels": {
