@@ -23,7 +23,7 @@ export const AbstractMethod = () => {
     const routerInfo = routes.find((router: IRouter) => router.path === location.pathname) as IRouter;
 
     useEffect(() => {
-        Server('method', { method: routerInfo.id });
+        Server('method', { method: routerInfo.methodId });
     }, []);
 
     const needHideContent = (): boolean => {
