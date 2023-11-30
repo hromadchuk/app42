@@ -1,19 +1,73 @@
-import { Avatar, Container, Divider, Notification, UnstyledButton } from '@mantine/core';
-import { IconBook2, IconPigMoney } from '@tabler/icons-react';
+import {
+    Avatar,
+    Container,
+    Divider,
+    getThemeColor,
+    Modal,
+    Notification,
+    SimpleGrid,
+    Text,
+    UnstyledButton,
+    useMantineTheme
+} from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import {
+    IconAddressBook,
+    IconBook2,
+    IconMessages,
+    IconPigMoney,
+    IconUser,
+    IconUsersGroup,
+    TablerIconsProps
+} from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { Api } from 'telegram';
 import { Link } from 'react-router-dom';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { CallAPI, getDocLink } from '../lib/helpers.ts';
-import { routes } from '../routes.tsx';
+import { hexToRgba } from '../lib/theme.ts';
+import { getMethods, IMethod, MethodCategory } from '../routes.tsx';
 import Logo from '../components/Logo.tsx';
 import { t } from '../lib/lang.ts';
 
 // @ts-ignore
 import classes from '../styles/MenuPage.module.css';
 
+interface ICard {
+    id: MethodCategory;
+    icon: (props: TablerIconsProps) => JSX.Element;
+    color: string;
+}
+
+const cards = [
+    {
+        id: MethodCategory.ACCOUNT,
+        icon: IconUser,
+        color: 'violet'
+    },
+    {
+        id: MethodCategory.CONTACTS,
+        icon: IconAddressBook,
+        color: 'teal'
+    },
+    {
+        id: MethodCategory.CHANNELS,
+        icon: IconUsersGroup,
+        color: 'yellow'
+    },
+    {
+        id: MethodCategory.CHATS,
+        icon: IconMessages,
+        color: 'pink'
+    }
+];
+
 const MenuPage = () => {
-    const [developer, setDeveloper] = useState<null | Api.User>(null);
+    const theme = useMantineTheme();
+    const [isModalOpened, { open, close }] = useDisclosure(false);
+
+    const [developer, setDeveloper] = useState<Api.User | null>(null);
+    const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
 
     useEffect(() => {
         CallAPI(
@@ -27,19 +81,55 @@ const MenuPage = () => {
         });
     }, []);
 
-    const links = routes
-        .filter((item) => item.isMethod)
-        .map((item, key) => (
-            <Link key={key} className={classes.link} to={item.path}>
-                {item.icon && <item.icon className={classes.linkIcon} stroke={1.5} />}
-                <span>{item.name}</span>
+    const methods = getMethods();
+
+    function getMethodsList(category: MethodCategory) {
+        return methods.filter((item) => item.categories.includes(category)).map(MethodRow);
+    }
+
+    function MethodRow(method: IMethod, key: number) {
+        return (
+            <Link key={key} className={classes.link} to={`/methods/${method.id}`}>
+                <method.icon className={classes.linkIcon} stroke={1.5} />
+                <span>{method.name}</span>
             </Link>
-        ));
+        );
+    }
+
+    function CategoryBlock(card: ICard, key: number) {
+        const color = getThemeColor(card.color, theme);
+        const cardStyle = {
+            backgroundColor: hexToRgba(theme.colors[card.color][9], 0.1)
+        };
+
+        return (
+            <UnstyledButton
+                key={key}
+                className={classes.item}
+                style={cardStyle}
+                onClick={() => {
+                    setSelectedCard(card);
+                    open();
+                }}
+            >
+                <card.icon size="2rem" color={color} />
+                <Text size="xs" mt={7}>
+                    {t(`menu.cards.${card.id}`)}
+                </Text>
+            </UnstyledButton>
+        );
+    }
 
     return (
         <>
+            <Modal opened={isModalOpened} onClose={close} title={selectedCard && t(`menu.cards.${selectedCard.id}`)}>
+                {selectedCard && getMethodsList(selectedCard.id)}
+            </Modal>
+
             <Container p={5}>
-                {links}
+                <SimpleGrid cols={2} mt="md">
+                    {cards.map(CategoryBlock)}
+                </SimpleGrid>
 
                 <Divider my="sm" />
 

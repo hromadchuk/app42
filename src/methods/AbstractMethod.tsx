@@ -63,11 +63,11 @@ export const AbstractMethod = () => {
     };
 
     const mt = (key: string): string => {
-        return t(`methods.${routerInfo.id}.${key}`);
+        return t(`methods.${routerInfo.methodId}.${key}`);
     };
 
     const md = (key: string): string[] => {
-        return td(`methods.${routerInfo.id}.${key}`);
+        return td(`methods.${routerInfo.methodId}.${key}`);
     };
 
     const getDialogs = async (options: IGetDialogOption): Promise<TDialogType[]> => {
