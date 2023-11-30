@@ -63,7 +63,13 @@
   "menu": {
     "documentation": "Documentation",
     "donate": "Support the project",
-    "telegram_channel": "Telegram channel with updates"
+    "telegram_channel": "Telegram channel with updates",
+    "cards": {
+      "account": "Account",
+      "contacts": "Contacts",
+      "channels": "Channels",
+      "chats": "Chats"
+    }
   },
   "alpha": {
     "description": "This is an alpha version of the product and there may be bugs. If you find a bug or have a suggestion, please send a message to the developer. Features will be added as the product is developed.",

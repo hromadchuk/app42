@@ -46,8 +46,8 @@ export function hexToRgba(hex: string, alpha: number): string {
     return `rgba(${parse.r}, ${parse.g}, ${parse.b}, ${parse.a})`;
 }
 
-export function darkenNex(hex: string): string {
-    const darkenFactor = 70;
+export function darkenNex(hex: string, factor?: number): string {
+    const darkenFactor = factor || 70;
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex) as string[];
     const rgb = {
         r: parseInt(result[1], 16),
@@ -72,6 +72,9 @@ export function setColors(colors: RequiredStringProps<ThemeParamsParsed>) {
         const setKey = `--tg-color-${key.replace(/_/g, '-')}`;
         body.style.setProperty(setKey, value as string);
     }
+
+    // set custom vars
+    body.style.setProperty('--tg-color-bg-color-darken', darkenNex(colors.bg_color, 5));
 
     // override blue theme
     const generatedColors = generateColors(colors.button_color);

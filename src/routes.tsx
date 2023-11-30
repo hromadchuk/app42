@@ -21,21 +21,33 @@ import { t } from './lib/lang.ts';
 
 const AuthRequired = lazy(() => import('./components/AuthRequired.tsx'));
 
-export interface IRouter {
+export enum MethodCategory {
+    ACCOUNT = 'account',
+    CONTACTS = 'contacts',
+    CHANNELS = 'channels',
+    CHATS = 'chats'
+}
+
+export interface IMethod {
+    id: string;
+    name: string;
+    icon: (props: TablerIconsProps) => JSX.Element;
+    categories: MethodCategory[];
+}
+
+export interface IRouter extends Partial<IMethod> {
     path: string;
-    isMethod: boolean;
     element: JSX.Element;
-    id?: string;
-    name?: string;
     withoutAuth?: boolean;
     childElement?: JSX.Element;
-    icon?: (props: TablerIconsProps) => JSX.Element;
+    methodId?: string;
 }
 
 interface IAppMethodRouter {
     id: string;
-    icon?: (props: TablerIconsProps) => JSX.Element;
+    icon: (props: TablerIconsProps) => JSX.Element;
     element: JSX.Element;
+    categories: MethodCategory[];
 }
 
 interface IAppRouter {
@@ -66,67 +78,80 @@ const appRoutes: IAppRouter[] = [
             {
                 id: 'get_id',
                 icon: Icon123,
-                element: createElement(lazy(() => import('./methods/GetId.tsx')))
+                element: createElement(lazy(() => import('./methods/GetId.tsx'))),
+                categories: [MethodCategory.ACCOUNT, MethodCategory.CHANNELS]
             },
             {
                 id: 'contacts_analysis',
                 icon: IconAddressBook,
-                element: createElement(lazy(() => import('./methods/ContactsAnalysis.tsx')))
+                element: createElement(lazy(() => import('./methods/ContactsAnalysis.tsx'))),
+                categories: [MethodCategory.CONTACTS]
             },
             {
                 id: 'messages_stat',
                 icon: IconMessageCircleSearch,
-                element: createElement(lazy(() => import('./methods/MessagesStat.tsx')))
+                element: createElement(lazy(() => import('./methods/MessagesStat.tsx'))),
+                categories: [MethodCategory.CHATS]
             },
             {
                 id: 'animated_messages',
                 icon: IconKeyframes,
-                element: createElement(lazy(() => import('./methods/AnimatedMessages.tsx')))
+                element: createElement(lazy(() => import('./methods/AnimatedMessages.tsx'))),
+                categories: [MethodCategory.CHATS]
             },
             {
                 id: 'inactive_channels',
                 icon: IconHourglassLow,
-                element: createElement(lazy(() => import('./methods/InactiveChannels.tsx')))
+                element: createElement(lazy(() => import('./methods/InactiveChannels.tsx'))),
+                categories: [MethodCategory.CHANNELS]
             },
             {
                 id: 'import_messages',
                 icon: IconMessageCircleUp,
-                element: createElement(lazy(() => import('./methods/ImportMessages.tsx')))
+                element: createElement(lazy(() => import('./methods/ImportMessages.tsx'))),
+                categories: [MethodCategory.CHATS]
             },
             {
                 id: 'clear_blacklist',
                 icon: IconThumbDownOff,
-                element: createElement(lazy(() => import('./methods/ClearBlacklist.tsx')))
+                element: createElement(lazy(() => import('./methods/ClearBlacklist.tsx'))),
+                categories: [MethodCategory.ACCOUNT]
             },
             {
                 id: 'administered',
                 icon: IconMessageCircleCog,
-                element: createElement(lazy(() => import('./methods/Administered.tsx')))
+                element: createElement(lazy(() => import('./methods/Administered.tsx'))),
+                categories: [MethodCategory.CHANNELS, MethodCategory.CHATS]
             },
             {
                 id: 'common_chats_top',
                 icon: IconCreativeCommonsNd,
-                element: createElement(lazy(() => import('./methods/CommonChatsTop.tsx')))
+                element: createElement(lazy(() => import('./methods/CommonChatsTop.tsx'))),
+                categories: [MethodCategory.CONTACTS, MethodCategory.CHATS]
             },
             {
                 id: 'calls_stat',
                 icon: IconPhoneCall,
-                element: createElement(lazy(() => import('./methods/CallsStat.tsx')))
+                element: createElement(lazy(() => import('./methods/CallsStat.tsx'))),
+                categories: [MethodCategory.CONTACTS]
             },
             {
                 id: 'channels_registration',
                 icon: IconCalendarPlus,
-                element: createElement(lazy(() => import('./methods/ChannelsRegistration.tsx')))
+                element: createElement(lazy(() => import('./methods/ChannelsRegistration.tsx'))),
+                categories: [MethodCategory.CHANNELS]
             },
             {
                 id: 'records_stat',
                 icon: IconReportAnalytics,
-                element: createElement(lazy(() => import('./methods/RecordsStat.tsx')))
+                element: createElement(lazy(() => import('./methods/RecordsStat.tsx'))),
+                categories: [MethodCategory.CHANNELS]
             },
             {
                 id: 'stories_stat',
                 icon: IconPhotoPentagon,
-                element: createElement(lazy(() => import('./methods/StoriesStat.tsx')))
+                element: createElement(lazy(() => import('./methods/StoriesStat.tsx'))),
+                categories: [MethodCategory.ACCOUNT]
             }
         ]
     }
@@ -137,18 +162,14 @@ const formattedRoutes: IRouter[] = [];
 function makeRoute(route: IAppRouter, method?: IAppMethodRouter): IRouter {
     const result: IRouter = {
         path: route.path,
-        isMethod: Boolean(method),
         element: route.element,
         withoutAuth: Boolean(route.withoutAuth)
     };
 
     if (method) {
-        result.isMethod = true;
-        result.id = method.id;
-        result.name = t(`routes.${method.id}`);
         result.path = `/methods/${method.id}`;
-        result.icon = method.icon;
         result.childElement = method.element;
+        result.methodId = method.id;
     }
 
     if (!result.withoutAuth) {
@@ -179,3 +200,16 @@ for (const route of appRoutes) {
 }
 
 export const routes = formattedRoutes;
+
+export const getMethods = (): IMethod[] => {
+    const methodsRoute = appRoutes.find((item) => item.path === '/methods') as IAppRouter;
+    const methods =
+        methodsRoute.methods?.map((item) => ({
+            id: item.id,
+            name: t(`routes.${item.id}`),
+            icon: item.icon,
+            categories: item.categories
+        })) || [];
+
+    return methods.sort((a, b) => a.name.localeCompare(b.name));
+};

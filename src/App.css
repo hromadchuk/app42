@@ -141,6 +141,13 @@ body {
     --tg-color-subtitle-text-color: transparent;
     --tg-color-text-color: transparent;
 
+    /* custom vars extends tg vars */
+    --tg-color-bg-color-darken: transparent;
+
     /* override Mantine vars */
     --mantine-color-body: var(--tg-color-bg-color);
+}
+
+.mantine-Notification-root {
+    background-color: var(--tg-color-bg-color-darken);
 }
