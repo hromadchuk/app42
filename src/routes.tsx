@@ -202,14 +202,14 @@ for (const route of appRoutes) {
 export const routes = formattedRoutes;
 
 export const getMethods = (): IMethod[] => {
-    const methodsRoute = appRoutes.find((item) => item.path === '/methods') as IAppRouter;
-    const methods =
-        methodsRoute.methods?.map((item) => ({
-            id: item.id,
-            name: t(`routes.${item.id}`),
-            icon: item.icon,
-            categories: item.categories
-        })) || [];
+    const methodsRoute = appRoutes.find((item) => item.path === '/methods') as Required<IAppRouter>;
+
+    const methods = methodsRoute.methods.map((item) => ({
+        id: item.id,
+        name: t(`routes.${item.id}`),
+        icon: item.icon,
+        categories: item.categories
+    }));
 
     return methods.sort((a, b) => a.name.localeCompare(b.name));
 };
