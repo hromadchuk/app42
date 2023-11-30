@@ -1,4 +1,4 @@
-import { ThemeChangedPayload } from '@tma.js/bridge';
+import { ThemeParamsParsed } from '@tma.js/sdk';
 import { generateColors } from '@mantine/colors-generator';
 import { getParams } from './helpers.ts';
 
@@ -15,10 +15,11 @@ export function getBackgroundColor() {
     return rgbToHex(color);
 }
 
-export function getParamsTheme(): RequiredStringProps<ThemeChangedPayload['theme_params']> {
+export function updateThemeFromParams() {
     const theme = getParams().get('tgWebAppThemeParams');
+    const colors = JSON.parse(theme || '{}');
 
-    return JSON.parse(theme || '{}');
+    setColors(colors);
 }
 
 export function rgbToHex(rgb: string): RGB {
@@ -63,13 +64,13 @@ export function darkenNex(hex: string): string {
     return rgbToHex(`rgb(${darkRgb.r}, ${darkRgb.g}, ${darkRgb.b})`);
 }
 
-export function setColors(colors: RequiredStringProps<ThemeChangedPayload['theme_params']>) {
+export function setColors(colors: RequiredStringProps<ThemeParamsParsed>) {
     const body = document.querySelector('body') as HTMLBodyElement;
 
     // set tg vars
     for (const [key, value] of Object.entries(colors)) {
         const setKey = `--tg-color-${key.replace(/_/g, '-')}`;
-        body.style.setProperty(setKey, value);
+        body.style.setProperty(setKey, value as string);
     }
 
     // override blue theme

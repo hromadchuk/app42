@@ -61,7 +61,7 @@ import { MessagesStatSharingGenerator } from '../sharing/MessagesStatSharingGene
 import { StatsPeriodPicker } from '../components/StatsPeriodPicker.tsx';
 import { CalculateActivityTime } from '../components/charts/chart_helpers.ts';
 import { ReactionsList } from '../components/ReactionsList.tsx';
-import { on, PopupClosedPayload, postEvent } from '@tma.js/bridge';
+import { on, postEvent } from '@tma.js/sdk';
 
 type TCorrectMessage = Api.Message | Api.MessageService;
 type TFilteredChannelParticipant = Exclude<
@@ -187,37 +187,6 @@ export const MessagesStat = () => {
     const [modalType, setModalType] = useState<EModalType>(EModalType.text);
 
     useEffect(() => {
-        async function onPopupClose({ button_id: eventName }: PopupClosedPayload) {
-            if (
-                eventName !== kickInactiveUsersEventName ||
-                !statResult?.tops.messages ||
-                !(
-                    (selectedOwner instanceof Api.Channel && selectedOwner?.participantsCount) ||
-                    (selectedOwner instanceof Api.Chat && selectedChat)
-                )
-            ) {
-                notifyError({ message: mt('incorrect_participants_data') });
-                return;
-            }
-
-            const isSuperGroup = selectedOwner instanceof Api.Channel;
-
-            let participantsForKick;
-            if (isSuperGroup) {
-                participantsForKick = await processChannelParticipants();
-            } else {
-                participantsForKick = processChatParticipants();
-            }
-
-            if ((participantsForKick || []).length === 0) {
-                notifyError({ message: mt('no_users_for_kick') });
-                setUsersForKick(null);
-                return;
-            }
-
-            setUsersForKick(participantsForKick);
-        }
-
         function processChatParticipants(): null | Api.User[] {
             if (
                 !(selectedOwner instanceof Api.Chat) ||
@@ -264,7 +233,36 @@ export const MessagesStat = () => {
             return processParticipants(participantsList, Api.ChannelParticipantAdmin, participants.users);
         }
 
-        return on('popup_closed', onPopupClose);
+        return on('popup_closed', async ({ button_id: eventName }) => {
+            if (
+                eventName !== kickInactiveUsersEventName ||
+                !statResult?.tops.messages ||
+                !(
+                    (selectedOwner instanceof Api.Channel && selectedOwner?.participantsCount) ||
+                    (selectedOwner instanceof Api.Chat && selectedChat)
+                )
+            ) {
+                notifyError({ message: mt('incorrect_participants_data') });
+                return;
+            }
+
+            const isSuperGroup = selectedOwner instanceof Api.Channel;
+
+            let participantsForKick;
+            if (isSuperGroup) {
+                participantsForKick = await processChannelParticipants();
+            } else {
+                participantsForKick = processChatParticipants();
+            }
+
+            if ((participantsForKick || []).length === 0) {
+                notifyError({ message: mt('no_users_for_kick') });
+                setUsersForKick(null);
+                return;
+            }
+
+            setUsersForKick(participantsForKick);
+        });
     }, [selectedOwner, minMessagesCountForKick, statResult, selectedChat]);
 
     function processParticipants(
