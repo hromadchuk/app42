@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import { getParams } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
-import { getParamsTheme, setColors } from './lib/theme.ts';
+import { updateThemeFromParams } from './lib/theme.ts';
 
 import App from './App.tsx';
 
@@ -23,6 +23,6 @@ const tgWebAppData = getParams().get('tgWebAppData');
 if (!tgWebAppData) {
     location.href = 'https://t.me/kit42bot/kit42';
 } else {
-    setColors(getParamsTheme());
+    updateThemeFromParams();
     createRoot(document.getElementById('root') as HTMLElement).render(<App />);
 }

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { EventListener, off, on, postEvent } from '@tma.js/bridge';
+import { MiniAppsEvents, off, on, postEvent } from '@tma.js/sdk';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ReactGA from 'react-ga4';
 import { isDev } from '../lib/helpers.ts';
@@ -20,14 +20,14 @@ export function EmptyHeader() {
             is_visible: true
         });
 
-        const settingsPressEvent: EventListener<'settings_button_pressed'> = () => {
+        const settingsPressEvent: MiniAppsEvents['settings_button_pressed'] = () => {
             navigate('/profile');
         };
 
         on('settings_button_pressed', settingsPressEvent);
 
         // back button
-        const backButtonPressEvent: EventListener<'back_button_pressed'> = () => {
+        const backButtonPressEvent: MiniAppsEvents['back_button_pressed'] = () => {
             navigate('/menu');
 
             if (window.isProgress) {
