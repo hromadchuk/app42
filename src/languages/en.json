@@ -242,9 +242,16 @@
       "send_button": "Send animation",
       "has_message_after_animation": "Has custom message after animation",
       "message_after_animation": "Custom message after animation",
+      "animations": {
+        "ticTacToe": {
+          "draw": "It's a draw!",
+          "win": "Player {winner} wins!"
+        }
+      },
       "titles": {
         "heart": "Animation heart",
-        "space_invaders": "Animation space invaders"
+        "space_invaders": "Animation space invaders",
+        "tic_tac_toe": "Animation tic tac toe (randomly generated)"
       }
     },
     "inactive_channels": {

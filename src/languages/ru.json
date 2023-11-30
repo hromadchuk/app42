@@ -242,9 +242,16 @@
       "send_button": "Отправить анимацию",
       "has_message_after_animation": "Есть сообщение после анимации",
       "message_after_animation": "Сообщение после анимации",
+      "animations": {
+        "ticTacToe": {
+          "draw": "Это ничья!",
+          "win": "Игрок {winner} победил!"
+        }
+      },
       "titles": {
         "heart": "Анимационное сердце",
-        "space_invaders": "Анимация космические захватчики"
+        "space_invaders": "Анимация космические захватчики",
+        "tic_tac_toe": "Анимация крестики-нолики (генерируется случайным образом)"
       }
     },
     "inactive_channels": {
