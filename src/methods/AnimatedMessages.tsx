@@ -1,7 +1,7 @@
 import { useDisclosure } from '@mantine/hooks';
 import { JSX, useContext, useEffect, useState } from 'react';
 import { Badge, Button, Card, Group, Image, Input, Modal, Notification, Space, Text } from '@mantine/core';
-import { IconHeart, IconMail, IconRocket, TablerIconsProps } from '@tabler/icons-react';
+import { IconHeart, IconMail, IconRocket, IconTicTac, TablerIconsProps } from '@tabler/icons-react';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { Api } from 'telegram';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
@@ -14,10 +14,13 @@ import classes from '../styles/AnimatedMessages.module.css';
 
 import HeartAnimation from '../assets/animated_messages/heart.tsx';
 import SpaceInvadersAnimation from '../assets/animated_messages/space-invaders.tsx';
+import TicTacToeAnimation from '../assets/animated_messages/tic-tac-toe.tsx';
 // @ts-ignore
 import HeartAnimationGif from '../assets/animated_messages/examples/heart.gif';
 // @ts-ignore
 import SpaceInvadersGif from '../assets/animated_messages/examples/space-invaders.gif';
+// @ts-ignore
+import TicTacToeGif from '../assets/animated_messages/examples/tic-tac-toe.gif';
 
 interface IOption {
     id: string;
@@ -56,6 +59,14 @@ export const AnimatedMessages = () => {
             withEndText: true,
             title: mt('titles.space_invaders'),
             frames: SpaceInvadersAnimation().split('\n\n')
+        },
+        {
+            id: 'tic_tac_toe',
+            icon: IconTicTac,
+            gif: TicTacToeGif,
+            withEndText: false,
+            title: mt('titles.tic_tac_toe'),
+            frames: TicTacToeAnimation(mt)
         }
     ];
 
