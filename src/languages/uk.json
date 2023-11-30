@@ -242,9 +242,16 @@
       "send_button": "Надіслати анімацію",
       "has_message_after_animation": "Є повідомлення після анімації",
       "message_after_animation": "Повідомлення після анімації",
+      "animations": {
+        "ticTacToe": {
+          "draw": "Це нічия!",
+          "win": "Гравець {winner} виграв!"
+        }
+      },
       "titles": {
         "heart": "Анімаційне серце",
-        "space_invaders": "Анімація космічні загарбники"
+        "space_invaders": "Анімація космічні загарбники",
+        "tic_tac_toe": "Анімація хрестики-нулики (генерується випадковим чином)"
       }
     },
     "inactive_channels": {
