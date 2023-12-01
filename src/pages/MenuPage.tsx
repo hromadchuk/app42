@@ -112,7 +112,7 @@ const MenuPage = () => {
                     open();
                 }}
             >
-                <card.icon size="2rem" color={color} />
+                <card.icon size={32} color={color} />
                 <Text size="xs" mt={7}>
                     {t(`menu.cards.${card.id}`)}
                 </Text>

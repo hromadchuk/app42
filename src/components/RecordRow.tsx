@@ -55,7 +55,7 @@ export function RecordRow({ record, description, callback }: IRecordRow) {
             </Group>
 
             <Container p={0} mr={0}>
-                <IconChevronRight size="0.9rem" stroke={1.5} />
+                <IconChevronRight size={14} stroke={1.5} />
             </Container>
         </Flex>
     );

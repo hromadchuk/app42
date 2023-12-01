@@ -118,7 +118,7 @@ export function OwnerRow({
             </div>
 
             <Container p={0} mr={0}>
-                {linkProps.component && createElement(rightIcon || IconChevronRight, { size: '0.9rem', stroke: 1.5 })}
+                {linkProps.component && createElement(rightIcon || IconChevronRight, { size: 14, stroke: 1.5 })}
             </Container>
         </Flex>
     );
