@@ -36,7 +36,7 @@ export function RecordPhoto({ photo }: { photo?: Api.TypePhoto }) {
     return (
         <div ref={ref}>
             <Avatar>
-                <IconPhoto size="1.5rem" />
+                <IconPhoto size={24} />
             </Avatar>
         </div>
     );

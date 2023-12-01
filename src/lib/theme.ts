@@ -1,12 +1,11 @@
-import { ThemeParamsParsed } from '@tma.js/sdk';
 import { generateColors } from '@mantine/colors-generator';
 import { getParams } from './helpers.ts';
 
 type RGB = `#${string}`;
 
-type RequiredStringProps<T> = {
-    [P in keyof T]-?: RGB;
-};
+interface ThemeParamsParsed {
+    [key: string]: RGB;
+}
 
 export function getBackgroundColor() {
     const body = document.querySelector('body') as HTMLBodyElement;
@@ -64,7 +63,7 @@ export function darkenNex(hex: string, factor?: number): string {
     return rgbToHex(`rgb(${darkRgb.r}, ${darkRgb.g}, ${darkRgb.b})`);
 }
 
-export function setColors(colors: RequiredStringProps<ThemeParamsParsed>) {
+export function setColors(colors: ThemeParamsParsed) {
     const body = document.querySelector('body') as HTMLBodyElement;
 
     // set tg vars

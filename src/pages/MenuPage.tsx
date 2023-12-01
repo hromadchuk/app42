@@ -127,7 +127,7 @@ const MenuPage = () => {
             </Modal>
 
             <Container p={5}>
-                <SimpleGrid cols={2} mt="md">
+                <SimpleGrid cols={2} m="xs">
                     {cards.map(CategoryBlock)}
                 </SimpleGrid>
 

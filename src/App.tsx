@@ -1,20 +1,20 @@
-import { useEffect, useState } from 'react';
+import { PropsWithChildren, useEffect, useState } from 'react';
 import { AppShell, MantineProvider } from '@mantine/core';
 import { useColorScheme } from '@mantine/hooks';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import ReactGA from 'react-ga4';
+import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { Api, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
 import { AppContext } from './contexts/AppContext.tsx';
-import { postEvent } from '@tma.js/sdk';
+import { SDKProvider, useBackButton, useMiniApp, usePostEvent, useSDKContext, useViewport } from '@tma.js/sdk-react';
 import { AppNotifications } from './components/AppNotifications.tsx';
 import { Constants } from './constants.ts';
 import { clearOldCache } from './lib/cache.ts';
-import { getParams, Server } from './lib/helpers.ts';
+import { getParams, isDev, Server } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
 import { setColors } from './lib/theme.ts';
 import { IRouter, routes } from './routes.tsx';
 
-import { EmptyHeader } from './components/EmptyHeader.tsx';
 import { AppFooter } from './components/AppFooter.tsx';
 
 import '@mantine/core/styles.css';
@@ -33,12 +33,45 @@ declare global {
 }
 
 const App = () => {
+    const miniApp = useMiniApp();
+    const viewport = useViewport();
+    const backButton = useBackButton();
+    const postEvent = usePostEvent();
+    const navigate = useNavigate();
+    const location = useLocation();
+
     const [user, setUser] = useState<null | Api.User>(null);
     const [isAppLoading, setAppLoading] = useState<boolean>(false);
 
     useEffect(() => {
+        // init mini app
+        miniApp.ready();
+        viewport.expand();
+
+        // where hook in sdk-react???
+        postEvent('web_app_setup_settings_button', {
+            is_visible: true
+        });
+
+        backButton.on('click', () => {
+            navigate('/menu');
+
+            if (window.isProgress) {
+                // need for stop all requests
+                window.isProgress = false;
+                window.location.reload();
+            }
+        });
+
+        // clear cache
         clearOldCache();
 
+        // init analytics
+        if (!isDev) {
+            ReactGA.initialize('G-T5H886J9RS');
+        }
+
+        // init app
         const session = localStorage.getItem(Constants.SESSION_KEY);
 
         window.TelegramClient = new TelegramClient(
@@ -62,7 +95,7 @@ const App = () => {
         } else if (currentVersion !== version) {
             localStorage.clear();
             localStorage.setItem(versionKey, version);
-            location.reload();
+            window.location.reload();
             return;
         }
 
@@ -79,12 +112,14 @@ const App = () => {
             console.error(`Error init app: ${error}`);
         }
 
-        setTimeout(() => {
-            postEvent('web_app_expand');
-        }, 500);
-
         window.addEventListener('message', ({ data }) => {
             const { eventType, eventData } = JSON.parse(data);
+
+            console.log('event', eventType, '=>', eventData);
+
+            if (eventType === 'settings_button_pressed') {
+                navigate('/profile');
+            }
 
             if (eventType === 'theme_changed') {
                 setColors(eventData.theme_params);
@@ -92,24 +127,68 @@ const App = () => {
         });
     }, []);
 
+    useEffect(() => {
+        if (!isDev) {
+            ReactGA.send({ hitType: 'pageview', page: location.pathname });
+        }
+
+        const excludeBackButton = ['/', '/menu'];
+
+        if (excludeBackButton.includes(location.pathname)) {
+            backButton.hide();
+        } else {
+            backButton.show();
+        }
+    }, [location]);
+
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
 
     return (
-        <MantineProvider forceColorScheme={useColorScheme()}>
-            <AppContext.Provider value={{ user, setUser, isAppLoading, setAppLoading }}>
-                <MemoryRouter>
-                    <AppShell>
-                        <EmptyHeader />
-                        <AppShell.Main>
-                            <Routes>{routes.map(GetRouter)}</Routes>
-                            <AppFooter />
-                        </AppShell.Main>
-                        <AppNotifications />
-                    </AppShell>
-                </MemoryRouter>
-            </AppContext.Provider>
-        </MantineProvider>
+        <AppContext.Provider
+            value={{
+                user,
+                setUser,
+                isAppLoading,
+                setAppLoading
+            }}
+        >
+            <Routes>{routes.map(GetRouter)}</Routes>
+            <AppFooter />
+            <AppNotifications />
+        </AppContext.Provider>
     );
 };
 
-export default App;
+function MiniAppLoader({ children }: PropsWithChildren) {
+    const { loading, initResult, error } = useSDKContext();
+
+    if (!loading && !error && !initResult) {
+        return <div>SDK init function is not yet called.</div>;
+    }
+
+    if (error) {
+        return <div>Something went wrong.</div>;
+    }
+
+    if (loading) {
+        return <div>Warming up SDK.</div>;
+    }
+
+    return <>{children}</>;
+}
+
+const MiniAppWrapper = () => (
+    <SDKProvider options={{ async: true }}>
+        <MantineProvider forceColorScheme={useColorScheme()}>
+            <MiniAppLoader>
+                <MemoryRouter>
+                    <AppShell>
+                        <App />
+                    </AppShell>
+                </MemoryRouter>
+            </MiniAppLoader>
+        </MantineProvider>
+    </SDKProvider>
+);
+
+export default MiniAppWrapper;

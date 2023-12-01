@@ -84,7 +84,7 @@ export const ClearBlacklist = () => {
                     sections={[{ value: getPercent(blockedCount - offset, blockedCount), color: 'yellow' }]}
                     label={
                         <Center>
-                            <IconUsersGroup size="1.4rem" stroke={1.5} />
+                            <IconUsersGroup size={22} stroke={1.5} />
                         </Center>
                     }
                 />

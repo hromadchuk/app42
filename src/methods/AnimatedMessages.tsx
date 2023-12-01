@@ -205,7 +205,7 @@ export const AnimatedMessages = () => {
 
                     {selectedOption?.withEndText && (
                         <Input
-                            leftSection={<IconMail size="1rem" />}
+                            leftSection={<IconMail size={16} />}
                             placeholder={mt('message_after_animation')}
                             onChange={(event) => setLastMessage(event.target.value)}
                         />
