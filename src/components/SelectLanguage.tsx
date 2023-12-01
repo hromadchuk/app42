@@ -33,7 +33,7 @@ export function SelectLanguage() {
             onClick={() => {
                 localStorage.setItem('lang', item.code);
                 setSelected(item);
-                location.reload();
+                window.location.reload();
             }}
             key={item.label}
         >
@@ -58,7 +58,7 @@ export function SelectLanguage() {
                             <span className={classes.label}>{selected.label}</span>
                         </Group>
                         <IconChevronDown
-                            size="1rem"
+                            size={16}
                             className={classNames(classes.icon, { [classes.iconOpened]: opened })}
                             stroke={1.5}
                         />
