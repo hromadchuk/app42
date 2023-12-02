@@ -152,7 +152,9 @@ export function SelectDialog(options: IOptionsSelectDialog) {
             return true;
         }
 
-        return options.allowTypes.includes(EOwnerType.channel) && row.owner instanceof Api.Channel;
+        return (
+            options.allowTypes.includes(EOwnerType.channel) && row.owner instanceof Api.Channel && !row.owner.megagroup
+        );
     }
 
     function formatRows(peers: Api.TypePeer[], users: Api.User[], chats: (Api.Chat | Api.Channel)[]): IOwnerRow[] {

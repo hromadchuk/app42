@@ -313,7 +313,8 @@
     },
     "channels_registration": {
       "no_created": "You don't have any created channels",
-      "created": "{time} ago"
+      "created": "{time} ago",
+      "today": "Less than 24 hours"
     },
     "records_stat": {
       "loading_records": "Getting records",
