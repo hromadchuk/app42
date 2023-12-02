@@ -5,6 +5,7 @@ import {
     IconAddressBook,
     IconCalendarPlus,
     IconCreativeCommonsNd,
+    IconDoorEnter,
     IconHourglassLow,
     IconKeyframes,
     IconMessageCircleCog,
@@ -152,6 +153,12 @@ const appRoutes: IAppRouter[] = [
                 icon: IconPhotoPentagon,
                 element: createElement(lazy(() => import('./methods/StoriesStat.tsx'))),
                 categories: [MethodCategory.ACCOUNT]
+            },
+            {
+                id: 'dialog_joined',
+                icon: IconDoorEnter,
+                element: createElement(lazy(() => import('./methods/DialogJoined.tsx'))),
+                categories: [MethodCategory.CHANNELS, MethodCategory.CHATS]
             }
         ]
     }
