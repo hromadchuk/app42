@@ -236,6 +236,13 @@
       "read_wait": "Waiting for the message to be read",
       "send_button": "Send animation",
       "has_message_after_animation": "Has custom message after animation",
+      "animated_text": {
+        "require": "Require text",
+        "text": "Short text that will be animated",
+        "incorrect": "Incorrect animation text. Double-check that you are not using any characters other than English/Russian letters or numbers. If not, the text is probably too long, try shortening it (it is better not to use text longer than 10 characters)",
+        "description": "Russian and English are supported. Not too big so as not to reach the limitations of telegram."
+      },
+      "error": "Some errors on message send. Try again later or with another data",
       "message_after_animation": "Custom message after animation",
       "animations": {
         "ticTacToe": {
@@ -246,7 +253,8 @@
       "titles": {
         "heart": "Animation heart",
         "space_invaders": "Animation space invaders",
-        "tic_tac_toe": "Animation tic tac toe (randomly generated)"
+        "tic_tac_toe": "Animation tic tac toe (randomly generated)",
+        "emoji_text": "Text animation (dynamically generated)"
       }
     },
     "inactive_channels": {
