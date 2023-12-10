@@ -91,7 +91,8 @@
     "calls_stat": "Calls stat",
     "channels_registration": "Channels registration",
     "records_stat": "Records stat",
-    "stories_stat": "Stories stat"
+    "stories_stat": "Stories stat",
+    "dialog_joined": "Dialogs joined date"
   },
   "charts": {
     "activity": {
@@ -396,6 +397,11 @@
         "views": "Views",
         "reaction": "Reactions"
       }
+    },
+    "dialog_joined": {
+      "no_created": "You don't have any dialogs",
+      "created": "{time} ago",
+      "today": "Less than 24 hours"
     }
   }
 }
