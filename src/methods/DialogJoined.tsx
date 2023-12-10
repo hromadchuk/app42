@@ -23,11 +23,11 @@ export const ChannelsRegistration = () => {
         const createdChannels = dialogs.filter((dialog) => {
             const correctType = dialog as Exclude<TDialogType, Api.User>;
 
-            return correctType.creator;
+            return !correctType.creator;
         });
 
         if (!dialogs.length) {
-            setFinishBlock({ state: 'error', text: mt('no_created') });
+            setFinishBlock({ state: 'error', text: mt('no_dialogs') });
             return;
         }
 
