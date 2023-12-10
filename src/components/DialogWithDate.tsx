@@ -13,7 +13,13 @@ export const DialogWithDate = ({ dialogs }: { dialogs: Api.Channel[] | Api.Chat[
             {dialogs.map((dialog, key) => {
                 const createdDate = dayjs(dialog.date * 1000);
                 const diffInSeconds = dayjs().diff(createdDate, 'second');
-                const createdText = mt('created').replace('{time}', getTextTime(diffInSeconds, true));
+                let textTime = mt('today');
+
+                if (diffInSeconds > 24 * 60 * 60) {
+                    textTime = getTextTime(diffInSeconds, true);
+                }
+
+                const createdText = mt('created').replace('{time}', textTime);
                 const createdDateText = createdDate.format('LL');
 
                 return <OwnerRow key={key} owner={dialog} description={`${createdText} (${createdDateText})`} />;

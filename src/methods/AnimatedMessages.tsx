@@ -1,11 +1,18 @@
 import { useDisclosure } from '@mantine/hooks';
 import { JSX, useContext, useEffect, useState } from 'react';
-import { Badge, Button, Card, Group, Image, Input, Modal, Notification, Space, Text } from '@mantine/core';
-import { IconHeart, IconMail, IconRocket, IconTicTac, TablerIconsProps } from '@tabler/icons-react';
+import { Badge, Button, Card, Group, Image, Input, Modal, Notification, Space, Text, TextInput } from '@mantine/core';
+import {
+    IconHeart,
+    IconMail,
+    IconRocket,
+    IconTextWrapDisabled,
+    IconTicTac,
+    TablerIconsProps
+} from '@tabler/icons-react';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { Api } from 'telegram';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
-import { CallAPI, getTextTime, sleep } from '../lib/helpers.ts';
+import { CallAPI, getTextTime, notifyError, sleep } from '../lib/helpers.ts';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
 
@@ -21,17 +28,22 @@ import HeartAnimationGif from '../assets/animated_messages/examples/heart.gif';
 import SpaceInvadersGif from '../assets/animated_messages/examples/space-invaders.gif';
 // @ts-ignore
 import TicTacToeGif from '../assets/animated_messages/examples/tic-tac-toe.gif';
+import emojiText from '../assets/animated_messages/emoji-text.ts';
 
 interface IOption {
     id: string;
     icon: (props: TablerIconsProps) => JSX.Element;
     withEndText?: boolean;
-    gif: String;
+    description?: string;
+    requireText?: boolean;
+    errorText?: string;
+    gif?: String;
     title: string;
     frames: string[];
 }
 
 const FRAME_TIME = 100;
+export const MAX_FRAMES_COUNT = 50;
 
 const stateReadMessages = new Map<number, number>();
 
@@ -40,6 +52,7 @@ export const AnimatedMessages = () => {
     const [opened, { open, close }] = useDisclosure(false);
 
     const [selectedOwner, setSelectedOwner] = useState<Api.User | null>(null);
+    const [textToAnimate, setTextToAnimate] = useState<string | null>(null);
     const [selectedOption, setSelectedOption] = useState<IOption | null>(null);
     const [lastMessage, setLastMessage] = useState<string>('');
 
@@ -67,6 +80,16 @@ export const AnimatedMessages = () => {
             withEndText: false,
             title: mt('titles.tic_tac_toe'),
             frames: TicTacToeAnimation(mt)
+        },
+        {
+            id: 'emoji-text',
+            icon: IconTextWrapDisabled,
+            withEndText: false,
+            requireText: true,
+            description: mt('animated_text.description'),
+            errorText: mt('animated_text.incorrect'),
+            title: mt('titles.emoji_text'),
+            frames: emojiText(textToAnimate || '')
         }
     ];
 
@@ -84,13 +107,24 @@ export const AnimatedMessages = () => {
         };
     }, []);
 
-    async function sendAnimation() {
-        setProgress({ text: mt('sending_message'), warningText: mt('loading_warning') });
+    useEffect(() => {
+        if (selectedOption) {
+            setSelectedOption(options.find((option) => option.id === selectedOption.id) as IOption);
+        }
+    }, [textToAnimate]);
 
+    async function sendAnimation() {
         const owner = selectedOwner as Api.User;
         const ownerId = owner.id.valueOf();
         const lines = selectedOption?.frames.slice(0) as string[];
         const firstLine = lines.shift() as string;
+
+        if (lines.length === 0) {
+            notifyError({ message: selectedOption?.errorText || mt('error') });
+            return;
+        }
+
+        setProgress({ text: mt('sending_message'), warningText: mt('loading_warning') });
 
         const messageId = await sendMessage(ownerId, firstLine);
 
@@ -175,8 +209,12 @@ export const AnimatedMessages = () => {
         open();
     }
 
+    function calculateFramesRenderTime(option: IOption): number {
+        return Math.ceil(option.frames.length / (1000 / FRAME_TIME));
+    }
+
     function OptionRow(option: IOption, key: number) {
-        const seconds = Math.round(option.frames.length / (1000 / FRAME_TIME));
+        const seconds = calculateFramesRenderTime(option);
 
         return (
             <Card mb={5} withBorder radius="md" key={key} className={classes.card} onClick={() => showModal(option)}>
@@ -188,8 +226,13 @@ export const AnimatedMessages = () => {
                                 {mt('has_message_after_animation')}
                             </Text>
                         )}
+                        {option.requireText && (
+                            <Text fz="xs" c="dimmed">
+                                {mt('animated_text.require')}
+                            </Text>
+                        )}
                     </div>
-                    <Badge size="xs">~{getTextTime(seconds)}</Badge>
+                    {seconds && <Badge size="xs">~{getTextTime(seconds)}</Badge>}
                 </Group>
             </Card>
         );
@@ -198,11 +241,16 @@ export const AnimatedMessages = () => {
     if (needHideContent()) return null;
 
     if (selectedOwner) {
+        const framesRenderTime = selectedOption ? calculateFramesRenderTime(selectedOption) : 0;
+
         return (
             <>
                 <Modal opened={opened} onClose={close} title={selectedOption?.title}>
-                    <Image maw={240} mx="auto" mb="xs" radius="md" src={selectedOption?.gif} alt="Random image" />
+                    {framesRenderTime > 0 && <Badge size="xs">~{getTextTime(framesRenderTime)}</Badge>}
 
+                    {selectedOption?.gif && (
+                        <Image maw={240} mx="auto" mb="xs" radius="md" src={selectedOption?.gif} alt="Random image" />
+                    )}
                     {selectedOption?.withEndText && (
                         <Input
                             leftSection={<IconMail size={16} />}
@@ -211,7 +259,22 @@ export const AnimatedMessages = () => {
                         />
                     )}
 
-                    <Button fullWidth variant="outline" mt="xs" onClick={sendAnimation}>
+                    {selectedOption?.requireText && (
+                        <TextInput
+                            label={selectedOption.description || ''}
+                            leftSection={<IconMail size="1rem" />}
+                            placeholder={mt('animated_text.text')}
+                            onChange={(event) => setTextToAnimate(event.target.value)}
+                        />
+                    )}
+
+                    <Button
+                        fullWidth
+                        variant="outline"
+                        disabled={selectedOption?.requireText && !textToAnimate && framesRenderTime <= 0}
+                        mt="xs"
+                        onClick={sendAnimation}
+                    >
                         {mt('send_button')}
                     </Button>
                 </Modal>
