@@ -240,10 +240,10 @@
       "animated_text": {
         "require": "Require text",
         "text": "Short text that will be animated",
-        "incorrect": "Incorrect animation text. Double-check that you are not using any characters other than English/Russian letters or numbers. If not, the text is probably too long, try shortening it (it is better not to use text longer than 10 characters).",
-        "description": "Russian and English are supported. Not too big so as not to reach the limitations of telegram."
+        "incorrect": "Incorrect animation text. Make sure that the text does not use characters other than Latin/Cyrillic letters and numbers. If not, maybe the text is too long, try shortening it (better not to use text longer than 10 characters).",
+        "description": "Latin and Cyrillic are supported. Not too big so as not to reach the limitations of Telegram."
       },
-      "error": "Some errors on message send. Try again later or with another data",
+      "error": "Some errors on message send. Try again later or with another data.",
       "message_after_animation": "Custom message after animation",
       "animations": {
         "ticTacToe": {
