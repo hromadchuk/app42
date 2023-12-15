@@ -6,7 +6,14 @@ import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-rou
 import { Api, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
 import { AppContext } from './contexts/AppContext.tsx';
-import { SDKProvider, useBackButton, useMiniApp, usePostEvent, useSDKContext, useViewport } from '@tma.js/sdk-react';
+import {
+    SDKProvider,
+    useBackButton,
+    useMiniApp,
+    useSDKContext,
+    useSettingsButton,
+    useViewport
+} from '@tma.js/sdk-react';
 import { AppNotifications } from './components/AppNotifications.tsx';
 import { Constants } from './constants.ts';
 import { clearOldCache } from './lib/cache.ts';
@@ -28,7 +35,6 @@ declare global {
         listenEvents: { [key: string]: (event: object) => void };
         userId: number;
         isProgress: boolean;
-        eruda: { init: () => void };
     }
 }
 
@@ -36,7 +42,7 @@ const App = () => {
     const miniApp = useMiniApp();
     const viewport = useViewport();
     const backButton = useBackButton();
-    const postEvent = usePostEvent();
+    const settingsButton = useSettingsButton();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -48,9 +54,9 @@ const App = () => {
         miniApp.ready();
         viewport.expand();
 
-        // where hook in sdk-react???
-        postEvent('web_app_setup_settings_button', {
-            is_visible: true
+        settingsButton.show();
+        settingsButton.on('click', () => {
+            navigate('/profile');
         });
 
         backButton.on('click', () => {
@@ -116,10 +122,6 @@ const App = () => {
             const { eventType, eventData } = JSON.parse(data);
 
             console.log('event', eventType, '=>', eventData);
-
-            if (eventType === 'settings_button_pressed') {
-                navigate('/profile');
-            }
 
             if (eventType === 'theme_changed') {
                 setColors(eventData.theme_params);
