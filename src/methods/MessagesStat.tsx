@@ -1,8 +1,10 @@
 import {
     Button,
+    Center,
     Container,
     Divider,
     Flex,
+    Group,
     Image,
     Modal,
     Notification,
@@ -28,6 +30,7 @@ import {
 import dayjs from 'dayjs';
 import { JSX, useContext, useState } from 'react';
 import { Api } from 'telegram';
+import { usePopup } from '@tma.js/sdk-react';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
@@ -153,6 +156,7 @@ const sharingImages = new Map<string, string>();
 export const MessagesStat = () => {
     const { mt, md, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
     const [isModalOpened, { open, close }] = useDisclosure(false);
+    const popup = usePopup();
 
     const [userActivityModalData, setUserActivityModalData] = useState<ITopItem | null>(null);
     const [isUserActivityModalOpened, { open: openUserActivityModal, close: closeUserActivityModal }] =
@@ -160,6 +164,8 @@ export const MessagesStat = () => {
 
     const [ownerMessages, setOwnerMessages] = useState<Api.TypeMessage[]>([]);
     const [ownerPeriods, setOwnerPeriods] = useState<IPeriodData[]>([]);
+    const [chatInactiveMembers, setChatInactiveMembers] = useState<Api.User[]>([]);
+    const [chatInactiveMembersShowCount, setChatInactiveMembersShowCount] = useState<number>(3);
     const [recordsPeriod, setRecordsPeriod] = useState<TPeriodType>([null, null]);
     const [selectedOwner, setSelectedOwner] = useState<TPeer | null>(null);
     const [statResult, setStatResult] = useState<IScanDataResult | null>(null);
@@ -182,6 +188,11 @@ export const MessagesStat = () => {
 
         if (!count) {
             setFinishBlock({ text: mt('no_messages'), state: 'error' });
+            return;
+        }
+
+        if (count < 10) {
+            setFinishBlock({ text: mt('need_more_messages'), state: 'error' });
             return;
         }
 
@@ -526,6 +537,31 @@ export const MessagesStat = () => {
             })
             .filter(({ count }) => Boolean(count));
 
+        const isSimpleChat = selectedOwner instanceof Api.Chat;
+        const isMegaGroupChat = (selectedOwner instanceof Api.Channel && selectedOwner.megagroup) || false;
+        const membersCount =
+            selectedOwner instanceof Api.Chat || (selectedOwner instanceof Api.Channel && selectedOwner.megagroup)
+                ? selectedOwner.participantsCount || 0
+                : 0;
+
+        if ((isSimpleChat || isMegaGroupChat) && membersCount <= 200) {
+            const activeUserIds = usersDataArray.filter((user) => user.count > 0).map((user) => user.peerId);
+            const members = await getMembers();
+            const membersWithoutMessages = members.filter((member) => {
+                const userId = member.id.valueOf();
+
+                if (userId === window.userId) {
+                    return false;
+                }
+
+                return !activeUserIds.includes(userId);
+            });
+
+            if (membersWithoutMessages.length) {
+                setChatInactiveMembers(membersWithoutMessages);
+            }
+        }
+
         setStatResult(stat);
         setProgress(null);
         prepareImages(stat);
@@ -557,6 +593,69 @@ export const MessagesStat = () => {
         }
 
         return 'unknown name';
+    }
+
+    async function getMembers(): Promise<Api.User[]> {
+        if (selectedOwner instanceof Api.Chat) {
+            const result = (await CallAPI(
+                new Api.messages.GetFullChat({
+                    chatId: selectedOwner.id
+                })
+            )) as Api.messages.ChatFull;
+
+            return result.users as Api.User[];
+        }
+
+        if (selectedOwner instanceof Api.Channel) {
+            const result = (await CallAPI(
+                new Api.channels.GetParticipants({
+                    channel: selectedOwner,
+                    limit: 200,
+                    offset: 0,
+                    filter: new Api.ChannelParticipantsRecent()
+                })
+            )) as Api.channels.ChannelParticipants;
+
+            return result.users as Api.User[];
+        }
+
+        return [];
+    }
+
+    function kickMember(userId: number) {
+        if (selectedOwner instanceof Api.Chat) {
+            CallAPI(
+                new Api.messages.DeleteChatUser({
+                    chatId: selectedOwner.id,
+                    userId
+                })
+            );
+        }
+
+        if (selectedOwner instanceof Api.Channel) {
+            CallAPI(
+                new Api.channels.EditBanned({
+                    channel: selectedOwner.id.valueOf(),
+                    participant: userId,
+                    bannedRights: new Api.ChatBannedRights({
+                        untilDate: 1,
+                        viewMessages: true,
+                        sendMessages: true,
+                        sendMedia: true,
+                        sendStickers: true,
+                        sendGifs: true,
+                        sendGames: true,
+                        sendInline: true,
+                        sendPolls: true,
+                        changeInfo: true,
+                        inviteUsers: true,
+                        pinMessages: true
+                    })
+                })
+            );
+        }
+
+        setChatInactiveMembers(chatInactiveMembers.filter((member) => member.id.valueOf() !== userId));
     }
 
     async function prepareImages(stat: IScanDataResult) {
@@ -970,6 +1069,72 @@ export const MessagesStat = () => {
 
                 <ReactionsList reactions={statResult.reactions} />
                 <ActivityChart data={statResult.activity} />
+
+                {chatInactiveMembers.length && (
+                    <>
+                        <Divider
+                            my="xs"
+                            label={`${mt('headers.inactive_users')} (${chatInactiveMembers.length})`}
+                            labelPosition="center"
+                            mb={0}
+                        />
+
+                        <Center>
+                            <Text size="xs" mb="xs">
+                                {mt('inactive_users_description')}
+                            </Text>
+                        </Center>
+
+                        {chatInactiveMembers.slice(0, chatInactiveMembersShowCount).map((owner, key) => (
+                            <div key={owner.id.valueOf() + key}>
+                                {OwnerRow({
+                                    owner,
+                                    callback() {
+                                        window.listenMAEvents.popup_closed = (data) => {
+                                            delete window.listenMAEvents.popup_closed;
+
+                                            if (data?.button_id === 'kick') {
+                                                kickMember(owner.id.valueOf());
+                                            }
+                                        };
+
+                                        popup.open({
+                                            message: mt('kick_question').replace(
+                                                '{name}',
+                                                owner.firstName || 'No name'
+                                            ),
+                                            buttons: [
+                                                {
+                                                    id: 'kick',
+                                                    type: 'destructive',
+                                                    text: mt('kick_button_yes')
+                                                },
+                                                {
+                                                    id: 'save',
+                                                    type: 'cancel'
+                                                }
+                                            ]
+                                        });
+                                    }
+                                })}
+                            </div>
+                        ))}
+
+                        {chatInactiveMembers.length >
+                            chatInactiveMembers.slice(0, chatInactiveMembersShowCount).length && (
+                            <Group mt="xs">
+                                <Button
+                                    variant="light"
+                                    color="gray"
+                                    fullWidth
+                                    onClick={() => setChatInactiveMembersShowCount(1e3)}
+                                >
+                                    {mt('inactive_users_show_more')}
+                                </Button>
+                            </Group>
+                        )}
+                    </>
+                )}
 
                 <Divider my="xs" label={mt('headers.tops')} labelPosition="center" mb={0} />
                 <TabsList tabs={tabsList} onChange={(tabId) => setSelectedTab(tabId as ETabId)} />

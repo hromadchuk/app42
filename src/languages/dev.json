@@ -134,6 +134,7 @@
       "loading_messages": "Getting messages",
       "loading_calculation": "Calculating stats",
       "no_messages": "No messages in the dialogue",
+      "need_more_messages": "Need more messages in the dialogue to get stats",
       "no_messages_for_period": "No messages in the dialogue for that period",
       "incorrect_period": "You have selected the wrong period for the dialog",
       "channel_not_selected": "You are not select any dialog yet",
@@ -142,6 +143,10 @@
       "button_send_image": "Send image of top to the dialog",
       "button_send_done": "Sent",
       "get_stats": "Get stats for period",
+      "inactive_users_description": "Did not write any messages during the selected period",
+      "inactive_users_show_more": "Show all inactive users",
+      "kick_question": "Do you want to remove {name} from the conversation?",
+      "kick_button_yes": "Yes",
       "headers": {
         "period": "Select the period for stats",
         "counts": "Counts",
@@ -154,7 +159,8 @@
         "stickers": "Stickers",
         "voice_duration": "Voices duration",
         "round_duration": "Videos duration",
-        "call_duration": "Calls duration"
+        "call_duration": "Calls duration",
+        "inactive_users": "Inactive users"
       },
       "user_activity": {
         "modal_title": "Selected user activity for this period"

@@ -158,23 +158,28 @@ export function SelectDialog(options: IOptionsSelectDialog) {
     }
 
     function formatRows(peers: Api.TypePeer[], users: Api.User[], chats: (Api.Chat | Api.Channel)[]): IOwnerRow[] {
-        return peers.map((peer): IOwnerRow => {
-            let ownerId = 0;
-            ownerId = getPeerId(peer);
+        return peers
+            .map((peer): IOwnerRow | null => {
+                const ownerId = getPeerId(peer);
 
-            const owner =
-                peer instanceof Api.PeerUser
-                    ? (users.find((findUser) => findUser.id.valueOf() === ownerId) as Api.User)
-                    : (chats.find((findChat) => findChat.id.valueOf() === ownerId) as Api.Chat | Api.Channel);
+                const owner =
+                    peer instanceof Api.PeerUser
+                        ? (users.find((findUser) => findUser.id.valueOf() === ownerId) as Api.User)
+                        : (chats.find((findChat) => findChat.id.valueOf() === ownerId) as Api.Chat | Api.Channel);
 
-            const row: IOwnerRow = { owner };
+                if (owner instanceof Api.Chat && owner.migratedTo) {
+                    return null;
+                }
 
-            if (options.getDescription) {
-                row.description = options.getDescription(owner);
-            }
+                const row: IOwnerRow = { owner };
 
-            return row;
-        });
+                if (options.getDescription) {
+                    row.description = options.getDescription(owner);
+                }
+
+                return row;
+            })
+            .filter(Boolean) as IOwnerRow[];
     }
 
     async function getOwners(): Promise<IOwnerRow[]> {
