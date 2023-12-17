@@ -1,3 +1,4 @@
+import { JSX, useContext, useState } from 'react';
 import {
     Button,
     Center,
@@ -28,7 +29,6 @@ import {
     TablerIconsProps
 } from '@tabler/icons-react';
 import dayjs from 'dayjs';
-import { JSX, useContext, useState } from 'react';
 import { Api } from 'telegram';
 import { usePopup } from '@tma.js/sdk-react';
 
@@ -150,6 +150,11 @@ interface ITabTops {
     owners: ITopItem[];
 }
 
+interface ITopic {
+    id: number;
+    name: string;
+}
+
 const ownersInfo = new Map<number, TPeer>();
 const sharingImages = new Map<string, string>();
 
@@ -170,6 +175,8 @@ export const MessagesStat = () => {
     const [selectedOwner, setSelectedOwner] = useState<TPeer | null>(null);
     const [statResult, setStatResult] = useState<IScanDataResult | null>(null);
     const [selectedTab, setSelectedTab] = useState<ETabId>(ETabId.messages);
+    const [chatTopics, setChatTopics] = useState<ITopic[]>([]);
+    const [selectedChatTopic, setSelectedChatTopic] = useState<number>(0);
 
     // sharing vars
     const [sharingNameType, setSharingNameType] = useState<ENameImageType>(ENameImageType.firstName);
@@ -215,6 +222,22 @@ export const MessagesStat = () => {
             count,
             periodDate: 0
         });
+
+        if (owner instanceof Api.Channel && owner.forum) {
+            const data = await CallAPI(
+                new Api.channels.GetForumTopics({
+                    channel: owner,
+                    limit: 100
+                })
+            );
+
+            const topics: ITopic[] = (data.topics as Api.ForumTopic[]).map((topic) => ({
+                id: topic.id,
+                name: topic.title
+            }));
+
+            setChatTopics(topics);
+        }
 
         setOwnerPeriods(periodsData);
         setProgress(null);
@@ -277,6 +300,9 @@ export const MessagesStat = () => {
             return;
         }
 
+        console.log({ selectedChatTopic });
+        console.log('messages', messages);
+
         setProgress({ text: mt('loading_calculation') });
 
         let lastPeerId = 0;
@@ -306,6 +332,16 @@ export const MessagesStat = () => {
 
         const usersMessagesByTime = new CalculateActivityTime();
         messages.forEach((message) => {
+            if (selectedChatTopic) {
+                if (!message.replyTo) {
+                    return;
+                } else if (message.replyTo.replyToTopId && message.replyTo.replyToTopId !== selectedChatTopic) {
+                    return;
+                } else if (message.replyTo.replyToMsgId !== selectedChatTopic) {
+                    return;
+                }
+            }
+
             const peerId = getAuthorId(message);
 
             if (!peersData[peerId]) {
@@ -1153,13 +1189,41 @@ export const MessagesStat = () => {
 
     if (ownerPeriods.length) {
         return (
-            <StatsPeriodPicker
-                selectedPeer={selectedOwner}
-                statsPeriods={ownerPeriods}
-                statsPeriod={recordsPeriod}
-                setStatsPeriod={setRecordsPeriod}
-                calcStatistic={calcStatistic}
-            />
+            <>
+                <OwnerRow owner={selectedOwner} withoutLink={true} />
+
+                {chatTopics.length > 0 && (
+                    <>
+                        <Divider my="xs" label={mt('headers.topics')} labelPosition="center" mb={0} />
+                        <Button
+                            fullWidth
+                            onClick={() => setSelectedChatTopic(0)}
+                            variant={selectedChatTopic === 0 ? 'primary' : 'light'}
+                        >
+                            {mt('all_messages_button')}
+                        </Button>
+
+                        {chatTopics.map((topic) => (
+                            <Button
+                                key={topic.id}
+                                mt="xs"
+                                fullWidth
+                                onClick={() => setSelectedChatTopic(topic.id)}
+                                variant={topic.id === selectedChatTopic ? 'primary' : 'light'}
+                            >
+                                {topic.name}
+                            </Button>
+                        ))}
+                    </>
+                )}
+
+                <StatsPeriodPicker
+                    statsPeriods={ownerPeriods}
+                    statsPeriod={recordsPeriod}
+                    setStatsPeriod={setRecordsPeriod}
+                    calcStatistic={calcStatistic}
+                />
+            </>
         );
     }
 

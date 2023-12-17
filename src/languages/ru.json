@@ -147,6 +147,7 @@
       "inactive_users_show_more": "Показать всех неактивных пользователей",
       "kick_question": "Вы хотите удалить {name} из беседы?",
       "kick_button_yes": "Да",
+      "all_messages_button": "Все сообщения",
       "headers": {
         "period": "Период статистики",
         "counts": "Суммарные показатели",
@@ -160,7 +161,8 @@
         "voice_duration": "Длительность голосовых",
         "round_duration": "Длительность видео",
         "call_duration": "Длительность звонков",
-        "inactive_users": "Неактивные пользователи"
+        "inactive_users": "Неактивные пользователи",
+        "topics": "Темы"
       },
       "user_activity": {
         "modal_title": "Активность пользователя за этот период"

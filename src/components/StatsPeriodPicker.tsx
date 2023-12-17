@@ -1,6 +1,5 @@
-import { OwnerRow } from './OwnerRow.tsx';
 import { Button, Center, Divider, Flex, SimpleGrid, Stack, Text } from '@mantine/core';
-import { declineAndFormat, TOwnerInfo } from '../lib/helpers.ts';
+import { declineAndFormat } from '../lib/helpers.ts';
 import React, { useContext } from 'react';
 import { MethodContext } from '../contexts/MethodContext.tsx';
 import { DatePicker } from '@mantine/dates';
@@ -8,7 +7,6 @@ import { getAppLangCode } from '../lib/lang.ts';
 import { IPeriodData, TPeriodType } from '../lib/methods/messages.ts';
 
 interface IStatsPeriodPickerProps {
-    selectedPeer: TOwnerInfo;
     statsPeriod: TPeriodType;
     statsPeriods: IPeriodData[];
     setStatsPeriod: React.Dispatch<React.SetStateAction<TPeriodType>>;
@@ -16,7 +14,6 @@ interface IStatsPeriodPickerProps {
 }
 
 export function StatsPeriodPicker({
-    selectedPeer,
     statsPeriod,
     statsPeriods,
     setStatsPeriod,
@@ -51,8 +48,6 @@ export function StatsPeriodPicker({
 
     return (
         <>
-            <OwnerRow owner={selectedPeer} withoutLink={true} />
-
             <Divider my="xs" label={mt('headers.period')} labelPosition="center" mb={0} />
             <Flex direction="column" gap="xl">
                 <Center>

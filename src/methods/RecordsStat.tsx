@@ -617,13 +617,15 @@ export const RecordsStat = () => {
 
     if (channelPeriods.length) {
         return (
-            <StatsPeriodPicker
-                selectedPeer={selectedChannel}
-                statsPeriods={channelPeriods}
-                statsPeriod={recordsPeriod}
-                setStatsPeriod={setRecordsPeriod}
-                calcStatistic={calcStatistic}
-            />
+            <>
+                <OwnerRow owner={selectedChannel} withoutLink={true} />
+                <StatsPeriodPicker
+                    statsPeriods={channelPeriods}
+                    statsPeriod={recordsPeriod}
+                    setStatsPeriod={setRecordsPeriod}
+                    calcStatistic={calcStatistic}
+                />
+            </>
         );
     }
 

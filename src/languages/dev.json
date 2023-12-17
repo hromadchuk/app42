@@ -147,6 +147,7 @@
       "inactive_users_show_more": "Show all inactive users",
       "kick_question": "Do you want to remove {name} from the conversation?",
       "kick_button_yes": "Yes",
+      "all_messages_button": "All messages",
       "headers": {
         "period": "Select the period for stats",
         "counts": "Counts",
@@ -160,7 +161,8 @@
         "voice_duration": "Voices duration",
         "round_duration": "Videos duration",
         "call_duration": "Calls duration",
-        "inactive_users": "Inactive users"
+        "inactive_users": "Inactive users",
+        "topics": "Topics"
       },
       "user_activity": {
         "modal_title": "Selected user activity for this period"
