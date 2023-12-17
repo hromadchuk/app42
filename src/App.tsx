@@ -33,6 +33,7 @@ declare global {
     interface Window {
         TelegramClient: TelegramClient;
         listenEvents: { [key: string]: (event: object) => void };
+        listenMAEvents: { [key: string]: (event: undefined | { button_id: string }) => void };
         userId: number;
         isProgress: boolean;
     }
@@ -106,6 +107,8 @@ const App = () => {
         }
 
         window.listenEvents = {};
+        window.listenMAEvents = {};
+
         window.TelegramClient.addEventHandler((event) => {
             if (window.listenEvents[event.className]) {
                 window.listenEvents[event.className](event);
@@ -122,6 +125,10 @@ const App = () => {
             const { eventType, eventData } = JSON.parse(data);
 
             console.log('event', eventType, '=>', eventData);
+
+            if (window.listenMAEvents[eventType]) {
+                window.listenMAEvents[eventType](eventData);
+            }
 
             if (eventType === 'theme_changed') {
                 setColors(eventData.theme_params);

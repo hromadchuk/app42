@@ -139,7 +139,7 @@ export async function getMessages({
         )) as Api.messages.MessagesSlice;
 
         for (const dialogOwner of [...users, ...chats]) {
-            peerInfo.set(dialogOwner.id.valueOf(), dialogOwner as Api.Channel);
+            peerInfo.set(dialogOwner.id.valueOf(), dialogOwner as Api.Chat);
         }
 
         const partMessages = filterMessages(messages, endTime, startDate);

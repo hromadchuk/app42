@@ -6,7 +6,7 @@ import { Api } from 'telegram';
 
 import { AppContext } from '../contexts/AppContext.tsx';
 import { IFinishBlock, IGetDialogOption, IProgress, MethodContext, TDialogType } from '../contexts/MethodContext.tsx';
-import { CallAPI, formatNumber, Server } from '../lib/helpers.ts';
+import { CallAPI, formatNumber, Server, sleep } from '../lib/helpers.ts';
 import { IRouter, routes } from '../routes.tsx';
 import { t, td } from '../lib/lang.ts';
 
@@ -93,6 +93,10 @@ export const AbstractMethod = () => {
                 total: count || dialogs.length,
                 addCount: dialogs.length
             });
+
+            if (count > 2000) {
+                await sleep(333);
+            }
 
             if (dialogs.length) {
                 dialogs.forEach((dialog) => {

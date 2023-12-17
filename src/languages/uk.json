@@ -134,6 +134,7 @@
       "loading_messages": "Отримання повідомлень",
       "loading_calculation": "Обчислення статистики",
       "no_messages": "Немає повідомлень у діалозі",
+      "need_more_messages": "Потрібно більше повідомлень у діалозі, щоб отримати статистику",
       "no_messages_for_period": "Немає повідомлень у діалозі за цей період",
       "incorrect_period": "Ви вибрали неправильний період для діалогу",
       "channel_not_selected": "Ви ще не обрали жодного діалогу",
@@ -142,6 +143,11 @@
       "button_send_image": "Надіслати зображення топу в діалог",
       "button_send_done": "Надіслано!",
       "get_stats": "Отримати статистику за період",
+      "inactive_users_description": "Немає повідомлень протягом вибраного періоду",
+      "inactive_users_show_more": "Показати всіх неактивних користувачів",
+      "kick_question": "Ви хочете видалити {name} з чату?",
+      "kick_button_yes": "Так",
+      "all_messages_button": "Усі повідомлення",
       "headers": {
         "period": "Період статистики",
         "counts": "Сумарні показники",
@@ -154,7 +160,9 @@
         "stickers": "Наліпки",
         "voice_duration": "Тривалість голосових",
         "round_duration": "Тривалість відео",
-        "call_duration": "Тривалість дзвінків"
+        "call_duration": "Тривалість дзвінків",
+        "inactive_users": "Неактивні користувачі",
+        "topics": "Теми"
       },
       "user_activity": {
         "modal_title": "Активність користувача за цей період"

@@ -134,6 +134,7 @@
       "loading_messages": "Получение сообщений",
       "loading_calculation": "Расчет статистики",
       "no_messages": "Нет сообщений в диалоге",
+      "need_more_messages": "Нужно больше сообщений в диалоге, чтобы получить статистику",
       "no_messages_for_period": "Нет сообщений в диалоге на этот период",
       "incorrect_period": "Вы выбрали неправильный период для диалога",
       "channel_not_selected": "Вы еще не выбрали ни одного диалога",
@@ -142,6 +143,11 @@
       "button_send_image": "Отправить картинку с топом в диалог",
       "button_send_done": "Отправлено!",
       "get_stats": "Получить статистику за период",
+      "inactive_users_description": "В выбранный период нет ни одного сообщения",
+      "inactive_users_show_more": "Показать всех неактивных пользователей",
+      "kick_question": "Вы хотите удалить {name} из беседы?",
+      "kick_button_yes": "Да",
+      "all_messages_button": "Все сообщения",
       "headers": {
         "period": "Период статистики",
         "counts": "Суммарные показатели",
@@ -154,7 +160,9 @@
         "stickers": "Стикеры",
         "voice_duration": "Длительность голосовых",
         "round_duration": "Длительность видео",
-        "call_duration": "Длительность звонков"
+        "call_duration": "Длительность звонков",
+        "inactive_users": "Неактивные пользователи",
+        "topics": "Темы"
       },
       "user_activity": {
         "modal_title": "Активность пользователя за этот период"
