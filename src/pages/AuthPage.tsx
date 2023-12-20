@@ -35,10 +35,12 @@ import { AppContext } from '../contexts/AppContext.tsx';
 import menuClasses from '../styles/MenuPage.module.css';
 // @ts-ignore
 import authClasses from '../styles/AuthPage.module.css';
+import Onboarding from '../components/Onboarding.tsx';
 
 enum AuthState {
     loading = 'loading',
     number = 'number',
+    onboarding = 'onboarding',
     code = 'code',
     password = 'password'
 }
@@ -69,11 +71,13 @@ const AuthPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const IS_ONBOARDING_COMPLETED_KEY = 'isOnboardingCompleted';
+
     const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
     const [searchCountry, setSearchCountry] = useState('');
     const [inputCountries, setInputCountries] = useState<IInputCountry[]>([]);
 
-    const [state, setSate] = useState(AuthState.loading);
+    const [state, setState] = useState(AuthState.loading);
     const [dataLogin, setDataLogin] = useState<Api.account.Password | null>(null);
     const [isLoading, setLoading] = useState(true);
 
@@ -116,12 +120,13 @@ const AuthPage = () => {
                 setPhoneCodeHash(authStateNumber.phoneCodeHash);
                 setCodeLength(authStateNumber.phoneCode);
                 setNumber(authStateNumber.numberSuffix);
-                setSate(AuthState.code);
+                setState(AuthState.code);
                 setLoading(false);
                 setAppLoading(false);
             } else if (!session) {
                 await getAuthData();
-                setSate(AuthState.number);
+                const isOnboardingCompleted = Boolean(localStorage.getItem(IS_ONBOARDING_COMPLETED_KEY));
+                setState(isOnboardingCompleted ? AuthState.number : AuthState.onboarding);
                 setLoading(false);
                 setAppLoading(false);
             } else {
@@ -148,7 +153,7 @@ const AuthPage = () => {
             navigate(query.get('to') || '/menu');
         } catch (error) {
             await getAuthData();
-            setSate(AuthState.number);
+            setState(AuthState.number);
             setLoading(false);
             setAppLoading(false);
         }
@@ -242,7 +247,7 @@ const AuthPage = () => {
 
             setPhoneCodeHash(phoneCodeHashResult);
             setCodeLength(phoneCodeLengthResult);
-            setSate(AuthState.code);
+            setState(AuthState.code);
         } catch (error) {
             // @ts-ignore
             setNumberError(error?.message);
@@ -277,7 +282,7 @@ const AuthPage = () => {
             // @ts-ignore
             if (error?.message.includes('SESSION_PASSWORD_NEEDED')) {
                 setDataLogin(await CallAPI(new Api.account.GetPassword()));
-                setSate(AuthState.password);
+                setState(AuthState.password);
                 setLoading(false);
                 setAppLoading(false);
             } else {
@@ -439,7 +444,7 @@ const AuthPage = () => {
         }
 
         return (
-            <Input.Wrapper label={t('auth_page.input_code')} error={codeError}>
+            <Input.Wrapper label={t('auth_page.input_code')} mt={10} error={codeError}>
                 <PinInput
                     styles={{
                         root: { justifyContent: 'space-between' }
@@ -462,6 +467,7 @@ const AuthPage = () => {
 
         return (
             <Input.Wrapper
+                mt={20}
                 label={t('auth_page.input_password') + (passwordHint ? ` (${passwordHint})` : '')}
                 error={passwordError}
             >
@@ -517,7 +523,7 @@ const AuthPage = () => {
             <Button
                 fullWidth
                 variant="outline"
-                mt="xs"
+                mt="20"
                 onClick={onClick}
                 disabled={(disabledValue || '').length === 0 || isLoading}
             >
@@ -531,6 +537,17 @@ const AuthPage = () => {
             <Center h={100} mx="auto">
                 <Loader />
             </Center>
+        );
+    }
+
+    if (state === AuthState.onboarding) {
+        return (
+            <Onboarding
+                onOnboardingEnd={() => {
+                    setState(AuthState.number);
+                    localStorage.setItem(IS_ONBOARDING_COMPLETED_KEY, '1');
+                }}
+            />
         );
     }
 
