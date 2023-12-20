@@ -125,6 +125,16 @@ export function getTextTime(seconds: number, isStrong?: boolean): string {
     return getStringsTimeArray(seconds, isStrong).join(' ');
 }
 
+const IS_ONBOARDING_COMPLETED_KEY = 'isOnboardingCompleted';
+
+export function markOnboardingAsCompleted(): void {
+    return localStorage.setItem(IS_ONBOARDING_COMPLETED_KEY, '1');
+}
+
+export function checkIsOnboardingCompleted(): boolean {
+    return Boolean(localStorage.getItem(IS_ONBOARDING_COMPLETED_KEY));
+}
+
 export function getStringsTimeArray(seconds: number, isStrong?: boolean): string[] {
     const period = getTime(seconds);
     const result: string[] = [];

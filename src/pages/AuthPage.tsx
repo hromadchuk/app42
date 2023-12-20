@@ -25,7 +25,7 @@ import { computeCheck } from 'telegram/Password';
 import { CountryFlag } from '../components/CountryFlag.tsx';
 import Logo from '../components/Logo.tsx';
 import { getCache, removeCache, setCache } from '../lib/cache.ts';
-import { CallAPI, getDocLink } from '../lib/helpers.ts';
+import { CallAPI, checkIsOnboardingCompleted, getDocLink, markOnboardingAsCompleted } from '../lib/helpers.ts';
 import { getAppLangCode, t } from '../lib/lang.ts';
 
 import { Constants } from '../constants.ts';
@@ -70,8 +70,6 @@ const AuthPage = () => {
     const { setUser, setAppLoading } = useContext(AppContext);
     const navigate = useNavigate();
     const location = useLocation();
-
-    const IS_ONBOARDING_COMPLETED_KEY = 'isOnboardingCompleted';
 
     const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
     const [searchCountry, setSearchCountry] = useState('');
@@ -125,7 +123,7 @@ const AuthPage = () => {
                 setAppLoading(false);
             } else if (!session) {
                 await getAuthData();
-                const isOnboardingCompleted = Boolean(localStorage.getItem(IS_ONBOARDING_COMPLETED_KEY));
+                const isOnboardingCompleted = Boolean(checkIsOnboardingCompleted());
                 setState(isOnboardingCompleted ? AuthState.number : AuthState.onboarding);
                 setLoading(false);
                 setAppLoading(false);
@@ -545,7 +543,7 @@ const AuthPage = () => {
             <Onboarding
                 onOnboardingEnd={() => {
                     setState(AuthState.number);
-                    localStorage.setItem(IS_ONBOARDING_COMPLETED_KEY, '1');
+                    markOnboardingAsCompleted();
                 }}
             />
         );

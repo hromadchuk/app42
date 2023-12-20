@@ -50,14 +50,20 @@ export default function Onboarding({ onOnboardingEnd }: IOnboarding) {
     const onboardingPages: TOnboardingPages = [];
 
     for (const onboardingImageKey in onboardingImages) {
-        onboardingPages.push({
+        const onboardingPageData: IPageData = {
             image: onboardingImages[onboardingImageKey],
             title: mt(`${onboardingImageKey}.title`),
             description: mt(`${onboardingImageKey}.description`),
             nextPageButtonText: mt(`${onboardingImageKey}.next`),
             backButtonText: mt(`${onboardingImageKey}.back`),
             closeOnboardingButtonText: mt(`${onboardingImageKey}.close`)
-        });
+        };
+
+        if (onboardingImageKey === 'authorize') {
+            onboardingPageData.imageFit = 'contain';
+        }
+
+        onboardingPages.push(onboardingPageData);
     }
 
     function onboardingPage(page: IPageData) {

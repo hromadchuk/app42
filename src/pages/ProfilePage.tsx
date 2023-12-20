@@ -5,7 +5,7 @@ import { Api } from 'telegram';
 import { AppContext } from '../contexts/AppContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { SelectLanguage } from '../components/SelectLanguage.tsx';
-import { CallAPI } from '../lib/helpers.ts';
+import { CallAPI, markOnboardingAsCompleted } from '../lib/helpers.ts';
 import { t } from '../lib/lang.ts';
 
 const ProfilePage = () => {
@@ -19,6 +19,7 @@ const ProfilePage = () => {
         navigate('/');
 
         localStorage.clear();
+        markOnboardingAsCompleted();
         location.reload();
     };
 
