@@ -20,12 +20,21 @@ export interface IGetDialogOption {
     types: (typeof Api.Chat | typeof Api.Channel | typeof Api.User)[];
 }
 
+export interface ISetListAction {
+    buttonText: string;
+    loadingText: string;
+    requestSleep: number;
+    owners: TDialogType[];
+    action: (owner: TDialogType) => Promise<void>;
+}
+
 export interface IMethodContext {
     progress?: IProgress | null;
     progressSafe?: IProgress | null;
     setProgress: (progress: IProgress | null) => void;
     finishBlock?: IFinishBlock;
     setFinishBlock: (finishBlock: IFinishBlock) => void;
+    setListAction: (options: ISetListAction) => void;
     needHideContent: () => boolean;
     t: (key: string) => string;
     td: (key: string) => string[];

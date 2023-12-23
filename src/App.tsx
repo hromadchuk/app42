@@ -1,5 +1,5 @@
 import { PropsWithChildren, useEffect, useState } from 'react';
-import { AppShell, MantineProvider } from '@mantine/core';
+import { AppShell, Center, Loader, MantineProvider } from '@mantine/core';
 import { useColorScheme } from '@mantine/hooks';
 import ReactGA from 'react-ga4';
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
@@ -172,15 +172,27 @@ function MiniAppLoader({ children }: PropsWithChildren) {
     const { loading, initResult, error } = useSDKContext();
 
     if (!loading && !error && !initResult) {
-        return <div>SDK init function is not yet called.</div>;
+        return (
+            <Center h={100} mx="auto">
+                SDK init function is not yet called.
+            </Center>
+        );
     }
 
     if (error) {
-        return <div>Something went wrong.</div>;
+        return (
+            <Center h={100} mx="auto">
+                Something went wrong.
+            </Center>
+        );
     }
 
     if (loading) {
-        return <div>Warming up SDK.</div>;
+        return (
+            <Center h={100} mx="auto">
+                <Loader />
+            </Center>
+        );
     }
 
     return <>{children}</>;
