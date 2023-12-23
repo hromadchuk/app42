@@ -52,6 +52,7 @@
     "footer": "Made with love",
     "done": "Done!",
     "getting_dialogs": "Getting dialogs",
+    "selected_button_subtext": "Selected {count} from {total}",
     "errors": {
       "api_rate_limit": "You have reached the limit of API requests, you need to wait {time} and try again"
     },
@@ -327,9 +328,20 @@
       }
     },
     "clear_blacklist": {
+      "get_blacklist": "Getting blacklist",
       "blacklist_empty": "Your blacklist is empty",
       "button_clear": "Clear blacklist",
-      "title": "Users/bots blocked"
+      "clearing_progress": "Clearing blacklist",
+      "checkbox_users": [
+        "user",
+        "users",
+        "users"
+      ],
+      "checkbox_bots": [
+        "bot",
+        "bots",
+        "bots"
+      ]
     },
     "administered": {
       "no_admins": "Administrated chats or channels not found",
