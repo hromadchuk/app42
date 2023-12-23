@@ -2,10 +2,18 @@ import { useContext, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Box, Center, Container, Notification, Progress, Text } from '@mantine/core';
 import { IconCircleCheck, IconExclamationCircle } from '@tabler/icons-react';
+import { ListAction } from '../components/ListAction.tsx';
 import { Api } from 'telegram';
 
 import { AppContext } from '../contexts/AppContext.tsx';
-import { IFinishBlock, IGetDialogOption, IProgress, MethodContext, TDialogType } from '../contexts/MethodContext.tsx';
+import {
+    IFinishBlock,
+    IGetDialogOption,
+    IProgress,
+    ISetListAction,
+    MethodContext,
+    TDialogType
+} from '../contexts/MethodContext.tsx';
 import { CallAPI, formatNumber, Server, sleep } from '../lib/helpers.ts';
 import { IRouter, routes } from '../routes.tsx';
 import { t, td } from '../lib/lang.ts';
@@ -19,6 +27,7 @@ export const AbstractMethod = () => {
 
     const [progress, _setProgress] = useState<IProgress | null>();
     const [finishBlock, _setFinishBlock] = useState<IFinishBlock>();
+    const [listAction, _setListAction] = useState<ISetListAction | null>(null);
 
     const routerInfo = routes.find((router: IRouter) => router.path === location.pathname) as IRouter;
 
@@ -27,7 +36,7 @@ export const AbstractMethod = () => {
     }, []);
 
     const needHideContent = (): boolean => {
-        return [progress, finishBlock].some(Boolean);
+        return [progress, finishBlock, listAction].some(Boolean);
     };
 
     const setProgress = (data: IProgress | null): void => {
@@ -70,6 +79,16 @@ export const AbstractMethod = () => {
         return td(`methods.${routerInfo.methodId}.${key}`);
     };
 
+    const setListAction = ({ buttonText, loadingText, owners, requestSleep, action }: ISetListAction) => {
+        _setListAction({
+            buttonText,
+            loadingText,
+            owners,
+            requestSleep,
+            action
+        });
+    };
+
     const getDialogs = async (options: IGetDialogOption): Promise<TDialogType[]> => {
         const { types } = options;
 
@@ -83,7 +102,6 @@ export const AbstractMethod = () => {
             offsetDate: 0
         };
 
-        // eslint-disable-next-line no-constant-condition
         while (true) {
             const { count, chats, users, dialogs, messages } = (await CallAPI(
                 new Api.messages.GetDialogs(params)
@@ -203,6 +221,10 @@ export const AbstractMethod = () => {
             );
         }
 
+        if (listAction) {
+            return <ListAction setProgress={setProgress} setFinishBlock={setFinishBlock} {...listAction} />;
+        }
+
         return null;
     };
 
@@ -219,7 +241,8 @@ export const AbstractMethod = () => {
                 md,
                 t,
                 td,
-                getDialogs
+                getDialogs,
+                setListAction
             }}
         >
             <Container mt="xs" p="xs">

@@ -1,5 +1,5 @@
-import { createElement, JSX } from 'react';
-import { Center, Container, Flex, Group, Text, UnstyledButton } from '@mantine/core';
+import { createElement, CSSProperties, JSX } from 'react';
+import { Center, Checkbox, Container, Flex, Group, Text, UnstyledButton } from '@mantine/core';
 import { Api } from 'telegram';
 import { IconCheck, IconChevronRight, TablerIconsProps } from '@tabler/icons-react';
 import { classNames, TOwnerInfo } from '../lib/helpers.ts';
@@ -18,6 +18,7 @@ interface IOwnerRow {
     ml?: string | number;
     mr?: string | number;
     styles?: object;
+    checked?: boolean;
 }
 
 interface ILinkProps {
@@ -36,13 +37,15 @@ export function OwnerRow({
     disabled,
     ml,
     mr,
-    styles
+    styles,
+    checked
 }: IOwnerRow) {
     const name: string[] = [];
     const linkProps: ILinkProps = {};
     const isUser = owner instanceof Api.User;
     const isChat = owner instanceof Api.Chat;
     const isChannel = owner instanceof Api.Channel;
+    const isCheckbox = checked !== undefined;
 
     if (!withoutLink && !disabled) {
         if (callback) {
@@ -92,6 +95,17 @@ export function OwnerRow({
         return null;
     }
 
+    const style: CSSProperties = {};
+
+    if (disabled) {
+        style.opacity = 0.5;
+    }
+
+    if (isCheckbox && !checked) {
+        style.opacity = 0.5;
+        style.filter = 'grayscale(1)';
+    }
+
     const Row = (
         <Flex
             gap="md"
@@ -100,7 +114,7 @@ export function OwnerRow({
             align="center"
             direction="row"
             wrap="nowrap"
-            opacity={disabled ? 0.5 : 1}
+            style={style}
             className={classNames({ [classes.row]: linkProps.component })}
         >
             <OwnerAvatar owner={owner} />
@@ -118,7 +132,10 @@ export function OwnerRow({
             </div>
 
             <Container p={0} mr={0}>
-                {linkProps.component && createElement(rightIcon || IconChevronRight, { size: 14, stroke: 1.5 })}
+                {isCheckbox && <Checkbox checked={checked} readOnly />}
+                {linkProps.component &&
+                    !isCheckbox &&
+                    createElement(rightIcon || IconChevronRight, { size: 14, stroke: 1.5 })}
             </Container>
         </Flex>
     );

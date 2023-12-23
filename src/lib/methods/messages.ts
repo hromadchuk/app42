@@ -128,7 +128,6 @@ export async function getMessages({
         params.offsetDate = startDate;
     }
 
-    // eslint-disable-next-line no-constant-condition
     while (true) {
         if (total > 3_000) {
             await sleep(777);
