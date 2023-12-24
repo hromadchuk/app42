@@ -17,7 +17,7 @@ import {
 import { AppNotifications } from './components/AppNotifications.tsx';
 import { Constants } from './constants.ts';
 import { clearOldCache } from './lib/cache.ts';
-import { getParams, isDev, Server } from './lib/helpers.ts';
+import { checkIsOnboardingCompleted, getParams, isDev, markOnboardingAsCompleted, Server } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
 import { setColors } from './lib/theme.ts';
 import { IRouter, routes } from './routes.tsx';
@@ -100,8 +100,15 @@ const App = () => {
         if (!currentVersion) {
             localStorage.setItem(versionKey, version);
         } else if (currentVersion !== version) {
+            const isOnboardingCompleted = checkIsOnboardingCompleted();
+
             localStorage.clear();
             localStorage.setItem(versionKey, version);
+
+            if (isOnboardingCompleted) {
+                markOnboardingAsCompleted();
+            }
+
             window.location.reload();
             return;
         }
