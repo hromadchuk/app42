@@ -27,6 +27,7 @@ import Logo from '../components/Logo.tsx';
 import { getCache, removeCache, setCache } from '../lib/cache.ts';
 import { CallAPI, checkIsOnboardingCompleted, getDocLink, markOnboardingAsCompleted } from '../lib/helpers.ts';
 import { getAppLangCode, t } from '../lib/lang.ts';
+import Onboarding from '../components/Onboarding.tsx';
 
 import { Constants } from '../constants.ts';
 import { AppContext } from '../contexts/AppContext.tsx';
@@ -35,7 +36,6 @@ import { AppContext } from '../contexts/AppContext.tsx';
 import menuClasses from '../styles/MenuPage.module.css';
 // @ts-ignore
 import authClasses from '../styles/AuthPage.module.css';
-import Onboarding from '../components/Onboarding.tsx';
 
 enum AuthState {
     loading = 'loading',
@@ -123,7 +123,7 @@ const AuthPage = () => {
                 setAppLoading(false);
             } else if (!session) {
                 await getAuthData();
-                const isOnboardingCompleted = Boolean(checkIsOnboardingCompleted());
+                const isOnboardingCompleted = checkIsOnboardingCompleted();
                 setState(isOnboardingCompleted ? AuthState.number : AuthState.onboarding);
                 setLoading(false);
                 setAppLoading(false);

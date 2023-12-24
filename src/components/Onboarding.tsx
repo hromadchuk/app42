@@ -1,119 +1,120 @@
-import { Button, Card, Group, Image, Text, UnstyledButton } from '@mantine/core';
-import React, { useState } from 'react';
+import { JSX, useEffect, useState } from 'react';
+import { Affix, Button, Center, Container, getThemeColor, Stack, Text, useMantineTheme } from '@mantine/core';
+import { IconChartHistogram, TablerIconsProps } from '@tabler/icons-react';
+import { Carousel, Embla } from '@mantine/carousel';
 import { t } from '../lib/lang.ts';
 
 // @ts-ignore
-import HeartAnimationGif from '../assets/animated_messages/examples/heart.gif';
-// @ts-ignore
-import CategoriesImage from '../assets/onboarding/categories.png';
-// @ts-ignore
-import LockImage from '../assets/onboarding/lock.png';
-// @ts-ignore
-import MessageStatsGif from '../assets/onboarding/message_stats.gif';
-// @ts-ignore
-import AllStatsGif from '../assets/onboarding/all_stats.gif';
-
-interface IPageData {
-    image: string;
-    imageFit?: React.CSSProperties['objectFit'];
-    title: string;
-    description: string;
-    nextPageButtonText: string;
-    backButtonText?: string;
-    closeOnboardingButtonText?: string;
-}
-
-type TOnboardingPages = Array<IPageData>;
+import classes from '../styles/Onboarding.module.css';
 
 interface IOnboarding {
     onOnboardingEnd: () => void;
 }
 
-function mt(text: string) {
-    const onboardingKey = `onboarding.${text}`;
-    const translatedText = t(`${onboardingKey}`);
-
-    return translatedText === `${onboardingKey}` ? '' : translatedText;
+interface ISlide {
+    title: string;
+    description: string;
+    color: string;
+    icon: (props: TablerIconsProps) => JSX.Element;
 }
 
 export default function Onboarding({ onOnboardingEnd }: IOnboarding) {
-    const [activeOnboardingPageIndex, setActiveOnboardingPageIndex] = useState(0);
+    const theme = useMantineTheme();
+    const [carouselHeight, setCarouselHeight] = useState<number>(document.body.clientHeight);
+    const [showEndButton, setShowEndButton] = useState<boolean>(false);
+    const [embla, setEmbla] = useState<Embla | null>(null);
 
-    const onboardingImages: { [key: string]: string } = {
-        welcome: String(HeartAnimationGif),
-        categories: String(CategoriesImage),
-        message_stats: String(MessageStatsGif),
-        all_stats: String(AllStatsGif),
-        authorize: String(LockImage)
-    };
+    const slides: ISlide[] = [
+        {
+            title: t('onboarding.slides.slide1.title'),
+            description: t('onboarding.slides.slide1.description'),
+            color: 'violet',
+            icon: IconChartHistogram
+        },
+        {
+            title: t('onboarding.slide1.title'),
+            description: t('onboarding.slide1.description'),
+            color: 'teal',
+            icon: IconChartHistogram
+        },
+        {
+            title: t('onboarding.slide1.title'),
+            description: t('onboarding.slide1.description'),
+            color: 'yellow',
+            icon: IconChartHistogram
+        },
+        {
+            title: t('onboarding.slide1.title'),
+            description: t('onboarding.slide1.description'),
+            color: 'pink',
+            icon: IconChartHistogram
+        }
+    ];
 
-    const onboardingPages: TOnboardingPages = [];
+    useEffect(() => {
+        // hook for waiting for bottom area rendered
+        setTimeout(() => {
+            const bottomAreaHeight = document.querySelector('#bottom-area')?.clientHeight || 0;
 
-    for (const onboardingImageKey in onboardingImages) {
-        const onboardingPageData: IPageData = {
-            image: onboardingImages[onboardingImageKey],
-            title: mt(`${onboardingImageKey}.title`),
-            description: mt(`${onboardingImageKey}.description`),
-            nextPageButtonText: mt(`${onboardingImageKey}.next`),
-            backButtonText: mt(`${onboardingImageKey}.back`),
-            closeOnboardingButtonText: mt(`${onboardingImageKey}.close`)
-        };
+            setCarouselHeight(document.body.clientHeight - bottomAreaHeight);
+        });
+    }, []);
 
-        if (onboardingImageKey === 'authorize') {
-            onboardingPageData.imageFit = 'contain';
+    useEffect(() => {
+        if (!embla) {
+            return;
         }
 
-        onboardingPages.push(onboardingPageData);
+        embla.on('select', () => {
+            const [slideId] = embla.slidesInView(true);
+
+            setShowEndButton(slideId === slides.length - 1);
+        });
+    }, [embla]);
+
+    function onClick() {
+        if (showEndButton) {
+            onOnboardingEnd();
+        } else {
+            embla?.scrollNext();
+        }
     }
 
-    function onboardingPage(page: IPageData) {
+    function Slide(slide: ISlide, key: number) {
+        const iconColor = getThemeColor(slide.color, theme);
+
         return (
-            <Card shadow="sm" padding="lg" radius="0">
-                <Card.Section>
-                    <Image fit={page.imageFit} src={page.image} height={160} alt="onboarding image" />
-                </Card.Section>
-
-                <Group justify="space-between" mt="md" mb="xs">
-                    <Text fw="bold">{page.title}</Text>
-                </Group>
-
-                <Text size="sm">{page.description}</Text>
-
-                <Button.Group mt="md">
-                    {page.backButtonText && (
-                        <Button
-                            fullWidth
-                            variant="default"
-                            onClick={() => setActiveOnboardingPageIndex(activeOnboardingPageIndex - 1)}
-                        >
-                            {page.backButtonText}
-                        </Button>
-                    )}
-
-                    <Button
-                        fullWidth
-                        onClick={() =>
-                            activeOnboardingPageIndex === onboardingPages.length - 1
-                                ? onOnboardingEnd()
-                                : setActiveOnboardingPageIndex(activeOnboardingPageIndex + 1)
-                        }
-                    >
-                        {page.nextPageButtonText}
-                    </Button>
-                </Button.Group>
-
-                {page.closeOnboardingButtonText && (
-                    <UnstyledButton
-                        onClick={() => setActiveOnboardingPageIndex(onboardingPages.length - 1)}
-                        mt="md"
-                        style={{ textAlign: 'center' }}
-                    >
-                        {page.closeOnboardingButtonText}
-                    </UnstyledButton>
-                )}
-            </Card>
+            <Carousel.Slide key={key}>
+                <Center h={carouselHeight}>
+                    <Stack align="center" p="md">
+                        <slide.icon size={64} color={iconColor} />
+                        <Text size="xl">{slide.title}</Text>
+                        <Text size="sm" ta="center">{slide.description}</Text>
+                    </Stack>
+                </Center>
+            </Carousel.Slide>
         );
     }
 
-    return onboardingPage(onboardingPages[activeOnboardingPageIndex]);
+    return (
+        <>
+            <Carousel
+                withIndicators
+                withControls={false}
+                h={carouselHeight}
+                classNames={classes}
+                getEmblaApi={setEmbla}
+            >
+                {slides.map(Slide)}
+            </Carousel>
+
+            <Affix id="bottom-area" position={{ bottom: 0 }} style={{ width: '100%' }}>
+                <Container p="xs">
+                    <Button fullWidth onClick={onClick}>
+                        {showEndButton ? t('onboarding.authorization_button') : t('onboarding.continue_button')}
+                    </Button>
+                </Container>
+            </Affix>
+        </>
+    );
 }
