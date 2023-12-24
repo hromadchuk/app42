@@ -1049,7 +1049,7 @@ export const MessagesStat = () => {
                 <ReactionsList reactions={statResult.reactions} />
                 <ActivityChart data={statResult.activity} />
 
-                {chatInactiveMembers.length && (
+                {chatInactiveMembers.length > 0 && (
                     <>
                         <Divider
                             my="xs"

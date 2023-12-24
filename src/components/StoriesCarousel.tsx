@@ -1,7 +1,7 @@
+import { useContext } from 'react';
 import { Carousel } from '@mantine/carousel';
 import { IStoryTop } from '../methods/StoriesStat.tsx';
 import { StoryCard } from './StoryCard.tsx';
-import { useContext } from 'react';
 import { AppContext } from '../contexts/AppContext.tsx';
 
 interface ICarouselProps {
