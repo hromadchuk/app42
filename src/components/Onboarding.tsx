@@ -1,6 +1,6 @@
 import { JSX, useEffect, useState } from 'react';
 import { Affix, Button, Center, Container, getThemeColor, Stack, Text, useMantineTheme } from '@mantine/core';
-import { IconChartHistogram, TablerIconsProps } from '@tabler/icons-react';
+import { IconChartHistogram, IconSeeding, IconShieldLock, IconTool, TablerIconsProps } from '@tabler/icons-react';
 import { Carousel, Embla } from '@mantine/carousel';
 import { t } from '../lib/lang.ts';
 
@@ -32,22 +32,22 @@ export default function Onboarding({ onOnboardingEnd }: IOnboarding) {
             icon: IconChartHistogram
         },
         {
-            title: t('onboarding.slide1.title'),
-            description: t('onboarding.slide1.description'),
+            title: t('onboarding.slides.slide2.title'),
+            description: t('onboarding.slides.slide2.description'),
             color: 'teal',
-            icon: IconChartHistogram
+            icon: IconSeeding
         },
         {
-            title: t('onboarding.slide1.title'),
-            description: t('onboarding.slide1.description'),
+            title: t('onboarding.slides.slide3.title'),
+            description: t('onboarding.slides.slide3.description'),
             color: 'yellow',
-            icon: IconChartHistogram
+            icon: IconTool
         },
         {
-            title: t('onboarding.slide1.title'),
-            description: t('onboarding.slide1.description'),
+            title: t('onboarding.slides.slide4.title'),
+            description: t('onboarding.slides.slide4.description'),
             color: 'pink',
-            icon: IconChartHistogram
+            icon: IconShieldLock
         }
     ];
 
@@ -89,7 +89,9 @@ export default function Onboarding({ onOnboardingEnd }: IOnboarding) {
                     <Stack align="center" p="md">
                         <slide.icon size={64} color={iconColor} />
                         <Text size="xl">{slide.title}</Text>
-                        <Text size="sm" ta="center">{slide.description}</Text>
+                        <Text size="sm" ta="center">
+                            {slide.description}
+                        </Text>
                     </Stack>
                 </Center>
             </Carousel.Slide>

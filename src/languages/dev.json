@@ -109,7 +109,19 @@
     "slides": {
       "slide1": {
         "title": "Analysis",
-        "description": "Show statistics on your contacts, calls, messages or channel's posts."
+        "description": "See statistics by contacts, calls, messages or channel's posts."
+      },
+      "slide2": {
+        "title": "Cleanliness",
+        "description": "Remove unnecessary stuff from your personal account, administered chat or channel."
+      },
+      "slide3": {
+        "title": "Many methods",
+        "description": "There are many methods for analytics, for cleaning and other interesting and useful information."
+      },
+      "slide4": {
+        "title": "Safety",
+        "description": "The app runs on the official API from Telegram. The application does not use a server, all session and data are stored only in your Telegram account."
       }
     }
   },
