@@ -7,6 +7,7 @@ import { CallAPI, getPeerId } from '../lib/helpers.ts';
 import { t } from '../lib/lang.ts';
 import { AppContext } from '../contexts/AppContext.tsx';
 import { OwnerRow } from './OwnerRow.tsx';
+import { TDialogWithoutUser } from '../contexts/MethodContext.tsx';
 
 export enum EOwnerType {
     user = 'user',
@@ -24,6 +25,7 @@ interface IOwnerRow {
 
 interface IOptionsBase {
     allowTypes: EOwnerType[];
+    isOnlyWithKickPermissions?: boolean;
     selfIgnore?: boolean;
     onOwnerSelect: (owner: TOwnerType) => void;
     getDescription?: (owner: TOwnerType) => string;
@@ -128,6 +130,10 @@ function SelectOwner({ getOwners, onOwnerSelect, searchOwners }: IOptionsSelectO
 export function SelectDialog(options: IOptionsSelectDialog) {
     const { user, setAppLoading } = useContext(AppContext);
 
+    function checkIsCanKickUsers(owner: TDialogWithoutUser): boolean {
+        return !options.isOnlyWithKickPermissions || owner.creator || Boolean(owner?.adminRights?.banUsers);
+    }
+
     function filterOwner(row: IOwnerRow): boolean {
         if (row.owner instanceof Api.User) {
             if (row.owner.bot) {
@@ -144,16 +150,20 @@ export function SelectDialog(options: IOptionsSelectDialog) {
         }
 
         if (
-            (options.allowTypes.includes(EOwnerType.chat) && row.owner instanceof Api.Chat) ||
-            (options.allowTypes.includes(EOwnerType.supergroup) &&
-                row.owner instanceof Api.Channel &&
-                row.owner.megagroup)
+            ((options.allowTypes.includes(EOwnerType.chat) && row.owner instanceof Api.Chat) ||
+                (options.allowTypes.includes(EOwnerType.supergroup) &&
+                    row.owner instanceof Api.Channel &&
+                    row.owner.megagroup)) &&
+            checkIsCanKickUsers(row.owner)
         ) {
             return true;
         }
 
         return (
-            options.allowTypes.includes(EOwnerType.channel) && row.owner instanceof Api.Channel && !row.owner.megagroup
+            options.allowTypes.includes(EOwnerType.channel) &&
+            row.owner instanceof Api.Channel &&
+            !row.owner.megagroup &&
+            checkIsCanKickUsers(row.owner)
         );
     }
 
