@@ -16,6 +16,8 @@ export interface IFinishBlock {
 
 export type TDialogType = Api.Chat | Api.Channel | Api.User;
 
+export type TDialogWithoutUser = Exclude<TDialogType, Api.User>;
+
 export interface IGetDialogOption {
     types: (typeof Api.Chat | typeof Api.Channel | typeof Api.User)[];
 }

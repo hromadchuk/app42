@@ -93,7 +93,8 @@
     "channels_registration": "Дата регистрации каналов",
     "records_stat": "Статистика записей",
     "stories_stat": "Статистика историй",
-    "dialog_joined": "Дата вступления в диалог"
+    "dialog_joined": "Дата вступления в чаты/каналы",
+    "clear_dialog_members": "Очистить участников чатов/каналов"
   },
   "charts": {
     "activity": {
@@ -456,6 +457,29 @@
       "no_created": "У вас нет диалогов",
       "created": "{time} назад",
       "today": "Меньше 24 часов"
+    },
+    "clear_dialog_members": {
+      "get_members": "Получение участников диалога",
+      "cannot_get_channel_participants": "Не удалось получить пользователей канала. Свяжитесь с разработчиком.",
+      "many_dialog_users_error": "В выбранном диалоге присутствует более 200 участников. Данные могут быть неправильными.",
+      "no_members": "В выбранном диалоге нет участников",
+      "button_clear": "Выгнать пользователей",
+      "checkbox_bots": "Боты",
+      "clearing_progress": "Удаление пользователей",
+      "checkbox_not_contact": "Нет в списке контактов",
+      "checkbox_not_been_for_long_time": "Не был в сети длительное время",
+      "checkbox_closed_online": "С закрытым онлайном",
+      "checkbox_not_premium": "Без Telegram премиум",
+      "checkbox_without_avatar": "Без аватара",
+      "radio_offline_for": "Были оффлайн {days}",
+      "periods": {
+        "1": "1 день",
+        "3": "3 дня",
+        "7": "неделю",
+        "30": "месяц",
+        "90": "3 месяца",
+        "180": "6 месяцев"
+      }
     }
   }
 }
