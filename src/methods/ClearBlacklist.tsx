@@ -112,8 +112,6 @@ export const ClearBlacklist = () => {
             requestSleep: 777,
             owners: deletedList,
             action: async (owner) => {
-                console.log('REMOVE', owner);
-
                 await CallAPI(
                     new Api.contacts.Unblock({
                         id: owner.id

@@ -93,8 +93,8 @@
     "channels_registration": "Channels registration",
     "records_stat": "Records stat",
     "stories_stat": "Stories stat",
-    "dialog_joined": "Dialogs joined date",
-    "clear_dialog_members": "Clear dialog members"
+    "dialog_joined": "Chats/channels joined date",
+    "clear_dialog_members": "Clear chats/channels members"
   },
   "charts": {
     "activity": {
@@ -342,14 +342,26 @@
       "no_contacts": "You don't have any contacts",
       "no_common_chats": "You don't have contacts with common chats",
       "decline": {
-        "chats": ["chat", "chats", "chats"],
-        "members": ["member", "members", "members"]
+        "chats": [
+          "chat",
+          "chats",
+          "chats"
+        ],
+        "members": [
+          "member",
+          "members",
+          "members"
+        ]
       }
     },
     "calls_stat": {
       "get_calls": "Getting calls",
       "no_calls": "You don't have any calls",
-      "calls_decline": ["call", "calls", "calls"],
+      "calls_decline": [
+        "call",
+        "calls",
+        "calls"
+      ],
       "modal_title": "More details",
       "counts": {
         "calls": "Total calls",
@@ -452,49 +464,21 @@
       "many_dialog_users_error": "There are over 200 participants in the selected dialog. The data may be incorrect.",
       "no_members": "There are no participants in the selected dialog",
       "button_clear": "Kick users",
-      "clearing_progress": "Kick users in the process",
-      "checkbox_bots": [
-        "bot",
-        "bots",
-        "bots"
-      ],
-      "checkbox_not_contact": [
-        "user is not in the contact list",
-        "users is not in the contact list",
-        "users is not in the contact list"
-      ],
-      "checkbox_not_been_for_long_time":[
-        "user has not been online for a long time",
-        "users has not been online for a long time",
-        "users has not been online for a long time"
-      ],
-      "checkbox_closed_online": [
-        "user with closed online status",
-        "users with closed online status",
-        "users with closed online status"
-      ],
-      "checkbox_not_premium":[
-        "user without telegram premium",
-        "users without telegram premium",
-        "users without telegram premium"
-      ],
-      "checkbox_without_avatar": [
-        "user without avatar",
-        "users without avatar",
-        "users without avatar"
-      ],
-      "offline_for": [
-        "user have been offline for {days}",
-        "users have been offline for {days}",
-        "users have been offline for {days}"
-      ],
+      "checkbox_bots": "Bots",
+      "clearing_progress": "Removing users",
+      "checkbox_not_contact": "Is not in the contact list",
+      "checkbox_not_been_for_long_time": "Has not been online for a long time",
+      "checkbox_closed_online": "With closed online status",
+      "checkbox_not_premium": "Without telegram premium",
+      "checkbox_without_avatar": "Without avatar",
+      "radio_offline_for": "Have been offline for {days}",
       "periods": {
         "1": "1 day",
         "3": "3 days",
         "7": "a week",
         "30": "a month",
         "90": "3 months",
-        "180": "six months"
+        "180": "6 months"
       }
     }
   }

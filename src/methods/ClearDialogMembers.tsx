@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useContext, useState } from 'react';
 import { Button, Checkbox, Flex, Radio } from '@mantine/core';
 import { Api } from 'telegram';
-import { declineAndFormat, notifyError } from '../lib/helpers.ts';
+import { declineAndFormat, formatNumber, notifyError } from '../lib/helpers.ts';
 
 import { MethodContext, TDialogType, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
@@ -143,8 +143,6 @@ export const ClearDialogMembers = () => {
             requestSleep: 777,
             owners: listToRemove,
             action: async (owner) => {
-                console.log('REMOVE', owner);
-
                 await kickMemberFromDialog(owner.id.valueOf(), selectedDialog as TDialogWithoutUser);
             }
         });
@@ -175,7 +173,7 @@ export const ClearDialogMembers = () => {
                 mt="xs"
                 checked={checked}
                 variant="outline"
-                label={declineAndFormat(Number(members?.length), md(text))}
+                label={`${mt(text)} (${formatNumber(Number(members?.length))})`}
                 disabled={members?.length === 0}
                 indeterminate={members?.length === 0}
                 onChange={(event) => onChange(event.currentTarget.checked)}
@@ -220,10 +218,12 @@ export const ClearDialogMembers = () => {
                                     checked={index === 0}
                                     value={String(period)}
                                     disabled={getNotBeenForLongTime(period)?.length === 0}
-                                    label={declineAndFormat(
-                                        Number(getNotBeenForLongTime(period)?.length),
-                                        md('offline_for')
-                                    ).replace('{days}', mt(`periods.${period}`))}
+                                    label={
+                                        declineAndFormat(
+                                            Number(getNotBeenForLongTime(period)?.length),
+                                            md('checkbox_users')
+                                        ).replace('{days}', mt(`periods.${period}`)) + mt('radio_offline_for')
+                                    }
                                 />
                             ))}
                         </Flex>
