@@ -2,10 +2,9 @@ import { Api } from 'telegram';
 import { CallAPI, sleep } from '../helpers.ts';
 import dayjs from 'dayjs';
 import { Constants } from '../../constants.ts';
-import { IProgress } from '../../contexts/MethodContext.tsx';
+import { IProgress, TDialogType } from '../../contexts/MethodContext.tsx';
 
 export type TCorrectMessage = Api.Message | Api.MessageService;
-export type TPeer = Api.User | Api.Chat | Api.Channel;
 
 export type TPeriodType = [Date | null, Date | null];
 
@@ -25,14 +24,14 @@ export interface IGetHistoryParams {
 }
 
 export interface IGetMessagesCallbackArguments {
-    peer: TPeer;
+    peer: TDialogType;
     total: number;
     endTime: number;
     startDate?: number | undefined | null;
 }
 
 export interface IGetMessagesArguments extends IGetMessagesCallbackArguments {
-    peerInfo: Map<number, TPeer>;
+    peerInfo: Map<number, TDialogType>;
     setProgress: (progress: IProgress | null) => void;
 }
 
@@ -57,7 +56,7 @@ export async function getTotalMessagesCount(channelId: Api.long): Promise<number
 export async function calculatePeriodsMessagesCount(
     messagesCount: number,
     periods: number[],
-    peer: TPeer,
+    peer: TDialogType,
     getMessagesCallback: ({
         peer,
         total,
@@ -225,7 +224,7 @@ export async function calculateEstimatedNumberOfPeriodMessages({
 
 export async function getMessagesByPeriod(
     period: TPeriodType,
-    selectedPeer: TPeer | null,
+    selectedPeer: TDialogType | null,
     getMessagesDecorator: (args: IGetMessagesCallbackArguments) => Promise<TCorrectMessage[]>
 ) {
     const dateFrom = period[0]?.getTime();
