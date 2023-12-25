@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { Api } from 'telegram';
 
-import { MethodContext, TDialogType } from '../contexts/MethodContext.tsx';
+import { MethodContext, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
 import DialogWithDate from '../components/DialogWithDate.tsx';
 
 export const ChannelsRegistration = () => {
@@ -21,7 +21,7 @@ export const ChannelsRegistration = () => {
         });
 
         const createdChannels = dialogs.filter((dialog) => {
-            const correctType = dialog as Exclude<TDialogType, Api.User>;
+            const correctType = dialog as TDialogWithoutUser;
 
             return !correctType.creator;
         });

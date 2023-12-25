@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { Text } from '@mantine/core';
 import { Api } from 'telegram';
 
-import { MethodContext, TDialogType } from '../contexts/MethodContext.tsx';
+import { MethodContext, TDialogType, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 
 export const Administered = () => {
@@ -17,17 +17,13 @@ export const Administered = () => {
             });
 
             const adminChats = dialogs.filter((dialog) => {
-                const correctType = dialog as Exclude<TDialogType, Api.User>;
+                const correctType = dialog as TDialogWithoutUser;
 
                 if (correctType.creator) {
                     return true;
                 }
 
-                if (correctType.adminRights) {
-                    return true;
-                }
-
-                return false;
+                return Boolean(correctType.adminRights);
             });
 
             if (!adminChats.length) {
@@ -47,7 +43,7 @@ export const Administered = () => {
                 <Text c="dimmed">{mt('title').replace('{count}', adminsList.length.toString())}</Text>
 
                 {adminsList.map((dialog, key) => {
-                    const correctType = dialog as Exclude<TDialogType, Api.User>;
+                    const correctType = dialog as TDialogWithoutUser;
 
                     return (
                         <OwnerRow

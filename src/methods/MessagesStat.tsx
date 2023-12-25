@@ -32,7 +32,7 @@ import dayjs from 'dayjs';
 import { Api } from 'telegram';
 import { usePopup } from '@tma.js/sdk-react';
 
-import { MethodContext } from '../contexts/MethodContext.tsx';
+import { MethodContext, TDialogType, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { ActivityChart } from '../components/charts/Activity.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
@@ -45,7 +45,6 @@ import {
     getTotalMessagesCount,
     IGetMessagesCallbackArguments,
     IPeriodData,
-    TPeer,
     TPeriodType,
     ValidationError
 } from '../lib/methods/messages.ts';
@@ -62,6 +61,7 @@ import { MessagesStatSharingGenerator } from '../sharing/MessagesStatSharingGene
 import { StatsPeriodPicker } from '../components/StatsPeriodPicker.tsx';
 import { CalculateActivityTime } from '../components/charts/chart_helpers.ts';
 import { ReactionsList } from '../components/ReactionsList.tsx';
+import { getDialogMembers, kickMemberFromDialog } from '../lib/methods/dialogs.ts';
 
 type TCorrectMessage = Api.Message | Api.MessageService;
 
@@ -96,7 +96,7 @@ interface IScanDataCalculation {
 
 interface ITopItem {
     count: number;
-    owner: TPeer;
+    owner: TDialogType;
     activity?: number[][];
 }
 
@@ -155,7 +155,7 @@ interface ITopic {
     name: string;
 }
 
-const ownersInfo = new Map<number, TPeer>();
+const ownersInfo = new Map<number, TDialogType>();
 const sharingImages = new Map<string, string>();
 
 export const MessagesStat = () => {
@@ -172,7 +172,7 @@ export const MessagesStat = () => {
     const [chatInactiveMembers, setChatInactiveMembers] = useState<Api.User[]>([]);
     const [chatInactiveMembersShowCount, setChatInactiveMembersShowCount] = useState<number>(3);
     const [recordsPeriod, setRecordsPeriod] = useState<TPeriodType>([null, null]);
-    const [selectedOwner, setSelectedOwner] = useState<TPeer | null>(null);
+    const [selectedOwner, setSelectedOwner] = useState<TDialogType | null>(null);
     const [statResult, setStatResult] = useState<IScanDataResult | null>(null);
     const [selectedTab, setSelectedTab] = useState<ETabId>(ETabId.messages);
     const [chatTopics, setChatTopics] = useState<ITopic[]>([]);
@@ -196,7 +196,7 @@ export const MessagesStat = () => {
         return false;
     }
 
-    async function getOptions(owner: TPeer) {
+    async function getOptions(owner: TDialogType) {
         setProgress({ text: mt('loading_messages') });
         setSelectedOwner(owner);
 
@@ -594,7 +594,7 @@ export const MessagesStat = () => {
 
         if ((isSimpleChat || isMegaGroupChat) && membersCount <= 200) {
             const activeUserIds = usersDataArray.filter((user) => user.count > 0).map((user) => user.peerId);
-            const members = await getMembers();
+            const members = await getDialogMembers(selectedOwner as TDialogWithoutUser);
             const membersWithoutMessages = members.filter((member) => {
                 const userId = member.id.valueOf();
 
@@ -615,7 +615,7 @@ export const MessagesStat = () => {
         prepareImages(stat);
     }
 
-    function getImageName(type: ENameImageType, owner: TPeer): string {
+    function getImageName(type: ENameImageType, owner: TDialogType): string {
         if (type === ENameImageType.username) {
             let username = '';
 
@@ -643,65 +643,8 @@ export const MessagesStat = () => {
         return 'unknown name';
     }
 
-    async function getMembers(): Promise<Api.User[]> {
-        if (selectedOwner instanceof Api.Chat) {
-            const result = (await CallAPI(
-                new Api.messages.GetFullChat({
-                    chatId: selectedOwner.id
-                })
-            )) as Api.messages.ChatFull;
-
-            return result.users as Api.User[];
-        }
-
-        if (selectedOwner instanceof Api.Channel) {
-            const result = (await CallAPI(
-                new Api.channels.GetParticipants({
-                    channel: selectedOwner,
-                    limit: 200,
-                    offset: 0,
-                    filter: new Api.ChannelParticipantsRecent()
-                })
-            )) as Api.channels.ChannelParticipants;
-
-            return result.users as Api.User[];
-        }
-
-        return [];
-    }
-
     function kickMember(userId: number) {
-        if (selectedOwner instanceof Api.Chat) {
-            CallAPI(
-                new Api.messages.DeleteChatUser({
-                    chatId: selectedOwner.id,
-                    userId
-                })
-            );
-        }
-
-        if (selectedOwner instanceof Api.Channel) {
-            CallAPI(
-                new Api.channels.EditBanned({
-                    channel: selectedOwner.id.valueOf(),
-                    participant: userId,
-                    bannedRights: new Api.ChatBannedRights({
-                        untilDate: 1,
-                        viewMessages: true,
-                        sendMessages: true,
-                        sendMedia: true,
-                        sendStickers: true,
-                        sendGifs: true,
-                        sendGames: true,
-                        sendInline: true,
-                        sendPolls: true,
-                        changeInfo: true,
-                        inviteUsers: true,
-                        pinMessages: true
-                    })
-                })
-            );
-        }
+        kickMemberFromDialog(userId, selectedOwner as TDialogWithoutUser);
 
         setChatInactiveMembers(chatInactiveMembers.filter((member) => member.id.valueOf() !== userId));
     }
@@ -956,7 +899,7 @@ export const MessagesStat = () => {
                     onClick={async () => {
                         setSharingImagesLoading(true);
 
-                        await MessagesStatSharingGenerator.sendMessage(image, selectedOwner as TPeer);
+                        await MessagesStatSharingGenerator.sendMessage(image, selectedOwner as TDialogType);
 
                         setSharingImagesLoading(false);
                         close();

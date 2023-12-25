@@ -93,7 +93,8 @@
     "channels_registration": "Channels registration",
     "records_stat": "Records stat",
     "stories_stat": "Stories stat",
-    "dialog_joined": "Dialogs joined date"
+    "dialog_joined": "Chats/channels joined date",
+    "clear_dialog_members": "Clear chats/channels members"
   },
   "charts": {
     "activity": {
@@ -101,6 +102,28 @@
       "description": "The graph displays event activity. The side scale is the day of the event, the top scale is the time of the event.",
       "min": "No activity",
       "max": "Maximum"
+    }
+  },
+  "onboarding": {
+    "continue_button": "Continue",
+    "authorization_button": "Authorization",
+    "slides": {
+      "slide1": {
+        "title": "Analysis",
+        "description": "See statistics by contacts, calls, messages or channel's posts."
+      },
+      "slide2": {
+        "title": "Cleanliness",
+        "description": "Remove unnecessary stuff from your personal account, administered chat or channel."
+      },
+      "slide3": {
+        "title": "Many methods",
+        "description": "There are many methods for analytics, for cleaning and other interesting and useful information."
+      },
+      "slide4": {
+        "title": "Safety",
+        "description": "The app runs on the official API from Telegram. The application does not use a server, all session and data are stored only in your Telegram account."
+      }
     }
   },
   "methods": {
@@ -319,14 +342,26 @@
       "no_contacts": "You don't have any contacts",
       "no_common_chats": "You don't have contacts with common chats",
       "decline": {
-        "chats": ["chat", "chats", "chats"],
-        "members": ["member", "members", "members"]
+        "chats": [
+          "chat",
+          "chats",
+          "chats"
+        ],
+        "members": [
+          "member",
+          "members",
+          "members"
+        ]
       }
     },
     "calls_stat": {
       "get_calls": "Getting calls",
       "no_calls": "You don't have any calls",
-      "calls_decline": ["call", "calls", "calls"],
+      "calls_decline": [
+        "call",
+        "calls",
+        "calls"
+      ],
       "modal_title": "More details",
       "counts": {
         "calls": "Total calls",
@@ -422,6 +457,29 @@
       "no_created": "You don't have any dialogs",
       "created": "{time} ago",
       "today": "Less than 24 hours"
+    },
+    "clear_dialog_members": {
+      "get_members": "Getting the dialog participants",
+      "cannot_get_channel_participants": "It didn't work out to get channel members. Contact the developer.",
+      "many_dialog_users_error": "There are over 200 participants in the selected dialog. The data may be incorrect.",
+      "no_members": "There are no participants in the selected dialog",
+      "button_clear": "Kick users",
+      "checkbox_bots": "Bots",
+      "clearing_progress": "Removing users",
+      "checkbox_not_contact": "Is not in the contact list",
+      "checkbox_not_been_for_long_time": "Has not been online for a long time",
+      "checkbox_closed_online": "With closed online status",
+      "checkbox_not_premium": "Without telegram premium",
+      "checkbox_without_avatar": "Without avatar",
+      "radio_offline_for": "Have been offline for {days}",
+      "periods": {
+        "1": "1 day",
+        "3": "3 days",
+        "7": "a week",
+        "30": "a month",
+        "90": "3 months",
+        "180": "6 months"
+      }
     }
   }
 }
