@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useContext, useState } from 'react';
 import { Button, Checkbox, Flex, Radio } from '@mantine/core';
 import { Api } from 'telegram';
-import { declineAndFormat, formatNumber, notifyError } from '../lib/helpers.ts';
+import { formatNumber, notifyError } from '../lib/helpers.ts';
 
 import { MethodContext, TDialogType, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
@@ -25,7 +25,7 @@ const offlineDays = [
 ];
 
 export const ClearDialogMembers = () => {
-    const { mt, md, needHideContent, setFinishBlock, setProgress, setListAction } = useContext(MethodContext);
+    const { mt, needHideContent, setFinishBlock, setProgress, setListAction } = useContext(MethodContext);
 
     const [needRemoveBots, setNeedRemoveBots] = useState(false);
     const [needRemoveClosedOnline, setNeedRemoveClosedOnline] = useState(false);
@@ -148,25 +148,6 @@ export const ClearDialogMembers = () => {
         });
     }
 
-    if (needHideContent()) return null;
-
-    if (!selectedDialog) {
-        return (
-            <SelectDialog
-                allowTypes={[EOwnerType.chat, EOwnerType.supergroup]}
-                isOnlyWithKickPermissions={true}
-                onOwnerSelect={async (owner: TDialogType) => {
-                    if (owner instanceof Api.User) {
-                        return;
-                    }
-
-                    setSelectedDialog(owner);
-                    await onDialogSelect(owner);
-                }}
-            />
-        );
-    }
-
     function RemovableCheckbox({ checked, members, text, onChange }: IRemovableCheckboxProps) {
         return (
             <Checkbox
@@ -177,6 +158,25 @@ export const ClearDialogMembers = () => {
                 disabled={members?.length === 0}
                 indeterminate={members?.length === 0}
                 onChange={(event) => onChange(event.currentTarget.checked)}
+            />
+        );
+    }
+
+    if (needHideContent()) return null;
+
+    if (!selectedDialog) {
+        return (
+            <SelectDialog
+                allowTypes={[EOwnerType.chat, EOwnerType.supergroup, EOwnerType.channel]}
+                isOnlyWithKickPermissions={true}
+                onOwnerSelect={async (owner: TDialogType) => {
+                    if (owner instanceof Api.User) {
+                        return;
+                    }
+
+                    setSelectedDialog(owner);
+                    await onDialogSelect(owner);
+                }}
             />
         );
     }
@@ -219,10 +219,8 @@ export const ClearDialogMembers = () => {
                                     value={String(period)}
                                     disabled={getNotBeenForLongTime(period)?.length === 0}
                                     label={
-                                        declineAndFormat(
-                                            Number(getNotBeenForLongTime(period)?.length),
-                                            md('checkbox_users')
-                                        ).replace('{days}', mt(`periods.${period}`)) + mt('radio_offline_for')
+                                        mt('radio_offline_for').replace('{days}', mt(`periods.${period}`)) +
+                                        ` (${formatNumber(Number(getNotBeenForLongTime(period)?.length))})`
                                     }
                                 />
                             ))}
