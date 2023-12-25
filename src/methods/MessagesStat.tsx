@@ -187,6 +187,15 @@ export const MessagesStat = () => {
     const [isSentToChat, setSentToChat] = useState<boolean>(false);
     const [modalType, setModalType] = useState<EModalType>(EModalType.text);
 
+    function checkIsMessagesCountLessThanMinimal(messagesCount: number): boolean {
+        if (messagesCount < 10) {
+            setFinishBlock({ text: mt('need_more_messages'), state: 'error' });
+            return true;
+        }
+
+        return false;
+    }
+
     async function getOptions(owner: TPeer) {
         setProgress({ text: mt('loading_messages') });
         setSelectedOwner(owner);
@@ -198,8 +207,7 @@ export const MessagesStat = () => {
             return;
         }
 
-        if (count < 10) {
-            setFinishBlock({ text: mt('need_more_messages'), state: 'error' });
+        if (checkIsMessagesCountLessThanMinimal(count)) {
             return;
         }
 
@@ -475,6 +483,10 @@ export const MessagesStat = () => {
             statData.messages++;
         });
 
+        if (checkIsMessagesCountLessThanMinimal(statData.messages)) {
+            return;
+        }
+
         const stat: IScanDataResult = {
             activity: usersMessagesByTime.get(0),
             period: getSelectedPeriod(statData.firstMessage, statData.lastMessage),
@@ -586,7 +598,7 @@ export const MessagesStat = () => {
             const membersWithoutMessages = members.filter((member) => {
                 const userId = member.id.valueOf();
 
-                if (userId === window.userId) {
+                if (userId === window.userId || member.deleted) {
                     return false;
                 }
 
@@ -1033,6 +1045,31 @@ export const MessagesStat = () => {
             open();
         };
 
+        const onKickUserClick = (owner: Api.User) => {
+            window.listenMAEvents.popup_closed = (data) => {
+                delete window.listenMAEvents.popup_closed;
+
+                if (data?.button_id === 'kick') {
+                    kickMember(owner.id.valueOf());
+                }
+            };
+
+            popup.open({
+                message: mt('kick_question').replace('{name}', owner.firstName || 'No name'),
+                buttons: [
+                    {
+                        id: 'kick',
+                        type: 'destructive',
+                        text: mt('kick_button_yes')
+                    },
+                    {
+                        id: 'save',
+                        type: 'cancel'
+                    }
+                ]
+            });
+        };
+
         const topOwners = tabs.find((tab) => tab.id === selectedTab)?.owners || [];
 
         return (
@@ -1106,7 +1143,7 @@ export const MessagesStat = () => {
                 <ReactionsList reactions={statResult.reactions} />
                 <ActivityChart data={statResult.activity} />
 
-                {chatInactiveMembers.length && (
+                {chatInactiveMembers.length > 0 && (
                     <>
                         <Divider
                             my="xs"
@@ -1125,33 +1162,10 @@ export const MessagesStat = () => {
                             <div key={owner.id.valueOf() + key}>
                                 {OwnerRow({
                                     owner,
-                                    callback() {
-                                        window.listenMAEvents.popup_closed = (data) => {
-                                            delete window.listenMAEvents.popup_closed;
-
-                                            if (data?.button_id === 'kick') {
-                                                kickMember(owner.id.valueOf());
-                                            }
-                                        };
-
-                                        popup.open({
-                                            message: mt('kick_question').replace(
-                                                '{name}',
-                                                owner.firstName || 'No name'
-                                            ),
-                                            buttons: [
-                                                {
-                                                    id: 'kick',
-                                                    type: 'destructive',
-                                                    text: mt('kick_button_yes')
-                                                },
-                                                {
-                                                    id: 'save',
-                                                    type: 'cancel'
-                                                }
-                                            ]
-                                        });
-                                    }
+                                    callback:
+                                        !(selectedOwner instanceof Api.User) && !selectedOwner?.adminRights?.banUsers
+                                            ? undefined
+                                            : () => onKickUserClick(owner)
                                 })}
                             </div>
                         ))}
