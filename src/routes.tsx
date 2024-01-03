@@ -4,6 +4,7 @@ import {
     Icon123,
     IconAddressBook,
     IconCalendarPlus,
+    IconClock,
     IconCreativeCommonsNd,
     IconDoorEnter,
     IconFriendsOff,
@@ -166,6 +167,12 @@ const appRoutes: IAppRouter[] = [
                 icon: IconFriendsOff,
                 element: createElement(lazy(() => import('./methods/ClearDialogMembers.tsx'))),
                 categories: [MethodCategory.CHANNELS, MethodCategory.CHATS]
+            },
+            {
+                id: 'get_account_registration_date',
+                icon: IconClock,
+                element: createElement(lazy(() => import('./methods/AccountRegistrationDate.tsx'))),
+                categories: [MethodCategory.ACCOUNT]
             }
         ]
     }

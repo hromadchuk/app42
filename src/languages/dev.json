@@ -94,7 +94,8 @@
     "records_stat": "Records stat",
     "stories_stat": "Stories stat",
     "dialog_joined": "Chats/channels joined date",
-    "clear_dialog_members": "Clear chats/channels members"
+    "clear_dialog_members": "Clear chats/channels members",
+    "get_account_registration_date": "Get account registration date"
   },
   "charts": {
     "activity": {
@@ -480,6 +481,16 @@
         "90": "3 months",
         "180": "6 months"
       }
+    },
+    "get_account_registration_date": {
+      "write_user_id": "Enter user id",
+      "my_id": "My id",
+      "user_id": "User id",
+      "calculate_date": "Calculate the approximate date of registration",
+      "empty_user_id": "You have not entered a user id",
+      "estimated_registration_date": "Approximate date of registration: {date}",
+      "user_older_than_available_information": "The user registered earlier than {date}",
+      "user_younger_than_available_information": "The user registered after {date}"
     }
   }
 }
