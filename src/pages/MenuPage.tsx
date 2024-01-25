@@ -138,7 +138,12 @@ const MenuPage = () => {
                     <span>{t('menu.documentation')}</span>
                 </UnstyledButton>
 
-                <UnstyledButton className={classes.link} component="a" href={getDocLink('donate')} target="_blank">
+                <UnstyledButton
+                    className={classes.link}
+                    component="a"
+                    href="https://t.me/tribute?start=sd1c"
+                    target="_blank"
+                >
                     <IconPigMoney className={classes.linkIcon} stroke={1.5} />
                     <span>{t('menu.donate')}</span>
                 </UnstyledButton>
