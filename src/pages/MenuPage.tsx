@@ -81,7 +81,6 @@ const MenuPage = () => {
 
     const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
     const [needShowOnboarding, setShowOnboarding] = useState(false);
-    const [cacheMethodId, setCacheMethodId] = useState<string | null>(null);
 
     useEffect(() => {
         (async () => {
@@ -103,7 +102,6 @@ const MenuPage = () => {
 
                 const methodId = await getCache(Constants.AUTH_STATE_METHOD_KEY);
                 if (methodId) {
-                    setCacheMethodId(methodId as string);
                     openAuth();
                 }
             }
@@ -192,8 +190,10 @@ const MenuPage = () => {
             <Modal opened={isModalAuthOpened} onClose={closeAuth} title={t('menu.auth_modal_title')}>
                 <AuthPage
                     onAuthComplete={() => {
-                        removeCache(Constants.AUTH_STATE_METHOD_KEY);
-                        navigate(`/methods/${cacheMethodId}`);
+                        getCache(Constants.AUTH_STATE_METHOD_KEY).then((cacheMethodId) => {
+                            navigate(`/methods/${cacheMethodId}`);
+                            removeCache(Constants.AUTH_STATE_METHOD_KEY);
+                        });
                     }}
                 />
             </Modal>
