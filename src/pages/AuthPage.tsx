@@ -1,11 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
 import {
-    Avatar,
     Button,
     Center,
     Combobox,
     Container,
-    Divider,
     Flex,
     Input,
     Loader,
@@ -13,34 +11,28 @@ import {
     PasswordInput,
     PinInput,
     ScrollArea,
+    Space,
     Text,
-    UnstyledButton,
     useCombobox
 } from '@mantine/core';
-import { IconBook2, IconSelector } from '@tabler/icons-react';
+import { IconSelector } from '@tabler/icons-react';
 import { IMaskInput } from 'react-imask';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { Api } from 'telegram';
 import { computeCheck } from 'telegram/Password';
 import { CountryFlag } from '../components/CountryFlag.tsx';
-import Logo from '../components/Logo.tsx';
 import { getCache, removeCache, setCache } from '../lib/cache.ts';
-import { CallAPI, checkIsOnboardingCompleted, getDocLink, markOnboardingAsCompleted } from '../lib/helpers.ts';
+import { CallAPI, getCurrentUser } from '../lib/helpers.ts';
 import { getAppLangCode, t } from '../lib/lang.ts';
-import Onboarding from '../components/Onboarding.tsx';
 
 import { Constants } from '../constants.ts';
 import { AppContext } from '../contexts/AppContext.tsx';
 
-// @ts-ignore
-import menuClasses from '../styles/MenuPage.module.css';
 // @ts-ignore
 import authClasses from '../styles/AuthPage.module.css';
 
 enum AuthState {
     loading = 'loading',
     number = 'number',
-    onboarding = 'onboarding',
     code = 'code',
     password = 'password'
 }
@@ -66,10 +58,12 @@ interface IAuthStateNumber {
     phoneCode: number;
 }
 
-const AuthPage = () => {
+interface IAuthPage {
+    onAuthComplete: () => void;
+}
+
+const AuthPage = ({ onAuthComplete }: IAuthPage) => {
     const { setUser, setAppLoading } = useContext(AppContext);
-    const navigate = useNavigate();
-    const location = useLocation();
 
     const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
     const [searchCountry, setSearchCountry] = useState('');
@@ -109,8 +103,6 @@ const AuthPage = () => {
         (async () => {
             const session = localStorage.getItem(Constants.SESSION_KEY);
 
-            await window.TelegramClient.connect();
-
             const authStateNumber = (await getCache(Constants.AUTH_STATE_NUMBER_KEY)) as IAuthStateNumber;
             if (authStateNumber) {
                 await getAuthData();
@@ -123,33 +115,23 @@ const AuthPage = () => {
                 setAppLoading(false);
             } else if (!session) {
                 await getAuthData();
-                const isOnboardingCompleted = checkIsOnboardingCompleted();
-                setState(isOnboardingCompleted ? AuthState.number : AuthState.onboarding);
+                setState(AuthState.number);
                 setLoading(false);
                 setAppLoading(false);
             } else {
-                await getCurrentUser();
+                await checkCurrentSession();
             }
         })();
     }, []);
 
-    async function getCurrentUser() {
-        try {
-            const query = new URLSearchParams(location.search);
-            const [user] = (await CallAPI(
-                new Api.users.GetUsers({
-                    id: [new Api.InputUserSelf()]
-                }),
-                { hideErrorAlert: true }
-            )) as Api.User[];
-
-            window.userId = user.id.valueOf();
-
+    async function checkCurrentSession() {
+        const user = await getCurrentUser();
+        if (user) {
             setUser(user as Api.User);
             setLoading(false);
             setAppLoading(false);
-            navigate(query.get('to') || '/menu');
-        } catch (error) {
+            onAuthComplete();
+        } else {
             await getAuthData();
             setState(AuthState.number);
             setLoading(false);
@@ -275,7 +257,7 @@ const AuthPage = () => {
 
             save();
 
-            await getCurrentUser();
+            await checkCurrentSession();
         } catch (error) {
             // @ts-ignore
             if (error?.message.includes('SESSION_PASSWORD_NEEDED')) {
@@ -311,7 +293,7 @@ const AuthPage = () => {
 
             save();
 
-            await getCurrentUser();
+            await checkCurrentSession();
         } catch (error) {
             // @ts-ignore
             setPasswordError(error.message);
@@ -538,20 +520,10 @@ const AuthPage = () => {
         );
     }
 
-    if (state === AuthState.onboarding) {
-        return (
-            <Onboarding
-                onOnboardingEnd={() => {
-                    setState(AuthState.number);
-                    markOnboardingAsCompleted();
-                }}
-            />
-        );
-    }
-
     return (
-        <Container>
-            <Center py={10}>{t('auth_page.description')}</Center>
+        <Container p={0}>
+            <Text size="sm">{t('auth_page.description')}</Text>
+            <Space h="xs" />
 
             {NumberInputRow()}
             {CodeInputRow()}
@@ -578,29 +550,6 @@ const AuthPage = () => {
 
             {WarningCodeRow()}
             {ResetAuthRow()}
-
-            {state === AuthState.number && (
-                <>
-                    <Divider my="sm" />
-
-                    <UnstyledButton className={menuClasses.link} component="a" href={getDocLink('')} target="_blank">
-                        <IconBook2 className={menuClasses.linkIcon} stroke={1.5} />
-                        <span>{t('menu.documentation')}</span>
-                    </UnstyledButton>
-
-                    <UnstyledButton
-                        className={menuClasses.link}
-                        component="a"
-                        href="https://t.me/kit42_app"
-                        target="_blank"
-                    >
-                        <Avatar size="sm" color="blue" radius="xl" mr="xs">
-                            <Logo size={14} />
-                        </Avatar>
-                        <span>{t('menu.telegram_channel')}</span>
-                    </UnstyledButton>
-                </>
-            )}
         </Container>
     );
 };
