@@ -63,10 +63,6 @@ const appRoutes: IAppRouter[] = [
     {
         path: '/',
         withoutAuth: true,
-        element: createElement(lazy(() => import('./pages/AuthPage.tsx')))
-    },
-    {
-        path: '/menu',
         element: createElement(lazy(() => import('./pages/MenuPage.tsx')))
     },
     {

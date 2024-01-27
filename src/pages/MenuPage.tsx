@@ -1,7 +1,8 @@
+import { useContext, useEffect, useState } from 'react';
 import {
     Avatar,
+    Button,
     Container,
-    Divider,
     getThemeColor,
     Modal,
     Notification,
@@ -20,18 +21,26 @@ import {
     IconUsersGroup,
     TablerIconsProps
 } from '@tabler/icons-react';
-import { useEffect, useState } from 'react';
-import { Api } from 'telegram';
-import { Link } from 'react-router-dom';
-import { OwnerRow } from '../components/OwnerRow.tsx';
-import { CallAPI, getDocLink } from '../lib/helpers.ts';
+import { useNavigate } from 'react-router-dom';
+import { Constants } from '../constants.ts';
+import { AppContext } from '../contexts/AppContext.tsx';
+import {
+    checkIsOnboardingCompleted,
+    classNames,
+    getCurrentUser,
+    getDocLink,
+    markOnboardingAsCompleted
+} from '../lib/helpers.ts';
 import { hexToRgba } from '../lib/theme.ts';
+import { getCache, removeCache, setCache } from '../lib/cache.ts';
 import { getMethods, IMethod, MethodCategory } from '../routes.tsx';
 import Logo from '../components/Logo.tsx';
 import { t } from '../lib/lang.ts';
+import Onboarding from '../components/Onboarding.tsx';
 
 // @ts-ignore
 import classes from '../styles/MenuPage.module.css';
+import AuthPage from './AuthPage.tsx';
 
 interface ICard {
     id: MethodCategory;
@@ -63,22 +72,42 @@ const cards = [
 ];
 
 const MenuPage = () => {
-    const theme = useMantineTheme();
-    const [isModalOpened, { open, close }] = useDisclosure(false);
+    const { user, setUser } = useContext(AppContext);
 
-    const [developer, setDeveloper] = useState<Api.User | null>(null);
+    const theme = useMantineTheme();
+    const navigate = useNavigate();
+    const [isModalOpened, { open, close }] = useDisclosure(false);
+    const [isModalAuthOpened, { open: openAuth, close: closeAuth }] = useDisclosure(false);
+
     const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
+    const [needShowOnboarding, setShowOnboarding] = useState(false);
+    const [cacheMethodId, setCacheMethodId] = useState<string | null>(null);
 
     useEffect(() => {
-        CallAPI(
-            new Api.users.GetUsers({
-                id: ['paulo']
-            })
-        ).then(([user]) => {
-            if (user) {
-                setDeveloper(user as Api.User);
+        (async () => {
+            const isOnboardingCompleted = checkIsOnboardingCompleted();
+
+            if (!window.isTelegramClientConnected) {
+                window.isTelegramClientConnected = true;
+                await window.TelegramClient.connect();
             }
-        });
+
+            if (!isOnboardingCompleted) {
+                setShowOnboarding(true);
+            } else {
+                const session = localStorage.getItem(Constants.SESSION_KEY);
+
+                if (session) {
+                    setUser(await getCurrentUser());
+                }
+
+                const methodId = await getCache(Constants.AUTH_STATE_METHOD_KEY);
+                if (methodId) {
+                    setCacheMethodId(methodId as string);
+                    openAuth();
+                }
+            }
+        })();
     }, []);
 
     const methods = getMethods();
@@ -88,11 +117,26 @@ const MenuPage = () => {
     }
 
     function MethodRow(method: IMethod, key: number) {
+        // <Link key={key} className={classes.link} to={`/methods/${method.id}`}>
         return (
-            <Link key={key} className={classes.link} to={`/methods/${method.id}`}>
+            <div
+                key={key}
+                className={classes.link}
+                onClick={() => {
+                    close();
+
+                    if (user) {
+                        navigate(`/methods/${method.id}`);
+                    } else {
+                        setCache(Constants.AUTH_STATE_METHOD_KEY, method.id, 15).then(() => {
+                            openAuth();
+                        });
+                    }
+                }}
+            >
                 <method.icon className={classes.linkIcon} stroke={1.5} />
                 <span>{method.name}</span>
-            </Link>
+            </div>
         );
     }
 
@@ -120,10 +164,39 @@ const MenuPage = () => {
         );
     }
 
+    if (needShowOnboarding) {
+        return (
+            <Onboarding
+                onOnboardingEnd={() => {
+                    setShowOnboarding(false);
+                    markOnboardingAsCompleted();
+                }}
+            />
+        );
+    }
+
     return (
         <>
-            <Modal opened={isModalOpened} onClose={close} title={selectedCard && t(`menu.cards.${selectedCard.id}`)}>
-                {selectedCard && getMethodsList(selectedCard.id)}
+            <Modal.Root opened={isModalOpened} onClose={close}>
+                <Modal.Overlay />
+                <Modal.Content>
+                    <Modal.Header>
+                        <Modal.Title>{selectedCard && t(`menu.cards.${selectedCard.id}`)}</Modal.Title>
+                        <Modal.CloseButton />
+                    </Modal.Header>
+                    <Modal.Body className={classes.modalContent}>
+                        {selectedCard && getMethodsList(selectedCard.id)}
+                    </Modal.Body>
+                </Modal.Content>
+            </Modal.Root>
+
+            <Modal opened={isModalAuthOpened} onClose={closeAuth} title={t('menu.auth_modal_title')}>
+                <AuthPage
+                    onAuthComplete={() => {
+                        removeCache(Constants.AUTH_STATE_METHOD_KEY);
+                        navigate(`/methods/${cacheMethodId}`);
+                    }}
+                />
             </Modal>
 
             <Container p={5}>
@@ -131,21 +204,9 @@ const MenuPage = () => {
                     {cards.map(CategoryBlock)}
                 </SimpleGrid>
 
-                <Divider my="sm" />
-
                 <UnstyledButton className={classes.link} component="a" href={getDocLink('')} target="_blank">
                     <IconBook2 className={classes.linkIcon} stroke={1.5} />
                     <span>{t('menu.documentation')}</span>
-                </UnstyledButton>
-
-                <UnstyledButton
-                    className={classes.link}
-                    component="a"
-                    href="https://t.me/tribute?start=sd1c"
-                    target="_blank"
-                >
-                    <IconPigMoney className={classes.linkIcon} stroke={1.5} />
-                    <span>{t('menu.donate')}</span>
                 </UnstyledButton>
 
                 <UnstyledButton className={classes.link} component="a" href="https://t.me/kit42_app" target="_blank">
@@ -154,14 +215,24 @@ const MenuPage = () => {
                     </Avatar>
                     <span>{t('menu.telegram_channel')}</span>
                 </UnstyledButton>
+
+                <UnstyledButton
+                    className={classes.link}
+                    component="a"
+                    href="https://t.me/tribute?start=sd1c"
+                    target="_blank"
+                >
+                    <IconPigMoney className={classNames(classes.linkIcon, classes.donutIcon)} stroke={1.5} />
+                    <span>{t('menu.donate')}</span>
+                </UnstyledButton>
             </Container>
 
-            {developer && (
-                <Notification withCloseButton={false} m="xs" color="gray">
-                    {t('alpha.description')}
-                    <OwnerRow owner={developer} description={t('alpha.user_description')} />
-                </Notification>
-            )}
+            <Notification withCloseButton={false} m="xs" color="gray">
+                {t('beta')}
+                <Button fullWidth variant="outline" mt="xs" component="a" href="https://t.me/paulo">
+                    @paulo
+                </Button>
+            </Notification>
         </>
     );
 };

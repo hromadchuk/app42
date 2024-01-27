@@ -4,7 +4,7 @@ import { Constants } from '../constants.ts';
 const db = new Kit42Database();
 
 function getPrefix(key: string): string {
-    if ([Constants.AUTH_STATE_NUMBER_KEY].includes(key)) {
+    if ([Constants.AUTH_STATE_NUMBER_KEY, Constants.AUTH_STATE_METHOD_KEY].includes(key)) {
         return key;
     }
 

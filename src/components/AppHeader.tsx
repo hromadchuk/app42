@@ -19,7 +19,7 @@ interface IAppHeader {
     user: null | Api.User;
 }
 
-const excludeBackButton = ['/', '/menu'];
+const excludeBackButton = ['/'];
 
 export function AppHeader({ user }: IAppHeader) {
     const location = useLocation();
@@ -58,7 +58,7 @@ export function AppHeader({ user }: IAppHeader) {
                 variant="transparent"
                 size="xl"
                 onClick={() => {
-                    navigate('/menu');
+                    navigate('/');
 
                     if (isAppLoading) {
                         // need for stop all requests

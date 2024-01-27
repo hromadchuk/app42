@@ -1,6 +1,6 @@
 {
   "auth_page": {
-    "description": "Kit 42 is a product with features for Telegram. For the product to work, you need to log in to your Telegram account.",
+    "description": "To be able to work with Telegram API, you need to log in to your account. Don't worry, the data is not transferred anywhere and the session is stored on your device.",
     "input_number": "Phone number",
     "input_code": "Verification code",
     "input_password": "Password",
@@ -65,6 +65,7 @@
     "documentation": "Documentation",
     "donate": "Support the project",
     "telegram_channel": "Telegram channel with updates",
+    "auth_modal_title": "Authorization",
     "cards": {
       "account": "Account",
       "contacts": "Contacts",
@@ -72,10 +73,7 @@
       "chats": "Chats"
     }
   },
-  "alpha": {
-    "description": "This is an alpha version of the product and there may be bugs. If you find a bug or have a suggestion, please send a message to the developer. Features will be added as the product is developed.",
-    "user_description": "Developer"
-  },
+  "beta": "This is beta version of the product and there may be bugs. If you find a bug or have a suggestion, please send a message to the developer. Features will be added as the product is developed.",
   "profile": {
     "button_logout": "Logout"
   },
@@ -90,8 +88,8 @@
     "administered": "Administrated chats and channels",
     "common_chats_top": "Top of contacts by common chats",
     "calls_stat": "Calls stat",
-    "channels_registration": "Channels registration",
-    "records_stat": "Records stat",
+    "channels_registration": "Date channels/chats were created",
+    "records_stat": "Posts stat",
     "stories_stat": "Stories stat",
     "dialog_joined": "Chats/channels joined date",
     "clear_dialog_members": "Clear chats/channels members"
@@ -106,7 +104,7 @@
   },
   "onboarding": {
     "continue_button": "Continue",
-    "authorization_button": "Authorization",
+    "launch_app": "Launch the application",
     "slides": {
       "slide1": {
         "title": "Analysis",

@@ -113,7 +113,7 @@ export default function Onboarding({ onOnboardingEnd }: IOnboarding) {
             <Affix id="bottom-area" position={{ bottom: 0 }} style={{ width: '100%' }}>
                 <Container p="xs">
                     <Button fullWidth onClick={onClick}>
-                        {showEndButton ? t('onboarding.authorization_button') : t('onboarding.continue_button')}
+                        {showEndButton ? t('onboarding.launch_app') : t('onboarding.continue_button')}
                     </Button>
                 </Container>
             </Affix>

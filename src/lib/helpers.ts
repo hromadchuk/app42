@@ -444,3 +444,22 @@ export function getPeerId(peer: Api.TypePeer) {
 
     return peer.channelId.valueOf();
 }
+
+export async function getCurrentUser(): Promise<Api.User | null> {
+    try {
+        const [user] = (await CallAPI(
+            new Api.users.GetUsers({
+                id: [new Api.InputUserSelf()]
+            }),
+            { hideErrorAlert: true }
+        )) as Api.User[];
+
+        window.userId = user.id.valueOf();
+
+        return user;
+    } catch (error) {
+        console.error('getCurrentUser error', error);
+    }
+
+    return null;
+}
