@@ -117,7 +117,6 @@ const MenuPage = () => {
     }
 
     function MethodRow(method: IMethod, key: number) {
-        // <Link key={key} className={classes.link} to={`/methods/${method.id}`}>
         return (
             <div
                 key={key}

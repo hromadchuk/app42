@@ -52,11 +52,18 @@ const App = () => {
     const [isAppLoading, setAppLoading] = useState<boolean>(false);
 
     useEffect(() => {
+        if (user) {
+            settingsButton.show();
+        } else {
+            settingsButton.hide();
+        }
+    }, [user]);
+
+    useEffect(() => {
         // init mini app
         miniApp.ready();
         viewport.expand();
 
-        settingsButton.show();
         settingsButton.on('click', () => {
             navigate('/profile');
         });
@@ -190,7 +197,7 @@ function MiniAppLoader({ children }: PropsWithChildren) {
     if (error) {
         return (
             <Center h={100} mx="auto">
-                Something went wrong.
+                Something went wrong: {error instanceof Error ? error.message : JSON.stringify(error)}
             </Center>
         );
     }
