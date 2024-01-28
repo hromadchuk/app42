@@ -317,6 +317,7 @@
       "get_blacklist": "Getting blacklist",
       "blacklist_empty": "Your blacklist is empty",
       "button_clear": "Clear blacklist",
+      "button_clear_preview": "Show list for deletion",
       "clearing_progress": "Clearing blacklist",
       "checkbox_users": [
         "user",
@@ -461,6 +462,7 @@
       "cannot_get_channel_participants": "It didn't work out to get channel members. Contact the developer.",
       "many_dialog_users_error": "There are over 200 participants in the selected dialog. The data may be incorrect.",
       "no_members": "There are no participants in the selected dialog",
+      "button_clear_preview": "Show list for deletion",
       "button_clear": "Kick users",
       "checkbox_bots": "Bots",
       "clearing_progress": "Removing users",
