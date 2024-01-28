@@ -1,9 +1,11 @@
 import { useContext, useEffect, useState } from 'react';
-import { Button, Checkbox } from '@mantine/core';
+import { Button, Flex } from '@mantine/core';
 import { Api } from 'telegram';
 import { CallAPI, declineAndFormat } from '../lib/helpers.ts';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
+import { CheckboxCard } from '../components/CheckboxCard.tsx';
+import { IconRobot, IconUser } from '@tabler/icons-react';
 
 interface IBannedResult {
     count: number;
@@ -126,24 +128,23 @@ export const ClearBlacklist = () => {
     if (blockedResult) {
         return (
             <>
-                <Checkbox
-                    checked={needRemoveUsers}
-                    variant="outline"
-                    label={declineAndFormat(blockedResult.users.length, md('checkbox_users'))}
-                    disabled={blockedResult.users.length === 0}
-                    indeterminate={blockedResult.users.length === 0}
-                    onChange={(event) => setNeedRemoveUsers(event.currentTarget.checked)}
-                />
+                <Flex gap={5}>
+                    <CheckboxCard
+                        icon={<IconUser />}
+                        title={declineAndFormat(blockedResult.users.length, md('checkbox_users'))}
+                        disabled={blockedResult.users.length === 0}
+                        checked={needRemoveUsers}
+                        setChecked={(isChecked) => setNeedRemoveUsers(isChecked)}
+                    />
 
-                <Checkbox
-                    mt="xs"
-                    checked={needRemoveBots}
-                    variant="outline"
-                    label={declineAndFormat(blockedResult.bots.length, md('checkbox_bots'))}
-                    disabled={blockedResult.bots.length === 0}
-                    indeterminate={blockedResult.bots.length === 0}
-                    onChange={(event) => setNeedRemoveBots(event.currentTarget.checked)}
-                />
+                    <CheckboxCard
+                        icon={<IconRobot />}
+                        title={declineAndFormat(blockedResult.bots.length, md('checkbox_bots'))}
+                        disabled={blockedResult.bots.length === 0}
+                        checked={needRemoveBots}
+                        setChecked={(isChecked) => setNeedRemoveBots(isChecked)}
+                    />
+                </Flex>
 
                 <Button
                     fullWidth
@@ -152,7 +153,7 @@ export const ClearBlacklist = () => {
                     disabled={blockedResult.count === 0 || (!needRemoveUsers && !needRemoveBots)}
                     onClick={clearBlacklist}
                 >
-                    {mt('button_clear')}
+                    {mt('button_clear_preview')}
                 </Button>
             </>
         );

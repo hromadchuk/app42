@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useContext, useState } from 'react';
-import { Button, Checkbox, Flex, Radio } from '@mantine/core';
+import { Button, Flex, Radio } from '@mantine/core';
 import { Api } from 'telegram';
 import { formatNumber, notifyError } from '../lib/helpers.ts';
 
@@ -7,6 +7,7 @@ import { MethodContext, TDialogType, TDialogWithoutUser } from '../contexts/Meth
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { getDialogParticipants, kickMemberFromDialog } from '../lib/methods/dialogs.ts';
 import { calculatePeriodTimestamp } from '../lib/methods/messages.ts';
+import { CheckboxCard } from '../components/CheckboxCard.tsx';
 
 interface IRemovableCheckboxProps {
     checked: boolean;
@@ -150,15 +151,16 @@ export const ClearDialogMembers = () => {
 
     function RemovableCheckbox({ checked, members, text, onChange }: IRemovableCheckboxProps) {
         return (
-            <Checkbox
-                mt="xs"
-                checked={checked}
-                variant="outline"
-                label={`${mt(text)} (${formatNumber(Number(members?.length))})`}
-                disabled={members?.length === 0}
-                indeterminate={members?.length === 0}
-                onChange={(event) => onChange(event.currentTarget.checked)}
-            />
+            <Flex mb={5}>
+                <CheckboxCard
+                    size="md"
+                    checked={checked}
+                    title={`${mt(text)} (${formatNumber(Number(members?.length))})`}
+                    disabled={members?.length === 0}
+                    setChecked={(isChecked) => onChange(isChecked)}
+                    isHorizontal={true}
+                />
+            </Flex>
         );
     }
 
@@ -264,7 +266,7 @@ export const ClearDialogMembers = () => {
                     }
                     onClick={clearDialogMembers}
                 >
-                    {mt('button_clear')}
+                    {mt('button_clear_preview')}
                 </Button>
             </>
         );
