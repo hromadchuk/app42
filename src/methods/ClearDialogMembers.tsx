@@ -264,7 +264,7 @@ export const ClearDialogMembers = () => {
                     }
                     onClick={clearDialogMembers}
                 >
-                    {mt('button_clear')}
+                    {mt('button_clear_preview')}
                 </Button>
             </>
         );
