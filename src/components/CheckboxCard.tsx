@@ -1,4 +1,4 @@
-import { Checkbox, Flex, Text, UnstyledButton } from '@mantine/core';
+import { Checkbox, Flex, MantineSize, Text, UnstyledButton } from '@mantine/core';
 
 // @ts-ignore
 import classes from '../styles/CheckboxCard.module.css';
@@ -6,13 +6,15 @@ import { ReactElement } from 'react';
 
 interface ICheckboxCard {
     title: string;
-    icon: ReactElement;
+    icon?: ReactElement;
     checked: boolean;
+    size?: MantineSize | (string & {});
     setChecked: (checked: boolean) => void;
     disabled?: boolean;
+    isHorizontal?: boolean;
 }
 
-export function CheckboxCard({ title, icon, disabled, checked, setChecked }: ICheckboxCard) {
+export function CheckboxCard({ title, icon, disabled, checked, setChecked, size, isHorizontal }: ICheckboxCard) {
     return (
         <Flex className={classes.root} data-disabled={disabled || undefined}>
             <Checkbox
@@ -22,18 +24,23 @@ export function CheckboxCard({ title, icon, disabled, checked, setChecked }: ICh
                 disabled={disabled}
                 indeterminate={disabled}
                 tabIndex={-1}
-                size="xs"
+                size={size || 'xs'}
             />
 
             <UnstyledButton
                 className={classes.control}
                 data-checked={checked || undefined}
+                data-horizontal={isHorizontal || undefined}
                 disabled={disabled}
                 onClick={() => setChecked(!checked)}
             >
-                <Flex align={'center'} direction={'column'}>
+                <Flex align={isHorizontal ? undefined : 'center'} direction={isHorizontal ? 'row' : 'column'}>
                     {icon}
-                    <Text mt={5} className={classes.label}>
+                    <Text
+                        mt={isHorizontal ? undefined : 5}
+                        data-horizontal={isHorizontal || undefined}
+                        className={classes.label}
+                    >
                         {title}
                     </Text>
                 </Flex>
