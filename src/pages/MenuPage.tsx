@@ -94,10 +94,12 @@ const MenuPage = () => {
             if (!isOnboardingCompleted) {
                 setShowOnboarding(true);
             } else {
-                const session = localStorage.getItem(Constants.SESSION_KEY);
+                if (!user) {
+                    const session = localStorage.getItem(Constants.SESSION_KEY);
 
-                if (session) {
-                    setUser(await getCurrentUser());
+                    if (session) {
+                        setUser(await getCurrentUser());
+                    }
                 }
 
                 const methodId = await getCache(Constants.AUTH_STATE_METHOD_KEY);
