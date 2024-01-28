@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useIntersection } from '@mantine/hooks';
 import { Api } from 'telegram';
-import { getAvatar, TOwnerInfo } from '../lib/helpers.ts';
+import { getAvatar, getDocumentThumb, TOwnerInfo } from '../lib/helpers.ts';
 import { ExAvatar } from './ExAvatar.tsx';
 
 interface IOwnerAvatar {
@@ -20,6 +20,14 @@ export function OwnerAvatar({ owner }: IOwnerAvatar) {
             entry?.isIntersecting &&
             !alreadyRequested
         ) {
+            if (owner.photo instanceof Api.UserProfilePhotoEmpty || owner.photo instanceof Api.ChatPhotoEmpty) {
+                return;
+            }
+
+            if (owner.photo.strippedThumb) {
+                setUserAvatar(getDocumentThumb(owner.photo) as string);
+            }
+
             setAlreadyRequested(true);
             getAvatar(owner).then((photo) => {
                 if (photo) {

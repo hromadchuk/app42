@@ -7,6 +7,7 @@ import { getAppLangCode, LangType, t, td } from './lang';
 import { FloodWaitError } from 'telegram/errors';
 
 export type TOwnerInfo = null | Api.TypeUser | Api.TypeChat;
+type TDocumentThumb = Api.TypeDocument | Api.TypePhoto | Api.UserProfilePhoto | Api.ChatPhoto | undefined;
 
 export const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
@@ -46,13 +47,15 @@ export function declineAndFormat(number: number, titles: string[]): string {
     return `${formatNumber(number)} ${decline(number, titles)}`;
 }
 
-export function getDocumentThumb(document: Api.TypeDocument | Api.TypePhoto | undefined) {
+export function getDocumentThumb(document: TDocumentThumb) {
     let data;
 
     if (document instanceof Api.Document && document?.thumbs) {
         data = getThumbStrippedSize(document.thumbs)?.bytes;
     } else if (document instanceof Api.Photo && document.fileReference) {
         data = getThumbStrippedSize(document.sizes)?.bytes;
+    } else if (document instanceof Api.UserProfilePhoto || document instanceof Api.ChatPhoto) {
+        data = document.strippedThumb;
     }
 
     if (!data) {
@@ -399,7 +402,6 @@ export async function getMediaVideoPreview(video: Api.Document): Promise<string 
     const buffer = await window.TelegramClient.downloadMedia(video as unknown as Api.TypeMessageMedia, {
         thumb: videoThumbsLength - 1
     });
-    // @ts-ignore
 
     return await getImageStringFromBuffer(buffer, cacheKey);
 }
