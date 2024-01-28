@@ -189,7 +189,14 @@ const MenuPage = () => {
                 </Modal.Content>
             </Modal.Root>
 
-            <Modal opened={isModalAuthOpened} onClose={closeAuth} title={t('menu.auth_modal_title')}>
+            <Modal
+                opened={isModalAuthOpened}
+                onClose={() => {
+                    removeCache(Constants.AUTH_STATE_METHOD_KEY);
+                    closeAuth();
+                }}
+                title={t('menu.auth_modal_title')}
+            >
                 <AuthPage
                     onAuthComplete={() => {
                         getCache(Constants.AUTH_STATE_METHOD_KEY).then((cacheMethodId) => {
