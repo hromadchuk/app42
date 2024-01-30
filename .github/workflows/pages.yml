@@ -4,6 +4,7 @@ on:
         branches: [ master ]
         paths:
             - src/**
+            - public/**
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
