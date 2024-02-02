@@ -37,6 +37,7 @@ declare global {
         listenMAEvents: { [key: string]: (event: undefined | { button_id: string }) => void };
         userId: number;
         isProgress: boolean;
+        isNeedToThrowErrorOnRequest: boolean;
     }
 }
 
@@ -74,7 +75,7 @@ const App = () => {
             if (window.isProgress) {
                 // need for stop all requests
                 window.isProgress = false;
-                window.location.reload();
+                window.isNeedToThrowErrorOnRequest = true;
             }
         });
 
