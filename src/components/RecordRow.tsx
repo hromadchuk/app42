@@ -7,7 +7,6 @@ import { TCorrectMessage } from '../lib/methods/messages.ts';
 import { InfoRow } from './InfoRow.tsx';
 import { RecordPhoto } from './RecordPhoto.tsx';
 
-// @ts-ignore
 import classes from '../styles/OwnerRow.module.css';
 
 interface IRecordRow {

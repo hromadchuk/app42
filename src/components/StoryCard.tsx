@@ -2,7 +2,7 @@ import { Container, Flex, Text, UnstyledButton } from '@mantine/core';
 import { Api } from 'telegram';
 import { classNames } from '../lib/helpers.ts';
 import { StoryImage } from './StoryImage.tsx';
-// @ts-ignore
+
 import classes from '../styles/OwnerRow.module.css';
 
 interface IStoriesCarousel {

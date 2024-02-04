@@ -4,7 +4,6 @@ import dayjs from 'dayjs';
 import { getPercent } from '../../lib/helpers.ts';
 import { chartLang } from './chart_helpers.ts';
 
-// @ts-ignore
 import classes from './Activity.module.css';
 
 interface IActivityChartProps {
