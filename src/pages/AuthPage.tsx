@@ -1,4 +1,5 @@
-import { useContext, useEffect, useState } from 'react';
+import { useMiniApp } from '@tma.js/sdk-react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import {
     Button,
     Center,
@@ -84,6 +85,63 @@ const AuthPage = ({ onAuthComplete }: IAuthPage) => {
     const [password, setPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
+    const contactNumberAlreadyRequested = useRef(false);
+    const contactNumberGetSuccessfully = useRef(false);
+
+    const setContactNumberAlreadyRequested = () => {
+        contactNumberAlreadyRequested.current = true;
+    };
+    const setContactNumberGetSuccessfully = () => {
+        contactNumberGetSuccessfully.current = true;
+    };
+
+    const miniApp = useMiniApp();
+
+    useEffect(() => {
+        if (state !== AuthState.number || inputCountries.length === 0) {
+            return;
+        }
+
+        if (number && contactNumberGetSuccessfully.current) {
+            confirmNumber();
+        }
+
+        if (contactNumberAlreadyRequested.current) {
+            return;
+        }
+
+        const contactData = async () => {
+            setContactNumberAlreadyRequested();
+            const { contact } = await miniApp.requestContact();
+
+            const contactNumber = contact.phoneNumber;
+
+            const numberWithoutInternationalPrefix = contactNumber.replace('+', '');
+            const internationalNumberCountry = inputCountries.find((inputCountry) => {
+                const patternWithoutSpaces = inputCountry.pattern?.replace(' ', '');
+                const phoneNumberWithoutSpaces = numberWithoutInternationalPrefix.replace(' ', '');
+
+                return (
+                    numberWithoutInternationalPrefix.startsWith(inputCountry.prefix.toString()) &&
+                    phoneNumberWithoutSpaces.length === patternWithoutSpaces?.length
+                );
+            });
+
+            if (!internationalNumberCountry) {
+                throw new Error(`${contactNumber} not found in numbers list`);
+            }
+
+            setContactNumberGetSuccessfully();
+            setNumber(numberWithoutInternationalPrefix.replace(String(internationalNumberCountry.prefix), ''));
+            setSelectedCountry(internationalNumberCountry.code);
+        };
+
+        contactData().catch((error) => {
+            console.log('Error on miniapp contact request');
+            console.error(error);
+        });
+    }, [state, number, inputCountries]);
+
     const combobox = useCombobox({
         onDropdownClose: () => {
             combobox.resetSelectedOption();
@@ -114,10 +172,7 @@ const AuthPage = ({ onAuthComplete }: IAuthPage) => {
                 setLoading(false);
                 setAppLoading(false);
             } else if (!session) {
-                await getAuthData();
-                setState(AuthState.number);
-                setLoading(false);
-                setAppLoading(false);
+                await setNumberAuthorizationState();
             } else {
                 await checkCurrentSession();
             }
@@ -132,11 +187,15 @@ const AuthPage = ({ onAuthComplete }: IAuthPage) => {
             setAppLoading(false);
             onAuthComplete();
         } else {
-            await getAuthData();
-            setState(AuthState.number);
-            setLoading(false);
-            setAppLoading(false);
+            await setNumberAuthorizationState();
         }
+    }
+
+    async function setNumberAuthorizationState() {
+        await getAuthData();
+        setState(AuthState.number);
+        setLoading(false);
+        setAppLoading(false);
     }
 
     async function getAuthData() {
