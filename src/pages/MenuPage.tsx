@@ -21,6 +21,7 @@ import {
     IconUsersGroup,
     TablerIconsProps
 } from '@tabler/icons-react';
+import { Locales, useTonAddress, useTonConnectModal, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useNavigate } from 'react-router-dom';
 import { Constants } from '../constants.ts';
 import { AppContext } from '../contexts/AppContext.tsx';
@@ -33,6 +34,7 @@ import {
 } from '../lib/helpers.ts';
 import { hexToRgba } from '../lib/theme.ts';
 import { getCache, removeCache, setCache } from '../lib/cache.ts';
+import { getModalLang } from '../lib/ton.ts';
 import { getMethods, IMethod, MethodCategory } from '../routes.tsx';
 import Logo from '../components/Logo.tsx';
 import { t } from '../lib/lang.ts';
@@ -75,6 +77,10 @@ const MenuPage = () => {
 
     const theme = useMantineTheme();
     const navigate = useNavigate();
+    const { state: tonState, open: tonOpen, close: tonClose } = useTonConnectModal();
+    const wallet = useTonWallet();
+    const userFriendlyAddress = useTonAddress();
+    const [tonConnectUI, setOptions] = useTonConnectUI();
     const [isModalOpened, { open, close }] = useDisclosure(false);
     const [isModalAuthOpened, { open: openAuth, close: closeAuth }] = useDisclosure(false);
 
@@ -82,6 +88,8 @@ const MenuPage = () => {
     const [needShowOnboarding, setShowOnboarding] = useState(false);
 
     useEffect(() => {
+        setOptions({ language: getModalLang() });
+
         (async () => {
             const isOnboardingCompleted = checkIsOnboardingCompleted();
 
@@ -210,6 +218,15 @@ const MenuPage = () => {
                 <SimpleGrid cols={2} m="xs">
                     {cards.map(CategoryBlock)}
                 </SimpleGrid>
+
+                <div>
+                    <div>Modal state: {JSON.stringify(tonState || {})}</div>
+                    <button onClick={tonOpen}>Open modal</button>
+                    <button onClick={tonClose}>Close modal</button>
+                    <div>Connected wallet: {wallet?.name}</div>
+                    <div>Device: {wallet?.device.appName}</div>
+                    <div>userFriendlyAddress: {userFriendlyAddress}</div>
+                </div>
 
                 <UnstyledButton className={classes.link} component="a" href={getDocLink('')} target="_blank">
                     <IconBook2 className={classes.linkIcon} stroke={1.5} />

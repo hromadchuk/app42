@@ -1,6 +1,7 @@
 import { PropsWithChildren, useEffect, useState } from 'react';
 import { AppShell, Center, Loader, MantineProvider } from '@mantine/core';
 import { useColorScheme } from '@mantine/hooks';
+import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import ReactGA from 'react-ga4';
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { Api, TelegramClient } from 'telegram';
@@ -20,6 +21,7 @@ import { clearOldCache } from './lib/cache.ts';
 import { checkIsOnboardingCompleted, getParams, isDev, markOnboardingAsCompleted, Server } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
 import { setColors } from './lib/theme.ts';
+import { getManifestUrl } from './lib/ton.ts';
 import { IRouter, routes } from './routes.tsx';
 
 import { AppFooter } from './components/AppFooter.tsx';
@@ -215,15 +217,17 @@ function MiniAppLoader({ children }: PropsWithChildren) {
 
 const MiniAppWrapper = () => (
     <SDKProvider options={{ async: true }}>
-        <MantineProvider forceColorScheme={useColorScheme()}>
-            <MiniAppLoader>
-                <MemoryRouter>
-                    <AppShell>
-                        <App />
-                    </AppShell>
-                </MemoryRouter>
-            </MiniAppLoader>
-        </MantineProvider>
+        <TonConnectUIProvider manifestUrl={getManifestUrl()}>
+            <MantineProvider forceColorScheme={useColorScheme()}>
+                <MiniAppLoader>
+                    <MemoryRouter>
+                        <AppShell>
+                            <App />
+                        </AppShell>
+                    </MemoryRouter>
+                </MiniAppLoader>
+            </MantineProvider>
+        </TonConnectUIProvider>
     </SDKProvider>
 );
 
