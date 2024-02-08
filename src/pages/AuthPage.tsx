@@ -1,4 +1,3 @@
-import { useMiniApp } from '@tma.js/sdk-react';
 import { useContext, useEffect, useRef, useState } from 'react';
 import {
     Button,
@@ -17,7 +16,7 @@ import {
     useCombobox
 } from '@mantine/core';
 import { IconSelector } from '@tabler/icons-react';
-import { useCloudStorage } from '@tma.js/sdk-react';
+import { useCloudStorage, useMiniApp } from '@tma.js/sdk-react';
 import { IMaskInput } from 'react-imask';
 import { Api } from 'telegram';
 import { computeCheck } from 'telegram/Password';
