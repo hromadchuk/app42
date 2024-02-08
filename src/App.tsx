@@ -83,10 +83,12 @@ const App = () => {
             }
 
             // init app
-            const storageSession = decodeString(
-                await storage.get(Constants.SESSION_KEY),
-                serverData?.storageHash || ''
-            );
+            let storageSession = '';
+            try {
+                storageSession = decodeString(await storage.get(Constants.SESSION_KEY), serverData?.storageHash || '');
+            } catch (error) {
+                console.log('Error get session from storage', error);
+            }
 
             window.TelegramClient = new TelegramClient(
                 new StringSession(storageSession),
