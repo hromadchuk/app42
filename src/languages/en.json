@@ -66,6 +66,7 @@
     "donate": "Support the project",
     "telegram_channel": "Telegram channel with updates",
     "auth_modal_title": "Authorization",
+    "auth_modal_profile": "Profile",
     "cards": {
       "account": "Account",
       "contacts": "Contacts",
