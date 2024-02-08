@@ -31,10 +31,6 @@ export const AbstractMethod = () => {
 
     const routerInfo = routes.find((router: IRouter) => router.path === location.pathname) as IRouter;
 
-    useEffect(() => {
-        Server('method', { method: routerInfo.methodId });
-    }, []);
-
     const needHideContent = (): boolean => {
         return [progress, finishBlock, listAction].some(Boolean);
     };
@@ -61,6 +57,12 @@ export const AbstractMethod = () => {
 
         _setProgress(progressSafe);
     };
+
+    useEffect(() => {
+        Server('method', { method: routerInfo.methodId });
+
+        return () => setProgress(null);
+    }, []);
 
     const setFinishBlock = ({ text, state }: IFinishBlock): void => {
         setProgress(null);

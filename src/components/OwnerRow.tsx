@@ -5,7 +5,6 @@ import { IconCheck, IconChevronRight, TablerIconsProps } from '@tabler/icons-rea
 import { classNames, TOwnerInfo } from '../lib/helpers.ts';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
 
-// @ts-ignore
 import classes from '../styles/OwnerRow.module.css';
 
 interface IOwnerRow {

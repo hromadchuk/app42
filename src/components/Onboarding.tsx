@@ -4,7 +4,6 @@ import { IconChartHistogram, IconSeeding, IconShieldLock, IconTool, TablerIconsP
 import { Carousel, Embla } from '@mantine/carousel';
 import { t } from '../lib/lang.ts';
 
-// @ts-ignore
 import classes from '../styles/Onboarding.module.css';
 
 interface IOnboarding {

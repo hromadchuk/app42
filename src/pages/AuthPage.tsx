@@ -27,7 +27,6 @@ import { getAppLangCode, t } from '../lib/lang.ts';
 import { Constants } from '../constants.ts';
 import { AppContext } from '../contexts/AppContext.tsx';
 
-// @ts-ignore
 import authClasses from '../styles/AuthPage.module.css';
 
 enum AuthState {

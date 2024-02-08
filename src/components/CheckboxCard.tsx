@@ -1,8 +1,7 @@
+import { ReactElement } from 'react';
 import { Checkbox, Flex, MantineSize, Text, UnstyledButton } from '@mantine/core';
 
-// @ts-ignore
 import classes from '../styles/CheckboxCard.module.css';
-import { ReactElement } from 'react';
 
 interface ICheckboxCard {
     title: string;

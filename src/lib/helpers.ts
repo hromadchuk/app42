@@ -5,6 +5,7 @@ import { getCache, setCache } from './cache.ts';
 import { getHideUser, isHideMode } from './hide.ts';
 import { getAppLangCode, LangType, t, td } from './lang';
 import { FloodWaitError } from 'telegram/errors';
+import { AbortRequestError } from '../errors/AbortRequestError.ts';
 
 export type TOwnerInfo = null | Api.TypeUser | Api.TypeChat;
 type TDocumentThumb = Api.TypeDocument | Api.TypePhoto | Api.UserProfilePhoto | Api.ChatPhoto | undefined;
@@ -192,6 +193,12 @@ export async function CallAPI<R extends Api.AnyRequest>(
     await sleep(100);
 
     try {
+        if (window.isNeedToThrowErrorOnRequest) {
+            window.isNeedToThrowErrorOnRequest = false;
+
+            throw new AbortRequestError();
+        }
+
         const result = await window.TelegramClient.invoke(request);
 
         console.group(`API.${method}`);
@@ -224,7 +231,7 @@ export async function CallAPI<R extends Api.AnyRequest>(
             return await handleFloodWaitError(error, request, options);
         }
 
-        if (!options?.hideErrorAlert) {
+        if (!options?.hideErrorAlert && !(error instanceof AbortRequestError)) {
             notifyError({
                 title: `API.${method} error`,
                 message: getErrorMessage(error as Error)

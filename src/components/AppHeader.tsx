@@ -12,7 +12,6 @@ import LogoLottie from '../assets/logo_lottie.json';
 
 import { AppContext } from '../contexts/AppContext.tsx';
 
-// @ts-ignore
 import classes from '../styles/AppHeader.module.css';
 
 interface IAppHeader {

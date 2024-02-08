@@ -37,10 +37,9 @@ import { getMethods, IMethod, MethodCategory } from '../routes.tsx';
 import Logo from '../components/Logo.tsx';
 import { t } from '../lib/lang.ts';
 import Onboarding from '../components/Onboarding.tsx';
-
-// @ts-ignore
-import classes from '../styles/MenuPage.module.css';
 import AuthPage from './AuthPage.tsx';
+
+import classes from '../styles/MenuPage.module.css';
 
 interface ICard {
     id: MethodCategory;
