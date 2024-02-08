@@ -8,7 +8,6 @@ import ENIcon from '../assets/languages/en.svg';
 import UKIcon from '../assets/languages/uk.svg';
 import RUIcon from '../assets/languages/ru.svg';
 
-// @ts-ignore
 import classes from '../styles/SelectLanguage.module.css';
 
 interface ISelectLanguage {

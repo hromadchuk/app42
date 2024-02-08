@@ -16,17 +16,13 @@ import { CallAPI, getTextTime, notifyError, sleep } from '../lib/helpers.ts';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
 
-// @ts-ignore
 import classes from '../styles/AnimatedMessages.module.css';
 
 import HeartAnimation from '../assets/animated_messages/heart.tsx';
 import SpaceInvadersAnimation from '../assets/animated_messages/space-invaders.tsx';
 import TicTacToeAnimation from '../assets/animated_messages/tic-tac-toe.tsx';
-// @ts-ignore
 import HeartAnimationGif from '../assets/animated_messages/examples/heart.gif';
-// @ts-ignore
 import SpaceInvadersGif from '../assets/animated_messages/examples/space-invaders.gif';
-// @ts-ignore
 import TicTacToeGif from '../assets/animated_messages/examples/tic-tac-toe.gif';
 import emojiText from '../assets/animated_messages/emoji-text.ts';
 
