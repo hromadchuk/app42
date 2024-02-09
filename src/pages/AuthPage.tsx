@@ -16,12 +16,13 @@ import {
     useCombobox
 } from '@mantine/core';
 import { IconSelector } from '@tabler/icons-react';
+import { useCloudStorage } from '@tma.js/sdk-react';
 import { IMaskInput } from 'react-imask';
 import { Api } from 'telegram';
 import { computeCheck } from 'telegram/Password';
 import { CountryFlag } from '../components/CountryFlag.tsx';
 import { getCache, removeCache, setCache } from '../lib/cache.ts';
-import { CallAPI, getCurrentUser } from '../lib/helpers.ts';
+import { CallAPI, decodeString, encodeString, getCurrentUser } from '../lib/helpers.ts';
 import { getAppLangCode, t } from '../lib/lang.ts';
 
 import { Constants } from '../constants.ts';
@@ -62,7 +63,9 @@ interface IAuthPage {
 }
 
 const AuthPage = ({ onAuthComplete }: IAuthPage) => {
-    const { setUser, setAppLoading } = useContext(AppContext);
+    const { setUser, setAppLoading, initData } = useContext(AppContext);
+
+    const storage = useCloudStorage();
 
     const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
     const [searchCountry, setSearchCountry] = useState('');
@@ -94,13 +97,18 @@ const AuthPage = ({ onAuthComplete }: IAuthPage) => {
         }
     });
 
-    const save = () => localStorage.setItem(Constants.SESSION_KEY, `${window.TelegramClient.session.save()}`);
+    const save = async () => {
+        await storage.set(
+            Constants.SESSION_KEY,
+            encodeString(`${window.TelegramClient.session.save()}`, initData?.storageHash || '')
+        );
+    };
 
     useEffect(() => {
         setAppLoading(true);
 
         (async () => {
-            const session = localStorage.getItem(Constants.SESSION_KEY);
+            const storageSession = decodeString(await storage.get(Constants.SESSION_KEY), initData?.storageHash || '');
 
             const authStateNumber = (await getCache(Constants.AUTH_STATE_NUMBER_KEY)) as IAuthStateNumber;
             if (authStateNumber) {
@@ -112,7 +120,7 @@ const AuthPage = ({ onAuthComplete }: IAuthPage) => {
                 setState(AuthState.code);
                 setLoading(false);
                 setAppLoading(false);
-            } else if (!session) {
+            } else if (!storageSession) {
                 await getAuthData();
                 setState(AuthState.number);
                 setLoading(false);
@@ -222,7 +230,7 @@ const AuthPage = ({ onAuthComplete }: IAuthPage) => {
             };
 
             await setCache(Constants.AUTH_STATE_NUMBER_KEY, setData, 15);
-            save();
+            await save();
 
             setPhoneCodeHash(phoneCodeHashResult);
             setCodeLength(phoneCodeLengthResult);
@@ -254,8 +262,7 @@ const AuthPage = ({ onAuthComplete }: IAuthPage) => {
                 { hideErrorAlert: true }
             );
 
-            save();
-
+            await save();
             await checkCurrentSession();
         } catch (error) {
             // @ts-ignore
@@ -290,8 +297,7 @@ const AuthPage = ({ onAuthComplete }: IAuthPage) => {
                 hideErrorAlert: true
             });
 
-            save();
-
+            await save();
             await checkCurrentSession();
         } catch (error) {
             // @ts-ignore

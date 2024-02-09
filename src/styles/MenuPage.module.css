@@ -1,3 +1,15 @@
+.user {
+    display: block;
+    width: 100%;
+    padding: var(--mantine-spacing-xs);
+    color: light-dark(var(--mantine-color-black), var(--mantine-color-dark-0));
+    border-radius: var(--mantine-radius-sm);
+
+    &:hover {
+        background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+    }
+}
+
 .link {
     display: flex;
     align-items: center;
