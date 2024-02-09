@@ -82,11 +82,15 @@ const App = () => {
                 console.error(`Error init app: ${error}`);
             }
 
+            console.log('serverData', serverData);
+
             // init app
             const storageSession = decodeString(
                 await storage.get(Constants.SESSION_KEY),
                 serverData?.storageHash || ''
             );
+
+            console.log('init session', storageSession);
 
             window.TelegramClient = new TelegramClient(
                 new StringSession(storageSession),
