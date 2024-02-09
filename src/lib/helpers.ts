@@ -1,5 +1,4 @@
 import { Buffer } from 'buffer';
-import { AES, enc } from 'crypto-js';
 import { notifications } from '@mantine/notifications';
 import { Api } from 'telegram';
 import { getCache, setCache } from './cache.ts';
@@ -7,7 +6,6 @@ import { getHideUser, isHideMode } from './hide.ts';
 import { getAppLangCode, LangType, t, td } from './lang';
 import { FloodWaitError } from 'telegram/errors';
 import { AbortRequestError } from '../errors/AbortRequestError.ts';
-import { ServerMock } from './mock.ts';
 
 export type TOwnerInfo = null | Api.TypeUser | Api.TypeChat;
 type TDocumentThumb = Api.TypeDocument | Api.TypePhoto | Api.UserProfilePhoto | Api.ChatPhoto | undefined;
@@ -129,6 +127,16 @@ export function getTime(time: number): ITime {
 
 export function getTextTime(seconds: number, isStrong?: boolean): string {
     return getStringsTimeArray(seconds, isStrong).join(' ');
+}
+
+const IS_ONBOARDING_COMPLETED_KEY = 'isOnboardingCompleted';
+
+export function markOnboardingAsCompleted(): void {
+    return localStorage.setItem(IS_ONBOARDING_COMPLETED_KEY, '1');
+}
+
+export function checkIsOnboardingCompleted(): boolean {
+    return Boolean(localStorage.getItem(IS_ONBOARDING_COMPLETED_KEY));
 }
 
 export function getStringsTimeArray(seconds: number, isStrong?: boolean): string[] {
@@ -325,10 +333,10 @@ export async function parallelLimit(limit: number, tasks: Function[]): Promise<v
 const apiEndpoint =
     location.hostname === 'gromadchuk.github.io' ? 'https://kit42.gromadchuk.com' : `http://${location.hostname}`;
 
-export async function Server<T>(method: string, params: object = {}): Promise<T> {
+export async function Server(method: string, params: object = {}): Promise<object> {
     if (isDev) {
         console.log('skip Server', method, params);
-        return ServerMock<T>(method);
+        return {};
     }
 
     const authData = getParams().get('tgWebAppData');
@@ -351,7 +359,7 @@ export async function Server<T>(method: string, params: object = {}): Promise<T>
     console.log('Result:', data);
     console.groupEnd();
 
-    return data as T;
+    return data as object;
 }
 
 export async function getAvatar(owner: Api.User | Api.Channel | Api.Chat): Promise<string | null> {
@@ -463,12 +471,4 @@ export async function getCurrentUser(): Promise<Api.User | null> {
     }
 
     return null;
-}
-
-export function encodeString(string: string, key: string) {
-    return AES.encrypt(string, key).toString();
-}
-
-export function decodeString(encodedString: string, key: string) {
-    return AES.decrypt(encodedString, key).toString(enc.Utf8);
 }

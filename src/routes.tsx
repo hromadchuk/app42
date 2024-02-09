@@ -66,6 +66,10 @@ const appRoutes: IAppRouter[] = [
         element: createElement(lazy(() => import('./pages/MenuPage.tsx')))
     },
     {
+        path: '/profile',
+        element: createElement(lazy(() => import('./pages/ProfilePage.tsx')))
+    },
+    {
         path: '/methods',
         element: createElement(lazy(() => import('./methods/AbstractMethod.tsx'))),
         methods: [
