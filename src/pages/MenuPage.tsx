@@ -86,11 +86,6 @@ const MenuPage = () => {
         (async () => {
             const isOnboardingCompleted = await checkIsOnboardingCompleted();
 
-            if (!window.isTelegramClientConnected) {
-                window.isTelegramClientConnected = true;
-                await window.TelegramClient.connect();
-            }
-
             if (!isOnboardingCompleted) {
                 setShowOnboarding(true);
             } else {

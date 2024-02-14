@@ -25,7 +25,6 @@ import './App.css';
 declare global {
     interface Window {
         TelegramClient: TelegramClient;
-        isTelegramClientConnected: boolean;
         listenEvents: { [key: string]: (event: object) => void };
         listenMAEvents: { [key: string]: (event: undefined | { button_id: string }) => void };
         userId: number;

@@ -182,7 +182,14 @@ export async function CallAPI<R extends Api.AnyRequest>(
 ): Promise<R['__response']> {
     const method = request.className;
 
-    await sleep(100);
+    const methodsWithoutWait = ['help.GetNearestDc', 'help.GetCountriesList', 'users.GetUsers'];
+    if (!methodsWithoutWait.includes(method)) {
+        await sleep(100);
+    }
+
+    if (!window.TelegramClient.connected) {
+        await window.TelegramClient.connect();
+    }
 
     try {
         if (window.isNeedToThrowErrorOnRequest) {
