@@ -3,7 +3,8 @@ export function ServerMock<T>(method: string) {
         return {
             status: 'ok',
             topMethods: ['messages_stat', 'contacts_analysis', 'animated_messages', 'common_chats_top', 'administered'],
-            storageHash: 'localTestStorageHash'
+            storageHash: 'localTestStorageHash',
+            showEruda: false
         } as T;
     }
 

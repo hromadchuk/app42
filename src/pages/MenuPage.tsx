@@ -176,7 +176,7 @@ const MenuPage = () => {
         let usernames = '';
 
         if (user.usernames) {
-            usernames = user.usernames.map((username) => `@${username}`).join(', ');
+            usernames = user.usernames.map(({ username }) => `@${username}`).join(', ');
         } else if (user.username) {
             usernames = `@${user.username}`;
         }
@@ -242,7 +242,7 @@ const MenuPage = () => {
             </Modal>
 
             <Container p={5}>
-                <UserRow />
+                {UserRow()}
 
                 <SimpleGrid cols={2} m="xs">
                     {cards.map(CategoryBlock)}

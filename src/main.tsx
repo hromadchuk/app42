@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client';
-import { getParams } from './lib/helpers.ts';
+import { getParams, isDevUser } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
 import { updateThemeFromParams } from './lib/theme.ts';
 
@@ -18,8 +18,16 @@ dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 dayjs.locale(getAppLangCode());
 
-const tgWebAppData = getParams().get('tgWebAppData');
+if (isDevUser) {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/eruda';
+    document.body.append(script);
+    script.onload = () => {
+        window.eruda.init();
+    };
+}
 
+const tgWebAppData = getParams().get('tgWebAppData');
 if (!tgWebAppData) {
     location.href = 'https://t.me/kit42bot/kit42';
 } else {
