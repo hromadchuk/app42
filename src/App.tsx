@@ -30,6 +30,7 @@ declare global {
         userId: number;
         isProgress: boolean;
         isNeedToThrowErrorOnRequest: boolean;
+        eruda: { init: () => void };
     }
 }
 

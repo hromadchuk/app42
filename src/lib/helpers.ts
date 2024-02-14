@@ -12,14 +12,32 @@ import { ServerMock } from './mock.ts';
 export type TOwnerInfo = null | Api.TypeUser | Api.TypeChat;
 type TDocumentThumb = Api.TypeDocument | Api.TypePhoto | Api.UserProfilePhoto | Api.ChatPhoto | undefined;
 
+export function getParams() {
+    return new URLSearchParams(location.hash.slice(1));
+}
+
+export function getUserId() {
+    try {
+        const authData = getParams().get('tgWebAppData');
+        if (authData) {
+            const params = new URLSearchParams(authData);
+            const user = JSON.parse(params.get('user') as string);
+
+            return user.id;
+        }
+    } catch (error) {
+        console.error('getUserId error', error);
+    }
+
+    return 0;
+}
+
 export const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+export const isDevUser = [44221708, 5000925865].includes(getUserId());
 
 export function formatNumber(number: number): string {
     return `${number}`.replace(/(\d)(?=(\d{3})+$)/g, '$1\u00a0');
-}
-
-export function getParams() {
-    return new URLSearchParams(location.hash.slice(1));
 }
 
 export function decline(number: number, titles: string[]): string {
@@ -339,7 +357,6 @@ export async function Server<T>(method: string, params: object = {}): Promise<T>
     }
 
     const authData = getParams().get('tgWebAppData');
-
     if (!authData) {
         console.log('No auth data');
     }
