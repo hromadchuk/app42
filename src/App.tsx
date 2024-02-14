@@ -138,7 +138,9 @@ const App = () => {
             window.addEventListener('message', ({ data }) => {
                 const { eventType, eventData } = JSON.parse(data);
 
-                console.log('event', eventType, '=>', eventData);
+                if (eventType !== 'viewport_changed') {
+                    console.log('event', eventType, '=>', eventData);
+                }
 
                 if (window.listenMAEvents[eventType]) {
                     window.listenMAEvents[eventType](eventData);
