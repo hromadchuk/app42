@@ -66,6 +66,7 @@
     "donate": "Поддержать проект",
     "telegram_channel": "Telegram канал с обновлениями",
     "auth_modal_title": "Авторизация",
+    "auth_modal_profile": "Профиль",
     "cards": {
       "account": "Аккаунт",
       "contacts": "Контакты",
