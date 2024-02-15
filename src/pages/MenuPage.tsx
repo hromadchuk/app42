@@ -88,8 +88,8 @@ const MenuPage = () => {
 
             if (!isOnboardingCompleted) {
                 setShowOnboarding(true);
-            } else {
-                if (!user && initData) {
+            } else if (initData) {
+                if (!user && initData?.status === 'ok') {
                     const storageSession = decodeString(await storage.get(Constants.SESSION_KEY), initData.storageHash);
                     console.log('storageSession', storageSession);
                     if (storageSession) {
@@ -103,7 +103,7 @@ const MenuPage = () => {
                 }
             }
         })();
-    }, []);
+    }, [initData]);
 
     useEffect(() => {
         (async () => {

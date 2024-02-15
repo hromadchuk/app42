@@ -2,6 +2,7 @@ import { createContext } from 'react';
 import { Api } from 'telegram';
 
 export interface IInitData {
+    status: 'ok' | 'error';
     topMethods: string[];
     storageHash: string;
 }
