@@ -86,11 +86,16 @@ const MenuPage = () => {
         (async () => {
             const isOnboardingCompleted = await checkIsOnboardingCompleted();
 
+            console.log('isOnboardingCompleted', isOnboardingCompleted);
+            console.log('user', user);
+            console.log('initData', initData);
+
             if (!isOnboardingCompleted) {
                 setShowOnboarding(true);
             } else {
                 if (!user && initData) {
                     const storageSession = decodeString(await storage.get(Constants.SESSION_KEY), initData.storageHash);
+                    console.log('storageSession', storageSession);
                     if (storageSession) {
                         setUser(await getCurrentUser());
                     }
