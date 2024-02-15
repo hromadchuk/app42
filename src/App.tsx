@@ -80,6 +80,10 @@ const App = () => {
                 }
             } catch (error) {
                 console.error(`Error init app: ${error}`);
+
+                serverData = {
+                    status: 'error'
+                };
             }
 
             // init app
