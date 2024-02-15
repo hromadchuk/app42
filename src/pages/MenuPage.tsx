@@ -86,10 +86,6 @@ const MenuPage = () => {
         (async () => {
             const isOnboardingCompleted = await checkIsOnboardingCompleted();
 
-            console.log('isOnboardingCompleted', isOnboardingCompleted);
-            console.log('user', user);
-            console.log('initData', initData);
-
             if (!isOnboardingCompleted) {
                 setShowOnboarding(true);
             } else {
@@ -108,6 +104,18 @@ const MenuPage = () => {
             }
         })();
     }, []);
+
+    useEffect(() => {
+        (async () => {
+            console.log('user', user);
+            console.log('initData', initData);
+
+            if (initData) {
+                const storageSession = decodeString(await storage.get(Constants.SESSION_KEY), initData.storageHash);
+                console.log('storageSession', storageSession);
+            }
+        })();
+    }, [user, initData]);
 
     const methods = getMethods();
 
