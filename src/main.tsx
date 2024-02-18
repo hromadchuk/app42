@@ -27,10 +27,14 @@ if (isDevUser) {
     };
 }
 
-const tgWebAppData = getParams().get('tgWebAppData');
-if (!tgWebAppData) {
-    location.href = 'https://t.me/kit42bot/kit42';
-} else {
-    updateThemeFromParams();
-    createRoot(document.getElementById('root') as HTMLElement).render(<App />);
-}
+// only for test!!!
+import Test from '../Test.tsx';
+createRoot(document.getElementById('root') as HTMLElement).render(<Test />);
+
+// const tgWebAppData = getParams().get('tgWebAppData');
+// if (tgWebAppData) {
+//     updateThemeFromParams();
+//     createRoot(document.getElementById('root') as HTMLElement).render(<App />);
+// } else {
+//     location.href = 'https://t.me/kit42app/kit42';
+// }
