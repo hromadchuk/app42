@@ -398,6 +398,23 @@ export async function getAvatar(owner: Api.User | Api.Channel | Api.Chat): Promi
     return await getImageStringFromBuffer(buffer, cacheKey);
 }
 
+export async function getAvatars(owners: (Api.User | Api.Channel | Api.Chat)[]) {
+    const result = new Map<number, string | null>();
+
+    const avatars = await Promise.all(
+        owners.map(async (owner) => ({
+            id: owner.id.valueOf(),
+            avatar: await getAvatar(owner)
+        }))
+    );
+
+    for (const { id, avatar } of avatars) {
+        result.set(id, avatar);
+    }
+
+    return result;
+}
+
 export async function getMediaPhoto(photo: Api.TypePhoto): Promise<string | null> {
     const cacheKey = `media-photo-${photo.id}`;
     const cache = await getCache(cacheKey);
