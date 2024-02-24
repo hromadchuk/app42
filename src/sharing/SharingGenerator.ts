@@ -1,12 +1,15 @@
 import { Api } from 'telegram';
 import { CallAPI, dataUrlToFile, getAvatar } from '../lib/helpers.ts';
 import { getHideUser } from '../lib/hide.ts';
+import { TOwnerType } from '../components/SelectOwner.tsx';
+
 // @ts-ignore
 import fontFamilyUrl from './fonts/SFProText-Regular.ttf';
 // @ts-ignore
 import fontFamilyBoldUrl from './fonts/SFProText-Bold.ttf';
 
 export class SharingGenerator {
+    static messageText = 'by @kit42_app';
     fontFamily = 'SF Pro Text';
     fontFamilyBold = 'SF Pro Text Bold';
     titleColor = '#007FFF';
@@ -14,21 +17,31 @@ export class SharingGenerator {
     blackColor = '#000000';
     whiteColor = '#FFFFFF';
 
-    static async sendMessage(base64: string, owner: Api.User | Api.Chat | Api.Channel) {
-        const file = dataUrlToFile(base64, 'image.png');
+    static async sendMessage(base64: string, owner: TOwnerType) {
+        const upload = await this.uploadFile(base64);
 
-        const upload = await window.TelegramClient.uploadFile({
-            file,
-            workers: 3
-        });
-
-        CallAPI(
+        return CallAPI(
             new Api.messages.SendMedia({
                 peer: owner.id,
                 media: new Api.InputMediaUploadedPhoto({
                     file: upload
                 }),
-                message: 'by @kit42_app'
+                message: this.messageText
+            })
+        );
+    }
+
+    static async sendStory(base64: string, owner: TOwnerType) {
+        const upload = await this.uploadFile(base64);
+
+        return CallAPI(
+            new Api.stories.SendStory({
+                peer: owner.id,
+                media: new Api.InputMediaUploadedPhoto({
+                    file: upload
+                }),
+                caption: this.messageText,
+                privacyRules: [new Api.InputPrivacyValueAllowAll()]
             })
         );
     }
@@ -45,6 +58,15 @@ export class SharingGenerator {
         const tasks = Array.from(uniqOwners.values()).map((owner) => getAvatar(owner));
 
         await Promise.all(tasks);
+    }
+
+    private static async uploadFile(base64: string) {
+        const file = dataUrlToFile(base64, 'image.png');
+
+        return await window.TelegramClient.uploadFile({
+            file,
+            workers: 3
+        });
     }
 
     async init() {

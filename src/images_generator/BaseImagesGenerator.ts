@@ -157,7 +157,39 @@ export class BaseImagesGenerator {
         });
     }
 
-    async drawAvatar(context: CanvasRenderingContext2D, avatar: string, size: number, left: number, top: number) {
+    async drawAvatar(
+        context: CanvasRenderingContext2D,
+        avatar: string | null,
+        size: number,
+        left: number,
+        top: number,
+        channelTitle?: string
+    ) {
+        let processedAvatar = avatar;
+        if (!processedAvatar) {
+            const processedAvatarSize = 280;
+            const canvas = document.createElement('canvas');
+            canvas.width = processedAvatarSize;
+            canvas.height = processedAvatarSize;
+            const ctx = canvas.getContext('2d');
+            if (!ctx || !channelTitle) {
+                console.error('Could not draw avatar');
+                return;
+            }
+
+            const rootStyle = getComputedStyle(document.documentElement);
+            const letter = channelTitle[0];
+            ctx.fillStyle = rootStyle.getPropertyValue('--mantine-color-grape-light').trim();
+            ctx.fillRect(0, 0, processedAvatarSize, processedAvatarSize);
+            ctx.font = `${processedAvatarSize / 2}px ${this.fontFamilyBold}`; // Можно настроить
+            ctx.fillStyle = rootStyle.getPropertyValue('--mantine-color-grape-light-color').trim(); // цвет буквы
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(letter, processedAvatarSize / 2, processedAvatarSize / 2);
+
+            processedAvatar = canvas.toDataURL();
+        }
+
         await new Promise((resolveAvatar) => {
             const avatarImage = new Image(size, size);
             avatarImage.onload = () => {
@@ -171,7 +203,7 @@ export class BaseImagesGenerator {
 
                 resolveAvatar(true);
             };
-            avatarImage.src = avatar;
+            avatarImage.src = processedAvatar as string;
         });
     }
 }

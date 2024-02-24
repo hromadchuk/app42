@@ -16,7 +16,7 @@ export enum EOwnerType {
     supergroup = 'supergroup'
 }
 
-type TOwnerType = Api.User | Api.Chat | Api.Channel;
+export type TOwnerType = Api.User | Api.Chat | Api.Channel;
 
 interface IOwnerRow {
     owner: TOwnerType;

@@ -21,6 +21,7 @@ import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import '@mantine/carousel/styles.css';
 import './App.css';
+import { ModalsProvider } from '@mantine/modals';
 
 declare global {
     interface Window {
@@ -234,13 +235,15 @@ function MiniAppLoader({ children }: PropsWithChildren) {
 const MiniAppWrapper = () => (
     <SDKProvider options={{ async: true }}>
         <MantineProvider forceColorScheme={useColorScheme()}>
-            <MiniAppLoader>
-                <MemoryRouter>
-                    <AppShell>
-                        <App />
-                    </AppShell>
-                </MemoryRouter>
-            </MiniAppLoader>
+            <ModalsProvider>
+                <MiniAppLoader>
+                    <MemoryRouter>
+                        <AppShell>
+                            <App />
+                        </AppShell>
+                    </MemoryRouter>
+                </MiniAppLoader>
+            </ModalsProvider>
         </MantineProvider>
     </SDKProvider>
 );

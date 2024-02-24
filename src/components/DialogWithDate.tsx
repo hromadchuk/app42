@@ -1,49 +1,62 @@
+import { useContext, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { getTextTime } from '../lib/helpers.ts';
+import { getAvatars, getStringsTimeArray, getTextTime } from '../lib/helpers.ts';
 import { OwnerRow } from './OwnerRow.tsx';
 import { Api } from 'telegram';
-import { useContext, useState } from 'react';
 import { MethodContext } from '../contexts/MethodContext.tsx';
-import { openModal, ShareModal, ShareType } from './Share.tsx';
+import { ShareButtons, ShareType } from './Share.tsx';
+import { IRegDateImagesOptions } from '../images_generator/RegDateImagesGenerator.ts';
 
-export const DialogWithDate = ({ dialogs }: { dialogs: Api.Channel[] | Api.Chat[] }) => {
+const DialogWithDate = ({ dialogs }: { dialogs: Api.Channel[] | Api.Chat[] }) => {
     const { mt } = useContext(MethodContext);
-    const [selectedOwner, setSelectedOwner] = useState<Api.User | Api.Chat | Api.Channel | null>(null);
+    const [avatars, setAvatars] = useState<Map<number, string | null>>(new Map());
 
-    return (
-        <>
-            {ShareModal({
-                owner: selectedOwner,
-                type: ShareType.REG_DATE,
-                data: []
-            })}
+    useEffect(() => {
+        const getDialogAvatars = async () => {
+            setAvatars(await getAvatars(dialogs));
+        };
+        getDialogAvatars();
+    }, [dialogs]);
 
-            {dialogs.map((dialog, key) => {
-                const createdDate = dayjs(dialog.date * 1000);
-                const diffInSeconds = dayjs().diff(createdDate, 'second');
-                let textTime = mt('today');
+    return dialogs.map((dialog, key) => {
+        const createdDate = dayjs(dialog.date * 1000);
+        const diffInSeconds = dayjs().diff(createdDate, 'second');
+        let textTime = mt('today');
 
-                if (diffInSeconds > 24 * 60 * 60) {
-                    textTime = getTextTime(diffInSeconds, true);
-                }
+        if (diffInSeconds > 24 * 60 * 60) {
+            textTime = getTextTime(diffInSeconds, true);
+        }
 
-                const createdText = mt('created').replace('{time}', textTime);
-                const createdDateText = createdDate.format('LL');
+        const channelCreatedTimeAgoText = getStringsTimeArray(diffInSeconds);
 
-                return (
-                    <OwnerRow
-                        key={key}
-                        owner={dialog}
-                        description={`${createdText} (${createdDateText})`}
-                        callback={() => {
-                            setSelectedOwner(dialog);
-                            openModal();
-                        }}
-                    />
-                );
-            })}
-        </>
-    );
+        const createdText = mt('created').replace('{time}', textTime);
+        const createdDateText = createdDate.format('LL');
+        const avatarUrl = avatars.get(dialog.id.valueOf()) || null;
+
+        return (
+            <div key={key}>
+                <OwnerRow owner={dialog} description={`${createdText} (${createdDateText})`} />
+                <ShareButtons
+                    owner={dialog}
+                    type={ShareType.REG_DATE}
+                    data={
+                        {
+                            storyImage: true,
+                            messageImage: true,
+                            data: {
+                                title: channelCreatedTimeAgoText[0],
+                                subTitle: channelCreatedTimeAgoText[1],
+                                description: mt('share_description'),
+                                bottomNameText: dialog.title,
+                                bottomDateText: mt('was_created_date').replace('{date}', createdDateText),
+                                avatar: avatarUrl
+                            }
+                        } as IRegDateImagesOptions
+                    }
+                />
+            </div>
+        );
+    });
 };
 
 export default DialogWithDate;

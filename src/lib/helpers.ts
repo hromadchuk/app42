@@ -311,6 +311,15 @@ export function classNames(...classes: (string | object)[]): string {
     return list.join(' ');
 }
 
+export function notifySuccess({ title, message }: { title?: string; message?: string } = {}) {
+    notifications.show({
+        color: 'green',
+        title,
+        message,
+        autoClose: true
+    });
+}
+
 export function notifyError({ title, message }: { title?: string; message?: string } = {}) {
     notifications.show({
         color: 'red',

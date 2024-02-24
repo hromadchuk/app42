@@ -7,7 +7,7 @@ export interface IRegDateImagesOptions extends IImagesGeneratorOptions {
         description: string;
         bottomNameText: string;
         bottomDateText: string;
-        avatar: string;
+        avatar: string | null;
     };
 }
 
@@ -48,7 +48,14 @@ export class RegDateImagesGenerator extends BaseImagesGenerator {
 
         this.storyContext.globalAlpha = 1;
 
-        await this.drawAvatar(this.storyContext, data.avatar, 70, this.storyCanvasCenter - 140, 420);
+        await this.drawAvatar(
+            this.storyContext,
+            data.avatar,
+            70,
+            this.storyCanvasCenter - 140,
+            420,
+            data.bottomNameText
+        );
 
         this.storyContext.drawImage(await this.getImage('./items/reg_date/story_confiti.png'), 126, 190);
         this.storyContext.drawImage(
@@ -84,7 +91,14 @@ export class RegDateImagesGenerator extends BaseImagesGenerator {
 
         this.messageContext.globalAlpha = 1;
 
-        await this.drawAvatar(this.messageContext, data.avatar, 70, this.messageCanvasCenter - 140, 214);
+        await this.drawAvatar(
+            this.messageContext,
+            data.avatar,
+            70,
+            this.messageCanvasCenter - 140,
+            214,
+            data.bottomNameText
+        );
 
         this.messageContext.drawImage(await this.getImage('./items/reg_date/message_confiti.png'), 150, 120);
         this.messageContext.drawImage(
