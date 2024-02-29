@@ -53,7 +53,7 @@ const DialogWithDate = ({ dialogs }: { dialogs: Api.Channel[] | Api.Chat[] }) =>
                                 title: channelCreatedTimeAgoText[0],
                                 subTitle: channelCreatedTimeAgoText.slice(1).join(' '),
                                 description: mt('share_description'),
-                                bottomNameText: dialog.title,
+                                bottomText: dialog.title,
                                 bottomDateText: mt('was_created_date').replace('{date}', createdDateText),
                                 avatar: avatarUrl
                             }}

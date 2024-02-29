@@ -1,10 +1,7 @@
 import { BaseImagesGenerator, IImagesGeneratorOptions, IImagesGeneratorResponse } from './BaseImagesGenerator.ts';
 
 export interface IRegDateImagesOptions extends IImagesGeneratorOptions {
-    title: string;
     subTitle?: string;
-    description: string;
-    bottomNameText: string;
     bottomDateText: string;
     avatar: string | null;
 }
@@ -25,7 +22,7 @@ export class RegDateImagesGenerator extends BaseImagesGenerator {
     }
 
     async drawStoryImage(data: IRegDateImagesOptions) {
-        const { title, subTitle, description, bottomNameText, bottomDateText } = data;
+        const { title, subTitle, description, bottomText, bottomDateText } = data;
 
         this.storyContext.font = `136px ${this.fontFamilyBold}`;
         this.storyContext.fillText(title, this.storyCanvasCenter, 940);
@@ -44,19 +41,12 @@ export class RegDateImagesGenerator extends BaseImagesGenerator {
 
         const bottomTextYPosition = 1390;
         this.storyContext.font = `28px ${this.fontFamilyBold}`;
-        this.storyContext.fillText(bottomNameText, this.storyCanvasCenter, bottomTextYPosition);
+        this.storyContext.fillText(bottomText, this.storyCanvasCenter, bottomTextYPosition);
         this.storyContext.fillText(bottomDateText, this.storyCanvasCenter, bottomTextYPosition + 40);
 
         this.storyContext.globalAlpha = 1;
 
-        await this.drawAvatar(
-            this.storyContext,
-            data.avatar,
-            70,
-            this.storyCanvasCenter - 140,
-            420,
-            data.bottomNameText
-        );
+        await this.drawAvatar(this.storyContext, data.avatar, 70, this.storyCanvasCenter - 140, 420, data.bottomText);
 
         this.storyContext.drawImage(await this.getImage('./items/reg_date/story_confiti.png'), 126, 190);
         this.storyContext.drawImage(
@@ -67,7 +57,7 @@ export class RegDateImagesGenerator extends BaseImagesGenerator {
     }
 
     async drawMessageImage(data: IRegDateImagesOptions) {
-        const { title, subTitle, description, bottomNameText, bottomDateText } = data;
+        const { title, subTitle, description, bottomText, bottomDateText } = data;
 
         this.messageContext.textAlign = 'center';
         this.messageContext.font = `136px ${this.fontFamilyBold}`;
@@ -88,7 +78,7 @@ export class RegDateImagesGenerator extends BaseImagesGenerator {
 
         this.messageContext.textAlign = 'right';
         this.messageContext.font = `20px ${this.fontFamilyBold}`;
-        this.messageContext.fillText(`${bottomNameText} ${bottomDateText}`, this.messageCanvas.width - 50, 960);
+        this.messageContext.fillText(`${bottomText} ${bottomDateText}`, this.messageCanvas.width - 50, 960);
 
         this.messageContext.globalAlpha = 1;
 
@@ -98,7 +88,7 @@ export class RegDateImagesGenerator extends BaseImagesGenerator {
             70,
             this.messageCanvasCenter - 140,
             214,
-            data.bottomNameText
+            data.bottomText
         );
 
         this.messageContext.drawImage(await this.getImage('./items/reg_date/message_confiti.png'), 150, 120);

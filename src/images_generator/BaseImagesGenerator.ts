@@ -2,6 +2,9 @@ import fontFamilyBoldUrl from './fonts/RobotoMonoBold.ttf';
 import fontFamilyRegularUrl from './fonts/RobotoMonoRegular.ttf';
 
 export interface IImagesGeneratorOptions {
+    title: string;
+    description: string;
+    bottomText: string;
     storyImage?: boolean;
     messageImage?: boolean;
 }
