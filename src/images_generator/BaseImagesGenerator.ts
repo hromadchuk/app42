@@ -1,12 +1,9 @@
-import { Api } from 'telegram';
-import { getAvatar } from '../lib/helpers.ts';
 import fontFamilyBoldUrl from './fonts/RobotoMonoBold.ttf';
 import fontFamilyRegularUrl from './fonts/RobotoMonoRegular.ttf';
 
 export interface IImagesGeneratorOptions {
-    storyImage: boolean;
-    messageImage: boolean;
-    data: unknown;
+    storyImage?: boolean;
+    messageImage?: boolean;
 }
 
 export interface IImagesGeneratorResponse {
@@ -28,33 +25,18 @@ export class BaseImagesGenerator {
     storyCanvasCenter = 0;
     messageCanvasCenter = 0;
 
-    static async prepareAvatars(owners: (Api.User | Api.Channel | Api.Chat)[]) {
-        const uniqOwners = new Map<number, Api.User | Api.Channel | Api.Chat>();
-
-        for (const owner of owners) {
-            if (!uniqOwners.has(owner.id.valueOf())) {
-                uniqOwners.set(owner.id.valueOf(), owner);
-            }
-        }
-
-        const tasks = Array.from(uniqOwners.values()).map((owner) => getAvatar(owner));
-
-        // TODO ger strings
-        await Promise.all(tasks);
-    }
-
     async prepareProcess(options: IImagesGeneratorOptions) {
         await this.initFonts();
 
         if (options.storyImage) {
             this.createStoryCanvas();
-            this.storyContext.drawImage(await this.getImage('./story_background.png'), 0, 0);
+            this.storyContext.drawImage(await this.getImage('./items/story_background.png'), 0, 0);
             await this.drawStoryAppFooter();
         }
 
         if (options.messageImage) {
             this.createMessageCanvas();
-            this.messageContext.drawImage(await this.getImage('./message_background.png'), 0, 0);
+            this.messageContext.drawImage(await this.getImage('./items/message_background.png'), 0, 0);
             await this.drawMessageAppFooter();
         }
     }
@@ -89,7 +71,7 @@ export class BaseImagesGenerator {
         const width = this.storyContext.measureText(this.kit42Text).width;
         const logoXPosition = textCenter - width / 2 - 80;
 
-        this.storyContext.drawImage(await this.getImage('./story_logo.png'), logoXPosition, 1752);
+        this.storyContext.drawImage(await this.getImage('./items/story_logo.png'), logoXPosition, 1752);
         this.storyContext.globalAlpha = 1.0;
     }
 
@@ -99,7 +81,7 @@ export class BaseImagesGenerator {
         this.messageContext.fillStyle = this.mainColor;
         this.messageContext.fillText(this.kit42Text, 140, 964);
 
-        this.messageContext.drawImage(await this.getImage('./message_logo.png'), 80, 930);
+        this.messageContext.drawImage(await this.getImage('./items/message_logo.png'), 80, 930);
         this.messageContext.globalAlpha = 1.0;
     }
 
@@ -178,11 +160,11 @@ export class BaseImagesGenerator {
             }
 
             const rootStyle = getComputedStyle(document.documentElement);
-            const letter = channelTitle[0];
+            const letter = channelTitle[0].toUpperCase();
             ctx.fillStyle = rootStyle.getPropertyValue('--mantine-color-grape-light').trim();
             ctx.fillRect(0, 0, processedAvatarSize, processedAvatarSize);
-            ctx.font = `${processedAvatarSize / 2}px ${this.fontFamilyBold}`; // Можно настроить
-            ctx.fillStyle = rootStyle.getPropertyValue('--mantine-color-grape-light-color').trim(); // цвет буквы
+            ctx.font = `${processedAvatarSize / 2}px ${this.fontFamilyBold}`;
+            ctx.fillStyle = rootStyle.getPropertyValue('--mantine-color-grape-light-color').trim();
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(letter, processedAvatarSize / 2, processedAvatarSize / 2);

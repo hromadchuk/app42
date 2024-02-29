@@ -1,29 +1,30 @@
 import { BaseImagesGenerator, IImagesGeneratorOptions, IImagesGeneratorResponse } from './BaseImagesGenerator.ts';
 
 export interface IRegDateImagesOptions extends IImagesGeneratorOptions {
-    data: {
-        title: string;
-        subTitle?: string;
-        description: string;
-        bottomNameText: string;
-        bottomDateText: string;
-        avatar: string | null;
-    };
+    title: string;
+    subTitle?: string;
+    description: string;
+    bottomNameText: string;
+    bottomDateText: string;
+    avatar: string | null;
 }
 
 export class RegDateImagesGenerator extends BaseImagesGenerator {
     async generate(options: IRegDateImagesOptions): Promise<IImagesGeneratorResponse> {
         await super.prepareProcess(options);
 
-        // await this.drawMockImage('reg_date');
+        if (options.storyImage) {
+            await this.drawStoryImage(options);
+        }
 
-        await this.drawStoryImage(options);
-        await this.drawMessageImage(options);
+        if (options.messageImage) {
+            await this.drawMessageImage(options);
+        }
 
         return this.getResult();
     }
 
-    async drawStoryImage({ data }: IRegDateImagesOptions) {
+    async drawStoryImage(data: IRegDateImagesOptions) {
         const { title, subTitle, description, bottomNameText, bottomDateText } = data;
 
         this.storyContext.font = `136px ${this.fontFamilyBold}`;
@@ -65,7 +66,7 @@ export class RegDateImagesGenerator extends BaseImagesGenerator {
         );
     }
 
-    async drawMessageImage({ data }: IRegDateImagesOptions) {
+    async drawMessageImage(data: IRegDateImagesOptions) {
         const { title, subTitle, description, bottomNameText, bottomDateText } = data;
 
         this.messageContext.textAlign = 'center';

@@ -89,6 +89,11 @@
       "publish_header": "This is the picture that will be published in your channel",
       "publish_button": "Publish the post"
     },
+    "messages": {
+      "button": "Share in message",
+      "publish_header": "This is the picture that will be published in group",
+      "publish_button": "Send message"
+    },
     "close_modal": "Close",
     "success": "You have successfully shared the information!",
     "error": "Something went wrong. Try again later"

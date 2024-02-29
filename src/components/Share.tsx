@@ -1,13 +1,11 @@
+import React, { useEffect, useState } from 'react';
 import { Button, Flex, Image, StyleProp, Text } from '@mantine/core';
 import { Api } from 'telegram';
 import { IRegDateImagesOptions, RegDateImagesGenerator } from '../images_generator/RegDateImagesGenerator.ts';
 import { modals } from '@mantine/modals';
 import { TOwnerType } from './SelectOwner.tsx';
-import React, { useState } from 'react';
-import { IImagesGeneratorOptions, IImagesGeneratorResponse } from '../images_generator/BaseImagesGenerator.ts';
+import { IImagesGeneratorResponse } from '../images_generator/BaseImagesGenerator.ts';
 import { t } from '../lib/lang.ts';
-import { CantGetDataError } from '../errors/Share/CantGetDataError.ts';
-import { CantGetImageError } from '../errors/Share/CantGetImageError.ts';
 import { SharingGenerator } from '../sharing/SharingGenerator.ts';
 import { notifySuccess } from '../lib/helpers.ts';
 
@@ -20,57 +18,114 @@ export enum ActionType {
     POST = 'post'
 }
 
-interface IShareOptions {
-    owner: TOwnerType | null;
+interface IShareButtonsOptions {
+    owner: TOwnerType;
     type: ShareType;
-    data: IImagesGeneratorOptions;
+    data: IRegDateImagesOptions;
 }
 
-interface IModalShareOptions extends IShareOptions {
+interface IModalShareOptions extends IShareButtonsOptions {
     action: ActionType;
-}
-
-interface IShareButtonOptions extends IModalShareOptions {
-    children: string;
+    image: string;
 }
 
 interface IActionData {
     text: string;
+    buttonText: string;
     publishButtonText: string;
-    callback: (image: string, owner: TOwnerType) => Promise<Api.AnyRequest['__response']>;
+    callback: (image: string) => Promise<Api.AnyRequest['__response']>;
     image: {
         height: StyleProp<React.CSSProperties['height']>;
         width: StyleProp<React.CSSProperties['width']>;
-        url: string;
     };
 }
 
-export async function openModal(options: IModalShareOptions) {
-    const owner = options.owner;
+function getPostAccess(owner: TOwnerType) {
+    const result = {
+        canMakeMessages: false,
+        canMakeStories: false
+    };
 
-    if (!checkIsShareAvailable(owner, options.action)) {
-        return;
+    if (!owner || owner instanceof Api.User) {
+        return result;
     }
 
-    let actionData = {} as IActionData;
-    let image = {} as IImagesGeneratorResponse;
-    try {
-        image = await getImage(options);
-        actionData = getActionData(image, options.action);
-    } catch (e) {
-        console.error(e);
-        return;
+    if (!(owner instanceof Api.Chat) && Number(owner.level) > 0 && owner.adminRights?.postStories === true) {
+        result.canMakeStories = true;
     }
+
+    if (owner.adminRights?.postMessages === true || owner.creator === true) {
+        result.canMakeMessages = true;
+    }
+
+    return result;
+}
+
+function getActionData(owner: TOwnerType, action: ActionType): IActionData {
+    if (action === ActionType.STORY) {
+        return {
+            text: t('share.stories.publish_header'),
+            image: {
+                height: 350,
+                width: '70%'
+            },
+            buttonText: t('share.stories.button'),
+            publishButtonText: t('share.stories.publish_button'),
+            callback: (base64: string) => {
+                return SharingGenerator.sendStory(base64, owner);
+            }
+        };
+    }
+
+    if (action === ActionType.POST && owner instanceof Api.Channel) {
+        return {
+            text: t('share.posts.publish_header'),
+            image: {
+                height: 'auto',
+                width: '100%'
+            },
+            buttonText: t('share.posts.button'),
+            publishButtonText: t('share.posts.publish_button'),
+            callback: (base64: string) => {
+                return SharingGenerator.sendMessage(base64, owner);
+            }
+        };
+    }
+
+    return {
+        text: t('share.messages.publish_header'),
+        image: {
+            height: 'auto',
+            width: '100%'
+        },
+        buttonText: t('share.messages.button'),
+        publishButtonText: t('share.messages.publish_button'),
+        callback: (base64: string) => {
+            return SharingGenerator.sendMessage(base64, owner);
+        }
+    };
+}
+
+function getTitle(owner: TOwnerType): string {
+    if (owner instanceof Api.User) {
+        return `${owner.firstName} ${owner.lastName}`;
+    }
+
+    return owner.title;
+}
+
+export function openModal(options: IModalShareOptions) {
+    const actionData = getActionData(options.owner, options.action);
 
     modals.openConfirmModal({
-        title: getTitle(owner as Api.Channel | Api.User),
+        title: getTitle(options.owner),
         centered: true,
         children: (
             <Flex direction="column" align="center" gap={5}>
                 <Text size="sm">{actionData.text}</Text>
                 <Image
                     radius="md"
-                    src={actionData.image.url}
+                    src={options.image}
                     h={actionData.image.height}
                     w={actionData.image.width}
                     fit="contain"
@@ -83,7 +138,7 @@ export async function openModal(options: IModalShareOptions) {
         },
         onConfirm: () => {
             actionData
-                .callback(actionData.image.url, owner as Api.Channel | Api.User)
+                .callback(options.image)
                 .then(() => {
                     notifySuccess({ message: t('share.success') });
                 })
@@ -95,130 +150,61 @@ export async function openModal(options: IModalShareOptions) {
     });
 }
 
-function getActionData(image: IImagesGeneratorResponse, action: ActionType): IActionData {
-    switch (action) {
-        case ActionType.STORY:
-            if (!image.storyImage) {
-                throw new CantGetImageError();
-            }
+function runGenerator(type: ShareType, data: IShareButtonsOptions['data']): Promise<IImagesGeneratorResponse> {
+    if (type === ShareType.REG_DATE) {
+        return new RegDateImagesGenerator().generate(data);
+    }
 
-            return {
-                text: t('share.stories.publish_header'),
-                image: {
-                    height: 350,
-                    width: '70%',
-                    url: image.storyImage
-                },
-                publishButtonText: t('share.stories.publish_button'),
-                callback: (base64: string, owner: TOwnerType) => {
-                    return SharingGenerator.sendStory(base64, owner);
+    return Promise.resolve({});
+}
+
+export function ShareButtons(options: IShareButtonsOptions) {
+    const [needHide, setHide] = useState(false);
+    const [isLoading, setLoading] = useState(true);
+    const [{ storyImage, messageImage }, setImages] = useState<IImagesGeneratorResponse>({});
+
+    const { canMakeMessages, canMakeStories } = getPostAccess(options.owner);
+
+    useEffect(() => {
+        if (!canMakeMessages && !canMakeStories) {
+            return;
+        }
+
+        runGenerator(options.type, { ...options.data, storyImage: canMakeStories, messageImage: canMakeMessages }).then(
+            (images) => {
+                if (!images.storyImage && !images.messageImage) {
+                    setHide(true);
+                } else {
+                    setImages(images);
+                    setLoading(false);
                 }
-            };
-        case ActionType.POST:
-            if (!image.messageImage) {
-                throw new CantGetImageError();
             }
-
-            return {
-                text: t('share.posts.publish_header'),
-                image: {
-                    height: 'auto',
-                    width: '100%',
-                    url: image.messageImage
-                },
-                publishButtonText: t('share.posts.publish_button'),
-                callback: (base64: string, owner: TOwnerType) => {
-                    return SharingGenerator.sendMessage(base64, owner);
-                }
-            };
-        default:
-            throw new CantGetDataError();
-    }
-}
-
-function getTitle(owner: Api.User | Api.Channel) {
-    if (owner instanceof Api.User) {
-        return `${owner.firstName} ${owner.lastName}`;
-    }
-
-    return owner.title;
-}
-
-async function getImage(options: IShareOptions): Promise<IImagesGeneratorResponse> {
-    switch (options.type) {
-        case ShareType.REG_DATE:
-            if (isRegDateOptions(options.data)) {
-                const imagesGenerator = new RegDateImagesGenerator();
-
-                return await imagesGenerator.generate(options.data);
-            }
-
-            throw new CantGetDataError('Invalid data for REG_DATE type');
-        default:
-            throw new CantGetDataError();
-    }
-}
-
-function isRegDateOptions(data: IImagesGeneratorOptions): data is IRegDateImagesOptions {
-    if (typeof data === 'object' && data !== null && typeof data.data === 'object' && data.data !== null) {
-        return (
-            'bottomDateText' in data.data &&
-            'title' in data.data &&
-            'subTitle' in data.data &&
-            'description' in data.data &&
-            'bottomDateText' in data.data &&
-            'avatar' in data.data
         );
-    }
-    return false;
-}
+    }, []);
 
-export function ShareButton(options: IShareButtonOptions) {
-    const [isLoading, setLoading] = useState(false);
-
-    if (!checkIsShareAvailable(options.owner, options.action)) {
-        return <></>;
+    if ((!canMakeMessages && !canMakeStories) || needHide) {
+        return null;
     }
 
-    return (
-        <>
+    function ShareButton(lang: string, action: ActionType, image: string) {
+        return (
             <Button
                 fullWidth
-                onClick={async () => {
-                    setLoading(true);
-                    await openModal(options);
-                    setLoading(false);
-                }}
+                onClick={() => openModal({ ...options, action, image })}
                 disabled={isLoading}
                 loading={isLoading}
             >
-                {options.children}
+                {lang}
             </Button>
-        </>
-    );
-}
+        );
+    }
 
-export function ShareButtons(options: IShareOptions) {
+    const actionData = getActionData(options.owner, ActionType.POST);
+
     return (
         <Flex gap={5}>
-            <ShareButton {...{ action: ActionType.STORY, ...options }}>{t('share.stories.button')}</ShareButton>
-
-            <ShareButton {...{ action: ActionType.POST, ...options }}>{t('share.posts.button')}</ShareButton>
+            {canMakeStories && storyImage && ShareButton(t('share.stories.button'), ActionType.STORY, storyImage)}
+            {canMakeMessages && messageImage && ShareButton(actionData.buttonText, ActionType.POST, messageImage)}
         </Flex>
     );
-}
-
-function checkIsShareAvailable(owner: TOwnerType | null, action: ActionType): boolean {
-    if (!owner || owner instanceof Api.User) {
-        return false;
-    }
-
-    switch (action) {
-        case ActionType.STORY:
-            return !(owner instanceof Api.Chat) && Number(owner.level) > 0 && owner.adminRights?.postStories === true;
-        case ActionType.POST:
-            return owner.adminRights?.postMessages === true || owner.creator === true;
-        default:
-            return false;
-    }
 }

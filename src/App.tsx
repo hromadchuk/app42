@@ -10,7 +10,7 @@ import { SDKProvider, useBackButton, useCloudStorage, useMiniApp, useSDKContext,
 import { AppNotifications } from './components/AppNotifications.tsx';
 import { Constants } from './constants.ts';
 import { clearOldCache } from './lib/cache.ts';
-import { CallAPI, decodeString, getParams, isDev, Server } from './lib/helpers.ts';
+import { decodeString, getParams, isDev, Server } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
 import { setColors } from './lib/theme.ts';
 import { IRouter, routes } from './routes.tsx';
@@ -115,10 +115,6 @@ const App = () => {
                 localStorage.setItem(versionKey, version);
             } else if (currentVersion !== version) {
                 const isOnboardingCompleted = await checkIsOnboardingCompleted();
-
-                if (storageSession) {
-                    await CallAPI(new Api.auth.LogOut());
-                }
 
                 localStorage.clear();
                 localStorage.setItem(versionKey, version);
