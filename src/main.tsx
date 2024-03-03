@@ -28,13 +28,13 @@ if (isDevUser) {
 }
 
 // only for test!!!
-// import Test from '../Test.tsx';
-// createRoot(document.getElementById('root') as HTMLElement).render(<Test />);
+import Test from '../Test.tsx';
+createRoot(document.getElementById('root') as HTMLElement).render(<Test />);
 
-const tgWebAppData = getParams().get('tgWebAppData');
-if (tgWebAppData) {
-    updateThemeFromParams();
-    createRoot(document.getElementById('root') as HTMLElement).render(<App />);
-} else {
-    location.href = 'https://t.me/kit42app/kit42';
-}
+// const tgWebAppData = getParams().get('tgWebAppData');
+// if (tgWebAppData) {
+//     updateThemeFromParams();
+//     createRoot(document.getElementById('root') as HTMLElement).render(<App />);
+// } else {
+//     location.href = 'https://t.me/kit42app/kit42';
+// }

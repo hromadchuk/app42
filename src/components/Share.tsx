@@ -6,8 +6,9 @@ import { modals } from '@mantine/modals';
 import { TOwnerType } from './SelectOwner.tsx';
 import { IImagesGeneratorResponse } from '../images_generator/BaseImagesGenerator.ts';
 import { t } from '../lib/lang.ts';
-import { SharingGenerator } from '../sharing/SharingGenerator.ts';
-import { notifySuccess } from '../lib/helpers.ts';
+import { CallAPI, dataUrlToFile, notifySuccess } from '../lib/helpers.ts';
+
+const MESSAGE_TEXT = 'by @kit42_app';
 
 export enum ShareType {
     REG_DATE = 'reg_date'
@@ -72,7 +73,7 @@ function getActionData(owner: TOwnerType, action: ActionType): IActionData {
             buttonText: t('share.stories.button'),
             publishButtonText: t('share.stories.publish_button'),
             callback: (base64: string) => {
-                return SharingGenerator.sendStory(base64, owner);
+                return sendStory(base64, owner);
             }
         };
     }
@@ -87,7 +88,7 @@ function getActionData(owner: TOwnerType, action: ActionType): IActionData {
             buttonText: t('share.posts.button'),
             publishButtonText: t('share.posts.publish_button'),
             callback: (base64: string) => {
-                return SharingGenerator.sendMessage(base64, owner);
+                return sendMessage(base64, owner);
             }
         };
     }
@@ -101,7 +102,7 @@ function getActionData(owner: TOwnerType, action: ActionType): IActionData {
         buttonText: t('share.messages.button'),
         publishButtonText: t('share.messages.publish_button'),
         callback: (base64: string) => {
-            return SharingGenerator.sendMessage(base64, owner);
+            return sendMessage(base64, owner);
         }
     };
 }
@@ -156,6 +157,44 @@ function runGenerator(type: ShareType, data: IShareButtonsOptions['data']): Prom
     }
 
     return Promise.resolve({});
+}
+
+async function uploadFile(base64: string) {
+    const file = dataUrlToFile(base64, 'image.png');
+
+    return await window.TelegramClient.uploadFile({
+        file,
+        workers: 3
+    });
+}
+
+async function sendMessage(base64: string, owner: TOwnerType) {
+    const upload = await uploadFile(base64);
+
+    return CallAPI(
+        new Api.messages.SendMedia({
+            peer: owner.id,
+            media: new Api.InputMediaUploadedPhoto({
+                file: upload
+            }),
+            message: MESSAGE_TEXT
+        })
+    );
+}
+
+async function sendStory(base64: string, owner: TOwnerType) {
+    const upload = await uploadFile(base64);
+
+    return CallAPI(
+        new Api.stories.SendStory({
+            peer: owner.id,
+            media: new Api.InputMediaUploadedPhoto({
+                file: upload
+            }),
+            caption: MESSAGE_TEXT,
+            privacyRules: [new Api.InputPrivacyValueAllowAll()]
+        })
+    );
 }
 
 export function ShareButtons(options: IShareButtonsOptions) {
