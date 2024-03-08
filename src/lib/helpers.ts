@@ -522,3 +522,5 @@ export function encodeString(string: string, key: string) {
 export function decodeString(encodedString: string, key: string) {
     return AES.decrypt(encodedString, key).toString(enc.Utf8);
 }
+
+export type TOwnerType = Api.User | Api.Chat | Api.Channel;

@@ -94,7 +94,6 @@
       "publish_header": "This is the picture that will be published in group",
       "publish_button": "Send message"
     },
-    "close_modal": "Close",
     "success": "You have successfully shared the information!",
     "error": "Something went wrong. Try again later"
   },
@@ -191,6 +190,8 @@
       "kick_question": "Do you want to remove {name} from the conversation?",
       "kick_button_yes": "Yes",
       "all_messages_button": "All messages",
+      "share_title": "Chat activity",
+      "share_description": "for {name}",
       "headers": {
         "period": "Select the period for stats",
         "counts": "Counts",

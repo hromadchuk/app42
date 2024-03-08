@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Flex, Image, StyleProp, Text } from '@mantine/core';
 import { Api } from 'telegram';
+import {
+    IMessagesStatImagesOptions,
+    MessageStatImagesGenerator
+} from '../images_generator/MessageStatImagesGenerator.ts';
 import { IRegDateImagesOptions, RegDateImagesGenerator } from '../images_generator/RegDateImagesGenerator.ts';
 import { modals } from '@mantine/modals';
-import { TOwnerType } from './SelectOwner.tsx';
 import { IImagesGeneratorResponse } from '../images_generator/BaseImagesGenerator.ts';
 import { t } from '../lib/lang.ts';
-import { CallAPI, dataUrlToFile, notifySuccess } from '../lib/helpers.ts';
+import { CallAPI, dataUrlToFile, notifySuccess, TOwnerType } from '../lib/helpers.ts';
 
 const MESSAGE_TEXT = 'by @kit42_app';
 
 export enum ShareType {
-    REG_DATE = 'reg_date'
+    REG_DATE = 'reg_date',
+    MESSAGE_STAT = 'message_stat'
 }
 
 export enum ActionType {
@@ -22,7 +26,7 @@ export enum ActionType {
 interface IShareButtonsOptions {
     owner: TOwnerType;
     type: ShareType;
-    data: IRegDateImagesOptions;
+    data: IRegDateImagesOptions | IMessagesStatImagesOptions;
 }
 
 interface IModalShareOptions extends IShareButtonsOptions {
@@ -55,7 +59,7 @@ function getPostAccess(owner: TOwnerType) {
         result.canMakeStories = true;
     }
 
-    if (owner.adminRights?.postMessages === true || owner.creator === true) {
+    if (owner.adminRights?.postMessages === true || owner.creator === true || !owner.defaultBannedRights?.sendPhotos) {
         result.canMakeMessages = true;
     }
 
@@ -118,9 +122,8 @@ function getTitle(owner: TOwnerType): string {
 export function openModal(options: IModalShareOptions) {
     const actionData = getActionData(options.owner, options.action);
 
-    modals.openConfirmModal({
+    modals.open({
         title: getTitle(options.owner),
-        centered: true,
         children: (
             <Flex direction="column" align="center" gap={5}>
                 <Text size="sm">{actionData.text}</Text>
@@ -131,29 +134,36 @@ export function openModal(options: IModalShareOptions) {
                     w={actionData.image.width}
                     fit="contain"
                 />
+
+                <Button
+                    mt="xs"
+                    fullWidth
+                    onClick={() => {
+                        actionData
+                            .callback(options.image)
+                            .then(() => {
+                                notifySuccess({ message: t('share.success') });
+                            })
+                            .catch((error) => {
+                                console.error(error);
+                            });
+                        modals.closeAll();
+                    }}
+                >
+                    {actionData.publishButtonText}
+                </Button>
             </Flex>
-        ),
-        labels: {
-            confirm: actionData.publishButtonText,
-            cancel: t('share.close_modal')
-        },
-        onConfirm: () => {
-            actionData
-                .callback(options.image)
-                .then(() => {
-                    notifySuccess({ message: t('share.success') });
-                })
-                .catch((error) => {
-                    console.error(error);
-                });
-            modals.closeAll();
-        }
+        )
     });
 }
 
 function runGenerator(type: ShareType, data: IShareButtonsOptions['data']): Promise<IImagesGeneratorResponse> {
     if (type === ShareType.REG_DATE) {
-        return new RegDateImagesGenerator().generate(data);
+        return new RegDateImagesGenerator().generate(data as IRegDateImagesOptions);
+    }
+
+    if (type === ShareType.MESSAGE_STAT) {
+        return new MessageStatImagesGenerator().generate(data as IMessagesStatImagesOptions);
     }
 
     return Promise.resolve({});
@@ -241,7 +251,7 @@ export function ShareButtons(options: IShareButtonsOptions) {
     const actionData = getActionData(options.owner, ActionType.POST);
 
     return (
-        <Flex gap={5}>
+        <Flex gap={5} mt="xs" mb="xs">
             {canMakeStories && storyImage && ShareButton(t('share.stories.button'), ActionType.STORY, storyImage)}
             {canMakeMessages && messageImage && ShareButton(actionData.buttonText, ActionType.POST, messageImage)}
         </Flex>

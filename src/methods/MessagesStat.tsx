@@ -1,5 +1,5 @@
 import { JSX, useContext, useState } from 'react';
-import { Button, Center, Container, Divider, Flex, Group, Modal, Notification, Text, Textarea } from '@mantine/core';
+import { Button, Center, Container, Divider, Flex, Group, Modal, Notification, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
     IconHeart,
@@ -16,12 +16,14 @@ import {
 import dayjs from 'dayjs';
 import { Api } from 'telegram';
 import { usePopup } from '@tma.js/sdk-react';
+import { ShareButtons, ShareType } from '../components/Share.tsx';
 
-import { MethodContext, TDialogType, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
+import { MethodContext, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { ActivityChart } from '../components/charts/Activity.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
+import { IMessagesStatImagesOptions } from '../images_generator/MessageStatImagesGenerator.ts';
 import {
     calculatePeriodsMessagesCount,
     filterMessages,
@@ -37,10 +39,12 @@ import {
     CallAPI,
     declineAndFormat,
     formatNumber,
+    getAvatars,
     getPeerId,
     getStringsTimeArray,
     getTextTime,
-    notifyError
+    notifyError,
+    TOwnerType
 } from '../lib/helpers.ts';
 import { StatsPeriodPicker } from '../components/StatsPeriodPicker.tsx';
 import { CalculateActivityTime } from '../components/charts/chart_helpers.ts';
@@ -80,7 +84,7 @@ interface IScanDataCalculation {
 
 interface ITopItem {
     count: number;
-    owner: TDialogType;
+    owner: TOwnerType;
     activity?: number[][];
 }
 
@@ -117,16 +121,6 @@ enum ETabId {
     roundDuration = 'roundDuration'
 }
 
-// enum ENameImageType {
-//     firstName = 'firstName',
-//     username = 'username'
-// }
-
-enum EModalType {
-    text = 'text',
-    image = 'image'
-}
-
 interface ITabTops {
     id: ETabId;
     lang: string;
@@ -139,12 +133,10 @@ interface ITopic {
     name: string;
 }
 
-const ownersInfo = new Map<number, TDialogType>();
-// const sharingImages = new Map<string, string>();
+const ownersInfo = new Map<number, TOwnerType>();
 
 export const MessagesStat = () => {
     const { mt, md, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
-    const [isModalOpened, { open, close }] = useDisclosure(false);
     const popup = usePopup();
 
     const [userActivityModalData, setUserActivityModalData] = useState<ITopItem | null>(null);
@@ -156,20 +148,12 @@ export const MessagesStat = () => {
     const [chatInactiveMembers, setChatInactiveMembers] = useState<Api.User[]>([]);
     const [chatInactiveMembersShowCount, setChatInactiveMembersShowCount] = useState<number>(3);
     const [recordsPeriod, setRecordsPeriod] = useState<TPeriodType>([null, null]);
-    const [selectedOwner, setSelectedOwner] = useState<TDialogType | null>(null);
+    const [selectedOwner, setSelectedOwner] = useState<TOwnerType | null>(null);
     const [statResult, setStatResult] = useState<IScanDataResult | null>(null);
     const [selectedTab, setSelectedTab] = useState<ETabId>(ETabId.messages);
     const [chatTopics, setChatTopics] = useState<ITopic[]>([]);
     const [selectedChatTopic, setSelectedChatTopic] = useState<number>(0);
-
-    // sharing vars
-    // const [sharingNameType, setSharingNameType] = useState<ENameImageType>(ENameImageType.firstName);
-    // const [sharingTopType, setSharingTopType] = useState<ETabId>(ETabId.messages);
-    // const [isSharingImagesLoading, setSharingImagesLoading] = useState<boolean>(true);
-    // const [isSharingButtonVisible, setSharingButtonVisible] = useState<boolean>(true);
-    const [messageText, setMessageText] = useState<string>('');
-    const [isSentToChat, setSentToChat] = useState<boolean>(false);
-    const [modalType, setModalType] = useState<EModalType>(EModalType.text);
+    const [shareData, setShareData] = useState<IMessagesStatImagesOptions | null>(null);
 
     function checkIsMessagesCountLessThanMinimal(messagesCount: number): boolean {
         if (messagesCount < 10) {
@@ -180,7 +164,7 @@ export const MessagesStat = () => {
         return false;
     }
 
-    async function getOptions(owner: TDialogType) {
+    async function getOptions(owner: TOwnerType) {
         setProgress({ text: mt('loading_messages') });
         setSelectedOwner(owner);
 
@@ -276,6 +260,12 @@ export const MessagesStat = () => {
         }
 
         return `${firstMessageDate} - ${lastMessageDate}`;
+    }
+
+    function getOwnerName(owner: TOwnerType): string {
+        const name = owner instanceof Api.User ? owner.firstName : owner.title;
+
+        return name || 'No name';
     }
 
     async function calcStatistic() {
@@ -596,98 +586,31 @@ export const MessagesStat = () => {
 
         setStatResult(stat);
         setProgress(null);
-        // prepareImages(stat);
-    }
 
-    // function getImageName(type: ENameImageType, owner: TDialogType): string {
-    //     if (type === ENameImageType.username) {
-    //         let username = '';
-    //
-    //         if ((owner instanceof Api.User || owner instanceof Api.Channel) && owner.username) {
-    //             username = owner.username;
-    //         }
-    //
-    //         if ((owner instanceof Api.User || owner instanceof Api.Channel) && owner.usernames?.length) {
-    //             username = owner.usernames[0].username;
-    //         }
-    //
-    //         if (username) {
-    //             return `@${username.toLowerCase()}`;
-    //         }
-    //     }
-    //
-    //     if (owner instanceof Api.User && owner.firstName) {
-    //         return owner.firstName;
-    //     }
-    //
-    //     if (owner instanceof Api.Chat || owner instanceof Api.Channel) {
-    //         return owner.title;
-    //     }
-    //
-    //     return 'unknown name';
-    // }
+        if (stat.tops.messages.length >= 3) {
+            const owners = stat.tops.messages.map((item) => item.owner);
+            const avatars = await getAvatars(owners);
+
+            const users = stat.tops.messages.slice(0, 8).map((item) => ({
+                name: getOwnerName(item.owner),
+                description: declineAndFormat(item.count, md('decline.messages')),
+                avatar: avatars.get(item.owner.id.valueOf()) || undefined
+            }));
+
+            setShareData({
+                title: mt('share_title'),
+                description: mt('share_description').replace('{name}', getOwnerName(selectedOwner as TOwnerType)),
+                bottomText: mt('stat_date').replace('{date}', stat.period),
+                users
+            });
+        }
+    }
 
     function kickMember(userId: number) {
         kickMemberFromDialog(userId, selectedOwner as TDialogWithoutUser);
 
         setChatInactiveMembers(chatInactiveMembers.filter((member) => member.id.valueOf() !== userId));
     }
-
-    // async function prepareImages(stat: IScanDataResult) {
-    //     const tabs = getImageTabs(stat);
-    //
-    //     if (tabs.length === 0) {
-    //         setSharingButtonVisible(false);
-    //         setSharingImagesLoading(false);
-    //         return;
-    //     }
-    //
-    //     const tabsOwners = [];
-    //
-    //     for (const tab of tabs) {
-    //         for (const item of tab.owners) {
-    //             tabsOwners.push(item.owner);
-    //         }
-    //     }
-    //
-    //     await MessagesStatSharingGenerator.prepareImages(tabsOwners);
-    //
-    //     const imagesTasks = [];
-    //     for (const imaneNameType of Object.values(ENameImageType)) {
-    //         for (const tab of tabs) {
-    //             imagesTasks.push(
-    //                 (async () => {
-    //                     const data = await new MessagesStatSharingGenerator().getMessageImage({
-    //                         title: mt('sharing.image_title'),
-    //                         users: tab.owners.map((item) => ({
-    //                             info: item.owner as Api.User,
-    //                             name: getImageName(imaneNameType, item.owner),
-    //                             description: getDescription(tab.id, item.count, true)
-    //                         })),
-    //                         description: mt('sharing.image_period').replace('{period}', stat.period),
-    //                         subDescription: getImageSubDescription(tab.id)
-    //                     });
-    //
-    //                     sharingImages.set(`${imaneNameType}_${tab.id}`, data);
-    //                 })()
-    //             );
-    //         }
-    //     }
-    //
-    //     await Promise.all(imagesTasks);
-    //
-    //     setSharingImagesLoading(false);
-    // }
-
-    // function getImageTabs(stat: IScanDataResult) {
-    //     return getTabs(stat).filter((tab) => {
-    //         if (tab.id === ETabId.uniqMessages) {
-    //             return false;
-    //         }
-    //
-    //         return tab.owners.length >= 3;
-    //     });
-    // }
 
     function getTabs(stat: IScanDataResult) {
         const tabs: ITabTops[] = [
@@ -781,120 +704,6 @@ export const MessagesStat = () => {
         return '';
     }
 
-    // function getImageSubDescription(tabId: ETabId): string {
-    //     if (tabId === ETabId.messages) {
-    //         return mt('sharing.by.messages');
-    //     }
-    //
-    //     if (tabId === ETabId.uniqMessages) {
-    //         return mt('sharing.by.uniq_messages');
-    //     }
-    //
-    //     if (tabId === ETabId.reactions) {
-    //         return mt('sharing.by.reactions');
-    //     }
-    //
-    //     if (tabId === ETabId.attachments) {
-    //         return mt('sharing.by.attachments');
-    //     }
-    //
-    //     if (tabId === ETabId.stickers) {
-    //         return mt('sharing.by.stickers');
-    //     }
-    //
-    //     if (tabId === ETabId.voiceDuration) {
-    //         return mt('sharing.by.voice_duration');
-    //     }
-    //
-    //     if (tabId === ETabId.roundDuration) {
-    //         return mt('sharing.by.round_duration');
-    //     }
-    //
-    //     return '';
-    // }
-
-    function ModalContent() {
-        if (modalType === EModalType.text) {
-            return (
-                <>
-                    {mt('sharing.text_description')}
-
-                    <Textarea autosize value={messageText} readOnly />
-
-                    <Button
-                        fullWidth
-                        size="xs"
-                        mt="xs"
-                        onClick={() => {
-                            CallAPI(
-                                new Api.messages.SendMessage({
-                                    peer: selectedOwner?.id,
-                                    message: messageText
-                                })
-                            );
-
-                            setSentToChat(true);
-                            close();
-                        }}
-                    >
-                        {mt('button_send')}
-                    </Button>
-                </>
-            );
-        }
-
-        // const imageKey = `${sharingNameType}_${sharingTopType}`;
-        // const image = sharingImages.get(imageKey) as string;
-        // const tabs = getImageTabs(statResult as IScanDataResult);
-        //
-        // return (
-        //     <>
-        //         <Image key={imageKey} radius="md" src={image} />
-        //
-        //         <Title mt="xs" order={6}>
-        //             {mt('sharing.image_name_type')}
-        //         </Title>
-        //
-        //         <SegmentedControl
-        //             fullWidth
-        //             size="xs"
-        //             value={sharingNameType}
-        //             onChange={(type) => setSharingNameType(type as ENameImageType)}
-        //             data={[
-        //                 { label: mt('sharing.names_type.name'), value: ENameImageType.firstName },
-        //                 { label: mt('sharing.names_type.username'), value: ENameImageType.username }
-        //             ]}
-        //         />
-        //
-        //         <Title mt="xs" order={6}>
-        //             {mt('sharing.image_type')}
-        //         </Title>
-        //         <Radio.Group value={sharingTopType} onChange={(type) => setSharingTopType(type as ETabId)}>
-        //             {tabs.map((tab, key) => (
-        //                 <Radio key={key} value={tab.id} label={mt(`headers.${tab.lang}`)} mt={5} />
-        //             ))}
-        //         </Radio.Group>
-        //
-        //         <Button
-        //             fullWidth
-        //             size="xs"
-        //             mt="xs"
-        //             loading={isSharingImagesLoading}
-        //             onClick={async () => {
-        //                 setSharingImagesLoading(true);
-        //
-        //                 await MessagesStatSharingGenerator.sendMessage(image, selectedOwner as TDialogType);
-        //
-        //                 setSharingImagesLoading(false);
-        //                 close();
-        //             }}
-        //         >
-        //             {mt('button_send_image')}
-        //         </Button>
-        //     </>
-        // );
-    }
-
     if (needHideContent()) return null;
 
     if (statResult) {
@@ -949,28 +758,10 @@ export const MessagesStat = () => {
             return null;
         };
 
-        const sendToChat = () => {
-            const lines = [mt('stat_date').replace('{date}', statResult.period), ''];
-
-            counts.forEach(({ label, value }) => {
-                lines.push(`* ${label} — ${value}`);
-            });
-
-            setMessageText(lines.join('\n'));
-            setModalType(EModalType.text);
-
-            open();
-        };
-
         const onTopOwnerClick = (top: ITopItem) => {
             setUserActivityModalData(top);
             openUserActivityModal();
         };
-
-        // const sendToChatImage = () => {
-        //     setModalType(EModalType.image);
-        //     open();
-        // };
 
         const onKickUserClick = (owner: Api.User) => {
             window.listenMAEvents.popup_closed = (data) => {
@@ -1001,10 +792,6 @@ export const MessagesStat = () => {
 
         return (
             <>
-                <Modal opened={isModalOpened} onClose={close} title={mt('sharing.modal_title')}>
-                    {ModalContent()}
-                </Modal>
-
                 <Modal
                     opened={isUserActivityModalOpened}
                     onClose={closeUserActivityModal}
@@ -1025,22 +812,9 @@ export const MessagesStat = () => {
                     description={mt('stat_date').replace('{date}', statResult.period)}
                 />
 
-                <Button fullWidth size="xs" mt="xs" onClick={sendToChat} disabled={isSentToChat}>
-                    {isSentToChat ? mt('button_send_done') : mt('button_send')}
-                </Button>
-
-                {/* {isSharingButtonVisible && ( */}
-                {/*     <Button */}
-                {/*         fullWidth */}
-                {/*         size="xs" */}
-                {/*         mt="xs" */}
-                {/*         onClick={sendToChatImage} */}
-                {/*         loading={isSharingImagesLoading} */}
-                {/*         disabled={isSharingImagesLoading} */}
-                {/*     > */}
-                {/*         {mt('button_send_image')} */}
-                {/*     </Button> */}
-                {/* )} */}
+                {shareData && selectedOwner && (
+                    <ShareButtons owner={selectedOwner} type={ShareType.MESSAGE_STAT} data={shareData} />
+                )}
 
                 <Divider my="xs" label={mt('headers.counts')} labelPosition="center" mb={0} />
                 {counts.map((item, key) => (
@@ -1172,6 +946,7 @@ export const MessagesStat = () => {
         <SelectDialog
             allowTypes={[EOwnerType.user, EOwnerType.chat, EOwnerType.supergroup]}
             onOwnerSelect={(owner) => {
+                console.log('owner', owner);
                 setSelectedOwner(owner);
                 getOptions(owner);
             }}

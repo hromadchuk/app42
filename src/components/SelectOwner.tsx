@@ -3,7 +3,7 @@ import { Box, Center, CloseButton, Input, Loader } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import { IconSearch, IconUsersGroup } from '@tabler/icons-react';
 import { Api } from 'telegram';
-import { CallAPI, getPeerId } from '../lib/helpers.ts';
+import { CallAPI, getPeerId, TOwnerType } from '../lib/helpers.ts';
 import { t } from '../lib/lang.ts';
 import { AppContext } from '../contexts/AppContext.tsx';
 import { OwnerRow } from './OwnerRow.tsx';
@@ -15,8 +15,6 @@ export enum EOwnerType {
     channel = 'channel',
     supergroup = 'supergroup'
 }
-
-export type TOwnerType = Api.User | Api.Chat | Api.Channel;
 
 interface IOwnerRow {
     owner: TOwnerType;
