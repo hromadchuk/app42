@@ -311,6 +311,15 @@ export function classNames(...classes: (string | object)[]): string {
     return list.join(' ');
 }
 
+export function notifySuccess({ title, message }: { title?: string; message?: string } = {}) {
+    notifications.show({
+        color: 'green',
+        title,
+        message,
+        autoClose: true
+    });
+}
+
 export function notifyError({ title, message }: { title?: string; message?: string } = {}) {
     notifications.show({
         color: 'red',
@@ -396,6 +405,23 @@ export async function getAvatar(owner: Api.User | Api.Channel | Api.Chat): Promi
     const buffer = await window.TelegramClient.downloadProfilePhoto(owner.id);
 
     return await getImageStringFromBuffer(buffer, cacheKey);
+}
+
+export async function getAvatars(owners: (Api.User | Api.Channel | Api.Chat)[]) {
+    const result = new Map<number, string | null>();
+
+    const avatars = await Promise.all(
+        owners.map(async (owner) => ({
+            id: owner.id.valueOf(),
+            avatar: await getAvatar(owner)
+        }))
+    );
+
+    for (const { id, avatar } of avatars) {
+        result.set(id, avatar);
+    }
+
+    return result;
 }
 
 export async function getMediaPhoto(photo: Api.TypePhoto): Promise<string | null> {
@@ -496,3 +522,5 @@ export function encodeString(string: string, key: string) {
 export function decodeString(encodedString: string, key: string) {
     return AES.decrypt(encodedString, key).toString(enc.Utf8);
 }
+
+export type TOwnerType = Api.User | Api.Chat | Api.Channel;

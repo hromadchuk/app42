@@ -17,6 +17,7 @@
     "@mantine/core": "^7.4.1",
     "@mantine/dates": "^7.4.1",
     "@mantine/hooks": "^7.4.1",
+    "@mantine/modals": "7.4.1",
     "@mantine/notifications": "^7.4.1",
     "@tabler/icons-react": "^2.38.0",
     "@tma.js/sdk-react": "^1.1.1",
@@ -30,7 +31,7 @@
     "react-ga4": "^2.1.0",
     "react-imask": "^7.1.3",
     "react-router-dom": "^6.16.0",
-    "telegram": "^2.19.9"
+    "telegram": "^2.19.19"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",

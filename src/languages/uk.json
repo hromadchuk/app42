@@ -78,6 +78,25 @@
   "profile": {
     "button_logout": "Вийти"
   },
+  "share": {
+    "stories": {
+      "button": "Поділитися в історії",
+      "publish_header": "Це картинка, яка буде опублікована в історіях вашого каналу",
+      "publish_button": "Опублікувати історію"
+    },
+    "posts": {
+      "button": "Пділитися публікацією",
+      "publish_header": "Це картинка, що буде опублікована у вашому каналі",
+      "publish_button": "Опублікувати запис"
+    },
+    "messages": {
+      "button": "Поділитись повідомленням",
+      "publish_header": "Це картинка, яка буде опублікована в чаті",
+      "publish_button": "Надіслати повідомлення"
+    },
+    "success": "Ви успішно поділилися інформацією!",
+    "error": "Щось пішло не так. Спробуйте пізніше."
+  },
   "routes": {
     "get_id": "Отримати ID акаунту/каналу",
     "contacts_analysis": "Аналіз контактів",
@@ -171,6 +190,8 @@
       "kick_question": "Ви хочете видалити {name} з чату?",
       "kick_button_yes": "Так",
       "all_messages_button": "Усі повідомлення",
+      "share_title": "Активність чату",
+      "share_description": "для {name}",
       "headers": {
         "period": "Період статистики",
         "counts": "Сумарні показники",
@@ -378,6 +399,8 @@
     "channels_registration": {
       "no_created": "У вас немає створених каналів",
       "created": "{time} тому",
+      "share_description": "канал було створено",
+      "was_created_date": "було створенно {date}",
       "today": "Менше ніж 24 години"
     },
     "records_stat": {

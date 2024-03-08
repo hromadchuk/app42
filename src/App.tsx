@@ -10,7 +10,7 @@ import { SDKProvider, useBackButton, useCloudStorage, useMiniApp, useSDKContext,
 import { AppNotifications } from './components/AppNotifications.tsx';
 import { Constants } from './constants.ts';
 import { clearOldCache } from './lib/cache.ts';
-import { CallAPI, decodeString, getParams, isDev, Server } from './lib/helpers.ts';
+import { decodeString, getParams, isDev, Server } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
 import { setColors } from './lib/theme.ts';
 import { IRouter, routes } from './routes.tsx';
@@ -21,6 +21,7 @@ import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import '@mantine/carousel/styles.css';
 import './App.css';
+import { ModalsProvider } from '@mantine/modals';
 
 declare global {
     interface Window {
@@ -114,10 +115,6 @@ const App = () => {
                 localStorage.setItem(versionKey, version);
             } else if (currentVersion !== version) {
                 const isOnboardingCompleted = await checkIsOnboardingCompleted();
-
-                if (storageSession) {
-                    await CallAPI(new Api.auth.LogOut());
-                }
 
                 localStorage.clear();
                 localStorage.setItem(versionKey, version);
@@ -234,13 +231,15 @@ function MiniAppLoader({ children }: PropsWithChildren) {
 const MiniAppWrapper = () => (
     <SDKProvider options={{ async: true }}>
         <MantineProvider forceColorScheme={useColorScheme()}>
-            <MiniAppLoader>
-                <MemoryRouter>
-                    <AppShell>
-                        <App />
-                    </AppShell>
-                </MemoryRouter>
-            </MiniAppLoader>
+            <ModalsProvider>
+                <MiniAppLoader>
+                    <MemoryRouter>
+                        <AppShell>
+                            <App />
+                        </AppShell>
+                    </MemoryRouter>
+                </MiniAppLoader>
+            </ModalsProvider>
         </MantineProvider>
     </SDKProvider>
 );
