@@ -2,13 +2,14 @@ import { useContext, useEffect, useState } from 'react';
 import { Text } from '@mantine/core';
 import { Api } from 'telegram';
 
-import { MethodContext, TDialogType, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
+import { MethodContext, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
+import { TOwnerType } from '../lib/helpers.ts';
 
 export const Administered = () => {
     const { mt, needHideContent, setFinishBlock, getDialogs } = useContext(MethodContext);
 
-    const [adminsList, setAdminsList] = useState<TDialogType[] | null>(null);
+    const [adminsList, setAdminsList] = useState<TOwnerType[] | null>(null);
 
     useEffect(() => {
         (async () => {

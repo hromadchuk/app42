@@ -78,6 +78,25 @@
   "profile": {
     "button_logout": "Logout"
   },
+  "share": {
+    "stories": {
+      "button": "Share in story",
+      "publish_header": "This is the picture that will be published in your channel's stories",
+      "publish_button": "Publish the story"
+    },
+    "posts": {
+      "button": "Share in post",
+      "publish_header": "This is the picture that will be published in your channel",
+      "publish_button": "Publish the post"
+    },
+    "messages": {
+      "button": "Share in message",
+      "publish_header": "This is the picture that will be published in group",
+      "publish_button": "Send message"
+    },
+    "success": "You have successfully shared the information!",
+    "error": "Something went wrong. Try again later."
+  },
   "routes": {
     "get_id": "Get account or channel ID",
     "contacts_analysis": "Contact analysis",
@@ -171,6 +190,8 @@
       "kick_question": "Do you want to remove {name} from the conversation?",
       "kick_button_yes": "Yes",
       "all_messages_button": "All messages",
+      "share_title": "Chat activity",
+      "share_description": "for {name}",
       "headers": {
         "period": "Select the period for stats",
         "counts": "Counts",
@@ -378,6 +399,8 @@
     "channels_registration": {
       "no_created": "You don't have any created channels",
       "created": "{time} ago",
+      "share_description": "ago channel was created",
+      "was_created_date": "was created on {date}",
       "today": "Less than 24 hours"
     },
     "records_stat": {

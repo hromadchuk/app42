@@ -78,6 +78,25 @@
   "profile": {
     "button_logout": "Выйти"
   },
+  "share": {
+    "stories": {
+      "button": "Поделиться в истории",
+      "publish_header": "Это изображение, которое будет опубликовано в историях вашего канала",
+      "publish_button": "Опубликовать историю"
+    },
+    "posts": {
+      "button": "Опубликовать запись",
+      "publish_header": "Это изображение, которое будет опубликовано в вашем канале",
+      "publish_button": "Опубликовать пост"
+    },
+    "messages": {
+      "button": "Отправить сообщением",
+      "publish_header": "Это изображение, которое будет опубликовано в чате",
+      "publish_button": "Отправить сообщение"
+    },
+    "success": "Вы успешно поделились информацией!",
+    "error": "Что-то пошло не так. Попробуйте позже."
+  },
   "routes": {
     "get_id": "Узнать ID аккаунта или канала",
     "contacts_analysis": "Анализ контактов",
@@ -171,6 +190,8 @@
       "kick_question": "Вы хотите удалить {name} из беседы?",
       "kick_button_yes": "Да",
       "all_messages_button": "Все сообщения",
+      "share_title": "Активность чата",
+      "share_description": "для {name}",
       "headers": {
         "period": "Период статистики",
         "counts": "Суммарные показатели",
@@ -378,6 +399,8 @@
     "channels_registration": {
       "no_created": "У вас нет созданных каналов",
       "created": "{time} назад",
+      "share_description": "канал был создан",
+      "was_created_date": "был создан {date}",
       "today": "Меньше 24 часов"
     },
     "records_stat": {
