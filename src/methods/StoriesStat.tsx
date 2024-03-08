@@ -254,6 +254,10 @@ export const CallsStat = () => {
                 nextOffset = storyViewsList.nextOffset || '';
 
                 for (const viewer of storyViewsList.views) {
+                    if (!(viewer instanceof Api.StoryView)) {
+                        continue;
+                    }
+
                     const reaction = viewer.reaction;
 
                     if (!reaction) {
