@@ -95,7 +95,7 @@
       "publish_button": "Send message"
     },
     "success": "You have successfully shared the information!",
-    "error": "Something went wrong. Try again later"
+    "error": "Something went wrong. Try again later."
   },
   "routes": {
     "get_id": "Get account or channel ID",
