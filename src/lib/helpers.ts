@@ -368,13 +368,14 @@ export async function Server<T>(method: string, params: object = {}): Promise<T>
     const authData = getParams().get('tgWebAppData');
     if (!authData) {
         console.log('No auth data');
+        return {} as T;
     }
 
     const data = await fetch(`${apiEndpoint}/api/${method}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            authData: authData as string
+            authData
         },
         body: JSON.stringify(params)
     }).then((response) => response.json());
