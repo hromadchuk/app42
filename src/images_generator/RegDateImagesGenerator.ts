@@ -1,4 +1,9 @@
-import { BaseImagesGenerator, IImagesGeneratorOptions, IImagesGeneratorResponse } from './BaseImagesGenerator.ts';
+import {
+    AdditionalImageUrl,
+    BaseImagesGenerator,
+    IImagesGeneratorOptions,
+    IImagesGeneratorResponse
+} from './BaseImagesGenerator.ts';
 
 export interface IRegDateImagesOptions extends IImagesGeneratorOptions {
     subTitle?: string;
@@ -48,9 +53,9 @@ export class RegDateImagesGenerator extends BaseImagesGenerator {
 
         await this.drawAvatar(this.storyContext, data.avatar, 70, this.storyCanvasCenter - 140, 420, data.bottomText);
 
-        this.storyContext.drawImage(await this.getImage('./items/reg_date/story_confiti.png'), 126, 190);
+        this.storyContext.drawImage(await this.getImage(AdditionalImageUrl.REG_DATE_STORY_CONFITI), 126, 190);
         this.storyContext.drawImage(
-            await this.getImage('./items/reg_date/story_circle.png'),
+            await this.getImage(AdditionalImageUrl.REG_DATE_STORY_CIRCLE),
             this.storyCanvasCenter - 145,
             415
         );
@@ -91,9 +96,9 @@ export class RegDateImagesGenerator extends BaseImagesGenerator {
             data.bottomText
         );
 
-        this.messageContext.drawImage(await this.getImage('./items/reg_date/message_confiti.png'), 150, 120);
+        this.messageContext.drawImage(await this.getImage(AdditionalImageUrl.REG_DATE_MESSAGE_CONFITI), 150, 120);
         this.messageContext.drawImage(
-            await this.getImage('./items/reg_date/message_circle.png'),
+            await this.getImage(AdditionalImageUrl.REG_DATE_MESSAGE_CIRCLE),
             this.messageCanvasCenter - 146,
             210
         );

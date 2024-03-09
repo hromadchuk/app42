@@ -14,6 +14,99 @@ export interface IImagesGeneratorResponse {
     messageImage?: string;
 }
 
+// TODO need fix this strange dynamic import
+export enum AdditionalImageUrl {
+    MESSAGE_BACKGROUND = './items/message_background.png',
+    STORY_BACKGROUND = './items/story_background.png',
+    STORY_LOGO = './items/story_logo.png',
+    MESSAGE_LOGO = './items/message_logo.png',
+
+    // Messages Stat
+    MESSAGE_STAT_NUMBER_4 = './items/messages_stat/number4.png',
+    MESSAGE_STAT_NUMBER_5 = './items/messages_stat/number5.png',
+    MESSAGE_STAT_NUMBER_6 = './items/messages_stat/number6.png',
+    MESSAGE_STAT_NUMBER_7 = './items/messages_stat/number7.png',
+    MESSAGE_STAT_NUMBER_8 = './items/messages_stat/number8.png',
+    MESSAGE_STAT_USER_CIRCLE = './items/messages_stat/user_circle.png',
+    MESSAGE_STAT_TOP_3_CIRCLE = './items/messages_stat/top3_circle.png',
+    MESSAGE_STAT_TOP_3_BACKGROUND = './items/messages_stat/top3_background.png',
+
+    // Reg Date
+    REG_DATE_STORY_CONFITI = './items/reg_date/story_confiti.png',
+    REG_DATE_STORY_CIRCLE = './items/reg_date/story_circle.png',
+    REG_DATE_MESSAGE_CONFITI = './items/reg_date/message_confiti.png',
+    REG_DATE_MESSAGE_CIRCLE = './items/reg_date/message_circle.png'
+}
+
+function getAdditionalImage(image: AdditionalImageUrl) {
+    if (image === AdditionalImageUrl.MESSAGE_BACKGROUND) {
+        return import(AdditionalImageUrl.MESSAGE_BACKGROUND);
+    }
+
+    if (image === AdditionalImageUrl.STORY_BACKGROUND) {
+        return import(AdditionalImageUrl.STORY_BACKGROUND);
+    }
+
+    if (image === AdditionalImageUrl.STORY_LOGO) {
+        return import(AdditionalImageUrl.STORY_LOGO);
+    }
+
+    if (image === AdditionalImageUrl.MESSAGE_LOGO) {
+        return import(AdditionalImageUrl.MESSAGE_LOGO);
+    }
+
+    if (image === AdditionalImageUrl.MESSAGE_STAT_NUMBER_4) {
+        return import(AdditionalImageUrl.MESSAGE_STAT_NUMBER_4);
+    }
+
+    if (image === AdditionalImageUrl.MESSAGE_STAT_NUMBER_5) {
+        return import(AdditionalImageUrl.MESSAGE_STAT_NUMBER_5);
+    }
+
+    if (image === AdditionalImageUrl.MESSAGE_STAT_NUMBER_6) {
+        return import(AdditionalImageUrl.MESSAGE_STAT_NUMBER_6);
+    }
+
+    if (image === AdditionalImageUrl.MESSAGE_STAT_NUMBER_7) {
+        return import(AdditionalImageUrl.MESSAGE_STAT_NUMBER_7);
+    }
+
+    if (image === AdditionalImageUrl.MESSAGE_STAT_NUMBER_8) {
+        return import(AdditionalImageUrl.MESSAGE_STAT_NUMBER_8);
+    }
+
+    if (image === AdditionalImageUrl.MESSAGE_STAT_USER_CIRCLE) {
+        return import(AdditionalImageUrl.MESSAGE_STAT_USER_CIRCLE);
+    }
+
+    if (image === AdditionalImageUrl.MESSAGE_STAT_TOP_3_CIRCLE) {
+        return import(AdditionalImageUrl.MESSAGE_STAT_TOP_3_CIRCLE);
+    }
+
+    if (image === AdditionalImageUrl.MESSAGE_STAT_TOP_3_BACKGROUND) {
+        return import(AdditionalImageUrl.MESSAGE_STAT_TOP_3_BACKGROUND);
+    }
+
+    if (image === AdditionalImageUrl.REG_DATE_STORY_CONFITI) {
+        return import(AdditionalImageUrl.REG_DATE_STORY_CONFITI);
+    }
+
+    if (image === AdditionalImageUrl.REG_DATE_STORY_CIRCLE) {
+        return import(AdditionalImageUrl.REG_DATE_STORY_CIRCLE);
+    }
+
+    if (image === AdditionalImageUrl.REG_DATE_MESSAGE_CONFITI) {
+        return import(AdditionalImageUrl.REG_DATE_MESSAGE_CONFITI);
+    }
+
+    if (image === AdditionalImageUrl.REG_DATE_MESSAGE_CIRCLE) {
+        return import(AdditionalImageUrl.REG_DATE_MESSAGE_CIRCLE);
+    }
+
+    // kill me
+    return import(AdditionalImageUrl.MESSAGE_BACKGROUND);
+}
+
 export class BaseImagesGenerator {
     kit42Text = 't.me/kit42_app'.toUpperCase();
     fontFamilyBold = 'Roboto Mono Bold';
@@ -33,13 +126,13 @@ export class BaseImagesGenerator {
 
         if (options.storyImage) {
             this.createStoryCanvas();
-            this.storyContext.drawImage(await this.getImage('./items/story_background.png'), 0, 0);
+            this.storyContext.drawImage(await this.getImage(AdditionalImageUrl.STORY_BACKGROUND), 0, 0);
             await this.drawStoryAppFooter();
         }
 
         if (options.messageImage) {
             this.createMessageCanvas();
-            this.messageContext.drawImage(await this.getImage('./items/message_background.png'), 0, 0);
+            this.messageContext.drawImage(await this.getImage(AdditionalImageUrl.MESSAGE_BACKGROUND), 0, 0);
             await this.drawMessageAppFooter();
         }
     }
@@ -74,7 +167,7 @@ export class BaseImagesGenerator {
         const width = this.storyContext.measureText(this.kit42Text).width;
         const logoXPosition = textCenter - width / 2 - 80;
 
-        this.storyContext.drawImage(await this.getImage('./items/story_logo.png'), logoXPosition, 1752);
+        this.storyContext.drawImage(await this.getImage(AdditionalImageUrl.STORY_LOGO), logoXPosition, 1752);
         this.storyContext.globalAlpha = 1.0;
     }
 
@@ -84,20 +177,20 @@ export class BaseImagesGenerator {
         this.messageContext.fillStyle = this.mainColor;
         this.messageContext.fillText(this.kit42Text, 140, 964);
 
-        this.messageContext.drawImage(await this.getImage('./items/message_logo.png'), 80, 930);
+        this.messageContext.drawImage(await this.getImage(AdditionalImageUrl.MESSAGE_LOGO), 80, 930);
         this.messageContext.globalAlpha = 1.0;
     }
 
     async drawMockImage(prefix: string) {
         if (this.storyCanvas) {
             this.storyContext.globalAlpha = 0.5;
-            this.storyContext.drawImage(await this.getImage(`./mock_images/${prefix}_story.jpg`), 0, 0);
+            await this.drawMock(this.storyContext, `${prefix}_story`);
             this.storyContext.globalAlpha = 1.0;
         }
 
         if (this.messageCanvas) {
             this.messageContext.globalAlpha = 0.5;
-            this.messageContext.drawImage(await this.getImage(`./mock_images/${prefix}_message.jpg`), 0, 0);
+            await this.drawMock(this.messageContext, `${prefix}_message`);
             this.messageContext.globalAlpha = 1.0;
         }
     }
@@ -129,9 +222,9 @@ export class BaseImagesGenerator {
     }
 
     // eslint-disable-next-line no-undef
-    getImage(path: string): Promise<CanvasImageSource> {
+    getImage(path: AdditionalImageUrl): Promise<CanvasImageSource> {
         return new Promise((resolve) => {
-            import(path).then((content) => {
+            getAdditionalImage(path).then((content) => {
                 const img = new Image();
 
                 img.src = content.default;
@@ -140,6 +233,22 @@ export class BaseImagesGenerator {
                 };
             });
         });
+    }
+
+    async drawMock(context: CanvasRenderingContext2D, name: string): Promise<void> {
+        // eslint-disable-next-line no-undef
+        const image = await new Promise<CanvasImageSource>((resolve) => {
+            import(`./mock_images/${name}.jpg`).then((content) => {
+                const img = new Image();
+
+                img.src = content.default;
+                img.onload = () => {
+                    resolve(img);
+                };
+            });
+        });
+
+        context.drawImage(image, 0, 0);
     }
 
     async drawAvatar(

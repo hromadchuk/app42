@@ -1,4 +1,9 @@
-import { BaseImagesGenerator, IImagesGeneratorOptions, IImagesGeneratorResponse } from './BaseImagesGenerator.ts';
+import {
+    AdditionalImageUrl,
+    BaseImagesGenerator,
+    IImagesGeneratorOptions,
+    IImagesGeneratorResponse
+} from './BaseImagesGenerator.ts';
 
 interface IMessagesStatImagesUserOption {
     name: string;
@@ -51,6 +56,14 @@ export class MessageStatImagesGenerator extends BaseImagesGenerator {
         let moreCenter = center - (otherUsers.length - 1) * 106.5;
         let userNumber = 4;
 
+        const imageAliases = new Map([
+            [4, await this.getImage(AdditionalImageUrl.MESSAGE_STAT_NUMBER_4)],
+            [5, await this.getImage(AdditionalImageUrl.MESSAGE_STAT_NUMBER_5)],
+            [6, await this.getImage(AdditionalImageUrl.MESSAGE_STAT_NUMBER_6)],
+            [7, await this.getImage(AdditionalImageUrl.MESSAGE_STAT_NUMBER_7)],
+            [8, await this.getImage(AdditionalImageUrl.MESSAGE_STAT_NUMBER_8)]
+        ]);
+
         for (const user of otherUsers) {
             await this.drawAvatar(
                 this.messageContext,
@@ -61,14 +74,11 @@ export class MessageStatImagesGenerator extends BaseImagesGenerator {
                 user.name
             );
 
-            this.messageContext.drawImage(
-                await this.getImage(`./items/messages_stat/number${userNumber++}.png`),
-                moreCenter - 64,
-                640
-            );
+            // eslint-disable-next-line no-undef
+            this.messageContext.drawImage(imageAliases.get(userNumber++) as CanvasImageSource, moreCenter - 64, 640);
 
             this.messageContext.drawImage(
-                await this.getImage('./items/messages_stat/user_circle.png'),
+                await this.getImage(AdditionalImageUrl.MESSAGE_STAT_USER_CIRCLE),
                 moreCenter - 28 * 2 + 1,
                 657 - 5
             );
@@ -93,7 +103,7 @@ export class MessageStatImagesGenerator extends BaseImagesGenerator {
             await this.drawAvatar(this.messageContext, user.avatar || null, 40, x + xOffset, y, user.name);
 
             this.messageContext.drawImage(
-                await this.getImage('./items/messages_stat/top3_circle.png'),
+                await this.getImage(AdditionalImageUrl.MESSAGE_STAT_TOP_3_CIRCLE),
                 x + xOffset - 5,
                 y - 5
             );
@@ -108,6 +118,10 @@ export class MessageStatImagesGenerator extends BaseImagesGenerator {
             xOffset += 272;
         }
 
-        this.messageContext.drawImage(await this.getImage('./items/messages_stat/top3_background.png'), x + 82, y - 66);
+        this.messageContext.drawImage(
+            await this.getImage(AdditionalImageUrl.MESSAGE_STAT_TOP_3_BACKGROUND),
+            x + 82,
+            y - 66
+        );
     }
 }
