@@ -3,8 +3,8 @@ import fontFamilyRegularUrl from './fonts/RobotoMonoRegular.ttf';
 
 export interface IImagesGeneratorOptions {
     title: string;
-    description: string;
-    bottomText: string;
+    bottomText?: string;
+    description?: string;
     storyImage?: boolean;
     messageImage?: boolean;
 }
@@ -35,7 +35,11 @@ export enum AdditionalImageUrl {
     REG_DATE_STORY_CONFITI = './items/reg_date/story_confiti.png',
     REG_DATE_STORY_CIRCLE = './items/reg_date/story_circle.png',
     REG_DATE_MESSAGE_CONFITI = './items/reg_date/message_confiti.png',
-    REG_DATE_MESSAGE_CIRCLE = './items/reg_date/message_circle.png'
+    REG_DATE_MESSAGE_CIRCLE = './items/reg_date/message_circle.png',
+
+    // Call Stat
+    CALL_STAT_STARS = './items/call_stat/stars.png',
+    CALL_STAT_BORDER = './items/call_stat/border.png'
 }
 
 function getAdditionalImage(image: AdditionalImageUrl) {
@@ -101,6 +105,14 @@ function getAdditionalImage(image: AdditionalImageUrl) {
 
     if (image === AdditionalImageUrl.REG_DATE_MESSAGE_CIRCLE) {
         return import(AdditionalImageUrl.REG_DATE_MESSAGE_CIRCLE);
+    }
+
+    if (image === AdditionalImageUrl.CALL_STAT_STARS) {
+        return import(AdditionalImageUrl.CALL_STAT_STARS);
+    }
+
+    if (image === AdditionalImageUrl.CALL_STAT_BORDER) {
+        return import(AdditionalImageUrl.CALL_STAT_BORDER);
     }
 
     // kill me
