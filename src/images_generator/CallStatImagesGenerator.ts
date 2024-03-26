@@ -7,6 +7,7 @@ import {
 import { formatNumber } from '../lib/helpers.ts';
 
 export interface ICallStatImagesOptions extends IImagesGeneratorOptions {
+    title: string;
     totalDurationCount: string;
     totalDurationLabel: string;
     callsCount: number;

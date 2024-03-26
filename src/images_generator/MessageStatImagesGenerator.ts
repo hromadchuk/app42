@@ -12,6 +12,9 @@ interface IMessagesStatImagesUserOption {
 }
 
 export interface IMessagesStatImagesOptions extends IImagesGeneratorOptions {
+    title: string;
+    bottomText: string;
+    description: string;
     users: IMessagesStatImagesUserOption[];
 }
 
