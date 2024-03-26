@@ -12,7 +12,7 @@ import { IImagesGeneratorResponse } from '../images_generator/BaseImagesGenerato
 import { t } from '../lib/lang.ts';
 import { CallAPI, dataUrlToFile, notifySuccess, TOwnerType } from '../lib/helpers.ts';
 
-const MESSAGE_TEXT = 'by @kit42_app';
+const MESSAGE_TEXT = 'by @kit42bot';
 
 export enum ShareType {
     REG_DATE = 'reg_date',
