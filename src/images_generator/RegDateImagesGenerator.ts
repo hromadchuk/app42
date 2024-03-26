@@ -6,6 +6,9 @@ import {
 } from './BaseImagesGenerator.ts';
 
 export interface IRegDateImagesOptions extends IImagesGeneratorOptions {
+    title: string;
+    bottomText: string;
+    description: string;
     subTitle?: string;
     bottomDateText: string;
     avatar: string | null;
