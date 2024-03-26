@@ -21,6 +21,12 @@
     "errors": {
       "api_rate_limit": "You have reached the limit of API requests, you need to wait {time} and try again"
     },
+    "time_short": {
+      "days": "d",
+      "hours": "h",
+      "minutes": "m",
+      "seconds": "s"
+    },
     "time": {
       "years": [
         "year",
@@ -394,6 +400,13 @@
         "calls": "Calls",
         "duration": "Duration",
         "max_duration": "Maximum duration"
+      },
+      "sharing": {
+        "title": "Calls statistics",
+        "total_duration": "total duration",
+        "total_calls": "total calls",
+        "participants": "participants",
+        "max_duration": "max duration"
       }
     },
     "channels_registration": {

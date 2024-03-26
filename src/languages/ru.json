@@ -21,6 +21,12 @@
     "errors": {
       "api_rate_limit": "Вы достигли лимита запросов к API, вам нужно подождать {time} и попробовать снова"
     },
+    "time_short": {
+      "days": "д",
+      "hours": "ч",
+      "minutes": "м",
+      "seconds": "с"
+    },
     "time": {
       "years": [
         "год",
@@ -394,6 +400,13 @@
         "calls": "Звонки",
         "duration": "Продолжительность",
         "max_duration": "Максимальная продолжительность"
+      },
+      "sharing": {
+        "title": "Статистика звонков",
+        "total_duration": "общая продолжительность",
+        "total_calls": "всего звонков",
+        "participants": "собеседников",
+        "max_duration": "макс. длительность"
       }
     },
     "channels_registration": {

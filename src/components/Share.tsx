@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Flex, Image, StyleProp, Text } from '@mantine/core';
 import { Api } from 'telegram';
+import { CallStatImagesGenerator, ICallStatImagesOptions } from '../images_generator/CallStatImagesGenerator.ts';
 import {
     IMessagesStatImagesOptions,
     MessageStatImagesGenerator
@@ -15,7 +16,8 @@ const MESSAGE_TEXT = 'by @kit42_app';
 
 export enum ShareType {
     REG_DATE = 'reg_date',
-    MESSAGE_STAT = 'message_stat'
+    MESSAGE_STAT = 'message_stat',
+    CALL_STAT = 'call_stat'
 }
 
 export enum ActionType {
@@ -26,7 +28,7 @@ export enum ActionType {
 interface IShareButtonsOptions {
     owner: TOwnerType;
     type: ShareType;
-    data: IRegDateImagesOptions | IMessagesStatImagesOptions;
+    data: IRegDateImagesOptions | IMessagesStatImagesOptions | ICallStatImagesOptions;
 }
 
 interface IModalShareOptions extends IShareButtonsOptions {
@@ -45,22 +47,31 @@ interface IActionData {
     };
 }
 
-function getPostAccess(owner: TOwnerType) {
+async function getPostAccess(owner: TOwnerType) {
     const result = {
-        canMakeMessages: false,
-        canMakeStories: false
+        canPostMessages: false,
+        canPostStories: false
     };
+
+    const data = await CallAPI(
+        new Api.stories.CanSendStory({
+            peer: owner.id
+        }),
+        {
+            hideErrorAlert: true
+        }
+    );
+
+    if (data) {
+        result.canPostStories = true;
+    }
 
     if (!owner || owner instanceof Api.User) {
         return result;
     }
 
-    if (!(owner instanceof Api.Chat) && Number(owner.level) > 0 && owner.adminRights?.postStories === true) {
-        result.canMakeStories = true;
-    }
-
     if (owner.adminRights?.postMessages === true || owner.creator === true || !owner.defaultBannedRights?.sendPhotos) {
-        result.canMakeMessages = true;
+        result.canPostMessages = true;
     }
 
     return result;
@@ -113,7 +124,7 @@ function getActionData(owner: TOwnerType, action: ActionType): IActionData {
 
 function getTitle(owner: TOwnerType): string {
     if (owner instanceof Api.User) {
-        return `${owner.firstName} ${owner.lastName}`;
+        return `${owner.firstName || ''} ${owner.lastName || ''}`;
     }
 
     return owner.title;
@@ -166,6 +177,10 @@ function runGenerator(type: ShareType, data: IShareButtonsOptions['data']): Prom
         return new MessageStatImagesGenerator().generate(data as IMessagesStatImagesOptions);
     }
 
+    if (type === ShareType.CALL_STAT) {
+        return new CallStatImagesGenerator().generate(data as ICallStatImagesOptions);
+    }
+
     return Promise.resolve({});
 }
 
@@ -210,25 +225,30 @@ async function sendStory(base64: string, owner: TOwnerType) {
 export function ShareButtons(options: IShareButtonsOptions) {
     const [needHide, setHide] = useState(false);
     const [isLoading, setLoading] = useState(true);
+    const [canMakeMessages, setCanMakeMessages] = useState(false);
+    const [canMakeStories, setCanMakeStories] = useState(false);
     const [{ storyImage, messageImage }, setImages] = useState<IImagesGeneratorResponse>({});
 
-    const { canMakeMessages, canMakeStories } = getPostAccess(options.owner);
-
     useEffect(() => {
-        if (!canMakeMessages && !canMakeStories) {
-            return;
-        }
+        getPostAccess(options.owner).then(({ canPostMessages, canPostStories }) => {
+            if (canPostMessages || canPostStories) {
+                setCanMakeMessages(canPostMessages);
+                setCanMakeStories(canPostStories);
 
-        runGenerator(options.type, { ...options.data, storyImage: canMakeStories, messageImage: canMakeMessages }).then(
-            (images) => {
-                if (!images.storyImage && !images.messageImage) {
-                    setHide(true);
-                } else {
-                    setImages(images);
-                    setLoading(false);
-                }
+                runGenerator(options.type, {
+                    ...options.data,
+                    storyImage: canPostStories,
+                    messageImage: canPostMessages
+                }).then((images) => {
+                    if (images.storyImage || images.messageImage) {
+                        setImages(images);
+                        setLoading(false);
+                    } else {
+                        setHide(true);
+                    }
+                });
             }
-        );
+        });
     }, []);
 
     if ((!canMakeMessages && !canMakeStories) || needHide) {

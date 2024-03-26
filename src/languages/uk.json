@@ -21,6 +21,12 @@
     "errors": {
       "api_rate_limit": "Ви досягли межі API запитів, вам потрібно зачекати {time} і повторити спробу"
     },
+    "time_short": {
+      "days": "д",
+      "hours": "г",
+      "minutes": "хв",
+      "seconds": "с"
+    },
     "time": {
       "years": [
         "рік",
@@ -394,6 +400,13 @@
         "calls": "Дзвінки",
         "duration": "Тривалість",
         "max_duration": "Максимальна тривалість"
+      },
+      "sharing": {
+        "title": "Статистика дзвінків",
+        "total_duration": "загальна тривалість",
+        "total_calls": "всього дзвінків",
+        "participants": "учасники",
+        "max_duration": "макс. тривалість"
       }
     },
     "channels_registration": {

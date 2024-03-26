@@ -149,6 +149,32 @@ export function getTextTime(seconds: number, isStrong?: boolean): string {
     return getStringsTimeArray(seconds, isStrong).join(' ');
 }
 
+export function getShortTextTime(time: number, size: number): string {
+    const days = Math.floor(time / 86400);
+    const hours = Math.floor((time % 86400) / 3600);
+    const minutes = Math.floor(((time % 86400) % 3600) / 60);
+    const seconds = Math.floor(((time % 86400) % 3600) % 60);
+    const result: string[] = [];
+
+    if (days) {
+        result.push(`${days}${t('common.time_short.days')}`);
+    }
+
+    if (hours && result.length < size) {
+        result.push(`${hours}${t('common.time_short.hours')}`);
+    }
+
+    if (minutes && result.length < size) {
+        result.push(`${minutes}${t('common.time_short.minutes')}`);
+    }
+
+    if (seconds && result.length < size) {
+        result.push(`${seconds}${t('common.time_short.seconds')}`);
+    }
+
+    return result.join(' ');
+}
+
 export function getStringsTimeArray(seconds: number, isStrong?: boolean): string[] {
     const period = getTime(seconds);
     const result: string[] = [];
