@@ -53,17 +53,21 @@ async function getPostAccess(owner: TOwnerType) {
         canPostStories: false
     };
 
-    const data = await CallAPI(
-        new Api.stories.CanSendStory({
-            peer: owner.id
-        }),
-        {
-            hideErrorAlert: true
-        }
-    );
+    try {
+        const data = await CallAPI(
+            new Api.stories.CanSendStory({
+                peer: owner.id
+            }),
+            {
+                hideErrorAlert: true
+            }
+        );
 
-    if (data) {
-        result.canPostStories = true;
+        if (data) {
+            result.canPostStories = true;
+        }
+    } catch (error) {
+        console.error(error);
     }
 
     if (!owner || owner instanceof Api.User) {
