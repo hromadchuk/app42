@@ -36,5 +36,5 @@ if (tgWebAppData) {
     updateThemeFromParams();
     createRoot(document.getElementById('root') as HTMLElement).render(<App />);
 } else {
-    location.href = 'https://t.me/kit42app/kit42';
+    location.href = 'https://t.me/kit42bot';
 }
