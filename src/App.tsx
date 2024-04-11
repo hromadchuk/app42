@@ -29,7 +29,6 @@ declare global {
     interface Window {
         TelegramClient: TelegramClient;
         listenEvents: { [key: string]: (event: object) => void };
-        listenMAEvents: { [key: string]: (event: undefined | { button_id: string }) => void };
         userId: number;
         isProgress: boolean;
         isNeedToThrowErrorOnRequest: boolean;
@@ -130,7 +129,6 @@ const App = () => {
             }
 
             window.listenEvents = {};
-            window.listenMAEvents = {};
 
             window.TelegramClient.addEventHandler((event) => {
                 if (window.listenEvents[event.className]) {
@@ -143,10 +141,6 @@ const App = () => {
 
                 if (eventType !== 'viewport_changed') {
                     console.log('event', eventType, '=>', eventData);
-                }
-
-                if (window.listenMAEvents[eventType]) {
-                    window.listenMAEvents[eventType](eventData);
                 }
 
                 if (eventType === 'theme_changed') {
@@ -234,13 +228,15 @@ const MiniAppWrapper = () => (
     <SDKProvider options={{ async: true }}>
         <TonConnectUIProvider manifestUrl={getManifestUrl()}>
             <MantineProvider forceColorScheme={useColorScheme()}>
-                <MiniAppLoader>
-                    <MemoryRouter>
-                        <AppShell>
-                            <App />
-                        </AppShell>
-                    </MemoryRouter>
-                </MiniAppLoader>
+                <ModalsProvider>
+                    <MiniAppLoader>
+                        <MemoryRouter>
+                            <AppShell>
+                                <App />
+                            </AppShell>
+                        </MemoryRouter>
+                    </MiniAppLoader>
+                </ModalsProvider>
             </MantineProvider>
         </TonConnectUIProvider>
     </SDKProvider>

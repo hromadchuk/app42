@@ -16,6 +16,7 @@ import {
     IconPhotoPentagon,
     IconReportAnalytics,
     IconThumbDownOff,
+    IconUser,
     TablerIconsProps
 } from '@tabler/icons-react';
 
@@ -27,7 +28,8 @@ export enum MethodCategory {
     ACCOUNT = 'account',
     CONTACTS = 'contacts',
     CHANNELS = 'channels',
-    CHATS = 'chats'
+    CHATS = 'chats',
+    TON = 'ton'
 }
 
 export interface IMethod {
@@ -158,6 +160,12 @@ const appRoutes: IAppRouter[] = [
                 icon: IconFriendsOff,
                 element: createElement(lazy(() => import('./methods/ClearDialogMembers.tsx'))),
                 categories: [MethodCategory.CHANNELS, MethodCategory.CHATS]
+            },
+            {
+                id: 'wallet',
+                icon: IconUser,
+                element: createElement(lazy(() => import('./methods/TonWallet.tsx'))),
+                categories: [MethodCategory.TON]
             }
         ]
     }

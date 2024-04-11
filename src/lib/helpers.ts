@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
 import { AES, enc } from 'crypto-js';
+import { HttpClient, Api as TonApiSDK } from 'tonapi-sdk-js';
 import { notifications } from '@mantine/notifications';
 import { Api } from 'telegram';
 import { getCache, setCache } from './cache.ts';
@@ -11,6 +12,18 @@ import { ServerMock } from './mock.ts';
 
 export type TOwnerInfo = null | Api.TypeUser | Api.TypeChat;
 type TDocumentThumb = Api.TypeDocument | Api.TypePhoto | Api.UserProfilePhoto | Api.ChatPhoto | undefined;
+
+const httpClient = new HttpClient({
+    baseUrl: 'https://tonapi.io/',
+    baseApiParams: {
+        headers: {
+            Authorization: 'Bearer AGGHQSHTE46RAWAAAAAKDQJHVP3ZWTD7VWS2TQK72GTO6DBKO42J2BGIQYDRAZBK2BYLTMI',
+            'Content-type': 'application/json'
+        }
+    }
+});
+
+export const TonApi = new TonApiSDK(httpClient);
 
 export function getParams() {
     return new URLSearchParams(location.hash.slice(1));
