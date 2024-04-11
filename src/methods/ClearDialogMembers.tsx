@@ -1,9 +1,9 @@
 import { Dispatch, SetStateAction, useContext, useState } from 'react';
 import { Button, Flex, Radio } from '@mantine/core';
 import { Api } from 'telegram';
-import { formatNumber, notifyError } from '../lib/helpers.ts';
+import { formatNumber, notifyError, TOwnerType } from '../lib/helpers.ts';
 
-import { MethodContext, TDialogType, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
+import { MethodContext, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { getDialogParticipants, kickMemberFromDialog } from '../lib/methods/dialogs.ts';
 import { calculatePeriodTimestamp } from '../lib/methods/messages.ts';
@@ -171,7 +171,7 @@ export const ClearDialogMembers = () => {
             <SelectDialog
                 allowTypes={[EOwnerType.chat, EOwnerType.supergroup, EOwnerType.channel]}
                 isOnlyWithKickPermissions={true}
-                onOwnerSelect={async (owner: TDialogType) => {
+                onOwnerSelect={async (owner: TOwnerType) => {
                     if (owner instanceof Api.User) {
                         return;
                     }

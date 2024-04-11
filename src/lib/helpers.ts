@@ -1,22 +1,43 @@
 import { Buffer } from 'buffer';
+import { AES, enc } from 'crypto-js';
 import { notifications } from '@mantine/notifications';
 import { Api } from 'telegram';
 import { getCache, setCache } from './cache.ts';
 import { getHideUser, isHideMode } from './hide.ts';
 import { getAppLangCode, LangType, t, td } from './lang';
 import { FloodWaitError } from 'telegram/errors';
+import { AbortRequestError } from '../errors/AbortRequestError.ts';
+import { ServerMock } from './mock.ts';
 
 export type TOwnerInfo = null | Api.TypeUser | Api.TypeChat;
 type TDocumentThumb = Api.TypeDocument | Api.TypePhoto | Api.UserProfilePhoto | Api.ChatPhoto | undefined;
 
+export function getParams() {
+    return new URLSearchParams(location.hash.slice(1));
+}
+
+export function getUserId() {
+    try {
+        const authData = getParams().get('tgWebAppData');
+        if (authData) {
+            const params = new URLSearchParams(authData);
+            const user = JSON.parse(params.get('user') as string);
+
+            return user.id;
+        }
+    } catch (error) {
+        console.error('getUserId error', error);
+    }
+
+    return 0;
+}
+
 export const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+export const isDevUser = [44221708, 5000925865].includes(getUserId());
 
 export function formatNumber(number: number): string {
     return `${number}`.replace(/(\d)(?=(\d{3})+$)/g, '$1\u00a0');
-}
-
-export function getParams() {
-    return new URLSearchParams(location.hash.slice(1));
 }
 
 export function decline(number: number, titles: string[]): string {
@@ -128,14 +149,30 @@ export function getTextTime(seconds: number, isStrong?: boolean): string {
     return getStringsTimeArray(seconds, isStrong).join(' ');
 }
 
-const IS_ONBOARDING_COMPLETED_KEY = 'isOnboardingCompleted';
+export function getShortTextTime(time: number, size: number): string {
+    const days = Math.floor(time / 86400);
+    const hours = Math.floor((time % 86400) / 3600);
+    const minutes = Math.floor(((time % 86400) % 3600) / 60);
+    const seconds = Math.floor(((time % 86400) % 3600) % 60);
+    const result: string[] = [];
 
-export function markOnboardingAsCompleted(): void {
-    return localStorage.setItem(IS_ONBOARDING_COMPLETED_KEY, '1');
-}
+    if (days) {
+        result.push(`${days}${t('common.time_short.days')}`);
+    }
 
-export function checkIsOnboardingCompleted(): boolean {
-    return Boolean(localStorage.getItem(IS_ONBOARDING_COMPLETED_KEY));
+    if (hours && result.length < size) {
+        result.push(`${hours}${t('common.time_short.hours')}`);
+    }
+
+    if (minutes && result.length < size) {
+        result.push(`${minutes}${t('common.time_short.minutes')}`);
+    }
+
+    if (seconds && result.length < size) {
+        result.push(`${seconds}${t('common.time_short.seconds')}`);
+    }
+
+    return result.join(' ');
 }
 
 export function getStringsTimeArray(seconds: number, isStrong?: boolean): string[] {
@@ -189,9 +226,22 @@ export async function CallAPI<R extends Api.AnyRequest>(
 ): Promise<R['__response']> {
     const method = request.className;
 
-    await sleep(100);
+    const methodsWithoutWait = ['help.GetNearestDc', 'help.GetCountriesList', 'users.GetUsers'];
+    if (!methodsWithoutWait.includes(method)) {
+        await sleep(100);
+    }
+
+    if (!window.TelegramClient.connected) {
+        await window.TelegramClient.connect();
+    }
 
     try {
+        if (window.isNeedToThrowErrorOnRequest) {
+            window.isNeedToThrowErrorOnRequest = false;
+
+            throw new AbortRequestError();
+        }
+
         const result = await window.TelegramClient.invoke(request);
 
         console.group(`API.${method}`);
@@ -224,7 +274,7 @@ export async function CallAPI<R extends Api.AnyRequest>(
             return await handleFloodWaitError(error, request, options);
         }
 
-        if (!options?.hideErrorAlert) {
+        if (!options?.hideErrorAlert && !(error instanceof AbortRequestError)) {
             notifyError({
                 title: `API.${method} error`,
                 message: getErrorMessage(error as Error)
@@ -287,6 +337,15 @@ export function classNames(...classes: (string | object)[]): string {
     return list.join(' ');
 }
 
+export function notifySuccess({ title, message }: { title?: string; message?: string } = {}) {
+    notifications.show({
+        color: 'green',
+        title,
+        message,
+        autoClose: true
+    });
+}
+
 export function notifyError({ title, message }: { title?: string; message?: string } = {}) {
     notifications.show({
         color: 'red',
@@ -326,23 +385,23 @@ export async function parallelLimit(limit: number, tasks: Function[]): Promise<v
 const apiEndpoint =
     location.hostname === 'gromadchuk.github.io' ? 'https://kit42.gromadchuk.com' : `http://${location.hostname}`;
 
-export async function Server(method: string, params: object = {}): Promise<object> {
+export async function Server<T>(method: string, params: object = {}): Promise<T> {
     if (isDev) {
         console.log('skip Server', method, params);
-        return {};
+        return ServerMock<T>(method);
     }
 
     const authData = getParams().get('tgWebAppData');
-
     if (!authData) {
         console.log('No auth data');
+        return {} as T;
     }
 
     const data = await fetch(`${apiEndpoint}/api/${method}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            authData: authData as string
+            authData
         },
         body: JSON.stringify(params)
     }).then((response) => response.json());
@@ -352,7 +411,7 @@ export async function Server(method: string, params: object = {}): Promise<objec
     console.log('Result:', data);
     console.groupEnd();
 
-    return data as object;
+    return data as T;
 }
 
 export async function getAvatar(owner: Api.User | Api.Channel | Api.Chat): Promise<string | null> {
@@ -373,6 +432,23 @@ export async function getAvatar(owner: Api.User | Api.Channel | Api.Chat): Promi
     const buffer = await window.TelegramClient.downloadProfilePhoto(owner.id);
 
     return await getImageStringFromBuffer(buffer, cacheKey);
+}
+
+export async function getAvatars(owners: (Api.User | Api.Channel | Api.Chat)[]) {
+    const result = new Map<number, string | null>();
+
+    const avatars = await Promise.all(
+        owners.map(async (owner) => ({
+            id: owner.id.valueOf(),
+            avatar: await getAvatar(owner)
+        }))
+    );
+
+    for (const { id, avatar } of avatars) {
+        result.set(id, avatar);
+    }
+
+    return result;
 }
 
 export async function getMediaPhoto(photo: Api.TypePhoto): Promise<string | null> {
@@ -465,3 +541,13 @@ export async function getCurrentUser(): Promise<Api.User | null> {
 
     return null;
 }
+
+export function encodeString(string: string, key: string) {
+    return AES.encrypt(string, key).toString();
+}
+
+export function decodeString(encodedString: string, key: string) {
+    return AES.decrypt(encodedString, key).toString(enc.Utf8);
+}
+
+export type TOwnerType = Api.User | Api.Chat | Api.Channel;

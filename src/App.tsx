@@ -6,19 +6,12 @@ import ReactGA from 'react-ga4';
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { Api, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
-import { AppContext } from './contexts/AppContext.tsx';
-import {
-    SDKProvider,
-    useBackButton,
-    useMiniApp,
-    useSDKContext,
-    useSettingsButton,
-    useViewport
-} from '@tma.js/sdk-react';
+import { AppContext, IInitData } from './contexts/AppContext.tsx';
+import { SDKProvider, useBackButton, useCloudStorage, useMiniApp, useSDKContext, useViewport } from '@tma.js/sdk-react';
 import { AppNotifications } from './components/AppNotifications.tsx';
 import { Constants } from './constants.ts';
 import { clearOldCache } from './lib/cache.ts';
-import { checkIsOnboardingCompleted, getParams, isDev, markOnboardingAsCompleted, Server } from './lib/helpers.ts';
+import { decodeString, getParams, isDev, Server } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
 import { setColors } from './lib/theme.ts';
 import { getManifestUrl } from './lib/ton.ts';
@@ -30,15 +23,17 @@ import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import '@mantine/carousel/styles.css';
 import './App.css';
+import { ModalsProvider } from '@mantine/modals';
 
 declare global {
     interface Window {
         TelegramClient: TelegramClient;
-        isTelegramClientConnected: boolean;
         listenEvents: { [key: string]: (event: object) => void };
         listenMAEvents: { [key: string]: (event: undefined | { button_id: string }) => void };
         userId: number;
         isProgress: boolean;
+        isNeedToThrowErrorOnRequest: boolean;
+        eruda: { init: () => void };
     }
 }
 
@@ -46,111 +41,119 @@ const App = () => {
     const miniApp = useMiniApp();
     const viewport = useViewport();
     const backButton = useBackButton();
-    const settingsButton = useSettingsButton();
+    const storage = useCloudStorage();
     const navigate = useNavigate();
     const location = useLocation();
 
     const [user, setUser] = useState<null | Api.User>(null);
+    const [initData, setInitData] = useState<null | IInitData>(null);
     const [isAppLoading, setAppLoading] = useState<boolean>(false);
 
     useEffect(() => {
-        if (user) {
-            settingsButton.show();
-        } else {
-            settingsButton.hide();
-        }
-    }, [user]);
+        (async () => {
+            // init mini app
+            miniApp.ready();
+            viewport.expand();
 
-    useEffect(() => {
-        // init mini app
-        miniApp.ready();
-        viewport.expand();
+            backButton.on('click', () => {
+                navigate('/');
 
-        settingsButton.on('click', () => {
-            navigate('/profile');
-        });
+                if (window.isProgress) {
+                    // need for stop all requests
+                    window.isProgress = false;
+                    window.isNeedToThrowErrorOnRequest = true;
+                }
+            });
 
-        backButton.on('click', () => {
-            navigate('/');
+            // clear cache
+            clearOldCache();
 
-            if (window.isProgress) {
-                // need for stop all requests
-                window.isProgress = false;
+            // init analytics
+            if (!isDev) {
+                ReactGA.initialize('G-T5H886J9RS');
+            }
+
+            // init server data
+            let serverData = null;
+            try {
+                serverData = await Server<IInitData>('init', { platform: getParams().get('tgWebAppPlatform') });
+
+                if (serverData?.storageHash) {
+                    setInitData(serverData);
+                }
+            } catch (error) {
+                console.error(`Error init app: ${error}`);
+
+                serverData = {
+                    status: 'error'
+                };
+            }
+
+            // init app
+            let storageSession = '';
+            try {
+                storageSession = decodeString(await storage.get(Constants.SESSION_KEY), serverData?.storageHash || '');
+            } catch (error) {
+                console.log('Error get session from storage', error);
+            }
+
+            window.TelegramClient = new TelegramClient(
+                new StringSession(storageSession),
+                Constants.API_ID,
+                Constants.API_HASH,
+                {
+                    connectionRetries: 5,
+                    useWSS: true,
+                    floodSleepThreshold: 0,
+                    langCode: getAppLangCode()
+                }
+            );
+
+            const versionKey = 'TGLibVersion';
+            const version = window.TelegramClient.__version__;
+            const currentVersion = localStorage.getItem(versionKey);
+
+            if (!currentVersion) {
+                localStorage.setItem(versionKey, version);
+            } else if (currentVersion !== version) {
+                const isOnboardingCompleted = await checkIsOnboardingCompleted();
+
+                localStorage.clear();
+                localStorage.setItem(versionKey, version);
+
+                if (isOnboardingCompleted) {
+                    await markOnboardingAsCompleted();
+                }
+
                 window.location.reload();
-            }
-        });
-
-        // clear cache
-        clearOldCache();
-
-        // init analytics
-        if (!isDev) {
-            ReactGA.initialize('G-T5H886J9RS');
-        }
-
-        // init app
-        const session = localStorage.getItem(Constants.SESSION_KEY);
-
-        window.TelegramClient = new TelegramClient(
-            new StringSession(session || ''),
-            Constants.API_ID,
-            Constants.API_HASH,
-            {
-                connectionRetries: 5,
-                useWSS: true,
-                floodSleepThreshold: 0,
-                langCode: getAppLangCode()
-            }
-        );
-
-        const versionKey = 'TGLibVersion';
-        const version = window.TelegramClient.__version__;
-        const currentVersion = localStorage.getItem(versionKey);
-
-        if (!currentVersion) {
-            localStorage.setItem(versionKey, version);
-        } else if (currentVersion !== version) {
-            const isOnboardingCompleted = checkIsOnboardingCompleted();
-
-            localStorage.clear();
-            localStorage.setItem(versionKey, version);
-
-            if (isOnboardingCompleted) {
-                markOnboardingAsCompleted();
+                return;
             }
 
-            window.location.reload();
-            return;
-        }
+            window.listenEvents = {};
+            window.listenMAEvents = {};
 
-        window.listenEvents = {};
-        window.listenMAEvents = {};
+            window.TelegramClient.addEventHandler((event) => {
+                if (window.listenEvents[event.className]) {
+                    window.listenEvents[event.className](event);
+                }
+            });
 
-        window.TelegramClient.addEventHandler((event) => {
-            if (window.listenEvents[event.className]) {
-                window.listenEvents[event.className](event);
-            }
-        });
+            window.addEventListener('message', ({ data }) => {
+                const { eventType, eventData } = JSON.parse(data);
 
-        try {
-            Server('init', { platform: getParams().get('tgWebAppPlatform') });
-        } catch (error) {
-            console.error(`Error init app: ${error}`);
-        }
+                if (eventType !== 'viewport_changed') {
+                    console.log('event', eventType, '=>', eventData);
+                }
 
-        window.addEventListener('message', ({ data }) => {
-            const { eventType, eventData } = JSON.parse(data);
+                if (window.listenMAEvents[eventType]) {
+                    window.listenMAEvents[eventType](eventData);
+                }
 
-            console.log('event', eventType, '=>', eventData);
-
-            if (window.listenMAEvents[eventType]) {
-                window.listenMAEvents[eventType](eventData);
-            }
-
-            if (eventType === 'theme_changed') {
-                setColors(eventData.theme_params);
-            }
-        });
+                if (eventType === 'theme_changed') {
+                    setColors(eventData.theme_params);
+                }
+            });
+        })();
     }, []);
 
     useEffect(() => {
@@ -167,6 +170,14 @@ const App = () => {
         }
     }, [location]);
 
+    async function markOnboardingAsCompleted(): Promise<void> {
+        await storage.set(Constants.ONBOARDING_COMPLETED_KEY, '1');
+    }
+
+    async function checkIsOnboardingCompleted(): Promise<boolean> {
+        return Boolean(await storage.get(Constants.ONBOARDING_COMPLETED_KEY));
+    }
+
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
 
     return (
@@ -174,8 +185,12 @@ const App = () => {
             value={{
                 user,
                 setUser,
+                initData,
+                setInitData,
                 isAppLoading,
-                setAppLoading
+                setAppLoading,
+                markOnboardingAsCompleted,
+                checkIsOnboardingCompleted
             }}
         >
             <Routes>{routes.map(GetRouter)}</Routes>

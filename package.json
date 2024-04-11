@@ -17,9 +17,11 @@
     "@mantine/core": "^7.4.1",
     "@mantine/dates": "^7.4.1",
     "@mantine/hooks": "^7.4.1",
+    "@mantine/modals": "7.4.1",
     "@mantine/notifications": "^7.4.1",
     "@tabler/icons-react": "^2.38.0",
     "@tma.js/sdk-react": "^1.1.1",
+    "crypto-js": "^4.2.0",
     "@tonconnect/ui-react": "^2.0.0",
     "dayjs": "^1.11.10",
     "dexie": "^3.2.4",
@@ -30,9 +32,10 @@
     "react-ga4": "^2.1.0",
     "react-imask": "^7.1.3",
     "react-router-dom": "^6.16.0",
-    "telegram": "^2.19.9"
+    "telegram": "^2.19.19"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^5.62.0",

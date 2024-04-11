@@ -6,11 +6,14 @@ import { Api } from 'telegram';
 import { ActivityChart } from '../components/charts/Activity.tsx';
 import { CalculateActivityTime } from '../components/charts/chart_helpers.ts';
 import { InfoRow } from '../components/InfoRow.tsx';
+import { ShareButtons, ShareType } from '../components/Share.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
+import { ICallStatImagesOptions } from '../images_generator/CallStatImagesGenerator.ts';
+import { CallAPI, declineAndFormat, getShortTextTime, getTextTime } from '../lib/helpers.ts';
 
+import { AppContext } from '../contexts/AppContext.tsx';
 import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
-import { CallAPI, declineAndFormat, getTextTime } from '../lib/helpers.ts';
 
 enum ETabId {
     calls = 'calls',
@@ -45,11 +48,13 @@ interface IStatResult {
 }
 
 export const CallsStat = () => {
+    const { user: appUser } = useContext(AppContext);
     const { mt, md, needHideContent, setFinishBlock, setProgress } = useContext(MethodContext);
 
     const [isModalOpened, { open, close }] = useDisclosure(false);
     const [stat, setStat] = useState<IStatResult | null>(null);
     const [modalData, setModalData] = useState<IUserTop | null>(null);
+    const [shareData, setShareData] = useState<ICallStatImagesOptions | null>(null);
     const [selectedTab, setSelectedTab] = useState<ETabId>(ETabId.calls);
 
     useEffect(() => {
@@ -179,6 +184,18 @@ export const CallsStat = () => {
                 }
             };
 
+            setShareData({
+                title: mt('sharing.title'),
+                totalDurationCount: getShortTextTime(totalDuration, 3),
+                totalDurationLabel: mt('sharing.total_duration'),
+                callsCount: totalCalls,
+                callsLabel: mt('sharing.total_calls'),
+                participantsCount: users.size,
+                participantsLabel: mt('sharing.participants'),
+                maxDurationCount: getShortTextTime(maxDuration, 3),
+                maxDurationLabel: mt('sharing.max_duration')
+            });
+
             setStat(result);
             setProgress(null);
         })();
@@ -271,6 +288,9 @@ export const CallsStat = () => {
                     description={getTextTime(stat.counts.maxDuration)}
                     icon={IconClockUp}
                 />
+
+                {shareData && <ShareButtons owner={appUser as Api.User} type={ShareType.CALL_STAT} data={shareData} />}
+
                 <ActivityChart data={stat.activity} />
 
                 <TabsList tabs={tabsList} onChange={(tabId) => setSelectedTab(tabId as ETabId)} />

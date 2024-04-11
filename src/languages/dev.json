@@ -21,6 +21,12 @@
     "errors": {
       "api_rate_limit": "You have reached the limit of API requests, you need to wait {time} and try again"
     },
+    "time_short": {
+      "days": "d",
+      "hours": "h",
+      "minutes": "m",
+      "seconds": "s"
+    },
     "time": {
       "years": [
         "year",
@@ -66,6 +72,7 @@
     "donate": "Support the project",
     "telegram_channel": "Telegram channel with updates",
     "auth_modal_title": "Authorization",
+    "auth_modal_profile": "Profile",
     "cards": {
       "account": "Account",
       "contacts": "Contacts",
@@ -76,6 +83,25 @@
   "beta": "This is beta version of the product and there may be bugs. If you find a bug or have a suggestion, please send a message to the developer. Features will be added as the product is developed.",
   "profile": {
     "button_logout": "Logout"
+  },
+  "share": {
+    "stories": {
+      "button": "Share in story",
+      "publish_header": "This is the picture that will be published in your channel's stories",
+      "publish_button": "Publish the story"
+    },
+    "posts": {
+      "button": "Share in post",
+      "publish_header": "This is the picture that will be published in your channel",
+      "publish_button": "Publish the post"
+    },
+    "messages": {
+      "button": "Share in message",
+      "publish_header": "This is the picture that will be published in group",
+      "publish_button": "Send message"
+    },
+    "success": "You have successfully shared the information!",
+    "error": "Something went wrong. Try again later."
   },
   "routes": {
     "get_id": "Get account or channel ID",
@@ -170,6 +196,8 @@
       "kick_question": "Do you want to remove {name} from the conversation?",
       "kick_button_yes": "Yes",
       "all_messages_button": "All messages",
+      "share_title": "Chat activity",
+      "share_description": "for {name}",
       "headers": {
         "period": "Select the period for stats",
         "counts": "Counts",
@@ -372,11 +400,20 @@
         "calls": "Calls",
         "duration": "Duration",
         "max_duration": "Maximum duration"
+      },
+      "sharing": {
+        "title": "Calls statistics",
+        "total_duration": "total duration",
+        "total_calls": "total calls",
+        "participants": "participants",
+        "max_duration": "max duration"
       }
     },
     "channels_registration": {
       "no_created": "You don't have any created channels",
       "created": "{time} ago",
+      "share_description": "ago channel was created",
+      "was_created_date": "was created on {date}",
       "today": "Less than 24 hours"
     },
     "records_stat": {

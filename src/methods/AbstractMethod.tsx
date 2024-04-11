@@ -11,10 +11,9 @@ import {
     IGetDialogOption,
     IProgress,
     ISetListAction,
-    MethodContext,
-    TDialogType
+    MethodContext
 } from '../contexts/MethodContext.tsx';
-import { CallAPI, formatNumber, Server, sleep } from '../lib/helpers.ts';
+import { CallAPI, formatNumber, Server, sleep, TOwnerType } from '../lib/helpers.ts';
 import { IRouter, routes } from '../routes.tsx';
 import { t, td } from '../lib/lang.ts';
 
@@ -30,10 +29,6 @@ export const AbstractMethod = () => {
     const [listAction, _setListAction] = useState<ISetListAction | null>(null);
 
     const routerInfo = routes.find((router: IRouter) => router.path === location.pathname) as IRouter;
-
-    useEffect(() => {
-        Server('method', { method: routerInfo.methodId });
-    }, []);
 
     const needHideContent = (): boolean => {
         return [progress, finishBlock, listAction].some(Boolean);
@@ -62,6 +57,12 @@ export const AbstractMethod = () => {
         _setProgress(progressSafe);
     };
 
+    useEffect(() => {
+        Server('method', { method: routerInfo.methodId });
+
+        return () => setProgress(null);
+    }, []);
+
     const setFinishBlock = ({ text, state }: IFinishBlock): void => {
         setProgress(null);
 
@@ -89,10 +90,10 @@ export const AbstractMethod = () => {
         });
     };
 
-    const getDialogs = async (options: IGetDialogOption): Promise<TDialogType[]> => {
+    const getDialogs = async (options: IGetDialogOption): Promise<TOwnerType[]> => {
         const { types } = options;
 
-        const allDialogs: TDialogType[] = [];
+        const allDialogs: TOwnerType[] = [];
 
         setProgress({ text: t('common.getting_dialogs') });
 
@@ -166,7 +167,7 @@ export const AbstractMethod = () => {
 
                 return result;
             },
-            { list: [], ids: [] } as { list: TDialogType[]; ids: number[] }
+            { list: [], ids: [] } as { list: TOwnerType[]; ids: number[] }
         );
 
         setProgress(null);

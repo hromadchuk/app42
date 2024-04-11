@@ -4,6 +4,7 @@ import {
     Button,
     Container,
     getThemeColor,
+    Group,
     Modal,
     Notification,
     SimpleGrid,
@@ -12,26 +13,23 @@ import {
     useMantineTheme
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { useCloudStorage } from '@tma.js/sdk-react';
 import {
     IconAddressBook,
     IconBook2,
     IconMessages,
     IconPigMoney,
+    IconSettings,
     IconUser,
     IconUsersGroup,
     TablerIconsProps
 } from '@tabler/icons-react';
 import { Locales, useTonAddress, useTonConnectModal, useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { useNavigate } from 'react-router-dom';
+import { OwnerAvatar } from '../components/OwnerAvatar.tsx';
 import { Constants } from '../constants.ts';
 import { AppContext } from '../contexts/AppContext.tsx';
-import {
-    checkIsOnboardingCompleted,
-    classNames,
-    getCurrentUser,
-    getDocLink,
-    markOnboardingAsCompleted
-} from '../lib/helpers.ts';
+import { classNames, decodeString, getCurrentUser, getDocLink } from '../lib/helpers.ts';
 import { hexToRgba } from '../lib/theme.ts';
 import { getCache, removeCache, setCache } from '../lib/cache.ts';
 import { getModalLang } from '../lib/ton.ts';
@@ -42,6 +40,7 @@ import Onboarding from '../components/Onboarding.tsx';
 import AuthPage from './AuthPage.tsx';
 
 import classes from '../styles/MenuPage.module.css';
+import ProfilePage from './ProfilePage.tsx';
 
 interface ICard {
     id: MethodCategory;
@@ -73,9 +72,10 @@ const cards = [
 ];
 
 const MenuPage = () => {
-    const { user, setUser } = useContext(AppContext);
+    const { user, setUser, initData, checkIsOnboardingCompleted, markOnboardingAsCompleted } = useContext(AppContext);
 
     const theme = useMantineTheme();
+    const storage = useCloudStorage();
     const navigate = useNavigate();
     const { state: tonState, open: tonOpen, close: tonClose } = useTonConnectModal();
     const wallet = useTonWallet();
@@ -83,6 +83,7 @@ const MenuPage = () => {
     const [tonConnectUI, setOptions] = useTonConnectUI();
     const [isModalOpened, { open, close }] = useDisclosure(false);
     const [isModalAuthOpened, { open: openAuth, close: closeAuth }] = useDisclosure(false);
+    const [isModalProfileOpened, { open: openProfile, close: closeProfile }] = useDisclosure(false);
 
     const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
     const [needShowOnboarding, setShowOnboarding] = useState(false);
@@ -91,20 +92,15 @@ const MenuPage = () => {
         setOptions({ language: getModalLang() });
 
         (async () => {
-            const isOnboardingCompleted = checkIsOnboardingCompleted();
-
-            if (!window.isTelegramClientConnected) {
-                window.isTelegramClientConnected = true;
-                await window.TelegramClient.connect();
-            }
+            const isOnboardingCompleted = await checkIsOnboardingCompleted();
 
             if (!isOnboardingCompleted) {
                 setShowOnboarding(true);
-            } else {
-                if (!user) {
-                    const session = localStorage.getItem(Constants.SESSION_KEY);
-
-                    if (session) {
+            } else if (initData) {
+                if (!user && initData?.status === 'ok') {
+                    const storageSession = decodeString(await storage.get(Constants.SESSION_KEY), initData.storageHash);
+                    console.log('storageSession', storageSession);
+                    if (storageSession) {
                         setUser(await getCurrentUser());
                     }
                 }
@@ -115,7 +111,19 @@ const MenuPage = () => {
                 }
             }
         })();
-    }, []);
+    }, [initData]);
+
+    useEffect(() => {
+        (async () => {
+            console.log('user', user);
+            console.log('initData', initData);
+
+            if (initData) {
+                const storageSession = decodeString(await storage.get(Constants.SESSION_KEY), initData.storageHash);
+                console.log('storageSession', storageSession);
+            }
+        })();
+    }, [user, initData]);
 
     const methods = getMethods();
 
@@ -181,6 +189,42 @@ const MenuPage = () => {
         );
     }
 
+    function UserRow() {
+        if (!user) {
+            return null;
+        }
+
+        let usernames = '';
+
+        if (user.usernames) {
+            usernames = user.usernames.map(({ username }) => `@${username}`).join(', ');
+        } else if (user.username) {
+            usernames = `@${user.username}`;
+        }
+
+        return (
+            <UnstyledButton className={classes.user} onClick={openProfile}>
+                <Group>
+                    <OwnerAvatar owner={user} />
+
+                    <div style={{ flex: 1 }}>
+                        <Text size="sm" fw={500}>
+                            {user.firstName} {user.lastName}
+                        </Text>
+
+                        {usernames && (
+                            <Text c="dimmed" size="xs">
+                                {usernames}
+                            </Text>
+                        )}
+                    </div>
+
+                    <IconSettings size={16} stroke={1.5} />
+                </Group>
+            </UnstyledButton>
+        );
+    }
+
     return (
         <>
             <Modal.Root opened={isModalOpened} onClose={close}>
@@ -214,7 +258,13 @@ const MenuPage = () => {
                 />
             </Modal>
 
+            <Modal opened={isModalProfileOpened} onClose={() => closeProfile()} title={t('menu.auth_modal_profile')}>
+                <ProfilePage />
+            </Modal>
+
             <Container p={5}>
+                {UserRow()}
+
                 <SimpleGrid cols={2} m="xs">
                     {cards.map(CategoryBlock)}
                 </SimpleGrid>
