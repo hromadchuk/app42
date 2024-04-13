@@ -32,16 +32,17 @@ import { useNavigate } from 'react-router-dom';
 import { OwnerAvatar } from '../components/OwnerAvatar.tsx';
 import { Constants } from '../constants.ts';
 import { AppContext } from '../contexts/AppContext.tsx';
-import { classNames, decodeString, getCurrentUser, getDocLink, TonApi } from '../lib/helpers.ts';
+import { classNames, decodeString, getCurrentUser, getDocLink } from '../lib/helpers.ts';
 import { hexToRgba } from '../lib/theme.ts';
 import { getCache, removeCache, setCache } from '../lib/cache.ts';
 import { getModalLang } from '../lib/ton.ts';
+import { TonApiCall } from '../lib/TonApi.ts';
 import { getMethods, IMethod, MethodCategory } from '../routes.tsx';
 import Logo from '../components/Logo.tsx';
-import { t } from '../lib/lang.ts';
 import Onboarding from '../components/Onboarding.tsx';
 import AuthPage from './AuthPage.tsx';
 import ProfilePage from './ProfilePage.tsx';
+import { t } from '../lib/lang.ts';
 
 import classes from '../styles/MenuPage.module.css';
 
@@ -129,7 +130,7 @@ const MenuPage = () => {
             return;
         }
 
-        TonApi.accounts.getAccount(userFriendlyAddress).then((accountInfo) => {
+        TonApiCall.getWallet(userFriendlyAddress).then((accountInfo) => {
             setWalletAddress(accountInfo.name || userFriendlyAddress);
 
             getCache(Constants.AUTH_STATE_METHOD_KEY).then((cacheMethodId) => {
