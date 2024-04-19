@@ -162,9 +162,9 @@ const appRoutes: IAppRouter[] = [
                 categories: [MethodCategory.CHANNELS, MethodCategory.CHATS]
             },
             {
-                id: 'wallet',
+                id: 'ton_nft_analysis',
                 icon: IconUser,
-                element: createElement(lazy(() => import('./methods/TonWallet.tsx'))),
+                element: createElement(lazy(() => import('./methods/TonNFTAnalysis.tsx'))),
                 categories: [MethodCategory.TON]
             }
         ]

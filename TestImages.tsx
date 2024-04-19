@@ -108,7 +108,7 @@ const imagesOptions: ICallStatImagesOptions[] = [
     }
 ];
 
-export default function Test() {
+export default function TestImages() {
     const [images, setImages] = useState<string[]>([]);
 
     useEffect(() => {
