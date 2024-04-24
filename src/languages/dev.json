@@ -118,7 +118,9 @@
     "records_stat": "Posts stat",
     "stories_stat": "Stories stat",
     "dialog_joined": "Chats/channels joined date",
-    "clear_dialog_members": "Clear chats/channels members"
+    "clear_dialog_members": "Clear chats/channels members",
+    "birthdays": "Birthdays",
+    "own_channels": "Own channels"
   },
   "charts": {
     "activity": {
@@ -517,6 +519,16 @@
         "90": "3 months",
         "180": "6 months"
       }
+    },
+    "birthdays": {
+      "no_contacts": "You don't have any contacts",
+      "get_users_info": "Getting users info",
+      "no_birthdays": "No birthdays"
+    },
+    "own_channels": {
+      "no_contacts": "You don't have any contacts",
+      "get_users_info": "Getting users info",
+      "no_channels": "You contacts doesn't have any channels"
     }
   }
 }
