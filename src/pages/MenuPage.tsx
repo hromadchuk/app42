@@ -105,18 +105,6 @@ const MenuPage = () => {
         })();
     }, [initData]);
 
-    useEffect(() => {
-        (async () => {
-            console.log('user', user);
-            console.log('initData', initData);
-
-            if (initData) {
-                const storageSession = decodeString(await storage.get(Constants.SESSION_KEY), initData.storageHash);
-                console.log('storageSession', storageSession);
-            }
-        })();
-    }, [user, initData]);
-
     const methods = getMethods();
 
     function getMethodsList(category: MethodCategory) {
