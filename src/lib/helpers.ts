@@ -1,28 +1,52 @@
+import { notifications } from '@mantine/notifications';
 import { Buffer } from 'buffer';
 import { AES, enc } from 'crypto-js';
-import { notifications } from '@mantine/notifications';
 import { Api } from 'telegram';
+import { FloodWaitError } from 'telegram/errors';
+import { AbortRequestError } from '../errors/AbortRequestError.ts';
 import { getCache, setCache } from './cache.ts';
 import { getHideUser, isHideMode } from './hide.ts';
 import { getAppLangCode, LangType, t, td } from './lang';
-import { FloodWaitError } from 'telegram/errors';
-import { AbortRequestError } from '../errors/AbortRequestError.ts';
 import { ServerMock } from './mock.ts';
 
 export type TOwnerInfo = null | Api.TypeUser | Api.TypeChat;
 type TDocumentThumb = Api.TypeDocument | Api.TypePhoto | Api.UserProfilePhoto | Api.ChatPhoto | undefined;
 
+interface IUser {
+    added_to_attachment_menu: boolean;
+    allows_write_to_pm: boolean;
+    first_name: string;
+    id: number;
+    language_code: string;
+    last_name: string;
+    photo_url: string;
+    username: string;
+}
+
 export function getParams() {
     return new URLSearchParams(location.hash.slice(1));
 }
 
-export function getUserId() {
+export function getUserData() {
     try {
         const authData = getParams().get('tgWebAppData');
         if (authData) {
             const params = new URLSearchParams(authData);
-            const user = JSON.parse(params.get('user') as string);
 
+            return JSON.parse(params.get('user') as string) as IUser;
+        }
+    } catch (error) {
+        console.error('getUserData error', error);
+    }
+
+    return null;
+}
+
+export function getUserId() {
+    try {
+        const user = getUserData();
+
+        if (user) {
             return user.id;
         }
     } catch (error) {

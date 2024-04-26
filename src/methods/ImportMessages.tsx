@@ -95,7 +95,7 @@ const icons = {
     [ImportType.Instagram]: IconBrandInstagram
 };
 
-const sortButtons = [LangType.RU, LangType.UK].includes(getAppLangCode())
+const sortButtons = [LangType.RU].includes(getAppLangCode())
     ? [ImportType.VK, ImportType.Instagram, ImportType.Facebook]
     : [ImportType.Instagram, ImportType.Facebook, ImportType.VK];
 
