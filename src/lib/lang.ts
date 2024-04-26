@@ -1,12 +1,11 @@
 import DEVLang from '../languages/dev.json';
 import ENLang from '../languages/en.json';
-import UKLang from '../languages/uk.json';
 import RULang from '../languages/ru.json';
+import { getUserData } from './helpers.ts';
 
 export enum LangType {
     DEV = 'dev',
     EN = 'en',
-    UK = 'uk',
     RU = 'ru'
 }
 
@@ -17,7 +16,6 @@ export interface ILang {
 const appLangSources: ILang = {
     [LangType.DEV]: DEVLang as ILang,
     [LangType.EN]: ENLang as ILang,
-    [LangType.UK]: UKLang as ILang,
     [LangType.RU]: RULang as ILang
 };
 
@@ -48,25 +46,22 @@ const mergeDeep = (target: ILang, ...sources: ILang[]): Object => {
 };
 
 export const getAppLangCode = (): LangType => {
-    const selectedLang = localStorage.getItem('lang') as LangType;
+    const user = getUserData();
+    if (user) {
+        if (user.language_code === LangType.RU) {
+            return LangType.RU;
+        }
 
-    if (selectedLang && appLangSources[selectedLang]) {
-        return selectedLang;
+        return LangType.EN;
     }
 
-    const browserLanguage = navigator.language;
-
-    if (browserLanguage.includes(LangType.UK)) {
-        return LangType.UK;
-    }
-
-    if (browserLanguage.includes(LangType.RU)) {
+    if (navigator.language.includes(LangType.RU)) {
         return LangType.RU;
     }
 
     return LangType.EN;
 };
-const appLanguages = [LangType.EN, LangType.UK, LangType.RU];
+const appLanguages = [LangType.EN, LangType.RU];
 
 for (const appLang of appLanguages) {
     appLangSources[appLang] = mergeDeep(

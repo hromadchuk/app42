@@ -72,7 +72,7 @@
     "donate": "Support the project",
     "telegram_channel": "Telegram channel with updates",
     "auth_modal_title": "Authorization",
-    "auth_modal_profile": "Profile",
+    "account_disconnect": "Disconnect account?",
     "cards": {
       "account": "Account",
       "contacts": "Contacts",
@@ -81,9 +81,6 @@
     }
   },
   "beta": "This is beta version of the product and there may be bugs. If you find a bug or have a suggestion, please send a message to the developer. Features will be added as the product is developed.",
-  "profile": {
-    "button_logout": "Logout"
-  },
   "share": {
     "stories": {
       "button": "Share in story",
