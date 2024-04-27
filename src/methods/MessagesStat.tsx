@@ -404,7 +404,7 @@ export const MessagesStat = () => {
                         const voice = attributes.find(
                             (attribute) => attribute instanceof Api.DocumentAttributeAudio
                         ) as Api.DocumentAttributeAudio | undefined;
-                        if (voice) {
+                        if (voice?.voice) {
                             peersData[peerId].voiceDuration += voice.duration;
                             statData.voiceDuration += voice.duration;
                         }
