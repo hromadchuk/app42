@@ -208,7 +208,7 @@
         "attachments": "Вложения",
         "stickers": "Стикеры",
         "voice_duration": "Длительность голосовых",
-        "round_duration": "Длительность видео",
+        "round_duration": "Длительность кружочков",
         "call_duration": "Длительность звонков",
         "inactive_users": "Неактивные пользователи",
         "topics": "Темы"
@@ -433,7 +433,7 @@
         "views": "Просмотры",
         "stickers": "Стикеры",
         "voice_duration": "Длительность голосовых",
-        "round_duration": "Длительность видео",
+        "round_duration": "Длительность кружочков",
         "call_duration": "Длительность звонков"
       },
       "reactions_description": "Полученные реакции на сообщениях",
