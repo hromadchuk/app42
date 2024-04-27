@@ -412,7 +412,7 @@ export const MessagesStat = () => {
                         const round = attributes.find(
                             (attribute) => attribute instanceof Api.DocumentAttributeVideo
                         ) as Api.DocumentAttributeVideo | undefined;
-                        if (round) {
+                        if (round?.roundMessage) {
                             peersData[peerId].roundDuration += round.duration;
                             statData.roundDuration += round.duration;
                         }
