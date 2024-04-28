@@ -3,6 +3,7 @@ import { createElement, JSX, lazy, Suspense } from 'react';
 import {
     Icon123,
     IconAddressBook,
+    IconCake,
     IconCalendarPlus,
     IconCreativeCommonsNd,
     IconDoorEnter,
@@ -17,6 +18,7 @@ import {
     IconReportAnalytics,
     IconThumbDownOff,
     IconUser,
+    IconUsersGroup,
     TablerIconsProps
 } from '@tabler/icons-react';
 
@@ -166,6 +168,18 @@ const appRoutes: IAppRouter[] = [
                 icon: IconUser,
                 element: createElement(lazy(() => import('./methods/TonNFTAnalysis.tsx'))),
                 categories: [MethodCategory.TON]
+            },
+            {
+                id: 'birthdays',
+                icon: IconCake,
+                element: createElement(lazy(() => import('./methods/Birthdays.tsx'))),
+                categories: [MethodCategory.CONTACTS]
+            },
+            {
+                id: 'own_channels',
+                icon: IconUsersGroup,
+                element: createElement(lazy(() => import('./methods/OwnChannels.tsx'))),
+                categories: [MethodCategory.CONTACTS]
             }
         ]
     }

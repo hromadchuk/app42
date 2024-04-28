@@ -2,7 +2,7 @@ import { PropsWithChildren, useEffect, useState } from 'react';
 import { AppShell, Center, Loader, MantineProvider } from '@mantine/core';
 import { useColorScheme } from '@mantine/hooks';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
-import ReactGA from 'react-ga4';
+import { ModalsProvider } from '@mantine/modals';
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { Api, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
@@ -16,6 +16,7 @@ import { getAppLangCode } from './lib/lang.ts';
 import { setColors } from './lib/theme.ts';
 import { getManifestUrl } from './lib/ton.ts';
 import { IRouter, routes } from './routes.tsx';
+import ReactGA from 'react-ga4';
 
 import { AppFooter } from './components/AppFooter.tsx';
 
@@ -23,7 +24,6 @@ import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import '@mantine/carousel/styles.css';
 import './App.css';
-import { ModalsProvider } from '@mantine/modals';
 
 declare global {
     interface Window {
@@ -117,7 +117,7 @@ const App = () => {
             } else if (currentVersion !== version) {
                 const isOnboardingCompleted = await checkIsOnboardingCompleted();
 
-                localStorage.clear();
+                localStorage.removeItem('GramJs:apiCache');
                 localStorage.setItem(versionKey, version);
 
                 if (isOnboardingCompleted) {
