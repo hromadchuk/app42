@@ -30,13 +30,13 @@ if (isDevUser) {
 // only for test!!!
 // import TestImages from '../TestImages.tsx';
 // createRoot(document.getElementById('root') as HTMLElement).render(<TestImages />);
-import TestTon from '../TestTon.tsx';
-createRoot(document.getElementById('root') as HTMLElement).render(<TestTon />);
+// import TestTon from '../TestTon.tsx';
+// createRoot(document.getElementById('root') as HTMLElement).render(<TestTon />);
 
-// const tgWebAppData = getParams().get('tgWebAppData');
-// if (tgWebAppData) {
-//     updateThemeFromParams();
-//     createRoot(document.getElementById('root') as HTMLElement).render(<App />);
-// } else {
-//     location.href = 'https://t.me/kit42bot';
-// }
+const tgWebAppData = getParams().get('tgWebAppData');
+if (tgWebAppData) {
+    updateThemeFromParams();
+    createRoot(document.getElementById('root') as HTMLElement).render(<App />);
+} else {
+    location.href = 'https://t.me/kit42bot';
+}
