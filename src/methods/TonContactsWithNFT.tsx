@@ -1,15 +1,19 @@
 import { useContext, useEffect, useState } from 'react';
-import { Badge, Card, Group, Text } from '@mantine/core';
+import { Badge, Button, Card, Group, Text } from '@mantine/core';
 import { Api } from 'telegram';
 import dayjs from 'dayjs';
 import { OwnerRow } from '../components/OwnerRow.tsx';
-import { CallAPI, Server } from '../lib/helpers.ts';
+import { CallAPI, formatNumberFloat, Server } from '../lib/helpers.ts';
+import { getShortAddress } from '../lib/ton.ts';
+import { TonApiCall } from '../lib/TonApi.ts';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
 
 interface IUserRow {
     user: Api.User;
     wallets: string[];
+    walletsAlias: Map<string, string>;
+    walletsBalances: Map<string, number>;
     collectedNames: string[];
     collectedNumbers: number[];
     fragmentInfo: Map<string, Api.fragment.TypeCollectibleInfo>;
@@ -74,7 +78,7 @@ export const TonContactsWithNFT = () => {
         const filteredUsers: IUserRow[] = [];
 
         for (const user of result.users) {
-            const wallets: string[] = [];
+            const wallets = new Set<string>();
             const collectedNames: string[] = [];
             const collectedNumbers: number[] = [];
             const fragmentInfo: Map<string, Api.fragment.TypeCollectibleInfo> = new Map();
@@ -84,9 +88,7 @@ export const TonContactsWithNFT = () => {
                     for (const username of user.usernames) {
                         const findWallet = data.usernames.find((item) => item.username === username.username);
                         if (findWallet) {
-                            if (!wallets.includes(findWallet.ownerWallet)) {
-                                wallets.push(findWallet.ownerWallet);
-                            }
+                            wallets.add(findWallet.ownerWallet);
 
                             collectedNames.push(username.username);
 
@@ -104,9 +106,7 @@ export const TonContactsWithNFT = () => {
                 if (user.phone?.startsWith('888')) {
                     const findWallet = data.numbers.find((item) => item.number === Number(user.phone));
                     if (findWallet) {
-                        if (!wallets.includes(findWallet.ownerWallet)) {
-                            wallets.push(findWallet.ownerWallet);
-                        }
+                        wallets.add(findWallet.ownerWallet);
 
                         collectedNumbers.push(Number(user.phone));
 
@@ -120,10 +120,23 @@ export const TonContactsWithNFT = () => {
                     }
                 }
 
-                if (wallets.length) {
+                if (wallets.size) {
+                    const walletsAlias = new Map<string, string>();
+                    const walletsBalances = new Map<string, number>();
+
+                    for (const wallet of wallets) {
+                        const alias = await TonApiCall.getNormalizedWallet(wallet);
+                        walletsAlias.set(wallet, alias.non_bounceable.b64url);
+
+                        const info = await TonApiCall.getWallet(wallet);
+                        walletsBalances.set(wallet, info.balance);
+                    }
+
                     filteredUsers.push({
                         user,
-                        wallets,
+                        wallets: Array.from(wallets),
+                        walletsAlias,
+                        walletsBalances,
                         collectedNames,
                         collectedNumbers,
                         fragmentInfo
@@ -170,11 +183,11 @@ export const TonContactsWithNFT = () => {
                             <div>
                                 <Text fw={500}>@{name}</Text>
                                 <Text fz="xs" c="dimmed">
-                                    {date}, {cryptoAmount} {fragment.cryptoCurrency}
+                                    {date}, {formatNumberFloat(cryptoAmount)} {fragment.cryptoCurrency}
                                 </Text>
                             </div>
                             <Badge variant="light">
-                                ~{fragment.amount.valueOf() / 100} {fragment.currency}
+                                ~{formatNumberFloat(fragment.amount.valueOf() / 100)} {fragment.currency}
                             </Badge>
                         </Group>
                     );
@@ -197,13 +210,33 @@ export const TonContactsWithNFT = () => {
                             <div>
                                 <Text fw={500}>+{phone}</Text>
                                 <Text fz="xs" c="dimmed">
-                                    {date}, {cryptoAmount} {fragment.cryptoCurrency}
+                                    {date}, {formatNumberFloat(cryptoAmount)} {fragment.cryptoCurrency}
                                 </Text>
                             </div>
                             <Badge variant="light">
-                                ~{fragment.amount.valueOf() / 100} {fragment.currency}
+                                ~{formatNumberFloat(fragment.amount.valueOf() / 100)} {fragment.currency}
                             </Badge>
                         </Group>
+                    );
+                })}
+
+                {row.wallets.map((wallet, walletKey) => {
+                    const balance = parseFloat(((row.walletsBalances.get(wallet) as number) / 1e9).toFixed(2));
+
+                    return (
+                        <Button
+                            key={walletKey}
+                            mt="xs"
+                            variant="light"
+                            fullWidth
+                            component="a"
+                            href={`https://tonviewer.com/${wallet}`}
+                            target="_blank"
+                            justify="space-between"
+                            rightSection={`${formatNumberFloat(balance)} TON`}
+                        >
+                            {getShortAddress(wallet)}
+                        </Button>
                     );
                 })}
             </Card>

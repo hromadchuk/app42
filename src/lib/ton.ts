@@ -22,3 +22,9 @@ export function getModalLang() {
 
     return LangType.EN;
 }
+
+export function getShortAddress(address: string) {
+    const slicePart = address.slice(5, -5);
+
+    return address.replace(slicePart, '...');
+}

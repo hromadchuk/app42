@@ -38,7 +38,7 @@ import { getCache, removeCache, setCache } from '../lib/cache.ts';
 import { CallAPI, classNames, decodeString, getCurrentUser, getDocLink } from '../lib/helpers.ts';
 import { t } from '../lib/lang.ts';
 import { hexToRgba } from '../lib/theme.ts';
-import { getModalLang } from '../lib/ton.ts';
+import { getModalLang, getShortAddress } from '../lib/ton.ts';
 import { TonApiCall } from '../lib/TonApi.ts';
 import { AuthType, getMethods, IMethod, MethodCategory } from '../routes.tsx';
 
@@ -129,7 +129,7 @@ const MenuPage = () => {
         }
 
         TonApiCall.getWallet(userFriendlyAddress).then((accountInfo) => {
-            setWalletAddress(accountInfo.name || userFriendlyAddress);
+            setWalletAddress(accountInfo.name || getShortAddress(userFriendlyAddress));
 
             getCache(Constants.AUTH_STATE_METHOD_KEY).then((cacheMethodId) => {
                 if (cacheMethodId) {
