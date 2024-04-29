@@ -15,6 +15,14 @@ export class TonApiCall {
         return await TonApiCall.request<Account>('getWallet', TonApi.accounts.getAccount, wallet);
     }
 
+    static async getNormalizedWallet(wallet: string) {
+        return await TonApiCall.request<{
+            non_bounceable: {
+                b64url: string;
+            };
+        }>('getNormalizedWallet', TonApi.accounts.addressParse, wallet);
+    }
+
     static async getNfts(wallet: string) {
         let offset = 0;
         let work = true;
