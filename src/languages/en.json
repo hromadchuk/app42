@@ -120,7 +120,8 @@
     "clear_dialog_members": "Clear chats/channels members",
     "birthdays": "Birthdays",
     "own_channels": "Own channels",
-    "ton_contacts": "Contacts with NFT"
+    "ton_contacts": "Contacts with NFT",
+    "ton_jettons_analysis": "Jettons analysis"
   },
   "charts": {
     "activity": {
@@ -535,6 +536,11 @@
       "no_contacts_with_nft": "You don't have contacts with NFT",
       "get_users_info": "Getting users info",
       "bought": "Bought {date}"
+    },
+    "ton_jettons_analysis": {
+      "no_jettons": "You don't have any jettons",
+      "get_jettons_info": "Getting jettons info",
+      "top_holders": "You're in the top {position} of all holders"
     }
   }
 }

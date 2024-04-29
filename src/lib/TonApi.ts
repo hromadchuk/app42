@@ -4,6 +4,8 @@ import {
     AccountEvents,
     Error,
     HttpResponse,
+    JettonHolders,
+    JettonsBalances,
     NftCollection,
     NftItem,
     NftItems
@@ -21,6 +23,22 @@ export class TonApiCall {
                 b64url: string;
             };
         }>('getNormalizedWallet', TonApi.accounts.addressParse, wallet);
+    }
+
+    static async getJettons(wallet: string, currencies?: string[]) {
+        return await TonApiCall.request<JettonsBalances>(
+            'getJettons',
+            TonApi.accounts.getAccountJettonsBalances,
+            wallet,
+            { currencies: (currencies || []).join(',') }
+        );
+    }
+
+    static async getJettonHolders(wallet: string) {
+        return await TonApiCall.request<JettonHolders>('getJettonHolders', TonApi.jettons.getJettonHolders, wallet, {
+            limit: 1000,
+            offset: 0
+        });
     }
 
     static async getNfts(wallet: string) {

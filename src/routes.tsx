@@ -6,6 +6,7 @@ import {
     IconArchive,
     IconCake,
     IconCalendarPlus,
+    IconCoins,
     IconCreativeCommonsNd,
     IconDoorEnter,
     IconFriendsOff,
@@ -205,6 +206,13 @@ const appRoutes: IAppRouter[] = [
                 element: createElement(lazy(() => import('./methods/TonContactsWithNFT.tsx'))),
                 categories: [MethodCategory.TON, MethodCategory.CONTACTS],
                 authType: AuthType.TG
+            },
+            {
+                id: 'ton_jettons_analysis',
+                icon: IconCoins,
+                element: createElement(lazy(() => import('./methods/TonJettonsAnalysis.tsx'))),
+                categories: [MethodCategory.TON],
+                authType: AuthType.TON
             }
         ]
     }
