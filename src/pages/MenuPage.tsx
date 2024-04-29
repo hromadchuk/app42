@@ -129,7 +129,14 @@ const MenuPage = () => {
         }
 
         TonApiCall.getWallet(userFriendlyAddress).then((accountInfo) => {
-            setWalletAddress(accountInfo.name || userFriendlyAddress);
+            if (accountInfo.name) {
+                setWalletAddress(accountInfo.name);
+            } else {
+                const slicePart = userFriendlyAddress.slice(5, -5);
+                const shortWallet = userFriendlyAddress.replace(slicePart, '...');
+
+                setWalletAddress(shortWallet);
+            }
 
             getCache(Constants.AUTH_STATE_METHOD_KEY).then((cacheMethodId) => {
                 if (cacheMethodId) {
