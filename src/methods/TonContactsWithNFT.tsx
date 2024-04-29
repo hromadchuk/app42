@@ -159,7 +159,7 @@ export const TonContactsWithNFT = () => {
                         return null;
                     }
 
-                    const amount = `${fragment.amount.valueOf() / 100} ${fragment.currency}`;
+                    const cryptoAmount = parseFloat((fragment.cryptoAmount.valueOf() / 1e9).toFixed(2));
                     const date = mt('bought').replace(
                         '{date}',
                         dayjs(fragment.purchaseDate * 1000).format('DD.MM.YYYY')
@@ -170,10 +170,12 @@ export const TonContactsWithNFT = () => {
                             <div>
                                 <Text fw={500}>@{name}</Text>
                                 <Text fz="xs" c="dimmed">
-                                    {date}
+                                    {date}, {cryptoAmount} {fragment.cryptoCurrency}
                                 </Text>
                             </div>
-                            <Badge variant="light">~{amount}</Badge>
+                            <Badge variant="light">
+                                ~{fragment.amount.valueOf() / 100} {fragment.currency}
+                            </Badge>
                         </Group>
                     );
                 })}
@@ -184,7 +186,7 @@ export const TonContactsWithNFT = () => {
                         return null;
                     }
 
-                    const amount = `${fragment.amount.valueOf() / 100} ${fragment.currency}`;
+                    const cryptoAmount = parseFloat((fragment.cryptoAmount.valueOf() / 1e9).toFixed(2));
                     const date = mt('bought').replace(
                         '{date}',
                         dayjs(fragment.purchaseDate * 1000).format('DD.MM.YYYY')
@@ -195,10 +197,12 @@ export const TonContactsWithNFT = () => {
                             <div>
                                 <Text fw={500}>+{phone}</Text>
                                 <Text fz="xs" c="dimmed">
-                                    {date}
+                                    {date}, {cryptoAmount} {fragment.cryptoCurrency}
                                 </Text>
                             </div>
-                            <Badge variant="light">~{amount}</Badge>
+                            <Badge variant="light">
+                                ~{fragment.amount.valueOf() / 100} {fragment.currency}
+                            </Badge>
                         </Group>
                     );
                 })}
