@@ -119,9 +119,9 @@
     "stories_stat": "Stories stat",
     "dialog_joined": "Chats/channels joined date",
     "clear_dialog_members": "Clear chats/channels members",
-    "ton_nft_analysis": "NFT analysis",
     "birthdays": "Birthdays",
-    "own_channels": "Own channels"
+    "own_channels": "Own channels",
+    "ton_contacts": "Contacts with NFT"
   },
   "charts": {
     "activity": {
@@ -530,6 +530,12 @@
       "no_contacts": "You don't have any contacts",
       "get_users_info": "Getting users info",
       "no_channels": "You contacts doesn't have any channels"
+    },
+    "ton_contacts": {
+      "no_contacts": "You don't have any contacts",
+      "no_contacts_with_nft": "You don't have contacts with NFT",
+      "get_users_info": "Getting users info",
+      "bought": "Bought {date}"
     }
   }
 }

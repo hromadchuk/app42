@@ -1,4 +1,3 @@
-import { useContext, useEffect, useState } from 'react';
 import {
     ActionIcon,
     Avatar,
@@ -14,7 +13,6 @@ import {
     useMantineTheme
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { useCloudStorage, usePopup } from '@tma.js/sdk-react';
 import {
     IconAddressBook,
     IconBook2,
@@ -26,25 +24,26 @@ import {
     IconWallet,
     TablerIconsProps
 } from '@tabler/icons-react';
+import { useCloudStorage, usePopup } from '@tma.js/sdk-react';
 import { useTonAddress, useTonConnectModal, useTonConnectUI } from '@tonconnect/ui-react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Api } from 'telegram';
+import Logo from '../components/Logo.tsx';
+import Onboarding from '../components/Onboarding.tsx';
 import { OwnerAvatar } from '../components/OwnerAvatar.tsx';
 import { Constants } from '../constants.ts';
 import { AppContext } from '../contexts/AppContext.tsx';
-import { CallAPI, classNames, decodeString, getCurrentUser, getDocLink } from '../lib/helpers.ts';
-import { hexToRgba } from '../lib/theme.ts';
 import { getCache, removeCache, setCache } from '../lib/cache.ts';
+import { CallAPI, classNames, decodeString, getCurrentUser, getDocLink } from '../lib/helpers.ts';
+import { t } from '../lib/lang.ts';
+import { hexToRgba } from '../lib/theme.ts';
 import { getModalLang } from '../lib/ton.ts';
 import { TonApiCall } from '../lib/TonApi.ts';
-import { getMethods, IMethod, MethodCategory } from '../routes.tsx';
-import Logo from '../components/Logo.tsx';
-import Onboarding from '../components/Onboarding.tsx';
-import AuthPage from './AuthPage.tsx';
-import ProfilePage from './ProfilePage.tsx';
-import { t } from '../lib/lang.ts';
+import { AuthType, getMethods, IMethod, MethodCategory } from '../routes.tsx';
 
 import classes from '../styles/MenuPage.module.css';
+import AuthPage from './AuthPage.tsx';
 
 interface ICard {
     id: MethodCategory;
@@ -155,7 +154,7 @@ const MenuPage = () => {
                 onClick={() => {
                     close();
 
-                    if (method.categories.includes(MethodCategory.TON)) {
+                    if (method.authType === AuthType.TON) {
                         if (userFriendlyAddress) {
                             navigate(`/methods/${method.id}`);
                         } else {
@@ -163,12 +162,14 @@ const MenuPage = () => {
                                 tonOpen();
                             });
                         }
-                    } else if (user) {
-                        navigate(`/methods/${method.id}`);
-                    } else {
-                        setCache(Constants.AUTH_STATE_METHOD_KEY, method.id, 15).then(() => {
-                            openAuth();
-                        });
+                    } else if (method.authType === AuthType.TG) {
+                        if (user) {
+                            navigate(`/methods/${method.id}`);
+                        } else {
+                            setCache(Constants.AUTH_STATE_METHOD_KEY, method.id, 15).then(() => {
+                                openAuth();
+                            });
+                        }
                     }
                 }}
             >
