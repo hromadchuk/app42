@@ -235,7 +235,7 @@ export const TonContactsWithNFT = () => {
                             justify="space-between"
                             rightSection={`${formatNumberFloat(balance)} TON`}
                         >
-                            {getShortAddress(wallet)}
+                            {getShortAddress(row.walletsAlias.get(wallet) || wallet)}
                         </Button>
                     );
                 })}
