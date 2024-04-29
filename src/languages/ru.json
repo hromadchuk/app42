@@ -120,7 +120,8 @@
     "clear_dialog_members": "Очистить участников чатов/каналов",
     "birthdays": "День рождения",
     "own_channels": "Собственные каналы",
-    "ton_contacts": "Контакты с NFT"
+    "ton_contacts": "Контакты с NFT",
+    "ton_jettons_analysis": "Анализ жетонов"
   },
   "charts": {
     "activity": {
@@ -535,6 +536,11 @@
       "no_contacts_with_nft": "У вас нет контактов с NFT",
       "get_users_info": "Получение информации о пользователях",
       "bought": "Куплено {date}"
+    },
+    "ton_jettons_analysis": {
+      "no_jettons": "У вас нет жетонов",
+      "get_jettons_info": "Получение информации о жетонах",
+      "top_holders": "Вы находитесь в топ {position} среди всех держателей"
     }
   }
 }
