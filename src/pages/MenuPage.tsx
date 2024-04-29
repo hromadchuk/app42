@@ -1,5 +1,5 @@
-import { useContext, useEffect, useState } from 'react';
 import {
+    ActionIcon,
     Avatar,
     Button,
     Container,
@@ -13,7 +13,6 @@ import {
     useMantineTheme
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { useCloudStorage, usePopup } from '@tma.js/sdk-react';
 import {
     IconAddressBook,
     IconBook2,
@@ -22,23 +21,29 @@ import {
     IconPigMoney,
     IconUser,
     IconUsersGroup,
+    IconWallet,
     TablerIconsProps
 } from '@tabler/icons-react';
+import { useCloudStorage, usePopup } from '@tma.js/sdk-react';
+import { useTonAddress, useTonConnectModal, useTonConnectUI } from '@tonconnect/ui-react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Api } from 'telegram';
+import Logo from '../components/Logo.tsx';
+import Onboarding from '../components/Onboarding.tsx';
 import { OwnerAvatar } from '../components/OwnerAvatar.tsx';
 import { Constants } from '../constants.ts';
 import { AppContext } from '../contexts/AppContext.tsx';
-import { CallAPI, classNames, decodeString, getCurrentUser, getDocLink } from '../lib/helpers.ts';
-import { hexToRgba } from '../lib/theme.ts';
 import { getCache, removeCache, setCache } from '../lib/cache.ts';
-import { getMethods, IMethod, MethodCategory } from '../routes.tsx';
-import Logo from '../components/Logo.tsx';
+import { CallAPI, classNames, decodeString, getCurrentUser, getDocLink } from '../lib/helpers.ts';
 import { t } from '../lib/lang.ts';
-import Onboarding from '../components/Onboarding.tsx';
-import AuthPage from './AuthPage.tsx';
+import { hexToRgba } from '../lib/theme.ts';
+import { getModalLang } from '../lib/ton.ts';
+import { TonApiCall } from '../lib/TonApi.ts';
+import { AuthType, getMethods, IMethod, MethodCategory } from '../routes.tsx';
 
 import classes from '../styles/MenuPage.module.css';
+import AuthPage from './AuthPage.tsx';
 
 interface ICard {
     id: MethodCategory;
@@ -66,6 +71,11 @@ const cards = [
         id: MethodCategory.CHATS,
         icon: IconMessages,
         color: 'pink'
+    },
+    {
+        id: MethodCategory.TON,
+        icon: IconWallet,
+        color: 'blue'
     }
 ];
 
@@ -76,13 +86,20 @@ const MenuPage = () => {
     const storage = useCloudStorage();
     const navigate = useNavigate();
     const popup = usePopup();
+    const { open: tonOpen } = useTonConnectModal();
+    const userFriendlyAddress = useTonAddress();
+    const [wallet, setOptions] = useTonConnectUI();
+
     const [isModalOpened, { open, close }] = useDisclosure(false);
     const [isModalAuthOpened, { open: openAuth, close: closeAuth }] = useDisclosure(false);
 
     const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
     const [needShowOnboarding, setShowOnboarding] = useState(false);
+    const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
     useEffect(() => {
+        setOptions({ language: getModalLang() });
+
         (async () => {
             const isOnboardingCompleted = await checkIsOnboardingCompleted();
 
@@ -91,7 +108,7 @@ const MenuPage = () => {
             } else if (initData) {
                 if (!user && initData?.status === 'ok') {
                     const storageSession = decodeString(await storage.get(Constants.SESSION_KEY), initData.storageHash);
-                    console.log('storageSession', storageSession);
+                    console.log('storageSession', Boolean(storageSession));
                     if (storageSession) {
                         setUser(await getCurrentUser());
                     }
@@ -104,6 +121,24 @@ const MenuPage = () => {
             }
         })();
     }, [initData]);
+
+    useEffect(() => {
+        if (!userFriendlyAddress) {
+            setWalletAddress(null);
+            return;
+        }
+
+        TonApiCall.getWallet(userFriendlyAddress).then((accountInfo) => {
+            setWalletAddress(accountInfo.name || userFriendlyAddress);
+
+            getCache(Constants.AUTH_STATE_METHOD_KEY).then((cacheMethodId) => {
+                if (cacheMethodId) {
+                    removeCache(Constants.AUTH_STATE_METHOD_KEY);
+                    navigate(`/methods/${cacheMethodId}`);
+                }
+            });
+        });
+    }, [userFriendlyAddress]);
 
     const methods = getMethods();
 
@@ -119,12 +154,22 @@ const MenuPage = () => {
                 onClick={() => {
                     close();
 
-                    if (user) {
-                        navigate(`/methods/${method.id}`);
-                    } else {
-                        setCache(Constants.AUTH_STATE_METHOD_KEY, method.id, 15).then(() => {
-                            openAuth();
-                        });
+                    if (method.authType === AuthType.TON) {
+                        if (userFriendlyAddress) {
+                            navigate(`/methods/${method.id}`);
+                        } else {
+                            setCache(Constants.AUTH_STATE_METHOD_KEY, method.id, 15).then(() => {
+                                tonOpen();
+                            });
+                        }
+                    } else if (method.authType === AuthType.TG) {
+                        if (user) {
+                            navigate(`/methods/${method.id}`);
+                        } else {
+                            setCache(Constants.AUTH_STATE_METHOD_KEY, method.id, 15).then(() => {
+                                openAuth();
+                            });
+                        }
                     }
                 }}
             >
@@ -150,7 +195,7 @@ const MenuPage = () => {
                     open();
                 }}
             >
-                <card.icon size={32} color={color} />
+                <card.icon size={32} color={color} stroke={1.2} />
                 <Text size="xs" mt={7}>
                     {t(`menu.cards.${card.id}`)}
                 </Text>
@@ -230,6 +275,47 @@ const MenuPage = () => {
         );
     }
 
+    function WalletRow() {
+        if (!walletAddress) {
+            return null;
+        }
+
+        return (
+            <UnstyledButton
+                className={classes.user}
+                onClick={() => {
+                    popup
+                        .open({
+                            message: t('menu.wallet_disconnect'),
+                            buttons: [
+                                { id: 'exit', type: 'ok' },
+                                { id: 'cancel', type: 'cancel' }
+                            ]
+                        })
+                        .then((result) => {
+                            if (result === 'exit') {
+                                wallet.disconnect();
+                            }
+                        });
+                }}
+            >
+                <Group>
+                    <ActionIcon variant="subtle" size="lg" radius="xl">
+                        <IconWallet stroke={1} />
+                    </ActionIcon>
+
+                    <div style={{ flex: 1 }}>
+                        <Text size="sm" fw={500}>
+                            {walletAddress}
+                        </Text>
+                    </div>
+
+                    <IconLogout size={16} stroke={1.5} />
+                </Group>
+            </UnstyledButton>
+        );
+    }
+
     return (
         <>
             <Modal.Root opened={isModalOpened} onClose={close}>
@@ -265,21 +351,15 @@ const MenuPage = () => {
 
             <Container p={5}>
                 {UserRow()}
+                {WalletRow()}
 
                 <SimpleGrid cols={2} m="xs">
                     {cards.map(CategoryBlock)}
                 </SimpleGrid>
 
                 <UnstyledButton className={classes.link} component="a" href={getDocLink('')} target="_blank">
-                    <IconBook2 className={classes.linkIcon} stroke={1.5} />
+                    <IconBook2 className={classes.linkIcon} stroke={1} />
                     <span>{t('menu.documentation')}</span>
-                </UnstyledButton>
-
-                <UnstyledButton className={classes.link} component="a" href="https://t.me/kit42_app" target="_blank">
-                    <Avatar size="sm" color="blue" radius="xl" mr="xs">
-                        <Logo size={14} />
-                    </Avatar>
-                    <span>{t('menu.telegram_channel')}</span>
                 </UnstyledButton>
 
                 <UnstyledButton
@@ -288,8 +368,15 @@ const MenuPage = () => {
                     href="https://t.me/tribute?start=sd1c"
                     target="_blank"
                 >
-                    <IconPigMoney className={classNames(classes.linkIcon, classes.donutIcon)} stroke={1.5} />
+                    <IconPigMoney className={classNames(classes.linkIcon, classes.donutIcon)} stroke={1} />
                     <span>{t('menu.donate')}</span>
+                </UnstyledButton>
+
+                <UnstyledButton className={classes.link} component="a" href="https://t.me/kit42_app" target="_blank">
+                    <Avatar size="sm" color="blue" radius="xl" mr="xs">
+                        <Logo size={14} />
+                    </Avatar>
+                    <span>{t('menu.telegram_channel')}</span>
                 </UnstyledButton>
             </Container>
 

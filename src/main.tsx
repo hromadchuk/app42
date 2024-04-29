@@ -28,8 +28,10 @@ if (isDevUser) {
 }
 
 // only for test!!!
-// import Test from '../Test.tsx';
-// createRoot(document.getElementById('root') as HTMLElement).render(<Test />);
+// import TestImages from '../TestImages.tsx';
+// createRoot(document.getElementById('root') as HTMLElement).render(<TestImages />);
+// import TestTon from '../TestTon.tsx';
+// createRoot(document.getElementById('root') as HTMLElement).render(<TestTon />);
 
 const tgWebAppData = getParams().get('tgWebAppData');
 if (tgWebAppData) {
