@@ -35,21 +35,21 @@ export function ServerMock<T>(method: string) {
         return {
             usernames: [
                 {
-                    ownerWallet: 'UQDYzZmfsrGzhObKJUw4gzdeIxEai3jAFbiGKGwxvxHinf4K',
+                    ownerWallet: '0:d8cd999fb2b1b384e6ca254c3883375e23111a8b78c015b886286c31bf11e29d',
                     username: 'pavel'
                 },
                 {
-                    ownerWallet: 'UQDYzZmfsrGzhObKJUw4gzdeIxEai3jAFbiGKGwxvxHinf4K',
+                    ownerWallet: '0:d8cd999fb2b1b384e6ca254c3883375e23111a8b78c015b886286c31bf11e29d',
                     username: 'paul'
                 },
                 {
-                    ownerWallet: 'UQDYzZmfsrGzhObKJUw4gzdeIxEai3jAFbiGKGwxvxHinf4K',
+                    ownerWallet: '0:d8cd999fb2b1b384e6ca254c3883375e23111a8b78c015b886286c31bf11e29d',
                     username: 'paulo'
                 }
             ],
             numbers: [
                 {
-                    ownerWallet: 'UQDYzZmfsrGzhObKJUw4gzdeIxEai3jAFbiGKGwxvxHinf4K',
+                    ownerWallet: '0:d8cd999fb2b1b384e6ca254c3883375e23111a8b78c015b886286c31bf11e29d',
                     number: 88802375914
                 }
             ]
