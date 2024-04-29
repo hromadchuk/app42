@@ -78,6 +78,12 @@ export function formatNumber(number: number): string {
     return `${number}`.replace(/(\d)(?=(\d{3})+$)/g, '$1\u00a0');
 }
 
+export function formatNumberFloat(number: number): string {
+    const [int, float] = `${number}`.split('.');
+
+    return formatNumber(parseInt(int)) + (float ? `.${float}` : '');
+}
+
 export function decline(number: number, titles: string[]): string {
     const langCode = getAppLangCode();
 
