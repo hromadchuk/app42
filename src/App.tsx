@@ -1,6 +1,7 @@
 import { PropsWithChildren, useEffect, useState } from 'react';
 import { AppShell, Center, Loader, MantineProvider } from '@mantine/core';
 import { useColorScheme } from '@mantine/hooks';
+import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import { ModalsProvider } from '@mantine/modals';
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { Api, TelegramClient } from 'telegram';
@@ -13,6 +14,7 @@ import { clearOldCache } from './lib/cache.ts';
 import { decodeString, getParams, isDev, Server } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
 import { setColors } from './lib/theme.ts';
+import { getManifestUrl } from './lib/ton.ts';
 import { IRouter, routes } from './routes.tsx';
 import ReactGA from 'react-ga4';
 
@@ -27,7 +29,6 @@ declare global {
     interface Window {
         TelegramClient: TelegramClient;
         listenEvents: { [key: string]: (event: object) => void };
-        listenMAEvents: { [key: string]: (event: undefined | { button_id: string }) => void };
         userId: number;
         isProgress: boolean;
         isNeedToThrowErrorOnRequest: boolean;
@@ -128,7 +129,6 @@ const App = () => {
             }
 
             window.listenEvents = {};
-            window.listenMAEvents = {};
 
             window.TelegramClient.addEventHandler((event) => {
                 if (window.listenEvents[event.className]) {
@@ -141,10 +141,6 @@ const App = () => {
 
                 if (eventType !== 'viewport_changed') {
                     console.log('event', eventType, '=>', eventData);
-                }
-
-                if (window.listenMAEvents[eventType]) {
-                    window.listenMAEvents[eventType](eventData);
                 }
 
                 if (eventType === 'theme_changed') {
@@ -230,17 +226,19 @@ function MiniAppLoader({ children }: PropsWithChildren) {
 
 const MiniAppWrapper = () => (
     <SDKProvider options={{ async: true }}>
-        <MantineProvider forceColorScheme={useColorScheme()}>
-            <ModalsProvider>
-                <MiniAppLoader>
-                    <MemoryRouter>
-                        <AppShell>
-                            <App />
-                        </AppShell>
-                    </MemoryRouter>
-                </MiniAppLoader>
-            </ModalsProvider>
-        </MantineProvider>
+        <TonConnectUIProvider manifestUrl={getManifestUrl()}>
+            <MantineProvider forceColorScheme={useColorScheme()}>
+                <ModalsProvider>
+                    <MiniAppLoader>
+                        <MemoryRouter>
+                            <AppShell>
+                                <App />
+                            </AppShell>
+                        </MemoryRouter>
+                    </MiniAppLoader>
+                </ModalsProvider>
+            </MantineProvider>
+        </TonConnectUIProvider>
     </SDKProvider>
 );
 

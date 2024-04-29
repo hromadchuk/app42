@@ -1,6 +1,7 @@
-import { notifications } from '@mantine/notifications';
 import { Buffer } from 'buffer';
 import { AES, enc } from 'crypto-js';
+import { HttpClient, Api as TonApiSDK } from 'tonapi-sdk-js';
+import { notifications } from '@mantine/notifications';
 import { Api } from 'telegram';
 import { FloodWaitError } from 'telegram/errors';
 import { AbortRequestError } from '../errors/AbortRequestError.ts';
@@ -11,6 +12,19 @@ import { ServerMock } from './mock.ts';
 
 export type TOwnerInfo = null | Api.TypeUser | Api.TypeChat;
 type TDocumentThumb = Api.TypeDocument | Api.TypePhoto | Api.UserProfilePhoto | Api.ChatPhoto | undefined;
+
+export const TonApi = new TonApiSDK(
+    new HttpClient({
+        baseUrl: 'https://tonapi.io/',
+        baseApiParams: {
+            headers: {
+                // Authorization: 'Bearer AGGHQSHTE46RAWAAAAAKDQJHVP3ZWTD7VWS2TQK72GTO6DBKO42J2BGIQYDRAZBK2BYLTMI',
+                Authorization: 'Bearer AENPCE3B43W5JCAAAAAHIJIGZOQOMJZG6PDKT7FH5QBAC4G4EUZ2UTKTJRPD77HAXKVUCCI',
+                'Content-type': 'application/json'
+            }
+        }
+    })
+);
 
 interface IUser {
     added_to_attachment_menu: boolean;

@@ -72,12 +72,14 @@
     "donate": "Support the project",
     "telegram_channel": "Telegram channel with updates",
     "auth_modal_title": "Authorization",
+    "wallet_disconnect": "Disconnect the wallet?",
     "account_disconnect": "Disconnect account?",
     "cards": {
       "account": "Account",
       "contacts": "Contacts",
       "channels": "Channels",
-      "chats": "Chats"
+      "chats": "Chats",
+      "ton": "TON"
     }
   },
   "beta": "This is beta version of the product and there may be bugs. If you find a bug or have a suggestion, please send a message to the developer. Features will be added as the product is developed.",
@@ -117,7 +119,8 @@
     "dialog_joined": "Chats/channels joined date",
     "clear_dialog_members": "Clear chats/channels members",
     "birthdays": "Birthdays",
-    "own_channels": "Own channels"
+    "own_channels": "Own channels",
+    "ton_contacts": "Contacts with NFT"
   },
   "charts": {
     "activity": {
@@ -526,6 +529,12 @@
       "no_contacts": "You don't have any contacts",
       "get_users_info": "Getting users info",
       "no_channels": "You contacts doesn't have any channels"
+    },
+    "ton_contacts": {
+      "no_contacts": "You don't have any contacts",
+      "no_contacts_with_nft": "You don't have contacts with NFT",
+      "get_users_info": "Getting users info",
+      "bought": "Bought {date}"
     }
   }
 }

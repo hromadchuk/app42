@@ -3,6 +3,7 @@ import { createElement, JSX, lazy, Suspense } from 'react';
 import {
     Icon123,
     IconAddressBook,
+    IconArchive,
     IconCake,
     IconCalendarPlus,
     IconCreativeCommonsNd,
@@ -29,7 +30,13 @@ export enum MethodCategory {
     ACCOUNT = 'account',
     CONTACTS = 'contacts',
     CHANNELS = 'channels',
-    CHATS = 'chats'
+    CHATS = 'chats',
+    TON = 'ton'
+}
+
+export enum AuthType {
+    TG = 'tg',
+    TON = 'ton'
 }
 
 export interface IMethod {
@@ -37,6 +44,7 @@ export interface IMethod {
     name: string;
     icon: (props: TablerIconsProps) => JSX.Element;
     categories: MethodCategory[];
+    authType: AuthType;
 }
 
 export interface IRouter extends Partial<IMethod> {
@@ -52,6 +60,7 @@ interface IAppMethodRouter {
     icon: (props: TablerIconsProps) => JSX.Element;
     element: JSX.Element;
     categories: MethodCategory[];
+    authType: AuthType;
 }
 
 interface IAppRouter {
@@ -75,103 +84,127 @@ const appRoutes: IAppRouter[] = [
                 id: 'get_id',
                 icon: Icon123,
                 element: createElement(lazy(() => import('./methods/GetId.tsx'))),
-                categories: [MethodCategory.ACCOUNT, MethodCategory.CHANNELS]
+                categories: [MethodCategory.ACCOUNT, MethodCategory.CHANNELS],
+                authType: AuthType.TG
             },
             {
                 id: 'contacts_analysis',
                 icon: IconAddressBook,
                 element: createElement(lazy(() => import('./methods/ContactsAnalysis.tsx'))),
-                categories: [MethodCategory.CONTACTS]
+                categories: [MethodCategory.CONTACTS],
+                authType: AuthType.TG
             },
             {
                 id: 'messages_stat',
                 icon: IconMessageCircleSearch,
                 element: createElement(lazy(() => import('./methods/MessagesStat.tsx'))),
-                categories: [MethodCategory.CHATS]
+                categories: [MethodCategory.CHATS],
+                authType: AuthType.TG
             },
             {
                 id: 'animated_messages',
                 icon: IconKeyframes,
                 element: createElement(lazy(() => import('./methods/AnimatedMessages.tsx'))),
-                categories: [MethodCategory.CHATS]
+                categories: [MethodCategory.CHATS],
+                authType: AuthType.TG
             },
             {
                 id: 'inactive_channels',
                 icon: IconHourglassLow,
                 element: createElement(lazy(() => import('./methods/InactiveChannels.tsx'))),
-                categories: [MethodCategory.CHANNELS]
+                categories: [MethodCategory.CHANNELS],
+                authType: AuthType.TG
             },
             {
                 id: 'import_messages',
                 icon: IconMessageCircleUp,
                 element: createElement(lazy(() => import('./methods/ImportMessages.tsx'))),
-                categories: [MethodCategory.CHATS]
+                categories: [MethodCategory.CHATS],
+                authType: AuthType.TG
             },
             {
                 id: 'clear_blacklist',
                 icon: IconThumbDownOff,
                 element: createElement(lazy(() => import('./methods/ClearBlacklist.tsx'))),
-                categories: [MethodCategory.ACCOUNT]
+                categories: [MethodCategory.ACCOUNT],
+                authType: AuthType.TG
             },
             {
                 id: 'administered',
                 icon: IconMessageCircleCog,
                 element: createElement(lazy(() => import('./methods/Administered.tsx'))),
-                categories: [MethodCategory.CHANNELS, MethodCategory.CHATS]
+                categories: [MethodCategory.CHANNELS, MethodCategory.CHATS],
+                authType: AuthType.TG
             },
             {
                 id: 'common_chats_top',
                 icon: IconCreativeCommonsNd,
                 element: createElement(lazy(() => import('./methods/CommonChatsTop.tsx'))),
-                categories: [MethodCategory.CONTACTS, MethodCategory.CHATS]
+                categories: [MethodCategory.CONTACTS, MethodCategory.CHATS],
+                authType: AuthType.TG
             },
             {
                 id: 'calls_stat',
                 icon: IconPhoneCall,
                 element: createElement(lazy(() => import('./methods/CallsStat.tsx'))),
-                categories: [MethodCategory.CONTACTS]
+                categories: [MethodCategory.CONTACTS],
+                authType: AuthType.TG
             },
             {
                 id: 'channels_registration',
                 icon: IconCalendarPlus,
                 element: createElement(lazy(() => import('./methods/ChannelsRegistration.tsx'))),
-                categories: [MethodCategory.CHANNELS]
+                categories: [MethodCategory.CHANNELS],
+                authType: AuthType.TG
             },
             {
                 id: 'records_stat',
                 icon: IconReportAnalytics,
                 element: createElement(lazy(() => import('./methods/RecordsStat.tsx'))),
-                categories: [MethodCategory.CHANNELS]
+                categories: [MethodCategory.CHANNELS],
+                authType: AuthType.TG
             },
             {
                 id: 'stories_stat',
                 icon: IconPhotoPentagon,
                 element: createElement(lazy(() => import('./methods/StoriesStat.tsx'))),
-                categories: [MethodCategory.ACCOUNT]
+                categories: [MethodCategory.ACCOUNT],
+                authType: AuthType.TG
             },
             {
                 id: 'dialog_joined',
                 icon: IconDoorEnter,
                 element: createElement(lazy(() => import('./methods/DialogJoined.tsx'))),
-                categories: [MethodCategory.CHANNELS, MethodCategory.CHATS]
+                categories: [MethodCategory.CHANNELS, MethodCategory.CHATS],
+                authType: AuthType.TG
             },
             {
                 id: 'clear_dialog_members',
                 icon: IconFriendsOff,
                 element: createElement(lazy(() => import('./methods/ClearDialogMembers.tsx'))),
-                categories: [MethodCategory.CHANNELS, MethodCategory.CHATS]
+                categories: [MethodCategory.CHANNELS, MethodCategory.CHATS],
+                authType: AuthType.TG
             },
             {
                 id: 'birthdays',
                 icon: IconCake,
                 element: createElement(lazy(() => import('./methods/Birthdays.tsx'))),
-                categories: [MethodCategory.CONTACTS]
+                categories: [MethodCategory.CONTACTS],
+                authType: AuthType.TG
             },
             {
                 id: 'own_channels',
                 icon: IconUsersGroup,
                 element: createElement(lazy(() => import('./methods/OwnChannels.tsx'))),
-                categories: [MethodCategory.CONTACTS]
+                categories: [MethodCategory.CONTACTS],
+                authType: AuthType.TG
+            },
+            {
+                id: 'ton_contacts',
+                icon: IconArchive,
+                element: createElement(lazy(() => import('./methods/TonContactsWithNFT.tsx'))),
+                categories: [MethodCategory.TON, MethodCategory.CONTACTS],
+                authType: AuthType.TG
             }
         ]
     }
@@ -228,7 +261,8 @@ export const getMethods = (): IMethod[] => {
         id: item.id,
         name: t(`routes.${item.id}`),
         icon: item.icon,
-        categories: item.categories
+        categories: item.categories,
+        authType: item.authType
     }));
 
     return methods.sort((a, b) => a.name.localeCompare(b.name));

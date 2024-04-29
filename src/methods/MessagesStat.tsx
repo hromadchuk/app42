@@ -764,28 +764,26 @@ export const MessagesStat = () => {
         };
 
         const onKickUserClick = (owner: Api.User) => {
-            window.listenMAEvents.popup_closed = (data) => {
-                delete window.listenMAEvents.popup_closed;
-
-                if (data?.button_id === 'kick') {
-                    kickMember(owner.id.valueOf());
-                }
-            };
-
-            popup.open({
-                message: mt('kick_question').replace('{name}', owner.firstName || 'No name'),
-                buttons: [
-                    {
-                        id: 'kick',
-                        type: 'destructive',
-                        text: mt('kick_button_yes')
-                    },
-                    {
-                        id: 'save',
-                        type: 'cancel'
+            popup
+                .open({
+                    message: mt('kick_question').replace('{name}', owner.firstName || 'No name'),
+                    buttons: [
+                        {
+                            id: 'kick',
+                            type: 'destructive',
+                            text: mt('kick_button_yes')
+                        },
+                        {
+                            id: 'save',
+                            type: 'cancel'
+                        }
+                    ]
+                })
+                .then((result) => {
+                    if (result === 'kick') {
+                        kickMember(owner.id.valueOf());
                     }
-                ]
-            });
+                });
         };
 
         const topOwners = tabs.find((tab) => tab.id === selectedTab)?.owners || [];
