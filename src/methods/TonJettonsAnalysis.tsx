@@ -88,8 +88,8 @@ export const TonJettonsAnalysis = () => {
         return jettonsList.map((jetton, key) => {
             return (
                 <Stack gap={0} key={key}>
-                    <Group justify="space-between">
-                        <Group>
+                    <Group wrap="nowrap" justify="space-between">
+                        <Group wrap="nowrap">
                             <Avatar src={jetton.image} radius="sm" />
 
                             <div>
