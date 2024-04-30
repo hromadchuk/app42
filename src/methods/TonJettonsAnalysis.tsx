@@ -45,7 +45,7 @@ export const TonJettonsAnalysis = () => {
 
             for (const { jetton, balance, price } of filteredBalances) {
                 const point = '1' + new Array(jetton.decimals).fill(0).join('');
-                const formattedBalance = (Number(balance) / Number(point)).toFixed(jetton.decimals);
+                const formattedBalance = formatNumberFloat(Number((Number(balance) / Number(point)).toFixed(2)));
 
                 const holders = await TonApiCall.getJettonHolders(jetton.address);
                 const holderPosition = holders.addresses.findIndex((holder) => holder.owner.address === userWallet);
@@ -103,7 +103,7 @@ export const TonJettonsAnalysis = () => {
                         <Stack gap={0} align="end">
                             {jetton.amounts.map((amount, amountKey) => (
                                 <Badge variant="transparent" color="blue" size="sm" key={amountKey}>
-                                    {amount}
+                                    ~{amount}
                                 </Badge>
                             ))}
                         </Stack>
