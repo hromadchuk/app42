@@ -1,5 +1,4 @@
 import {
-    ActionIcon,
     Avatar,
     Button,
     Container,
@@ -300,9 +299,7 @@ const MenuPage = () => {
                 }}
             >
                 <Group>
-                    <ActionIcon variant="subtle" size="lg" radius="xl">
-                        <IconWallet stroke={1} />
-                    </ActionIcon>
+                    <IconWallet stroke={1} color="var(--mantine-color-blue-filled)" />
 
                     <div style={{ flex: 1 }}>
                         <Text size="sm" fw={500}>
