@@ -1,0 +1,28 @@
+.copyIcon {
+    width: rem(16);
+}
+
+.infoRowText {
+    word-break: break-all;
+    overflow-wrap: anywhere;
+}
+
+.infoRowHeaderText {
+    font-weight: bold
+}
+
+.chartBurgerIcon {
+    --chart-button-margin: 5px;
+    --ti-size-burger: calc(var(--ti-size) + 20);
+    height: var(--ti-size-burger);
+    width: var(--ti-size-burger);
+
+    position: absolute;
+    right: var(--chart-button-margin);
+    top: var(--chart-button-margin);
+    z-index: 10;
+}
+
+.chartInput {
+    width: 80%;
+}

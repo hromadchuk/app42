@@ -3,7 +3,7 @@ import { Badge, Button, Card, Group, Text } from '@mantine/core';
 import { Api } from 'telegram';
 import dayjs from 'dayjs';
 import { OwnerRow } from '../components/OwnerRow.tsx';
-import { CallAPI, formatNumberFloat, Server } from '../lib/helpers.ts';
+import { CallAPI, convertTonValueToHumanReadable, formatNumberFloat, Server } from '../lib/helpers.ts';
 import { getShortAddress } from '../lib/ton.ts';
 import { TonApiCall } from '../lib/TonApi.ts';
 
@@ -172,7 +172,7 @@ export const TonContactsWithNFT = () => {
                         return null;
                     }
 
-                    const cryptoAmount = parseFloat((fragment.cryptoAmount.valueOf() / 1e9).toFixed(2));
+                    const cryptoAmount = convertTonValueToHumanReadable(fragment.cryptoAmount.valueOf());
                     const date = mt('bought').replace(
                         '{date}',
                         dayjs(fragment.purchaseDate * 1000).format('DD.MM.YYYY')
@@ -199,7 +199,7 @@ export const TonContactsWithNFT = () => {
                         return null;
                     }
 
-                    const cryptoAmount = parseFloat((fragment.cryptoAmount.valueOf() / 1e9).toFixed(2));
+                    const cryptoAmount = convertTonValueToHumanReadable(fragment.cryptoAmount.valueOf());
                     const date = mt('bought').replace(
                         '{date}',
                         dayjs(fragment.purchaseDate * 1000).format('DD.MM.YYYY')
@@ -221,7 +221,7 @@ export const TonContactsWithNFT = () => {
                 })}
 
                 {row.wallets.map((wallet, walletKey) => {
-                    const balance = parseFloat(((row.walletsBalances.get(wallet) as number) / 1e9).toFixed(2));
+                    const balance = convertTonValueToHumanReadable(row.walletsBalances.get(wallet) as number);
 
                     return (
                         <Button

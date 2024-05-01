@@ -594,4 +594,8 @@ export function decodeString(encodedString: string, key: string) {
     return AES.decrypt(encodedString, key).toString(enc.Utf8);
 }
 
+export function convertTonValueToHumanReadable(value: number): number {
+    return parseFloat((value / 1e9).toFixed(2));
+}
+
 export type TOwnerType = Api.User | Api.Chat | Api.Channel;

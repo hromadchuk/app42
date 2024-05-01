@@ -121,7 +121,8 @@
     "birthdays": "Birthdays",
     "own_channels": "Own channels",
     "ton_contacts": "Contacts with NFT",
-    "ton_jettons_analysis": "Jettons analysis"
+    "ton_jettons_analysis": "Jettons analysis",
+    "ton_wallet_analysis": "Wallet analysis"
   },
   "charts": {
     "activity": {
@@ -541,6 +542,22 @@
       "no_jettons": "You don't have any jettons",
       "get_jettons_info": "Getting jettons info",
       "top_holders": "You're in the top {position} of all holders"
+    },
+    "ton_wallet_analysis": {
+      "copy": "Copy",
+      "copies": "Copied",
+      "address": "Address",
+      "full_address": "Full address",
+      "name": "Name",
+      "balance": "Balance",
+      "last_activity": "Last activity",
+      "never": "Never",
+      "domains": "Domains",
+      "balance_changes": "Balance changes",
+      "chart_loading": "Chart is loading. Current step: {step}",
+      "save_changes": "Save changes",
+      "chart_interval": "Select the interval of the chart",
+      "chart_divisions_count": "Enter the number of divisions for the graph"
     }
   }
 }

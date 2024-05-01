@@ -2,6 +2,7 @@ import {
     Account,
     AccountEvent,
     AccountEvents,
+    DomainNames,
     Error,
     HttpResponse,
     JettonHolders,
@@ -11,6 +12,15 @@ import {
     NftItems
 } from 'tonapi-sdk-js';
 import { sleep, TonApi } from './helpers.ts';
+import dayjs from 'dayjs';
+
+export enum AvailableBalancePeriods {
+    hour = 'hour',
+    day = 'day',
+    week = 'week',
+    month = 'month',
+    year = 'year'
+}
 
 export class TonApiCall {
     static async getWallet(wallet: string) {
@@ -39,6 +49,50 @@ export class TonApiCall {
             limit: 1000,
             offset: 0
         });
+    }
+
+    static async getDomains(wallet: string) {
+        return await TonApiCall.request<DomainNames>('getDomains', TonApi.accounts.accountDnsBackResolve, wallet);
+    }
+
+    static async *getBalanceChange(
+        wallet: string,
+        startDate: dayjs.Dayjs,
+        step: AvailableBalancePeriods,
+        stepSize: number,
+        stepsCount: number
+    ): AsyncGenerator<{
+        date: number;
+        value: number;
+    }> {
+        if (stepsCount <= 0 || stepSize <= 0) {
+            throw new Error('Incorrect data');
+        }
+
+        let balanceToDate = startDate;
+        for (let remainingStepsCount = stepsCount; remainingStepsCount > 0; remainingStepsCount--) {
+            const balanceFromDate = balanceToDate.add(-1 * stepSize, step);
+            const balanceInPeriod = await this.getBalanceChangeInPeriod(wallet, balanceFromDate, balanceToDate);
+
+            balanceToDate = balanceFromDate;
+
+            yield {
+                date: balanceFromDate.unix(),
+                value: balanceInPeriod.balance_change
+            };
+        }
+    }
+
+    static async getBalanceChangeInPeriod(wallet: string, from: dayjs.Dayjs, to: dayjs.Dayjs) {
+        return await TonApiCall.request<{ balance_change: number }>(
+            'getBalanceChange',
+            TonApi.accounts.getAccountDiff,
+            wallet,
+            {
+                start_date: from.unix(),
+                end_date: to.unix()
+            }
+        );
     }
 
     static async getNfts(wallet: string) {

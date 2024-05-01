@@ -20,6 +20,7 @@ import {
     IconReportAnalytics,
     IconThumbDownOff,
     IconUsersGroup,
+    IconWallet,
     TablerIconsProps
 } from '@tabler/icons-react';
 
@@ -212,6 +213,13 @@ const appRoutes: IAppRouter[] = [
                 icon: IconCoins,
                 element: createElement(lazy(() => import('./methods/TonJettonsAnalysis.tsx'))),
                 categories: [MethodCategory.TON],
+                authType: AuthType.TON
+            },
+            {
+                id: 'ton_wallet_analysis',
+                icon: IconWallet,
+                element: createElement(lazy(() => import('./methods/TonWalletAnalysis.tsx'))),
+                categories: [MethodCategory.TON, MethodCategory.ACCOUNT],
                 authType: AuthType.TON
             }
         ]
