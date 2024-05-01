@@ -79,8 +79,10 @@ export function formatNumber(number: number): string {
 
 export function formatNumberFloat(number: number): string {
     const [int, float] = `${number}`.split('.');
+    const slicedFloat = float?.slice(0, 2);
+    const suffix = !Number(slicedFloat) ? '' : `.${slicedFloat}`;
 
-    return formatNumber(parseInt(int)) + (float ? `.${float}` : '');
+    return formatNumber(parseInt(int)) + suffix;
 }
 
 export function decline(number: number, titles: string[]): string {
