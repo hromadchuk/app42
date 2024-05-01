@@ -25,8 +25,6 @@ import {
 
 import { t } from './lib/lang.ts';
 
-const AuthRequired = lazy(() => import('./components/AuthRequired.tsx'));
-
 export enum MethodCategory {
     ACCOUNT = 'account',
     CONTACTS = 'contacts',
@@ -51,7 +49,6 @@ export interface IMethod {
 export interface IRouter extends Partial<IMethod> {
     path: string;
     element: JSX.Element;
-    withoutAuth?: boolean;
     childElement?: JSX.Element;
     methodId?: string;
 }
@@ -66,7 +63,6 @@ interface IAppMethodRouter {
 
 interface IAppRouter {
     path: string;
-    withoutAuth?: boolean;
     element: JSX.Element;
     methods?: IAppMethodRouter[];
 }
@@ -74,7 +70,6 @@ interface IAppRouter {
 const appRoutes: IAppRouter[] = [
     {
         path: '/',
-        withoutAuth: true,
         element: createElement(lazy(() => import('./pages/MenuPage.tsx')))
     },
     {
@@ -223,18 +218,13 @@ const formattedRoutes: IRouter[] = [];
 function makeRoute(route: IAppRouter, method?: IAppMethodRouter): IRouter {
     const result: IRouter = {
         path: route.path,
-        element: route.element,
-        withoutAuth: Boolean(route.withoutAuth)
+        element: route.element
     };
 
     if (method) {
         result.path = `/methods/${method.id}`;
         result.childElement = method.element;
         result.methodId = method.id;
-    }
-
-    if (!result.withoutAuth) {
-        result.element = <AuthRequired page={result.element} />;
     }
 
     result.element = (

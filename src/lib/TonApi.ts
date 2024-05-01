@@ -138,8 +138,6 @@ export class TonApiCall {
     }
 
     private static async request<T>(method: string, func: Function, ...params: unknown[]): Promise<T> {
-        await sleep(333);
-
         try {
             const data = await func(...params);
 
