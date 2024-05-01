@@ -442,13 +442,14 @@ export async function Server<T>(method: string, params: object = {}): Promise<T>
         return {} as T;
     }
 
+    const noobBody = encodeString(JSON.stringify(params), `noobHook${getUserId()}`);
     const data = await fetch(`${apiEndpoint}/api/${method}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             authData
         },
-        body: JSON.stringify(params)
+        body: JSON.stringify({ nb: noobBody })
     }).then((response) => response.json());
 
     console.group(`SERVER /${method}`);
@@ -576,8 +577,6 @@ export async function getCurrentUser(): Promise<Api.User | null> {
             }),
             { hideErrorAlert: true }
         )) as Api.User[];
-
-        window.userId = user.id.valueOf();
 
         return user;
     } catch (error) {
