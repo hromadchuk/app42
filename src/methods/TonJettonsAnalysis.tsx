@@ -14,6 +14,7 @@ interface IJetton {
     symbol: string;
     decimals: number;
     holderPosition: number;
+    amountTON: number;
     amounts: string[];
 }
 
@@ -44,6 +45,7 @@ export const TonJettonsAnalysis = () => {
             setProgress({ total: filteredBalances.length, text: mt('get_jettons_info') });
 
             for (const { jetton, balance, price } of filteredBalances) {
+                let amountTON = 0;
                 const point = '1' + new Array(jetton.decimals).fill(0).join('');
                 const formattedBalance = formatNumberFloat(Number((Number(balance) / Number(point)).toFixed(2)));
 
@@ -54,8 +56,13 @@ export const TonJettonsAnalysis = () => {
                 const priceKeys = Object.keys(price?.prices || {});
 
                 for (const key of priceKeys) {
-                    const amount = formatNumberFloat(getPrice(formattedBalance, Number(price?.prices?.[key])));
-                    amounts.push(`${amount} ${key}`);
+                    const amount = (Number(balance) / Number(point)) * Number(price?.prices?.[key]);
+
+                    if (key === 'TON') {
+                        amountTON = amount;
+                    }
+
+                    amounts.push(`${formatNumberFloat(amount)} ${key}`);
                 }
 
                 setProgress({ addCount: 1 });
@@ -67,20 +74,17 @@ export const TonJettonsAnalysis = () => {
                     symbol: jetton.symbol,
                     decimals: jetton.decimals,
                     holderPosition,
-                    amounts
+                    amounts,
+                    amountTON
                 });
             }
+
+            jettons.sort((a, b) => b.amountTON - a.amountTON);
 
             setJettonsList(jettons);
             setProgress(null);
         })();
     }, []);
-
-    function getPrice(formattedBalance: string, price: number) {
-        const amount = parseFloat(formattedBalance) * price;
-
-        return parseFloat(amount.toFixed(2));
-    }
 
     if (needHideContent()) return null;
 
