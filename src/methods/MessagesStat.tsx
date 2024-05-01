@@ -43,6 +43,7 @@ import {
     getPeerId,
     getStringsTimeArray,
     getTextTime,
+    getUserId,
     notifyError,
     TOwnerType
 } from '../lib/helpers.ts';
@@ -572,7 +573,7 @@ export const MessagesStat = () => {
             const membersWithoutMessages = members.filter((member) => {
                 const userId = member.id.valueOf();
 
-                if (userId === window.userId || member.deleted) {
+                if (userId === getUserId() || member.deleted) {
                     return false;
                 }
 

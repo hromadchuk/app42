@@ -1,5 +1,6 @@
 import { CacheDataType, ICacheData, Kit42Database } from './database.ts';
 import { Constants } from '../constants.ts';
+import { getUserId } from './helpers.ts';
 
 const db = new Kit42Database();
 
@@ -8,7 +9,7 @@ function getPrefix(key: string): string {
         return key;
     }
 
-    return `${window.userId}:${key}`;
+    return `${getUserId()}:${key}`;
 }
 
 function getCurrentTimestamp(): number {

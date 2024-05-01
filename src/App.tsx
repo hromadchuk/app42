@@ -29,7 +29,6 @@ declare global {
     interface Window {
         TelegramClient: TelegramClient;
         listenEvents: { [key: string]: (event: object) => void };
-        userId: number;
         isProgress: boolean;
         isNeedToThrowErrorOnRequest: boolean;
         eruda: { init: () => void };
