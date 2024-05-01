@@ -18,8 +18,7 @@ export const TonApi = new TonApiSDK(
         baseUrl: 'https://tonapi.io/',
         baseApiParams: {
             headers: {
-                // Authorization: 'Bearer AGGHQSHTE46RAWAAAAAKDQJHVP3ZWTD7VWS2TQK72GTO6DBKO42J2BGIQYDRAZBK2BYLTMI',
-                Authorization: 'Bearer AENPCE3B43W5JCAAAAAHIJIGZOQOMJZG6PDKT7FH5QBAC4G4EUZ2UTKTJRPD77HAXKVUCCI',
+                Authorization: 'Bearer AGGHQSHTE46RAWAAAAAKDQJHVP3ZWTD7VWS2TQK72GTO6DBKO42J2BGIQYDRAZBK2BYLTMI',
                 'Content-type': 'application/json'
             }
         }
