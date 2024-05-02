@@ -147,8 +147,10 @@ const App = () => {
                 }
             });
 
+            console.log({ isDevUser });
             if (isDevUser) {
                 sendSecureData({ test: 1, test2: [1, '21', { test4: 4 }] });
+                console.log('sendSecureData');
             }
         })();
     }, []);
