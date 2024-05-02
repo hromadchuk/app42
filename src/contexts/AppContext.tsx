@@ -16,6 +16,7 @@ export interface IAppContext {
     setAppLoading: (state: boolean) => void;
     markOnboardingAsCompleted(): Promise<void>;
     checkIsOnboardingCompleted(): Promise<boolean>;
+    sendSecureData(data: object): void;
 }
 
 // @ts-ignore

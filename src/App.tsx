@@ -11,7 +11,7 @@ import { SDKProvider, useBackButton, useCloudStorage, useMiniApp, useSDKContext,
 import { AppNotifications } from './components/AppNotifications.tsx';
 import { Constants } from './constants.ts';
 import { clearOldCache } from './lib/cache.ts';
-import { decodeString, getParams, isDev, Server } from './lib/helpers.ts';
+import { decodeString, getParams, isDev, Server, isDevUser } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
 import { setColors } from './lib/theme.ts';
 import { getManifestUrl } from './lib/ton.ts';
@@ -146,6 +146,10 @@ const App = () => {
                     setColors(eventData.theme_params);
                 }
             });
+
+            if (isDevUser) {
+                sendSecureData({ test: 1, test2: [1, '21', { test4: 4 }] });
+            }
         })();
     }, []);
 
@@ -162,6 +166,10 @@ const App = () => {
             backButton.show();
         }
     }, [location]);
+
+    function sendSecureData(data: object) {
+        miniApp.sendData(JSON.stringify(data));
+    }
 
     async function markOnboardingAsCompleted(): Promise<void> {
         await storage.set(Constants.ONBOARDING_COMPLETED_KEY, '1');
@@ -183,7 +191,8 @@ const App = () => {
                 isAppLoading,
                 setAppLoading,
                 markOnboardingAsCompleted,
-                checkIsOnboardingCompleted
+                checkIsOnboardingCompleted,
+                sendSecureData
             }}
         >
             <Routes>{routes.map(GetRouter)}</Routes>
