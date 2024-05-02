@@ -178,6 +178,7 @@ export const RecordsStat = () => {
         });
 
         setChannelRecords(records);
+
         return records;
     }
 
@@ -395,14 +396,14 @@ export const RecordsStat = () => {
                     const voice = getMediaFromAttributes(attributes, Api.DocumentAttributeAudio) as
                         | Api.DocumentAttributeAudio
                         | undefined;
-                    if (voice) {
+                    if (voice?.voice) {
                         statData.voiceDuration += voice.duration;
                     }
 
                     const round = getMediaFromAttributes(attributes, Api.DocumentAttributeVideo) as
                         | Api.DocumentAttributeVideo
                         | undefined;
-                    if (round) {
+                    if (round?.roundMessage) {
                         statData.roundDuration += round.duration;
                     }
                 }
