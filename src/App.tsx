@@ -11,7 +11,7 @@ import { SDKProvider, useBackButton, useCloudStorage, useMiniApp, useSDKContext,
 import { AppNotifications } from './components/AppNotifications.tsx';
 import { Constants } from './constants.ts';
 import { clearOldCache } from './lib/cache.ts';
-import { decodeString, getParams, isDev, Server, isDevUser } from './lib/helpers.ts';
+import { decodeString, getParams, isDev, isDevUser, Server } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
 import { setColors } from './lib/theme.ts';
 import { getManifestUrl } from './lib/ton.ts';
