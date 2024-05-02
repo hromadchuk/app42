@@ -8,8 +8,6 @@ export function getManifestUrl() {
     const staticUrl = getStaticUrl();
     const manifestFile = 'tonconnect-manifest.json';
 
-    console.log(1, staticUrl + manifestFile);
-
     return staticUrl + manifestFile;
 }
 
