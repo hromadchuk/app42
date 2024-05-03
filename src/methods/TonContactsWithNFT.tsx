@@ -4,7 +4,6 @@ import { Api } from 'telegram';
 import dayjs from 'dayjs';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { CallAPI, formatNumberFloat, Server } from '../lib/helpers.ts';
-import { getShortAddress } from '../lib/ton.ts';
 import { TonApiCall } from '../lib/TonApi.ts';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
@@ -235,7 +234,7 @@ export const TonContactsWithNFT = () => {
                             justify="space-between"
                             rightSection={`${formatNumberFloat(balance)} TON`}
                         >
-                            {getShortAddress(row.walletsAlias.get(wallet) || wallet)}
+                            {TonApiCall.getShortAddress(row.walletsAlias.get(wallet) || wallet)}
                         </Button>
                     );
                 })}
