@@ -379,8 +379,8 @@ const MenuPage = () => {
 
             <Notification withCloseButton={false} m="xs" color="gray">
                 {t('beta')}
-                <Button fullWidth variant="outline" mt="xs" component="a" href="https://t.me/paulo">
-                    @paulo
+                <Button fullWidth variant="outline" mt="xs" component="a" href="https://t.me/test_address">
+                    {t('menu.developer')}
                 </Button>
             </Notification>
         </>
