@@ -10,9 +10,19 @@ import {
     NftItem,
     NftItems
 } from 'tonapi-sdk-js';
+import { MD5 } from 'crypto-js';
+import { getCache, setCache } from './cache.ts';
 import { sleep, TonApi } from './helpers.ts';
 
 export class TonApiCall {
+    static manifestUrl = 'https://gromadchuk.github.io/kit-42/tonconnect-manifest.json';
+
+    static getShortAddress(address: string) {
+        const slicePart = address.slice(5, -5);
+
+        return address.replace(slicePart, '...');
+    }
+
     static async getWallet(wallet: string) {
         return await TonApiCall.request<Account>('getWallet', TonApi.accounts.getAccount, wallet);
     }
@@ -139,12 +149,20 @@ export class TonApiCall {
 
     private static async request<T>(method: string, func: Function, ...params: unknown[]): Promise<T> {
         try {
+            const cacheKey = `TON.${method}:${MD5(JSON.stringify(params))}`;
+            const cache = await getCache(cacheKey);
+            if (cache) {
+                return cache as T;
+            }
+
             const data = await func(...params);
 
             console.group(`TON API /${method}`);
             console.log('Request:', params);
             console.log('Result:', data);
             console.groupEnd();
+
+            await setCache(cacheKey, data, 5);
 
             return data as T;
         } catch (error) {

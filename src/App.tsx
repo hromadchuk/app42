@@ -14,7 +14,7 @@ import { clearOldCache } from './lib/cache.ts';
 import { decodeString, getParams, isDev, isDevUser, Server } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
 import { setColors } from './lib/theme.ts';
-import { getManifestUrl } from './lib/ton.ts';
+import { TonApiCall } from './lib/TonApi.ts';
 import { IRouter, routes } from './routes.tsx';
 import ReactGA from 'react-ga4';
 
@@ -236,7 +236,7 @@ function MiniAppLoader({ children }: PropsWithChildren) {
 
 const MiniAppWrapper = () => (
     <SDKProvider options={{ async: true }}>
-        <TonConnectUIProvider manifestUrl={getManifestUrl()}>
+        <TonConnectUIProvider manifestUrl={TonApiCall.manifestUrl}>
             <MantineProvider forceColorScheme={useColorScheme()}>
                 <ModalsProvider>
                     <MiniAppLoader>

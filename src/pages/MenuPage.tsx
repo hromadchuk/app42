@@ -24,7 +24,7 @@ import {
     TablerIconsProps
 } from '@tabler/icons-react';
 import { useCloudStorage, usePopup } from '@tma.js/sdk-react';
-import { useTonAddress, useTonConnectModal, useTonConnectUI } from '@tonconnect/ui-react';
+import { Locales, useTonAddress, useTonConnectModal, useTonConnectUI } from '@tonconnect/ui-react';
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Api } from 'telegram';
@@ -35,9 +35,8 @@ import { Constants } from '../constants.ts';
 import { AppContext } from '../contexts/AppContext.tsx';
 import { getCache, removeCache, setCache } from '../lib/cache.ts';
 import { CallAPI, classNames, decodeString, getCurrentUser, getDocLink } from '../lib/helpers.ts';
-import { t } from '../lib/lang.ts';
+import { getAppLangCode, t } from '../lib/lang.ts';
 import { hexToRgba } from '../lib/theme.ts';
-import { getModalLang, getShortAddress } from '../lib/ton.ts';
 import { TonApiCall } from '../lib/TonApi.ts';
 import { AuthType, getMethods, IMethod, MethodCategory } from '../routes.tsx';
 
@@ -97,7 +96,7 @@ const MenuPage = () => {
     const [walletAddress, setWalletAddress] = useState<string | null>(null);
 
     useEffect(() => {
-        setOptions({ language: getModalLang() });
+        setOptions({ language: getAppLangCode() as Locales });
 
         (async () => {
             const isOnboardingCompleted = await checkIsOnboardingCompleted();
@@ -128,7 +127,7 @@ const MenuPage = () => {
         }
 
         TonApiCall.getWallet(userFriendlyAddress).then((accountInfo) => {
-            setWalletAddress(accountInfo.name || getShortAddress(userFriendlyAddress));
+            setWalletAddress(accountInfo.name || TonApiCall.getShortAddress(userFriendlyAddress));
 
             getCache(Constants.AUTH_STATE_METHOD_KEY).then((cacheMethodId) => {
                 if (cacheMethodId) {
