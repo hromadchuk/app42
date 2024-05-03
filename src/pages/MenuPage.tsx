@@ -369,7 +369,7 @@ const MenuPage = () => {
                     <span>{t('menu.donate')}</span>
                 </UnstyledButton>
 
-                <UnstyledButton className={classes.link} component="a" href="https://t.me/iamhro" target="_blank">
+                <UnstyledButton className={classes.link} component="a" href="https://t.me/kit42_app" target="_blank">
                     <Avatar size="sm" color="blue" radius="xl" mr="xs">
                         <Logo size={14} />
                     </Avatar>
@@ -379,7 +379,7 @@ const MenuPage = () => {
 
             <Notification withCloseButton={false} m="xs" color="gray">
                 {t('beta')}
-                <Button fullWidth variant="outline" mt="xs" component="a" href="https://t.me/test_address">
+                <Button fullWidth variant="outline" mt="xs" component="a" href="https://t.me/iamhro">
                     {t('menu.developer')}
                 </Button>
             </Notification>
