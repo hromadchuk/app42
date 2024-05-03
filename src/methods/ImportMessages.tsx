@@ -99,7 +99,7 @@ const sortButtons = [LangType.RU].includes(getAppLangCode())
     ? [ImportType.VK, ImportType.Instagram, ImportType.Facebook]
     : [ImportType.Instagram, ImportType.Facebook, ImportType.VK];
 
-export const ImportMessages = () => {
+export default function ImportMessages() {
     const { mt, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
 
     const [importType, setImportType] = useState<ImportType | null>(null);
@@ -523,6 +523,4 @@ export const ImportMessages = () => {
             )}
         </>
     );
-};
-
-export default ImportMessages;
+}

@@ -29,7 +29,7 @@ interface IGetWalletsResponse {
     }[];
 }
 
-export const TonContactsWithNFT = () => {
+export default function TonContactsWithNFT() {
     const { mt, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
     const [users, setUsers] = useState<IUserRow[]>([]);
 
@@ -243,6 +243,4 @@ export const TonContactsWithNFT = () => {
     }
 
     return null;
-};
-
-export default TonContactsWithNFT;
+}

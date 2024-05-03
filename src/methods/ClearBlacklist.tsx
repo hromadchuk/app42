@@ -13,7 +13,7 @@ interface IBannedResult {
     users: Api.User[];
 }
 
-export const ClearBlacklist = () => {
+export default function ClearBlacklist() {
     const { mt, md, needHideContent, setFinishBlock, setProgress, setListAction } = useContext(MethodContext);
 
     const [needRemoveUsers, setNeedRemoveUsers] = useState(true);
@@ -160,6 +160,4 @@ export const ClearBlacklist = () => {
     }
 
     return null;
-};
-
-export default ClearBlacklist;
+}

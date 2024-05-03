@@ -11,7 +11,7 @@ interface IUserItem {
     birthday: Api.Birthday;
 }
 
-export const Birthdays = () => {
+export default function Birthdays() {
     const { mt, needHideContent, setFinishBlock, setProgress } = useContext(MethodContext);
 
     const [usersList, setUsersList] = useState<IUserItem[]>([]);
@@ -71,6 +71,4 @@ export const Birthdays = () => {
     }
 
     return null;
-};
-
-export default Birthdays;
+}

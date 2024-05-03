@@ -17,7 +17,7 @@ interface IUserData {
     commonChats: ICommonChats;
 }
 
-export const CommonChatsTop = (): JSX.Element | null => {
+export default function CommonChatsTop(): JSX.Element | null {
     const { mt, md, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
 
     const [isModalOpened, { open, close }] = useDisclosure(false);
@@ -123,6 +123,4 @@ export const CommonChatsTop = (): JSX.Element | null => {
             <SectionBlock />
         </>
     );
-};
-
-export default CommonChatsTop;
+}

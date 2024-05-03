@@ -136,7 +136,7 @@ interface ITopic {
 
 const ownersInfo = new Map<number, TOwnerType>();
 
-export const MessagesStat = () => {
+export default function MessagesStat() {
     const { mt, md, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
     const popup = usePopup();
 
@@ -951,6 +951,4 @@ export const MessagesStat = () => {
             }}
         />
     );
-};
-
-export default MessagesStat;
+}

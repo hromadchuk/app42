@@ -4,7 +4,7 @@ import { Api } from 'telegram';
 import { MethodContext, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
 import DialogWithDate from '../components/DialogWithDate.tsx';
 
-export const ChannelsRegistration = () => {
+export default function ChannelsRegistration() {
     const { mt, needHideContent, setProgress, setFinishBlock, getDialogs } = useContext(MethodContext);
 
     const [channels, setChannels] = useState<Api.Channel[] | null>(null);
@@ -44,6 +44,4 @@ export const ChannelsRegistration = () => {
     }
 
     return null;
-};
-
-export default ChannelsRegistration;
+}

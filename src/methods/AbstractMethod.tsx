@@ -20,7 +20,7 @@ import { t, td } from '../lib/lang.ts';
 // TODO need fix this, progress always null in child components
 let progressSafe: IProgress | null = null;
 
-export const AbstractMethod = () => {
+export default function AbstractMethod() {
     const location = useLocation();
     const { setAppLoading } = useContext(AppContext);
 
@@ -252,6 +252,4 @@ export const AbstractMethod = () => {
             </Container>
         </MethodContext.Provider>
     );
-};
-
-export default AbstractMethod;
+}

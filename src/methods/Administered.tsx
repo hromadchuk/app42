@@ -6,7 +6,7 @@ import { MethodContext, TDialogWithoutUser } from '../contexts/MethodContext.tsx
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { TOwnerType } from '../lib/helpers.ts';
 
-export const Administered = () => {
+export default function Administered() {
     const { mt, needHideContent, setFinishBlock, getDialogs } = useContext(MethodContext);
 
     const [adminsList, setAdminsList] = useState<TOwnerType[] | null>(null);
@@ -59,6 +59,4 @@ export const Administered = () => {
     }
 
     return null;
-};
-
-export default Administered;
+}

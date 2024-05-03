@@ -24,7 +24,7 @@ enum EFilerType {
     OLD = 'old'
 }
 
-export const ContactsAnalysis = () => {
+export default function ContactsAnalysis() {
     const { mt, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
 
     const [opened, { open, close }] = useDisclosure(false);
@@ -254,6 +254,4 @@ export const ContactsAnalysis = () => {
             {SectionBlock(EFilerType.OLD, oldUsersData, 'old')}
         </>
     );
-};
-
-export default ContactsAnalysis;
+}
