@@ -64,10 +64,8 @@ export default function Onboarding({ onOnboardingEnd }: IOnboarding) {
             return;
         }
 
-        embla.on('select', () => {
-            const [slideId] = embla.slidesInView(true);
-
-            setShowEndButton(slideId === slides.length - 1);
+        embla.on('slidesInView', (data: { canScrollNext: () => boolean }) => {
+            setShowEndButton(!data.canScrollNext());
         });
     }, [embla]);
 
