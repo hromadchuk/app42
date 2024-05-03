@@ -11,7 +11,7 @@ interface IUserItem {
     personalChannel: Api.Channel;
 }
 
-export const OwnChannels = () => {
+export default function OwnChannels() {
     const { mt, needHideContent, setFinishBlock, setProgress } = useContext(MethodContext);
 
     const [usersList, setUsersList] = useState<IUserItem[]>([]);
@@ -82,5 +82,3 @@ export const OwnChannels = () => {
 
     return null;
 };
-
-export default OwnChannels;

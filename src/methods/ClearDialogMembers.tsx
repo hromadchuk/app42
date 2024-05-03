@@ -25,7 +25,7 @@ const offlineDays = [
     180 // 6 months
 ];
 
-export const ClearDialogMembers = () => {
+export default function ClearDialogMembers() {
     const { mt, needHideContent, setFinishBlock, setProgress, setListAction } = useContext(MethodContext);
 
     const [needRemoveBots, setNeedRemoveBots] = useState(false);
@@ -274,5 +274,3 @@ export const ClearDialogMembers = () => {
 
     return null;
 };
-
-export default ClearDialogMembers;

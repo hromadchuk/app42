@@ -111,7 +111,7 @@ interface ITabTops {
 
 const channelsInfo = new Map<number, Api.Channel>();
 
-export const RecordsStat = () => {
+export default function RecordsStat() {
     const { mt, md, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
 
     const [channelRecords, setChannelRecords] = useState<Api.TypeMessage[]>([]);
@@ -640,5 +640,3 @@ export const RecordsStat = () => {
         />
     );
 };
-
-export default RecordsStat;

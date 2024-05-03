@@ -18,7 +18,7 @@ interface IJetton {
     amounts: string[];
 }
 
-export const TonJettonsAnalysis = () => {
+export default function TonJettonsAnalysis() {
     const { mt, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
 
     const [jettonsList, setJettonsList] = useState<IJetton[]>([]);
@@ -129,5 +129,3 @@ export const TonJettonsAnalysis = () => {
 
     return null;
 };
-
-export default TonJettonsAnalysis;

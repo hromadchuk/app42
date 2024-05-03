@@ -13,7 +13,7 @@ interface IOwnerInfo {
     lastActive: number;
 }
 
-export const InactiveChannels = () => {
+export default function InactiveChannels() {
     const { mt, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
 
     const [inactiveOwners, setInactiveOwners] = useState<IOwnerInfo[] | null>(null);
@@ -64,5 +64,3 @@ export const InactiveChannels = () => {
 
     return null;
 };
-
-export default InactiveChannels;

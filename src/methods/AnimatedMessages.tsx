@@ -43,7 +43,7 @@ export const MAX_FRAMES_COUNT = 50;
 
 const stateReadMessages = new Map<number, number>();
 
-export const AnimatedMessages = () => {
+export default function AnimatedMessages() {
     const { mt, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
     const [opened, { open, close }] = useDisclosure(false);
 
@@ -302,5 +302,3 @@ export const AnimatedMessages = () => {
         </>
     );
 };
-
-export default AnimatedMessages;

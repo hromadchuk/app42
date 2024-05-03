@@ -7,7 +7,7 @@ import { CallAPI, TOwnerInfo } from '../lib/helpers.ts';
 import { MethodContext } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 
-export const GetId = () => {
+export default function GetId() {
     const { mt, needHideContent } = useContext(MethodContext);
 
     const [isLoading, setIsLoading] = useState(false);
@@ -96,5 +96,3 @@ export const GetId = () => {
         </>
     );
 };
-
-export default GetId;

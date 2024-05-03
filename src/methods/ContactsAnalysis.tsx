@@ -24,7 +24,7 @@ enum EFilerType {
     OLD = 'old'
 }
 
-export const ContactsAnalysis = () => {
+export default function ContactsAnalysis() {
     const { mt, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
 
     const [opened, { open, close }] = useDisclosure(false);
@@ -255,5 +255,3 @@ export const ContactsAnalysis = () => {
         </>
     );
 };
-
-export default ContactsAnalysis;

@@ -47,7 +47,7 @@ interface IStatResult {
     };
 }
 
-export const CallsStat = () => {
+export default function CallsStat() {
     const { user: appUser } = useContext(AppContext);
     const { mt, md, needHideContent, setFinishBlock, setProgress } = useContext(MethodContext);
 
@@ -301,5 +301,3 @@ export const CallsStat = () => {
 
     return null;
 };
-
-export default CallsStat;
