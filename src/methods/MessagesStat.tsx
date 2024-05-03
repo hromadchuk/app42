@@ -951,4 +951,4 @@ export default function MessagesStat() {
             }}
         />
     );
-};
+}

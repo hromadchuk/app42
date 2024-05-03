@@ -252,4 +252,4 @@ export default function AbstractMethod() {
             </Container>
         </MethodContext.Provider>
     );
-};
+}

@@ -254,4 +254,4 @@ export default function ContactsAnalysis() {
             {SectionBlock(EFilerType.OLD, oldUsersData, 'old')}
         </>
     );
-};
+}

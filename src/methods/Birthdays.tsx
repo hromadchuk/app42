@@ -71,4 +71,4 @@ export default function Birthdays() {
     }
 
     return null;
-};
+}

@@ -273,4 +273,4 @@ export default function ClearDialogMembers() {
     }
 
     return null;
-};
+}

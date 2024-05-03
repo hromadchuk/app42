@@ -243,4 +243,4 @@ export default function TonContactsWithNFT() {
     }
 
     return null;
-};
+}

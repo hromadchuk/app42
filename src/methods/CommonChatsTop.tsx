@@ -123,4 +123,4 @@ export default function CommonChatsTop(): JSX.Element | null {
             <SectionBlock />
         </>
     );
-};
+}

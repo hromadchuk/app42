@@ -351,4 +351,4 @@ export default function CallsStat() {
     }
 
     return null;
-};
+}
