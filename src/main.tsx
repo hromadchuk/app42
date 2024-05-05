@@ -9,6 +9,7 @@ import dayjs from 'dayjs';
 import toObject from 'dayjs/plugin/toObject';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 import 'dayjs/locale/ru';
 import 'dayjs/locale/uk';
@@ -16,6 +17,7 @@ import 'dayjs/locale/uk';
 dayjs.extend(toObject);
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
+dayjs.extend(customParseFormat);
 dayjs.locale(getAppLangCode());
 
 if (isDevUser) {
@@ -30,8 +32,6 @@ if (isDevUser) {
 // only for test!!!
 // import TestImages from '../TestImages.tsx';
 // createRoot(document.getElementById('root') as HTMLElement).render(<TestImages />);
-// import TestTon from '../TestTon.tsx';
-// createRoot(document.getElementById('root') as HTMLElement).render(<TestTon />);
 
 const tgWebAppData = getParams().get('tgWebAppData');
 if (tgWebAppData) {

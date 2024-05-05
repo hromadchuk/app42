@@ -125,7 +125,7 @@ export default function TonContactsWithNFT() {
 
                     for (const wallet of wallets) {
                         const alias = await TonApiCall.getNormalizedWallet(wallet);
-                        walletsAlias.set(wallet, alias.non_bounceable.b64url);
+                        walletsAlias.set(wallet, alias);
 
                         const info = await TonApiCall.getWallet(wallet);
                         walletsBalances.set(wallet, info.balance);

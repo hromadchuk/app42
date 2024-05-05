@@ -122,7 +122,8 @@
     "birthdays": "Birthdays",
     "own_channels": "Own channels",
     "ton_contacts": "Contacts with NFT",
-    "ton_jettons_analysis": "Jettons analysis"
+    "ton_jettons_analysis": "Jettons analysis",
+    "ton_transactions": "Transactions analysis"
   },
   "charts": {
     "activity": {
@@ -542,6 +543,26 @@
       "no_jettons": "You don't have any jettons",
       "get_jettons_info": "Getting jettons info",
       "top_holders": "You're in the top {position} of all holders"
+    },
+    "ton_transactions": {
+      "get_events": "Getting events",
+      "no_transactions": "You don't have any transactions",
+      "total_counts": "Total counts",
+      "total_events": "Total events",
+      "counts": "Counts",
+      "events": "Events",
+      "chart": "Chart",
+      "sent": "Sent",
+      "received": "Received",
+      "sent_ton": "Sent TON",
+      "dex_events": "Events by DEX",
+      "received_ton": "Received TON",
+      "sent_usdt": "Sent USDT",
+      "received_usdt": "Received USDT",
+      "by_months": "By months",
+      "by_years": "By years",
+      "grouped_by_years": "Grouped by years",
+      "grouped_by_months": "Grouped by months"
     }
   }
 }

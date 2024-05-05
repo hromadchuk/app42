@@ -122,7 +122,8 @@
     "birthdays": "День рождения",
     "own_channels": "Собственные каналы",
     "ton_contacts": "Контакты с NFT",
-    "ton_jettons_analysis": "Анализ жетонов"
+    "ton_jettons_analysis": "Анализ жетонов",
+    "ton_transactions": "Анализ транзакций"
   },
   "charts": {
     "activity": {
@@ -542,6 +543,26 @@
       "no_jettons": "У вас нет жетонов",
       "get_jettons_info": "Получение информации о жетонах",
       "top_holders": "Вы находитесь в топ {position} среди всех держателей"
+    },
+    "ton_transactions": {
+      "get_events": "Получение событий",
+      "no_transactions": "У вас нет транзакций",
+      "total_counts": "Общее количество",
+      "total_events": "Всего событий",
+      "counts": "Количество",
+      "events": "События",
+      "chart": "График",
+      "sent": "Отправлено",
+      "received": "Получено",
+      "sent_ton": "Отправлено TON",
+      "dex_events": "События по DEX",
+      "received_ton": "Получено TON",
+      "sent_usdt": "Отправлено USDT",
+      "received_usdt": "Получено USDT",
+      "by_months": "По месяцам",
+      "by_years": "По годам",
+      "grouped_by_years": "Сгруппировано по годам",
+      "grouped_by_months": "Сгруппировано по месяцам"
     }
   }
 }

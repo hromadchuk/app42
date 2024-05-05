@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@mantine/carousel": "^7.9.0",
+    "@mantine/charts": "^7.9.0",
     "@mantine/colors-generator": "^7.9.0",
     "@mantine/core": "^7.9.0",
     "@mantine/dates": "^7.9.0",
@@ -32,6 +33,7 @@
     "react-ga4": "^2.1.0",
     "react-imask": "^7.6.0",
     "react-router-dom": "^6.23.0",
+    "recharts": "^2.12.6",
     "telegram": "^2.20.14",
     "tonapi-sdk-js": "^1.0.9"
   },

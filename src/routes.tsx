@@ -19,6 +19,7 @@ import {
     IconPhotoPentagon,
     IconReportAnalytics,
     IconThumbDownOff,
+    IconTransfer,
     IconUsersGroup,
     TablerIconsProps
 } from '@tabler/icons-react';
@@ -206,6 +207,13 @@ const appRoutes: IAppRouter[] = [
                 id: 'ton_jettons_analysis',
                 icon: IconCoins,
                 element: createElement(lazy(() => import('./methods/TonJettonsAnalysis.tsx'))),
+                categories: [MethodCategory.TON],
+                authType: AuthType.TON
+            },
+            {
+                id: 'ton_transactions',
+                icon: IconTransfer,
+                element: createElement(lazy(() => import('./methods/TonTransactions.tsx'))),
                 categories: [MethodCategory.TON],
                 authType: AuthType.TON
             }
