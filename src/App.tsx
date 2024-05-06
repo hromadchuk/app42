@@ -32,6 +32,7 @@ declare global {
         listenEvents: { [key: string]: (event: object) => void };
         isProgress: boolean;
         isNeedToThrowErrorOnRequest: boolean;
+        alreadyVisitedRefLink: boolean;
         eruda: { init: () => void };
     }
 }

@@ -14,6 +14,7 @@ export function ServerMock<T>(method: string) {
 
     if (method === 'get-my-names') {
         return {
+            date: Number(new Date()),
             names: [
                 {
                     name: 'Paulo',
@@ -25,10 +26,6 @@ export function ServerMock<T>(method: string) {
                 }
             ]
         } as T;
-    }
-
-    if (method === 'sync-contacts-names') {
-        return { status: 'ok' } as T;
     }
 
     if (method === 'get-wallets') {
