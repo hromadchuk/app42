@@ -120,6 +120,7 @@ export default function ContactsNames() {
                 </Alert>
 
                 <Input
+                    mt="md"
                     value={link}
                     readOnly={true}
                     rightSectionPointerEvents="all"
