@@ -138,7 +138,7 @@ export default function ContactsNames() {
     }
 
     if (serverData) {
-        if (serverData.names.length > 4) {
+        if (serverData.names.length) {
             return (
                 <>
                     {serverData.names.map(({ name, count }, key) => (
