@@ -21,6 +21,7 @@ import {
     IconThumbDownOff,
     IconTransfer,
     IconUsersGroup,
+    IconWritingSign,
     TablerIconsProps
 } from '@tabler/icons-react';
 
@@ -216,6 +217,13 @@ const appRoutes: IAppRouter[] = [
                 element: createElement(lazy(() => import('./methods/TonTransactions.tsx'))),
                 categories: [MethodCategory.TON],
                 authType: AuthType.TON
+            },
+            {
+                id: 'contacts_names',
+                icon: IconWritingSign,
+                element: createElement(lazy(() => import('./methods/ContactsNames.tsx'))),
+                categories: [MethodCategory.CONTACTS, MethodCategory.ACCOUNT],
+                authType: AuthType.TG
             }
         ]
     }

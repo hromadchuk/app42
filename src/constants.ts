@@ -6,5 +6,6 @@ export const Constants = {
     AUTH_STATE_NUMBER_KEY: 'authStateNumber',
     AUTH_STATE_METHOD_KEY: 'authStateMethod',
     TELEGRAM_FOUNDATION_DATE: 1376352000,
-    ONBOARDING_COMPLETED_KEY: 'isOnboardingCompleted'
+    ONBOARDING_COMPLETED_KEY: 'isOnboardingCompleted',
+    ALLOW_USE_CONTACTS_NAMES_KEY: 'allowUseContactsNames'
 };

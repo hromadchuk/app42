@@ -112,9 +112,15 @@ const MenuPage = () => {
                     }
                 }
 
+                const param = new URLSearchParams(location.search).get('tgWebAppStartParam');
                 const methodId = await getCache(Constants.AUTH_STATE_METHOD_KEY);
                 if (methodId) {
                     openAuth();
+                } else if (param === 'cn' && !window.alreadyVisitedRefLink) {
+                    const method = getMethods().find((item) => item.id === 'contacts_names');
+                    if (method) {
+                        openMethod(method);
+                    }
                 }
             }
         })();
@@ -140,37 +146,37 @@ const MenuPage = () => {
 
     const methods = getMethods();
 
+    function openMethod(method: IMethod) {
+        close();
+
+        if (method.authType === AuthType.TON) {
+            if (userFriendlyAddress) {
+                window.alreadyVisitedRefLink = true;
+                navigate(`/methods/${method.id}`);
+            } else {
+                setCache(Constants.AUTH_STATE_METHOD_KEY, method.id, 15).then(() => {
+                    tonOpen();
+                });
+            }
+        } else if (method.authType === AuthType.TG) {
+            if (user) {
+                window.alreadyVisitedRefLink = true;
+                navigate(`/methods/${method.id}`);
+            } else {
+                setCache(Constants.AUTH_STATE_METHOD_KEY, method.id, 15).then(() => {
+                    openAuth();
+                });
+            }
+        }
+    }
+
     function getMethodsList(category: MethodCategory) {
         return methods.filter((item) => item.categories.includes(category)).map(MethodRow);
     }
 
     function MethodRow(method: IMethod, key: number) {
         return (
-            <div
-                key={key}
-                className={classes.link}
-                onClick={() => {
-                    close();
-
-                    if (method.authType === AuthType.TON) {
-                        if (userFriendlyAddress) {
-                            navigate(`/methods/${method.id}`);
-                        } else {
-                            setCache(Constants.AUTH_STATE_METHOD_KEY, method.id, 15).then(() => {
-                                tonOpen();
-                            });
-                        }
-                    } else if (method.authType === AuthType.TG) {
-                        if (user) {
-                            navigate(`/methods/${method.id}`);
-                        } else {
-                            setCache(Constants.AUTH_STATE_METHOD_KEY, method.id, 15).then(() => {
-                                openAuth();
-                            });
-                        }
-                    }
-                }}
-            >
+            <div key={key} className={classes.link} onClick={() => openMethod(method)}>
                 <method.icon className={classes.linkIcon} stroke={1.5} />
                 <span>{method.name}</span>
             </div>
@@ -338,6 +344,7 @@ const MenuPage = () => {
                 <AuthPage
                     onAuthComplete={() => {
                         getCache(Constants.AUTH_STATE_METHOD_KEY).then((cacheMethodId) => {
+                            window.alreadyVisitedRefLink = true;
                             navigate(`/methods/${cacheMethodId}`);
                             removeCache(Constants.AUTH_STATE_METHOD_KEY);
                         });

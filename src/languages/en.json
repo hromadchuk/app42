@@ -123,7 +123,8 @@
     "own_channels": "Own channels",
     "ton_contacts": "Contacts with NFT",
     "ton_jettons_analysis": "Jettons analysis",
-    "ton_transactions": "Transactions analysis"
+    "ton_transactions": "Transactions analysis",
+    "contacts_names": "Your name in the contacts list"
   },
   "charts": {
     "activity": {
@@ -563,6 +564,15 @@
       "by_years": "By years",
       "grouped_by_years": "Grouped by years",
       "grouped_by_months": "Grouped by months"
+    },
+    "contacts_names": {
+      "no_contacts": "You don't have any contacts",
+      "allow_description": "To see information about how you are saved in other contacts list you must allow synchronisation of your contacts. This is necessary so that we can fill the database. Don't worry, the data will be recorded in an anonymised form.",
+      "allow_button": "Allow",
+      "decline_button": "Decline",
+      "updated": "Updated {date}",
+      "no_records": "We have no record of you. :(",
+      "share_description": "Share the link to the method with your friends so we can show them to you!"
     }
   }
 }
