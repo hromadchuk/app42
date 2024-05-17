@@ -15,7 +15,7 @@ import { getCache, setCache } from './cache.ts';
 import { sleep, TonApi } from './helpers.ts';
 
 export class TonApiCall {
-    static manifestUrl = 'https://gromadchuk.github.io/kit-42/tonconnect-manifest.json';
+    static manifestUrl = 'https://app42.app/app/tonconnect-manifest.json';
 
     static getShortAddress(address: string) {
         const slicePart = address.slice(5, -5);
