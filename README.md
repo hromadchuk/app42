@@ -1,15 +1,13 @@
-# Kit 42
+# App 42
 
-Kit 42 is a product with features for Telegram
-
-https://gromadchuk.github.io/kit-42/
+App 42 is a product with features for Telegram
 
 ## ⚠️ Deleting a session
-We recommend to remove active session after using Kit 42 to make sure that the service doesn't do something without your knowledge.
+We recommend to remove active session after using App 42 to make sure that the service doesn't do something without your knowledge.
 
 1. Open the settings tab
 2. Open «Devices» or «Active Sessions» (dependent by device)
-3. Find a session with «kit42»
+3. Find a session with «app42»
 4. Click on session row
 5. Click on «Terminate session»
 6. Confirm your action
