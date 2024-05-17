@@ -427,8 +427,7 @@ export async function parallelLimit(limit: number, tasks: Function[]): Promise<v
     await Promise.all(promises);
 }
 
-const apiEndpoint =
-    location.hostname === 'gromadchuk.github.io' ? 'https://kit42.gromadchuk.com' : `http://${location.hostname}`;
+const apiEndpoint = location.hostname === 'app42.app' ? 'https://app42.app' : `http://${location.hostname}`;
 
 export async function Server<T>(method: string, params: object = {}): Promise<T> {
     if (isDev) {
