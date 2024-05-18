@@ -111,7 +111,7 @@ export default function ContactsNames() {
     }
 
     function LinkRow() {
-        const link = `https://t.me/${isDev ? 'kit42_bot' : 'kit42bot'}/kit42?startapp=cn`;
+        const link = isDev ? 'https://t.me/kit42_bot/kit42?startapp=cn' : 'https://t.me/app42/app?startapp=cn';
 
         return (
             <>
