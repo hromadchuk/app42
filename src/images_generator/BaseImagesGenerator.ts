@@ -117,7 +117,7 @@ function getAdditionalImage(image: AdditionalImageUrl) {
 }
 
 export class BaseImagesGenerator {
-    kit42Text = 't.me/kit42bot'.toUpperCase();
+    kit42Text = 't.me/app42';
     fontFamilyBold = 'Roboto Mono Bold';
     fontFamilyRegular = 'Roboto Mono Regular';
     mainColor = '#FFFFFF';

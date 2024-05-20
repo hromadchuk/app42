@@ -375,7 +375,7 @@ const MenuPage = () => {
                     <span>{t('menu.donate')}</span>
                 </UnstyledButton>
 
-                <UnstyledButton className={classes.link} component="a" href="https://t.me/kit42_app" target="_blank">
+                <UnstyledButton className={classes.link} component="a" href="https://t.me/app42news" target="_blank">
                     <Avatar size="sm" color="blue" radius="xl" mr="xs">
                         <Logo size={14} />
                     </Avatar>
