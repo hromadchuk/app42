@@ -68,13 +68,14 @@
     "record": "Record"
   },
   "menu": {
+    "search_placeholder": "Type to search",
     "documentation": "Documentation",
     "donate": "Support the project",
     "telegram_channel": "Telegram channel with updates",
-    "developer": "Contact the developer",
     "auth_modal_title": "Authorization",
     "wallet_disconnect": "Disconnect the wallet?",
     "account_disconnect": "Disconnect account?",
+    "info": "If you have a question, bug or request, you can always {link}write to the developer{/link} about it!",
     "cards": {
       "account": "Account",
       "contacts": "Contacts",
@@ -83,7 +84,6 @@
       "ton": "TON"
     }
   },
-  "beta": "This is beta version of the product and there may be bugs. If you find a bug or have a suggestion, please send a message to the developer. Features will be added as the product is developed.",
   "share": {
     "stories": {
       "button": "Share in story",

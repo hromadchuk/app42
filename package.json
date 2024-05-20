@@ -21,6 +21,7 @@
     "@mantine/modals": "^7.9.0",
     "@mantine/notifications": "^7.9.0",
     "@tabler/icons-react": "^2.47.0",
+    "@telegram-apps/telegram-ui": "^2.1.3",
     "@tma.js/sdk-react": "^1.2.2",
     "@tonconnect/ui-react": "^2.0.2",
     "crypto-js": "^4.2.0",
@@ -39,6 +40,7 @@
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
+    "@types/css-modules": "^1.0.5",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^5.62.0",

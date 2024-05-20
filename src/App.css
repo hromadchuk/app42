@@ -2,152 +2,30 @@ html,
 body {
     overflow: auto;
     overscroll-behavior-y: none;
+    margin: 0;
 }
 
 * {
     touch-action: manipulation;
     -webkit-touch-callout: none;
-    /*-webkit-user-select: none;*/
-}
-
-@media (pointer: fine) {
-    #root,
-    header {
-        max-width: 450px;
-        margin: 0 auto;
-    }
 }
 
 body {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
+    font-family: -apple-system, BlinkMacSystemFont, 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
 
-    /* make empty vars for IDE and override blue Mantine theme */
-    --tg-color-override-0: transparency;
-    --tg-color-override-1: transparency;
-    --tg-color-override-2: transparency;
-    --tg-color-override-3: transparency;
-    --tg-color-override-4: transparency;
-    --tg-color-override-5: transparency;
-    --tg-color-override-6: transparency;
-    --tg-color-override-7: transparency;
-    --tg-color-override-8: transparency;
-    --tg-color-override-9: transparency;
+    --app-background-color: transparent;
+    --app-text-color: black;
 
-    --tg-color-override-dark-colors-0: transparency;
-    --tg-color-override-dark-colors-1: transparency;
-    --tg-color-override-dark-colors-2: transparency;
-    --tg-color-override-dark-colors-3: transparency;
-    --tg-color-override-dark-colors-4: transparency;
-    --tg-color-override-dark-colors-5: transparency;
-    --tg-color-override-dark-colors-6: transparency;
-    --tg-color-override-dark-colors-7: transparency;
-    --tg-color-override-dark-colors-8: transparency;
-    --tg-color-override-dark-colors-9: transparency;
-
-    --tg-color-override-dark-filled: transparency;
-    --tg-color-override-dark-filled-hover: transparency;
-    --tg-color-override-dark-light: transparency;
-    --tg-color-override-dark-light-hover: transparency;
-    --tg-color-override-dark-light-color: transparency;
-    --tg-color-override-dark-outline: transparency;
-    --tg-color-override-dark-outline-hover: transparency;
-
-    --tg-color-override-light-filled: transparency;
-    --tg-color-override-light-filled-hover: transparency;
-    --tg-color-override-light-light: transparency;
-    --tg-color-override-light-light-hover: transparency;
-    --tg-color-override-light-light-color: transparency;
-    --tg-color-override-light-outline: transparency;
-    --tg-color-override-light-outline-hover: transparency;
-
-    /* override Mantine vars */
-    --mantine-color-blue-0: var(--tg-color-override-0);
-    --mantine-color-blue-1: var(--tg-color-override-1);
-    --mantine-color-blue-2: var(--tg-color-override-2);
-    --mantine-color-blue-3: var(--tg-color-override-3);
-    --mantine-color-blue-4: var(--tg-color-override-4);
-    --mantine-color-blue-5: var(--tg-color-override-5);
-    --mantine-color-blue-6: var(--tg-color-override-6);
-    --mantine-color-blue-7: var(--tg-color-override-7);
-    --mantine-color-blue-8: var(--tg-color-override-8);
-    --mantine-color-blue-9: var(--tg-color-override-9);
-
-    --mantine-color-dark-0: var(--tg-color-override-dark-colors-0);
-    --mantine-color-dark-1: var(--tg-color-override-dark-colors-1);
-    --mantine-color-dark-2: var(--tg-color-override-dark-colors-2);
-    --mantine-color-dark-3: var(--tg-color-override-dark-colors-3);
-    --mantine-color-dark-4: var(--tg-color-override-dark-colors-4);
-    --mantine-color-dark-5: var(--tg-color-override-dark-colors-5);
-    --mantine-color-dark-6: var(--tg-color-override-dark-colors-6);
-    --mantine-color-dark-7: var(--tg-color-override-dark-colors-7);
-    --mantine-color-dark-8: var(--tg-color-override-dark-colors-8);
-    --mantine-color-dark-9: var(--tg-color-override-dark-colors-9);
-    --mantine-color-gray-0: var(--tg-color-override-0);
-    --mantine-color-gray-1: var(--tg-color-override-1);
-    --mantine-color-gray-2: var(--tg-color-override-2);
-    --mantine-color-gray-3: var(--tg-color-override-3);
-    --mantine-color-gray-4: var(--tg-color-override-4);
-    --mantine-color-gray-5: var(--tg-color-override-5);
-    --mantine-color-gray-6: var(--tg-color-override-6);
-    --mantine-color-gray-7: var(--tg-color-override-7);
-    --mantine-color-gray-8: var(--tg-color-override-8);
-    --mantine-color-gray-9: var(--tg-color-override-9);
-
-    --mantine-primary-color-filled: var(--tg-color-override-dark-filled);
-    --mantine-primary-color-filled-hover: var(--tg-color-override-dark-filled-hover);
-    --mantine-primary-color-light: var(--tg-color-override-dark-light);
-    --mantine-primary-color-light-hover: var(--tg-color-override-dark-light-hover);
-    --mantine-primary-color-light-color: var(--tg-color-override-dark-light-color);
-    --mantine-primary-color-outline: var(--tg-color-override-dark-outline);
-    --mantine-primary-color-outline-hover: var(--tg-color-override-dark-outline-hover);
+    background: var(--app-background-color);
+    color: var(--app-text-color);
 }
 
-/* override dark Mantine vars */
-[data-mantine-color-scheme=dark] body {
-    --mantine-color-blue-filled: var(--tg-color-override-dark-filled);
-    --mantine-color-blue-filled-hover: var(--tg-color-override-dark-filled-hover);
-    --mantine-color-blue-light: var(--tg-color-override-dark-light);
-    --mantine-color-blue-light-hover: var(--tg-color-override-dark-light-hover);
-    --mantine-color-blue-light-color: var(--tg-color-override-dark-light-color);
-    --mantine-color-blue-outline: var(--tg-color-override-dark-outline);
-    --mantine-color-blue-outline-hover: var(--tg-color-override-dark-outline-hover);
-}
-
-/* override light Mantine vars */
-[data-mantine-color-scheme=light] body {
-    --mantine-color-blue-filled: var(--tg-color-override-light-filled);
-    --mantine-color-blue-filled-hover: var(--tg-color-override-light-filled-hover);
-    --mantine-color-blue-light: var(--tg-color-override-light-light);
-    --mantine-color-blue-light-hover: var(--tg-color-override-light-light-hover);
-    --mantine-color-blue-light-color: var(--tg-color-override-light-light-color);
-    --mantine-color-blue-outline: var(--tg-color-override-light-outline);
-    --mantine-color-blue-outline-hover: var(--tg-color-override-light-outline-hover);
-}
-
-body {
-    /* init tg vars for IDE, they will be replaced in src/lib/theme.ts setColors() */
-    --tg-color-accent-text-color: transparent;
-    --tg-color-bg-color: transparent;
-    --tg-color-button-color: transparent;
-    --tg-color-button-text-color: transparent;
-    --tg-color-destructive-text-color: transparent;
-    --tg-color-header-bg-color: transparent;
-    --tg-color-hint-color: transparent;
-    --tg-color-link-color: transparent;
-    --tg-color-secondary-bg-color: transparent;
-    --tg-color-section-bg-color: transparent;
-    --tg-color-section-header-text-color: transparent;
-    --tg-color-subtitle-text-color: transparent;
-    --tg-color-text-color: transparent;
-
-    /* custom vars extends tg vars */
-    --tg-color-bg-color-darken: transparent;
-
-    /* override Mantine vars */
-    --mantine-color-body: var(--tg-color-bg-color);
-}
-
-.mantine-Notification-root {
-    background-color: var(--tg-color-bg-color-darken);
+a {
+    text-decoration: none;
+    color: var(--tgui--link_color);
 }
