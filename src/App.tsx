@@ -1,12 +1,20 @@
 import { useEffect, useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { useBackButton, useLaunchParams, useMiniApp } from '@tma.js/sdk-react';
 import { Api } from 'telegram';
+import { wrapCall } from './lib/helpers.ts';
 import { IRouter, routes } from './routes.tsx';
 
-import { AppContext, IInitData } from './contexts/AppContext.tsx';
+import { AppContext } from './contexts/AppContext.tsx';
 
 export function App() {
     const [user, setUser] = useState<null | Api.User>(null);
+
+    const miniApp = useMiniApp();
+    const backButton = useBackButton();
+    const navigate = useNavigate();
+    const currentLocation = useLocation();
+    const launchParams = useLaunchParams();
 
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
 
@@ -19,7 +27,22 @@ export function App() {
 
         body.setProperty('--app-background-color', backgroundColor);
         body.setProperty('--app-text-color', textColor);
+
+        backButton.on('click', () => {
+            navigate('/');
+        });
     }, []);
+
+    useEffect(() => {
+        if (['/'].includes(currentLocation.pathname)) {
+            wrapCall(() => backButton.hide());
+            wrapCall(() => {
+                miniApp.setHeaderColor(launchParams.themeParams.headerBackgroundColor as `#${string}`);
+            });
+        } else {
+            wrapCall(() => backButton.show());
+        }
+    }, [currentLocation]);
 
     return (
         <AppContext.Provider

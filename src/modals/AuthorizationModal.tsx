@@ -1,4 +1,4 @@
-import { IconSearch, IconUserPlus } from '@tabler/icons-react';
+import { IconSearch, IconTrash, IconUserPlus } from '@tabler/icons-react';
 import { Avatar, Button, Cell, Divider, Input, List, Modal, Section } from '@telegram-apps/telegram-ui';
 import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
 import { useEffect, useState } from 'react';
@@ -15,15 +15,13 @@ enum IAuthType {
     TON
 }
 
-interface IProps {
+interface IAuthorizationModalProps {
     authType?: IAuthType | null;
-    open: boolean;
+    isOpen: boolean;
     onOpenChange?: (open: boolean) => void;
 }
 
-function AuthorizationModal(props: IProps) {
-    const { authType, open, onOpenChange } = props;
-
+function AuthorizationModal({ authType, isOpen, onOpenChange }: IAuthorizationModalProps) {
     const [activeAuth, setActiveAuth] = useState<IAuthType | null>(authType ? authType : null);
     const [selectingCountry, setSelectingCountry] = useState<boolean>(false);
     const [waitingCode, setWaitingCode] = useState<boolean>(false);
@@ -57,23 +55,25 @@ function AuthorizationModal(props: IProps) {
 
     return (
         <div>
-            {open && (
+            {isOpen && (
                 <>
                     <Modal
-                        header={<ModalHeader>Accounts</ModalHeader>}
-                        open={open}
+                        header={<ModalHeader />}
+                        open={isOpen}
                         onOpenChange={onOpenChange && onOpenChange}
                         className="AuthorizationModal"
                     >
                         {activeAuth === null && (
                             <div style={{ paddingBottom: 16 }}>
-                                {/* <Cell
-                    before={<Avatar src="https://unsplash.com/photos/v2aKnjMbP_k/download?ixid=M3wxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNzE1ODE1NDc2fA&force=true&w=640" />}
-                    description="@meowmeow"
-                    after={<IconTrash size={28} className="accent-color" />}
-                    >
-                    Andrea Harinson
-                </Cell> */}
+                                <Cell
+                                    before={
+                                        <Avatar src="https://unsplash.com/photos/v2aKnjMbP_k/download?ixid=M3wxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNzE1ODE1NDc2fA&force=true&w=640" />
+                                    }
+                                    description="@meowmeow"
+                                    after={<IconTrash size={28} className="accent-color" />}
+                                >
+                                    Andrea Harinson
+                                </Cell>
                                 <Cell
                                     before={
                                         <Avatar>

@@ -76,6 +76,7 @@
     "wallet_disconnect": "Disconnect the wallet?",
     "account_disconnect": "Disconnect account?",
     "info": "If you have a question, bug or request, you can always {link}write to the developer{/link} about it!",
+    "no_methods": "No methods founds",
     "cards": {
       "account": "Account",
       "contacts": "Contacts",

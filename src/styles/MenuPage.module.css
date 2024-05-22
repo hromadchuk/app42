@@ -1,12 +1,20 @@
 .headerBox {
     display: flex;
     align-items: center;
-    background: var(--tgui--bg_color);
+    background: var(--tgui--secondary_bg_color);
 }
 
 .searchBox {
     width: 100%;
     margin-right: -22px;
+
+    & > div {
+        background: var(--tgui--secondary_bg_color);
+    }
+}
+
+.searchInput {
+    background: var(--tgui--bg_color);
 }
 
 .avatarsBox {
@@ -19,26 +27,8 @@
 }
 
 .link {
-    /*display: flex;*/
-    /*align-items: center;*/
     text-decoration: none;
     color: var(--tgui--text_color);
-    /*cursor: pointer;*/
-    /*font-size: var(--mantine-font-size-sm);*/
-    /*color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));*/
-    /*padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);*/
-    /*border-radius: var(--mantine-radius-sm);*/
-    /*font-weight: 500;*/
-    /*width: 100%;*/
-
-    /*&:hover {*/
-        /*background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));*/
-    /*}*/
-}
-
-.linkIcon {
-    /*color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-2));*/
-    /*margin-right: var(--mantine-spacing-sm);*/
 }
 
 .donutIcon {
@@ -60,19 +50,3 @@
         color: #c2255c;
     }
 }
-
-/*  .frequently-used,*/
-/*  .other-section {*/
-/*    margin-top: 16px;*/
-/*  }*/
-
-/*  .other-section {*/
-
-/*    a {*/
-/*      color: inherit;*/
-/*    }*/
-/*  }*/
-
-/*  .quote-section {*/
-/*    margin-top: 16px;*/
-/*  }*/

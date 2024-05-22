@@ -1,30 +1,30 @@
 // import { Buffer } from 'buffer';
 // import { AES, enc } from 'crypto-js';
-// import { HttpClient, Api as TonApiSDK } from 'tonapi-sdk-js';
+import { HttpClient, Api as TonApiSDK } from 'tonapi-sdk-js';
 // import { notifications } from '@mantine/notifications';
 import { Api } from 'telegram';
 // import { FloodWaitError } from 'telegram/errors';
 // import { AbortRequestError } from '../errors/AbortRequestError.ts';
 // import { getCache, setCache } from './cache.ts';
 // import { getHideUser, isHideMode } from './hide.ts';
-// import { getAppLangCode, LangType, t, td } from './lang';
+import { getAppLangCode, LangType, t, td } from './lang';
 // import { ServerMock } from './mock.ts';
-//
-// export type TOwnerInfo = null | Api.TypeUser | Api.TypeChat;
-// type TDocumentThumb = Api.TypeDocument | Api.TypePhoto | Api.UserProfilePhoto | Api.ChatPhoto | undefined;
-//
-// export const TonApi = new TonApiSDK(
-//     new HttpClient({
-//         baseUrl: 'https://tonapi.io/',
-//         baseApiParams: {
-//             headers: {
-//                 Authorization: 'Bearer AGGHQSHTE46RAWAAAAAKDQJHVP3ZWTD7VWS2TQK72GTO6DBKO42J2BGIQYDRAZBK2BYLTMI',
-//                 'Content-type': 'application/json'
-//             }
-//         }
-//     })
-// );
-//
+
+export type TOwnerInfo = null | Api.TypeUser | Api.TypeChat;
+type TDocumentThumb = Api.TypeDocument | Api.TypePhoto | Api.UserProfilePhoto | Api.ChatPhoto | undefined;
+
+export const TonApi = new TonApiSDK(
+    new HttpClient({
+        baseUrl: 'https://tonapi.io/',
+        baseApiParams: {
+            headers: {
+                Authorization: 'Bearer AGGHQSHTE46RAWAAAAAKDQJHVP3ZWTD7VWS2TQK72GTO6DBKO42J2BGIQYDRAZBK2BYLTMI',
+                'Content-type': 'application/json'
+            }
+        }
+    })
+);
+
 interface IUser {
     added_to_attachment_menu: boolean;
     allows_write_to_pm: boolean;
@@ -57,20 +57,20 @@ export function getUserData() {
     return null;
 }
 
-// export function getUserId() {
-//     try {
-//         const user = getUserData();
-//
-//         if (user) {
-//             return user.id;
-//         }
-//     } catch (error) {
-//         console.error('getUserId error', error);
-//     }
-//
-//     return 0;
-// }
-//
+export function getUserId() {
+    try {
+        const user = getUserData();
+
+        if (user) {
+            return user.id;
+        }
+    } catch (error) {
+        console.error('getUserId error', error);
+    }
+
+    return 0;
+}
+
 // export const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 //
 // export const isDevUser = [44221708, 5000925865].includes(getUserId());
@@ -160,11 +160,11 @@ export function getUserData() {
 //
 //     return Math.floor((100 * count) / total);
 // }
-//
-// export async function sleep(milliseconds: number): Promise<void> {
-//     await new Promise((resolve) => setTimeout(resolve, milliseconds));
-// }
-//
+
+export async function sleep(milliseconds: number): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
 // export interface ITime {
 //     years: number;
 //     months: number;
@@ -401,11 +401,11 @@ export function classNames(...classes: (string | object)[]): string {
 //         autoClose: false
 //     });
 // }
-//
-// export function getDocLink(path: string): string {
-//     return `https://wiki.kit42.app/v/${getAppLangCode()}/${path}`;
-// }
-//
+
+export function getDocLink(path: string): string {
+    return `https://wiki.kit42.app/v/${getAppLangCode()}/${path}`;
+}
+
 // export async function parallelLimit(limit: number, tasks: Function[]): Promise<void> {
 //     const copyTasks = tasks.slice(0);
 //
@@ -594,3 +594,11 @@ export function classNames(...classes: (string | object)[]): string {
 // export function decodeString(encodedString: string, key: string) {
 //     return AES.decrypt(encodedString, key).toString(enc.Utf8);
 // }
+
+export async function wrapCall(func: Function) {
+    try {
+        await func();
+    } catch (error) {
+        console.log('wrapCall error', error?.toString());
+    }
+}
