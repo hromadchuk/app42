@@ -1,22 +1,24 @@
 import { Cell, List, Section } from '@telegram-apps/telegram-ui';
+import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { getCardById, getMethodsByCardId } from '../cards.ts';
 import { PageHeader } from '../components/PageHeader.tsx';
-import { wrapCall } from '../lib/helpers.ts';
 import { IMethod, MethodCategory } from '../routes.tsx';
 import { t } from '../lib/lang.ts';
+
+import { AppContext } from '../contexts/AppContext.tsx';
 
 import classes from '../styles/MenuPage.module.css';
 
 export function MethodRow(method: IMethod) {
+    const { openMethod } = useContext(AppContext);
+    const categoryId = useParams().categoryId as MethodCategory;
+
     return (
         <Cell
             key={method.id}
             before={<method.icon size={28} stroke={1.2} />}
-            onClick={() => {
-                // navigate(`/category/${card.id}`);
-                // wrapCall(() => miniApp.setHeaderColor(card.color));
-            }}
+            onClick={() => openMethod(method, categoryId)}
         >
             {method.name}
         </Cell>

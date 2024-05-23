@@ -1,310 +1,526 @@
-import { IconSearch, IconTrash, IconUserPlus } from '@tabler/icons-react';
-import { Avatar, Button, Cell, Divider, Input, List, Modal, Section } from '@telegram-apps/telegram-ui';
+import { FormEvent, useContext, useEffect, useState } from 'react';
+import {
+    Button,
+    Caption,
+    Cell,
+    Divider,
+    Input,
+    List,
+    Modal,
+    Placeholder,
+    Section,
+    Spinner
+} from '@telegram-apps/telegram-ui';
 import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
-import { useEffect, useState } from 'react';
-// import AnimatedSticker3 from '~/assets/animatedStickers/3.json';
-// import AnimatedSticker4 from '~/assets/animatedStickers/4.json';
-// import AnimatedSticker5 from '~/assets/animatedStickers/5.json';
-// import AnimatedHeader from "../AnimatedHeader/AnimatedHeader";
+import { IconSearch } from '@tabler/icons-react';
+import { useCloudStorage } from '@tma.js/sdk-react';
+import { Api } from 'telegram';
+import { computeCheck } from 'telegram/Password';
+import { getCache, removeCache, setCache } from '../lib/cache.ts';
+import { CountryFlag } from '../components/CountryFlag.tsx';
+import { Constants } from '../constants.ts';
+import { AppContext } from '../contexts/AppContext.tsx';
+import { CallAPI, decodeString, encodeString, getCurrentUser, isDev, wrapCallMAMethod } from '../lib/helpers.ts';
+import { getAppLangCode, t } from '../lib/lang.ts';
+import { AnimatedHeader } from '../components/AnimatedHeader.tsx';
 
-import { useThemeParams } from '@tma.js/sdk-react';
-// import './AuthorizationModal.scss';
+import AnimatedPhone from '../assets/animated_stickers/phone.json';
+import AnimatedCloud from '../assets/animated_stickers/cloud.json';
+import AnimatedMonkey from '../assets/animated_stickers/monkey.json';
 
-enum IAuthType {
-    API,
-    TON
+import classes from '../styles/AuthorizationModal.module.css';
+
+interface IInputCountry {
+    name: string;
+    code: string;
+    prefix: number;
+    pattern?: string;
+}
+
+interface IAuthStateNumber {
+    countryCode: string;
+    numberSuffix: string;
+    phoneCodeHash: string;
+    phoneCode: number;
 }
 
 interface IAuthorizationModalProps {
-    authType?: IAuthType | null;
     isOpen: boolean;
-    onOpenChange?: (open: boolean) => void;
+    onOpenChange: (open: boolean) => void;
+    onAuthComplete: () => void;
 }
 
-function AuthorizationModal({ authType, isOpen, onOpenChange }: IAuthorizationModalProps) {
-    const [activeAuth, setActiveAuth] = useState<IAuthType | null>(authType ? authType : null);
-    const [selectingCountry, setSelectingCountry] = useState<boolean>(false);
-    const [waitingCode, setWaitingCode] = useState<boolean>(false);
-    const [waitingPassword, setWaitingPassword] = useState<boolean>(false);
-    const [passwordValue, setPasswordValue] = useState<string>('');
+export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAuthorizationModalProps) {
+    const { setUser, initData } = useContext(AppContext);
 
-    const themeParams = useThemeParams();
+    const storage = useCloudStorage();
+
+    const [isSelectingCountry, setSelectingCountry] = useState<boolean>(false);
+    const [isWaitingCode, setWaitingCode] = useState<boolean>(false);
+    const [isWaitingPassword, setWaitingPassword] = useState<boolean>(false);
+
+    const [selectedCountryCode, setSelectedCountryCode] = useState<string | null>(null);
+    const [searchCountry, setSearchCountry] = useState('');
+    const [inputCountries, setInputCountries] = useState<IInputCountry[]>([]);
+
+    const [dataLogin, setDataLogin] = useState<Api.account.Password | null>(null);
+    const [isDataLoading, setDataLoading] = useState(true);
+    const [isButtonLoading, setButtonLoading] = useState(false);
+
+    const [number, setNumber] = useState('');
+    const [numberError, setNumberError] = useState('');
+    const [phoneCodeHash, setPhoneCodeHash] = useState('');
+
+    const [codeLength, setCodeLength] = useState(5);
+    const [codeError, setCodeError] = useState('');
+
+    const [password, setPassword] = useState('');
+    const [passwordError, setPasswordError] = useState('');
 
     useEffect(() => {
-        setSelectingCountry(false);
-    }, [activeAuth]);
+        (async () => {
+            setDataLoading(true);
 
-    function onChange(e: React.FormEvent<HTMLInputElement>) {
-        if (e.currentTarget.classList.contains('last')) {
-            setWaitingPassword(true);
+            const storageSessionHashed = isDev
+                ? await getCache(Constants.SESSION_KEY)
+                : await wrapCallMAMethod<string>(() => storage.get(Constants.SESSION_KEY));
+            const storageSession = storageSessionHashed
+                ? decodeString(storageSessionHashed as string, initData?.storageHash || '')
+                : null;
+            console.log('Auth.storageSession', Boolean(storageSession));
+
+            const authStateNumber = (await getCache(Constants.AUTH_STATE_NUMBER_KEY)) as IAuthStateNumber;
+
+            console.log(1, authStateNumber);
+            console.log(2, !storageSession);
+
+            if (authStateNumber || !storageSession) {
+                await getAuthData();
+            }
+
+            if (authStateNumber) {
+                setSelectedCountryCode(authStateNumber.countryCode);
+                setPhoneCodeHash(authStateNumber.phoneCodeHash);
+                setCodeLength(authStateNumber.phoneCode);
+                setNumber(authStateNumber.numberSuffix);
+                setWaitingCode(true);
+                setButtonLoading(false);
+            }
+
+            setDataLoading(false);
+        })();
+    }, []);
+
+    async function checkCurrentSession() {
+        const user = await getCurrentUser();
+        if (user) {
+            setUser(user as Api.User);
+            setButtonLoading(false);
+            setWaitingPassword(false);
+            setWaitingCode(false);
+            onOpenChange(false);
+            onAuthComplete();
+        } else {
+            await getAuthData();
+            setButtonLoading(false);
+        }
+    }
+
+    async function getAuthData() {
+        const config = await CallAPI(new Api.help.GetNearestDc());
+        setSelectedCountryCode(config.country);
+
+        const { countries } = (await CallAPI(
+            new Api.help.GetCountriesList({
+                langCode: getAppLangCode()
+            })
+        )) as Api.help.CountriesList;
+
+        const initInputCountries: IInputCountry[] = [];
+
+        countries.forEach((country) => {
+            country.countryCodes.forEach((countryCode) => {
+                const data: IInputCountry = {
+                    name: country.name || country.defaultName,
+                    code: country.iso2,
+                    prefix: Number(countryCode.countryCode)
+                };
+
+                if (countryCode.patterns?.length) {
+                    data.pattern = countryCode.patterns.pop();
+                }
+
+                initInputCountries.push(data);
+            });
+        });
+
+        const anonymousNumberCountry = initInputCountries.find((country) => country.prefix === 888);
+        // skip some strange codes with problems
+        const ignorePrefixes = [
+            888, // Anonymous number
+            881, // International network
+            882, // International network
+            883, // International network
+            42 // Y-land ??
+        ];
+        const otherCountries = initInputCountries
+            .filter((country) => !ignorePrefixes.includes(country.prefix))
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+        if (anonymousNumberCountry) {
+            otherCountries.unshift(anonymousNumberCountry);
+        }
+
+        setInputCountries(otherCountries);
+    }
+
+    async function confirmNumber() {
+        setButtonLoading(true);
+        setNumberError('');
+
+        const country = getSelectCountry();
+        const phoneNumber = `+${country.prefix}${number}`.replace(/\s/g, '');
+
+        try {
+            const result = (await CallAPI(
+                new Api.auth.SendCode({
+                    phoneNumber,
+                    apiId: Constants.API_ID,
+                    apiHash: Constants.API_HASH,
+                    settings: new Api.CodeSettings({
+                        allowFlashcall: true,
+                        currentNumber: true,
+                        allowAppHash: true,
+                        allowMissedCall: true
+                    })
+                }),
+                { hideErrorAlert: true }
+            )) as Api.auth.SentCode;
+
+            const phoneCodeHashResult = result.phoneCodeHash as string;
+            // @ts-ignore
+            const phoneCodeLengthResult = result.type?.length;
+
+            const setData: IAuthStateNumber = {
+                countryCode: country.code,
+                numberSuffix: number,
+                phoneCodeHash: phoneCodeHashResult,
+                phoneCode: phoneCodeLengthResult
+            };
+
+            await setCache(Constants.AUTH_STATE_NUMBER_KEY, setData, 15);
+            await save();
+
+            setPhoneCodeHash(phoneCodeHashResult);
+            setCodeLength(phoneCodeLengthResult);
+            setWaitingCode(true);
+        } catch (error) {
+            // @ts-ignore
+            setNumberError(error?.message);
+        }
+
+        setButtonLoading(false);
+    }
+
+    async function confirmCode() {
+        setButtonLoading(true);
+        setCodeError('');
+
+        const country = getSelectCountry();
+        const phoneNumber = `+${country.prefix}${number}`.replace(/\s/g, '');
+
+        try {
+            await CallAPI(
+                new Api.auth.SignIn({
+                    phoneNumber,
+                    phoneCodeHash,
+                    phoneCode: getCode()
+                }),
+                { hideErrorAlert: true }
+            );
+
+            await save();
+            await checkCurrentSession();
+        } catch (error) {
+            // @ts-ignore
+            if (error?.message.includes('SESSION_PASSWORD_NEEDED')) {
+                setDataLogin(await CallAPI(new Api.account.GetPassword()));
+                setWaitingPassword(true);
+                setButtonLoading(false);
+            } else {
+                // @ts-ignore
+                setCodeError(error.message);
+            }
+        }
+
+        await removeCache(Constants.AUTH_STATE_NUMBER_KEY);
+
+        setButtonLoading(false);
+    }
+
+    async function confirmPassword() {
+        setButtonLoading(true);
+        setPasswordError('');
+
+        if (!dataLogin) {
             return;
         }
 
-        const nextElement = e.currentTarget.nextElementSibling as HTMLInputElement;
+        try {
+            await CallAPI(new Api.auth.CheckPassword({ password: await computeCheck(dataLogin, password) }), {
+                hideErrorAlert: true
+            });
 
-        if (nextElement) nextElement.focus();
+            await save();
+            await checkCurrentSession();
+        } catch (error) {
+            // @ts-ignore
+            setPasswordError(error.message);
+        }
+
+        setButtonLoading(false);
     }
 
-    useEffect(() => {
-        if (activeAuth === null) {
-            setSelectingCountry(false);
-            setWaitingCode(false);
-            setWaitingPassword(false);
+    function getCode() {
+        // @ts-ignore
+        return [...document.getElementsByClassName('smsCode')].map((el) => el.value).join('');
+    }
+
+    function getSelectCountry(): IInputCountry {
+        if (selectedCountryCode) {
+            return inputCountries.find((findCountry) => findCountry.code === selectedCountryCode) as IInputCountry;
         }
-    }, [activeAuth]);
+
+        return inputCountries[0];
+    }
+
+    function onCodeChange(e: FormEvent<HTMLInputElement>) {
+        const inputEvent = e.nativeEvent as InputEvent;
+        const isCorrectValue = Boolean((inputEvent.data || '').match(/[0-9]/));
+
+        e.currentTarget.value = String(isCorrectValue ? inputEvent.data : '');
+
+        const nextElement = e.currentTarget.nextElementSibling as HTMLInputElement;
+        if (nextElement && isCorrectValue) {
+            nextElement.focus();
+        }
+    }
+
+    async function save() {
+        if (isDev) {
+            await setCache(
+                Constants.SESSION_KEY,
+                encodeString(`${window.TelegramClient.session.save()}`, initData?.storageHash || ''),
+                60 * 24 * 365
+            );
+        } else {
+            await wrapCallMAMethod(() => {
+                storage.set(
+                    Constants.SESSION_KEY,
+                    encodeString(`${window.TelegramClient.session.save()}`, initData?.storageHash || '')
+                );
+            });
+        }
+    }
+
+    const selectedCountry = getSelectCountry();
 
     return (
         <div>
             {isOpen && (
                 <>
-                    <Modal
-                        header={<ModalHeader />}
-                        open={isOpen}
-                        onOpenChange={onOpenChange && onOpenChange}
-                        className="AuthorizationModal"
-                    >
-                        {activeAuth === null && (
-                            <div style={{ paddingBottom: 16 }}>
-                                <Cell
-                                    before={
-                                        <Avatar src="https://unsplash.com/photos/v2aKnjMbP_k/download?ixid=M3wxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNzE1ODE1NDc2fA&force=true&w=640" />
-                                    }
-                                    description="@meowmeow"
-                                    after={<IconTrash size={28} className="accent-color" />}
-                                >
-                                    Andrea Harinson
-                                </Cell>
-                                <Cell
-                                    before={
-                                        <Avatar>
-                                            <IconUserPlus size={20} />
-                                        </Avatar>
-                                    }
-                                    description="Press to log in"
-                                    onClick={() => setActiveAuth(IAuthType.API)}
-                                >
-                                    Add new account
-                                </Cell>
-                                <Cell
-                                    before={<Avatar src="https://ton.org/download/ton_symbol.svg" />}
-                                    description="Press to log in"
-                                    onClick={() => {}}
-                                >
-                                    TON
-                                </Cell>
-                            </div>
-                        )}
-
-                        {activeAuth === IAuthType.API && (
+                    <Modal header={<ModalHeader />} open={isOpen} onOpenChange={onOpenChange}>
+                        {isDataLoading ? (
+                            <Placeholder>
+                                <Spinner size="m" />
+                            </Placeholder>
+                        ) : (
                             <List style={{ padding: 16, paddingBottom: 32 }}>
-                                {/* <AnimatedHeader */}
-                                {/*     animationData={AnimatedSticker3} */}
-                                {/*     title="Authorization" */}
-                                {/*     subtitle="To be able to work with Telegram API, you need to log in to your account. Don't worry, the data is not transferred anywhere and the session is stored on your device." */}
-                                {/* /> */}
+                                <AnimatedHeader
+                                    animationData={AnimatedPhone}
+                                    title={t('auth_modal.phone_title')}
+                                    subtitle={t('auth_modal.description')}
+                                />
 
                                 <Cell
-                                    before={<img src={'https://flagcdn.com/ua.svg'} width={30} />}
+                                    before={<CountryFlag code={selectedCountry.code} size={30} />}
                                     onClick={() => setSelectingCountry(true)}
                                 >
-                                    Ukraine
+                                    {selectedCountry.name}
                                 </Cell>
-                                <Divider className="tgui-divider" style={{ margin: 0 }} />
-                                <Input before="+380" placeholder="000 000 000" />
+                                <Divider style={{ margin: 0 }} />
+                                <Input
+                                    status={numberError ? 'error' : 'default'}
+                                    header={numberError}
+                                    before={`+${selectedCountry.prefix}`}
+                                    placeholder={selectedCountry.pattern}
+                                    onChange={(e) => setNumber(e.currentTarget.value)}
+                                />
 
-                                <Button size="l" stretched onClick={() => setWaitingCode(true)}>
-                                    Next
+                                <Button
+                                    size="l"
+                                    stretched
+                                    onClick={confirmNumber}
+                                    disabled={isButtonLoading}
+                                    loading={isButtonLoading}
+                                >
+                                    {t('auth_modal.button_send_code')}
                                 </Button>
                             </List>
                         )}
                     </Modal>
 
-                    {activeAuth !== null && (
-                        <>
-                            {(waitingCode || waitingPassword) && (
-                                <Modal
-                                    header={<ModalHeader>Authorization</ModalHeader>}
-                                    open={waitingCode}
-                                    onOpenChange={(open) => !open && setWaitingCode(false)}
-                                    style={{ height: '100%' }}
-                                    className="AuthorizationModal"
-                                >
-                                    <div style={{ padding: '32px 16px' }}>
-                                        {waitingCode && !waitingPassword && (
-                                            <>
-                                                {/* <AnimatedHeader */}
-                                                {/*     animationData={AnimatedSticker4} */}
-                                                {/*     title="Enter a code" */}
-                                                {/*     subtitle="We are send activation code. It should come to the service cacount with +42777 number" */}
-                                                {/* /> */}
+                    {(isWaitingCode || isWaitingPassword) && (
+                        <Modal
+                            header={<ModalHeader>Authorization</ModalHeader>}
+                            open={isWaitingCode}
+                            onOpenChange={(open) => !open && setWaitingCode(false)}
+                        >
+                            <div style={{ padding: '32px 16px' }}>
+                                {isWaitingCode && !isWaitingPassword && (
+                                    <>
+                                        <AnimatedHeader
+                                            animationData={AnimatedCloud}
+                                            title={t('auth_modal.code_title')}
+                                            subtitle={t('auth_modal.code_description')}
+                                        />
 
-                                                <form
-                                                    className="code-section"
-                                                    style={themeParams.isDark ? { color: '#FFFFFF' } : {}}
-                                                >
-                                                    <input
-                                                        autoFocus
-                                                        type="num"
-                                                        inputMode="numeric"
-                                                        onChange={onChange}
-                                                    />
-                                                    <input type="num" inputMode="numeric" onChange={onChange} />
-                                                    <input type="num" inputMode="numeric" onChange={onChange} />
-                                                    <input type="num" inputMode="numeric" onChange={onChange} />
-                                                    <input type="num" inputMode="numeric" onChange={onChange} />
-                                                    <input
-                                                        type="num"
-                                                        inputMode="numeric"
-                                                        onChange={onChange}
-                                                        className="last"
-                                                    />
-                                                </form>
-                                            </>
-                                        )}
+                                        <Button
+                                            mode="plain"
+                                            size="s"
+                                            stretched
+                                            Component="a"
+                                            href="https://t.me/+42777"
+                                            target="_blank"
+                                        >
+                                            {t('auth_page.code_account_button')}
+                                        </Button>
 
-                                        {waitingPassword && (
-                                            <>
-                                                {/* <AnimatedHeader */}
-                                                {/*     animationData={AnimatedSticker5} */}
-                                                {/*     title="Enter a password" */}
-                                                {/*     subtitle="Please enter your 2fa password" */}
-                                                {/* /> */}
-
-                                                <Input
-                                                    type="password"
-                                                    value={passwordValue}
-                                                    onChange={(e) => setPasswordValue(e.currentTarget.value)}
-                                                    className="password-input"
+                                        <form
+                                            className={classes.codeSection}
+                                            style={{
+                                                color: 'var(--tgui--text_color)',
+                                                marginBottom: codeError ? 20 : 50
+                                            }}
+                                        >
+                                            {new Array(codeLength).fill(0).map((_, key) => (
+                                                <input
+                                                    autoFocus={key === 0}
+                                                    className="smsCode"
+                                                    type="num"
+                                                    key={key}
+                                                    inputMode="numeric"
+                                                    onChange={onCodeChange}
                                                 />
+                                            ))}
+                                        </form>
 
-                                                <Button
-                                                    stretched
-                                                    size="l"
-                                                    disabled={passwordValue.length === 0}
-                                                    onClick={() => setActiveAuth(null)}
-                                                >
-                                                    Continue
-                                                </Button>
-                                            </>
+                                        {Boolean(codeError) && (
+                                            <Caption
+                                                level="1"
+                                                weight="1"
+                                                style={{
+                                                    color: 'var(--tgui--destructive_text_color)',
+                                                    display: 'block',
+                                                    textAlign: 'center',
+                                                    marginBottom: 20
+                                                }}
+                                            >
+                                                {codeError}
+                                            </Caption>
                                         )}
-                                    </div>
-                                </Modal>
-                            )}
 
-                            {selectingCountry && (
-                                <Modal
-                                    header={<ModalHeader>Countries</ModalHeader>}
-                                    open={selectingCountry}
-                                    onOpenChange={(open) => !open && setSelectingCountry(false)}
-                                    className="AuthorizationModal"
-                                >
-                                    <List>
-                                        <Input before={<IconSearch opacity={0.5} />} size={28} placeholder="Search" />
+                                        <Button
+                                            size="l"
+                                            stretched
+                                            onClick={confirmCode}
+                                            disabled={isButtonLoading}
+                                            loading={isButtonLoading}
+                                        >
+                                            {t('auth_modal.button_confirm_code')}
+                                        </Button>
+                                    </>
+                                )}
 
-                                        <Divider className="tgui-divider" />
+                                {isWaitingPassword && (
+                                    <>
+                                        <AnimatedHeader
+                                            animationData={AnimatedMonkey}
+                                            title={t('auth_modal.password_title')}
+                                            subtitle={t('auth_modal.password_description')}
+                                        />
 
-                                        <Section>
+                                        <Input
+                                            type="password"
+                                            value={password}
+                                            status={passwordError ? 'error' : 'default'}
+                                            header={passwordError}
+                                            onChange={(e) => setPassword(e.currentTarget.value)}
+                                        />
+
+                                        <Button
+                                            stretched
+                                            size="l"
+                                            disabled={isButtonLoading}
+                                            loading={isButtonLoading}
+                                            onClick={confirmPassword}
+                                        >
+                                            {t('auth_modal.button_confirm_password')}
+                                        </Button>
+                                    </>
+                                )}
+                            </div>
+                        </Modal>
+                    )}
+
+                    {isSelectingCountry && (
+                        <Modal
+                            header={<ModalHeader>Countries</ModalHeader>}
+                            open={isSelectingCountry}
+                            onOpenChange={(open) => !open && setSelectingCountry(false)}
+                        >
+                            <List>
+                                <Input
+                                    before={<IconSearch opacity={0.3} />}
+                                    size={28}
+                                    placeholder={t('auth_modal.search_placeholder')}
+                                    onChange={(e) => setSearchCountry(e.target.value)}
+                                />
+
+                                <Divider />
+
+                                <Section>
+                                    {inputCountries
+                                        .filter((item) => {
+                                            if (!searchCountry) {
+                                                return true;
+                                            }
+
+                                            if (String(item.prefix).includes(searchCountry)) {
+                                                return true;
+                                            }
+
+                                            return item.name.toLowerCase().includes(searchCountry.toLowerCase());
+                                        })
+                                        .map((country, key) => (
                                             <Cell
-                                                before={<img src={'https://flagcdn.com/ua.svg'} width={30} />}
-                                                after="+380"
-                                                onClick={() => setSelectingCountry(false)}
+                                                key={key}
+                                                before={<CountryFlag code={country.code} size={28} />}
+                                                after={`+${country.prefix}`}
+                                                onClick={() => {
+                                                    setSelectedCountryCode(country.code);
+                                                    setSelectingCountry(false);
+                                                }}
                                             >
-                                                Ukraine
+                                                {country.name}
                                             </Cell>
-                                            <Cell
-                                                before={<img src={'https://flagcdn.com/gb.svg'} width={30} />}
-                                                after="+44"
-                                                onClick={() => setSelectingCountry(false)}
-                                            >
-                                                United Kingdom
-                                            </Cell>
-                                            <Cell
-                                                before={<img src={'https://flagcdn.com/us.svg'} width={30} />}
-                                                after="+1"
-                                                onClick={() => setSelectingCountry(false)}
-                                            >
-                                                United States
-                                            </Cell>
-                                            <Cell
-                                                before={<img src={'https://flagcdn.com/ad.svg'} width={30} />}
-                                                after="+376"
-                                                onClick={() => setSelectingCountry(false)}
-                                            >
-                                                Andorra
-                                            </Cell>
-                                            <Cell
-                                                before={<img src={'https://flagcdn.com/ae.svg'} width={30} />}
-                                                after="+971"
-                                                onClick={() => setSelectingCountry(false)}
-                                            >
-                                                United Arab Emirates
-                                            </Cell>
-                                            <Cell
-                                                before={<img src={'https://flagcdn.com/af.svg'} width={30} />}
-                                                after="+93"
-                                                onClick={() => setSelectingCountry(false)}
-                                            >
-                                                Afghanistan
-                                            </Cell>
-                                            <Cell
-                                                before={<img src={'https://flagcdn.com/ag.svg'} width={30} />}
-                                                after="+1268"
-                                                onClick={() => setSelectingCountry(false)}
-                                            >
-                                                Antigua and Barbuda
-                                            </Cell>
-                                            <Cell
-                                                before={<img src={'https://flagcdn.com/ai.svg'} width={30} />}
-                                                after="+1264"
-                                                onClick={() => setSelectingCountry(false)}
-                                            >
-                                                Anguilla
-                                            </Cell>
-                                            <Cell
-                                                before={<img src={'https://flagcdn.com/al.svg'} width={30} />}
-                                                after="+355"
-                                                onClick={() => setSelectingCountry(false)}
-                                            >
-                                                Albania
-                                            </Cell>
-                                            <Cell
-                                                before={<img src={'https://flagcdn.com/am.svg'} width={30} />}
-                                                after="+374"
-                                                onClick={() => setSelectingCountry(false)}
-                                            >
-                                                Armenia
-                                            </Cell>
-                                            <Cell
-                                                before={<img src={'https://flagcdn.com/ao.svg'} width={30} />}
-                                                after="+244"
-                                                onClick={() => setSelectingCountry(false)}
-                                            >
-                                                Angola
-                                            </Cell>
-                                            <Cell
-                                                before={<img src={'https://flagcdn.com/aq.svg'} width={30} />}
-                                                after="+672"
-                                                onClick={() => setSelectingCountry(false)}
-                                            >
-                                                Antarctica
-                                            </Cell>
-                                            <Cell
-                                                before={<img src={'https://flagcdn.com/ar.svg'} width={30} />}
-                                                after="+54"
-                                                onClick={() => setSelectingCountry(false)}
-                                            >
-                                                Argentina
-                                            </Cell>
-                                        </Section>
-                                    </List>
-                                </Modal>
-                            )}
-                        </>
+                                        ))}
+                                </Section>
+                            </List>
+                        </Modal>
                     )}
                 </>
             )}
         </div>
     );
 }
-
-export default AuthorizationModal;

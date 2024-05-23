@@ -3,41 +3,27 @@ import {
     Avatar,
     AvatarStack,
     Blockquote,
-    Button,
     Cell,
     Divider,
     Input,
-    List, Placeholder,
+    List,
+    Placeholder,
     Section,
     Tappable
 } from '@telegram-apps/telegram-ui';
-import {
-    IconAddressBook,
-    IconBook2,
-    IconMessages,
-    IconNews,
-    IconPigMoney, IconSearch,
-    IconUser,
-    IconUsersGroup,
-    IconWallet,
-    TablerIconsProps
-} from '@tabler/icons-react';
+import { IconBook2, IconNews, IconPigMoney, IconSearch } from '@tabler/icons-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMiniApp } from '@tma.js/sdk-react';
-import { useTonAddress, useTonConnectModal, useTonConnectUI } from '@tonconnect/ui-react';
-import { cards, ICard } from '../cards.ts';
+import { useTonAddress } from '@tonconnect/ui-react';
+import { cards } from '../cards.ts';
+import { OwnerAvatar } from '../components/OwnerAvatar.tsx';
 import { Constants } from '../constants.ts';
-import { getCache, removeCache } from '../lib/cache.ts';
-import { TonApiCall } from '../lib/TonApi.ts';
-import { classNames, getDocLink, wrapCall } from '../lib/helpers.ts';
-import { PageHeader } from '../components/PageHeader.tsx';
-import { getMethodsByName, MethodCategory } from '../routes.tsx';
+import { getCache } from '../lib/cache.ts';
+import { getDocLink, wrapCallMAMethod } from '../lib/helpers.ts';
+import { getMethodsByName } from '../routes.tsx';
 import { t } from '../lib/lang.ts';
 
 import { AppContext } from '../contexts/AppContext.tsx';
-
-import { AccountsModal } from '../modals/AccountsModal.tsx';
-import AuthorizationModal from '../modals/AuthorizationModal.tsx';
 
 import classes from '../styles/MenuPage.module.css';
 import TonLogo from '../assets/ton_logo.svg';
@@ -50,15 +36,12 @@ function getInfoTextWithLink() {
 }
 
 export default function MenuPage() {
-    const { user } = useContext(AppContext);
+    const { user, setAccountsModalOpen } = useContext(AppContext);
 
-    const { open: tonAuth } = useTonConnectModal();
     const userFriendlyAddress = useTonAddress();
     const miniApp = useMiniApp();
     const navigate = useNavigate();
 
-    const [isAccountsModalOpen, setAccountsModalOpen] = useState(false);
-    const [isAuthorizationModalOpen, setAuthorizationModalOpen] = useState(false);
     const [searchText, setSearchText] = useState('');
 
     useEffect(() => {
@@ -82,15 +65,7 @@ export default function MenuPage() {
         const avatars = [];
 
         if (user) {
-            avatars.push(
-                <Avatar
-                    key="user"
-                    size={28}
-                    src={
-                        'https://unsplash.com/photos/DItYlc26zVI/download?ixid=M3wxMjA3fDB8MXxzZWFyY2h8Mnx8bWFufGVufDB8fHx8MTcxNDg1MzcwOHww&force=true&w=640'
-                    }
-                />
-            );
+            avatars.push(<OwnerAvatar key="user" owner={user} size={28} />);
         }
 
         if (userFriendlyAddress) {
@@ -128,7 +103,7 @@ export default function MenuPage() {
                             before={<card.icon size={28} color={card.color} stroke={1.2} />}
                             onClick={() => {
                                 navigate(`/methods/${card.id}`);
-                                wrapCall(() => miniApp.setHeaderColor(card.color));
+                                wrapCallMAMethod(() => miniApp.setHeaderColor(card.color));
                             }}
                         >
                             {t(`menu.cards.${card.id}`)}
@@ -148,9 +123,6 @@ export default function MenuPage() {
                     <Link to="https://t.me/app42news" target="_blank" className={classes.link}>
                         <Cell before={<IconNews size={28} stroke={1.2} />}>{t('menu.telegram_channel')}</Cell>
                     </Link>
-                    <Cell onClick={tonAuth} before={<IconNews size={28} stroke={1.2} />}>
-                        tonAuth
-                    </Cell>
                 </Section>
 
                 <Blockquote>
@@ -165,7 +137,7 @@ export default function MenuPage() {
             <div className={classes.headerBox}>
                 <div className={classes.searchBox}>
                     <Input
-                        before={<IconSearch color="var(--tgui--subtitle_text_color)" />}
+                        before={<IconSearch opacity={0.3} />}
                         placeholder={t('menu.search_placeholder')}
                         className={classes.searchInput}
                         onChange={(e) => setSearchText(e.target.value)}
@@ -178,12 +150,6 @@ export default function MenuPage() {
             <Divider />
 
             <List style={{ padding: 16 }}>{Content()}</List>
-
-            <AccountsModal isOpen={isAccountsModalOpen} onOpenChange={(open) => setAccountsModalOpen(open)} />
-            <AuthorizationModal
-                isOpen={isAuthorizationModalOpen}
-                onOpenChange={(open) => setAuthorizationModalOpen(open)}
-            />
         </>
     );
 }

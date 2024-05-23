@@ -1,0 +1,36 @@
+.box {
+    text-align: center;
+}
+
+.content {
+    padding-bottom: 20px;
+}
+
+.animation {
+    width: 100px;
+    margin: 0 auto;
+}
+
+.text {
+    opacity: 0.8;
+    margin-top: 8px !important;
+}
+
+/*.AnimatedHeader {*/
+
+/*    text-align: center;*/
+
+/*    &__header-content {*/
+/*        padding-bottom: 20px;*/
+
+/*        &__animation {*/
+/*            width: 100px;*/
+/*            margin: 0 auto;*/
+/*        }*/
+
+/*        &__text {*/
+/*            opacity: 0.8;*/
+/*            margin-top: 8px !important;*/
+/*        }*/
+/*    }*/
+/*}*/

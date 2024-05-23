@@ -22,7 +22,7 @@ export function PageHeader(props: IPageHeaderProps) {
             <Headline weight="1">{header}</Headline>
 
             {subheader && (
-                <Subheadline level="2" weight="2">
+                <Subheadline level="2" weight="2" className={classes.description}>
                     {subheader}
                 </Subheadline>
             )}

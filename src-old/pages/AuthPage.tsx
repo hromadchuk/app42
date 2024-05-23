@@ -559,4 +559,4 @@ const AuthPage = ({ onAuthComplete }: IAuthPage) => {
     );
 };
 
-export default AuthPage;
+export default  AuthPage;
