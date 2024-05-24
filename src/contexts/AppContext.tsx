@@ -8,6 +8,14 @@ export interface IInitData {
     storageHash: string;
 }
 
+export interface ISnackbarOptions {
+    title: string;
+    message: string;
+    icon: JSX.Element;
+    duration: number;
+    type: 'success' | 'error' | 'loading';
+}
+
 export interface IAppContext {
     user: Api.User | null;
     setUser: (user: Api.User | null) => void;

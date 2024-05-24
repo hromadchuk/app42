@@ -10,8 +10,6 @@ export default function AbstractMethod() {
     const card = getCardById(categoryId);
     const method = getMethodById(methodId);
 
-    console.log({ categoryId, methodId });
-
     return (
         <>
             <PageHeader header={method.name} subheader={t(`menu.cards.${categoryId}`)} color={card.color} />

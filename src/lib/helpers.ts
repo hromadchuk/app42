@@ -1,13 +1,16 @@
 import { Buffer } from 'buffer';
 import { AES, enc } from 'crypto-js';
+import { createElement } from 'react';
 import { HttpClient, Api as TonApiSDK } from 'tonapi-sdk-js';
-// import { notifications } from '@mantine/notifications';
 import { Api } from 'telegram';
+import { Spinner } from '@telegram-apps/telegram-ui';
+import { IconCircleCheck, IconExclamationCircle } from '@tabler/icons-react';
 import { FloodWaitError } from 'telegram/errors';
 import { AbortRequestError } from '../errors/AbortRequestError.ts';
 import { getCache, setCache } from './cache.ts';
 import { getAppLangCode, LangType, t, td } from './lang';
 import { ServerMock } from './mock.ts';
+import { ISnackbarOptions } from '../contexts/AppContext.tsx';
 
 export type TOwnerInfo = null | Api.TypeUser | Api.TypeChat;
 type TDocumentThumb = Api.TypeDocument | Api.TypePhoto | Api.UserProfilePhoto | Api.ChatPhoto | undefined;
@@ -324,27 +327,29 @@ function getFloodWaitErrorMessage(seconds: number): string {
 async function handleFloodWaitError(error: FloodWaitError, request: Api.AnyRequest, options?: ICallApiOptions) {
     const totalWaitSeconds = error.seconds + 1; // +1 for safety
 
-    // const id = notifications.show({
-    //     loading: true,
-    //     message: getFloodWaitErrorMessage(totalWaitSeconds),
-    //     autoClose: false,
-    //     withCloseButton: false
-    // });
-    //
+    const snackbarParams: ISnackbarOptions = {
+        title: t('common.errors.api_error'),
+        message: getFloodWaitErrorMessage(totalWaitSeconds),
+        icon: createElement(Spinner, { size: 's' }),
+        type: 'loading',
+        duration: 1e9
+    };
+
+    window.showSnackbar(snackbarParams);
+
     let secondsToRetry = totalWaitSeconds;
-    // const updatedInterval = setInterval(() => {
-    //     secondsToRetry -= 1;
-    //     if (secondsToRetry <= 0) {
-    //         notifications.hide(id);
-    //         clearInterval(updatedInterval);
-    //     } else {
-    //         notifications.update({
-    //             id,
-    //             message: getFloodWaitErrorMessage(secondsToRetry),
-    //             loading: true
-    //         });
-    //     }
-    // }, 1000);
+    const updatedInterval = setInterval(() => {
+        secondsToRetry -= 1;
+        if (secondsToRetry <= 0) {
+            window.hideSnackbar();
+            clearInterval(updatedInterval);
+        } else {
+            window.showSnackbar({
+                ...snackbarParams,
+                message: getFloodWaitErrorMessage(secondsToRetry)
+            });
+        }
+    }, 1000);
 
     await sleep(secondsToRetry * 1000);
 
@@ -369,22 +374,28 @@ export function classNames(...classes: (string | object)[]): string {
     return list.join(' ');
 }
 
-export function notifySuccess({ title, message }: { title?: string; message?: string } = {}) {
-    // notifications.show({
-    //     color: 'green',
-    //     title,
-    //     message,
-    //     autoClose: true
-    // });
+export function notifySuccess({ title, message }: { title: string; message: string }) {
+    window.showSnackbar({
+        title,
+        message,
+        type: 'success',
+        icon: createElement(IconCircleCheck, { size: 24, stroke: 1.2, color: 'var(--tgui--green)' }),
+        duration: 3000
+    });
 }
 
-export function notifyError({ title, message }: { title?: string; message?: string } = {}) {
-    // notifications.show({
-    //     color: 'red',
-    //     title,
-    //     message,
-    //     autoClose: false
-    // });
+export function notifyError({ title, message }: { title: string; message: string }) {
+    window.showSnackbar({
+        title,
+        message,
+        type: 'error',
+        icon: createElement(IconExclamationCircle, {
+            size: 24,
+            stroke: 1.2,
+            color: 'var(--tg-theme-destructive-text-color)'
+        }),
+        duration: 30000
+    });
 }
 
 export function getDocLink(path: string): string {

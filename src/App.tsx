@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { IconButton, Snackbar } from '@telegram-apps/telegram-ui';
 import { IconX } from '@tabler/icons-react';
-import { SnackbarProps } from '@telegram-apps/telegram-ui/dist/components/Feedback/Snackbar/Snackbar';
 import ReactGA from 'react-ga4';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useBackButton, useCloudStorage, useLaunchParams, useMiniApp, useViewport } from '@tma.js/sdk-react';
@@ -16,7 +15,7 @@ import { AuthType, IMethod, IRouter, MethodCategory, routes } from './routes.tsx
 import { AccountsModal } from './modals/AccountsModal.tsx';
 import { AuthorizationModal } from './modals/AuthorizationModal.tsx';
 
-import { AppContext, IInitData } from './contexts/AppContext.tsx';
+import { AppContext, IInitData, ISnackbarOptions } from './contexts/AppContext.tsx';
 
 declare global {
     interface Window {
@@ -25,7 +24,8 @@ declare global {
         isProgress: boolean;
         isNeedToThrowErrorOnRequest: boolean;
         alreadyVisitedRefLink: boolean;
-        // showSnackbar: (message: string) => void;
+        showSnackbar: (options: ISnackbarOptions) => void;
+        hideSnackbar: () => void;
         // eruda: { init: () => void };
     }
 }
@@ -47,7 +47,7 @@ export function App() {
     const [isAccountsModalOpen, setAccountsModalOpen] = useState(false);
     const [isAuthorizationModalOpen, setAuthorizationModalOpen] = useState(false);
     const [initData, setInitData] = useState<null | IInitData>(null);
-    const [snackbarBlock, setSnackbarBlock] = useState<null | IInitData>(null);
+    const [snackbarOptions, setSnackbarOptions] = useState<null | ISnackbarOptions>(null);
 
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
 
@@ -64,6 +64,9 @@ export function App() {
         backButton.on('click', () => {
             navigate('/');
         });
+
+        window.showSnackbar = (options: ISnackbarOptions) => setSnackbarOptions(options);
+        window.hideSnackbar = () => setSnackbarOptions(null);
     }, []);
 
     useEffect(() => {
@@ -99,8 +102,6 @@ export function App() {
 
     useEffect(() => {
         setOptions({ language: getAppLangCode() as Locales });
-
-        console.log('initData', initData);
 
         (async () => {
             // TODO return onboarding
@@ -306,20 +307,21 @@ export function App() {
                 }}
             />
 
-            {Boolean(snackbarBlock) && (
+            {snackbarOptions && (
                 <Snackbar
-                    // forwardRef={snackbarRef}
-                    // before={<SnackbarButton onClick={function noRefCheck(){}}>Undo</SnackbarButton>}
+                    before={snackbarOptions.icon}
                     after={
-                        <IconButton mode="plain" size="s" onClick={() => setSnackbarBlock(null)}>
-                            <IconX />
-                        </IconButton>
+                        snackbarOptions.type !== 'loading' && (
+                            <IconButton mode="plain" size="s" onClick={() => setSnackbarOptions(null)}>
+                                <IconX />
+                            </IconButton>
+                        )
                     }
-                    description="Restore the message within 3 seconds"
-                    duration={10060}
-                    onClose={() => {}}
+                    description={snackbarOptions.message}
+                    duration={snackbarOptions.duration}
+                    onClose={() => setSnackbarOptions(null)}
                 >
-                    Message deleted
+                    {snackbarOptions.title}
                 </Snackbar>
             )}
         </AppContext.Provider>

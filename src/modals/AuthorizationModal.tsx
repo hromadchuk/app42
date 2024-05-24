@@ -81,6 +81,10 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
         (async () => {
             setDataLoading(true);
 
+            if (!initData) {
+                return;
+            }
+
             const storageSessionHashed = isDev
                 ? await getCache(Constants.SESSION_KEY)
                 : await wrapCallMAMethod<string>(() => storage.get(Constants.SESSION_KEY));
@@ -90,10 +94,6 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
             console.log('Auth.storageSession', Boolean(storageSession));
 
             const authStateNumber = (await getCache(Constants.AUTH_STATE_NUMBER_KEY)) as IAuthStateNumber;
-
-            console.log(1, authStateNumber);
-            console.log(2, !storageSession);
-
             if (authStateNumber || !storageSession) {
                 await getAuthData();
             }
@@ -105,11 +105,12 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
                 setNumber(authStateNumber.numberSuffix);
                 setWaitingCode(true);
                 setButtonLoading(false);
+                onOpenChange(true);
             }
 
             setDataLoading(false);
         })();
-    }, []);
+    }, [initData]);
 
     async function checkCurrentSession() {
         const user = await getCurrentUser();

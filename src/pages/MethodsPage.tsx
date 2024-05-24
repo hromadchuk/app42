@@ -30,9 +30,6 @@ export default function MethodsPage() {
     const card = getCardById(categoryId);
     const methodsList = getMethodsByCardId(categoryId);
 
-    console.log('categoryId', categoryId);
-    console.log('methodsList', methodsList);
-
     return (
         <>
             <PageHeader header={t(`menu.cards.${categoryId}`)} color={card.color} />

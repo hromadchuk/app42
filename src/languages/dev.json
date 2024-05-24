@@ -24,6 +24,7 @@
     "getting_dialogs": "Getting dialogs",
     "selected_button_subtext": "Selected {count} from {total}",
     "errors": {
+      "api_error": "API error",
       "api_rate_limit": "You have reached the limit of API requests, you need to wait {time} and try again"
     },
     "time_short": {
