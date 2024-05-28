@@ -100,7 +100,13 @@ export default function MenuPage() {
                     {cards.map((card, key) => (
                         <Cell
                             key={key}
-                            before={<card.icon size={28} color={card.color} stroke={1.2} />}
+                            before={
+                                <Avatar size={40} style={{ backgroundColor: card.color }}>
+                                    <card.icon size={28} stroke={1.2} />
+                                </Avatar>
+                            }
+                            description={t(`menu.cards.${card.id}_description`)}
+                            multiline={true}
                             onClick={() => {
                                 navigate(`/methods/${card.id}`);
                                 wrapCallMAMethod(() => miniApp.setHeaderColor(card.color));

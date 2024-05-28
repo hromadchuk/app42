@@ -82,10 +82,15 @@
     "no_methods": "No methods founds",
     "cards": {
       "account": "Account",
+      "account_description": "Analyse your account and keep it clean",
       "contacts": "Contacts",
+      "contacts_description": "Analyse your contacts",
       "channels": "Channels",
+      "channels_description": "Analyse your channels and clear your personal channels",
       "chats": "Chats",
-      "ton": "TON"
+      "chats_description": "Analyse chats and clean up private chats",
+      "ton": "TON",
+      "ton_description": "Analysing your wallet in the TON network"
     }
   },
   "share": {

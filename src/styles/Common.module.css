@@ -1,0 +1,9 @@
+.sectionBox {
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px;
+
+    hr {
+        display: none;
+    }
+}

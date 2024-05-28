@@ -46,13 +46,20 @@ export interface IMethod {
     icon: (props: TablerIconsProps) => JSX.Element;
     categories: MethodCategory[];
     authType: AuthType;
+    element: JSX.Element;
 }
 
-export interface IRouter extends Partial<IMethod> {
+export interface IRouter {
     path: string;
     element: JSX.Element;
-    childElement?: JSX.Element;
-    methodId?: string;
+}
+
+export interface IMethodComponent {
+    id: string;
+    icon: (props: TablerIconsProps) => JSX.Element;
+    categories: MethodCategory[];
+    authType: AuthType;
+    element: JSX.Element;
 }
 
 interface IAppMethodRouter {
@@ -84,11 +91,11 @@ const appRoutes: IAppRouter[] = [
     }
 ];
 
-const appMethods = [
+const appMethods: IMethodComponent[] = [
     {
         id: 'get_id',
         icon: Icon123,
-        // element: createElement(lazy(() => import('./methods/GetId.tsx'))),
+        element: createElement(lazy(() => import('./methods/GetId.tsx'))),
         categories: [MethodCategory.ACCOUNT, MethodCategory.CHANNELS],
         authType: AuthType.TG
     },
@@ -260,7 +267,8 @@ export function getMethods(): IMethod[] {
         name: t(`routes.${item.id}`),
         icon: item.icon,
         categories: item.categories,
-        authType: item.authType
+        authType: item.authType,
+        element: item.element
     }));
 
     return methods.sort((a, b) => a.name.localeCompare(b.name));
