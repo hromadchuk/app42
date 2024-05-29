@@ -153,10 +153,8 @@ export function OwnerRow({
             <Cell
                 {...linkProps}
                 titleBadge={getBadge()}
-                before={<OwnerAvatar owner={owner} size={48} />}
-                // before={OwnerAvatar({ owner, size: 28 })}
+                before={<OwnerAvatar owner={owner} size={description ? 48 : 40} />}
                 description={description}
-                style={{ paddingTop: 8, paddingBottom: 8 }}
             >
                 {name.join(' ')}
             </Cell>

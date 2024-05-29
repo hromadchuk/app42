@@ -1,18 +1,13 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import {
-    IFinishBlock,
-    IGetDialogOption,
-    IProgress,
-    ISetListAction,
-    MethodContext
-} from '../contexts/MethodContext.tsx';
+import { IFinishBlock, IProgress, ISetListAction, MethodContext } from '../contexts/MethodContext.tsx';
 import { Server } from '../lib/helpers.ts';
 import { t, td } from '../lib/lang.ts';
 import { getMethodById, IRouter, MethodCategory, routes } from '../routes.tsx';
 import { getCardById } from '../cards.ts';
 import { PageHeader } from '../components/PageHeader.tsx';
 import { MethodLoader } from '../components/MethodLoader.tsx';
+import { MethodPlaceholder } from '../components/MethodPlaceholder.tsx';
 
 // TODO need fix this, progress always null in child components
 let progressSafe: IProgress | null = null;
@@ -95,6 +90,10 @@ export default function AbstractMethod() {
             return <MethodLoader {...progress} />;
         }
 
+        if (finishBlock) {
+            return <MethodPlaceholder {...finishBlock} />;
+        }
+
         return null;
     }
 
@@ -111,7 +110,6 @@ export default function AbstractMethod() {
                 md,
                 t,
                 td,
-                // getDialogs,
                 setListAction
             }}
         >

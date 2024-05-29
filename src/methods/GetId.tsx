@@ -89,7 +89,9 @@ export default function GetId() {
 
             {ownerInfo && (
                 <Section className={commonClasses.sectionBox}>
-                    <OwnerRow owner={ownerInfo} />
+                    <div style={{ paddingTop: 8 }}>
+                        <OwnerRow owner={ownerInfo} />
+                    </div>
 
                     <Input
                         after={<CopyButton value={ownerInfo.id.toString()} />}

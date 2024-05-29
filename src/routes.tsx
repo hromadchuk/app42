@@ -22,7 +22,7 @@ import {
     IconTransfer,
     IconUsersGroup,
     IconWritingSign,
-    TablerIconsProps
+    TablerIcon
 } from '@tabler/icons-react';
 
 import { t } from './lib/lang.ts';
@@ -43,7 +43,7 @@ export enum AuthType {
 export interface IMethod {
     id: string;
     name: string;
-    icon: (props: TablerIconsProps) => JSX.Element;
+    icon: (props: TablerIcon) => JSX.Element;
     categories: MethodCategory[];
     authType: AuthType;
     element: JSX.Element;
@@ -56,7 +56,7 @@ export interface IRouter {
 
 export interface IMethodComponent {
     id: string;
-    icon: (props: TablerIconsProps) => JSX.Element;
+    icon: (props: TablerIcon) => JSX.Element;
     categories: MethodCategory[];
     authType: AuthType;
     element: JSX.Element;
@@ -64,7 +64,7 @@ export interface IMethodComponent {
 
 interface IAppMethodRouter {
     id: string;
-    icon: (props: TablerIconsProps) => JSX.Element;
+    icon: (props: TablerIcon) => JSX.Element;
     element: JSX.Element;
     categories: MethodCategory[];
     authType: AuthType;
@@ -144,7 +144,7 @@ const appMethods: IMethodComponent[] = [
     {
         id: 'administered',
         icon: IconMessageCircleCog,
-        // element: createElement(lazy(() => import('./methods/Administered.tsx'))),
+        element: createElement(lazy(() => import('./methods/Administered.tsx'))),
         categories: [MethodCategory.CHANNELS, MethodCategory.CHATS],
         authType: AuthType.TG
     },
