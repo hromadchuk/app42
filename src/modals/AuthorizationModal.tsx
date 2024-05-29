@@ -51,7 +51,7 @@ interface IAuthorizationModalProps {
 }
 
 export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAuthorizationModalProps) {
-    const { setUser, initData } = useContext(AppContext);
+    const { user, setUser, initData } = useContext(AppContext);
 
     const storage = useCloudStorage();
 
@@ -64,7 +64,6 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
     const [inputCountries, setInputCountries] = useState<IInputCountry[]>([]);
 
     const [dataLogin, setDataLogin] = useState<Api.account.Password | null>(null);
-    const [isDataLoading, setDataLoading] = useState(true);
     const [isButtonLoading, setButtonLoading] = useState(false);
 
     const [number, setNumber] = useState('');
@@ -79,8 +78,6 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
 
     useEffect(() => {
         (async () => {
-            setDataLoading(true);
-
             if (!initData) {
                 return;
             }
@@ -107,15 +104,20 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
                 setButtonLoading(false);
                 onOpenChange(true);
             }
-
-            setDataLoading(false);
         })();
     }, [initData]);
 
+    useEffect(() => {
+        if (isOpen && user) {
+            onAuthComplete();
+            onOpenChange(false);
+        }
+    }, [user]);
+
     async function checkCurrentSession() {
-        const user = await getCurrentUser();
-        if (user) {
-            setUser(user as Api.User);
+        const currentUser = await getCurrentUser();
+        if (currentUser) {
+            setUser(currentUser as Api.User);
             setButtonLoading(false);
             setWaitingPassword(false);
             setWaitingCode(false);
@@ -331,7 +333,7 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
             {isOpen && (
                 <>
                     <Modal header={<ModalHeader />} open={isOpen} onOpenChange={onOpenChange}>
-                        {isDataLoading ? (
+                        {!selectedCountry ? (
                             <Placeholder>
                                 <Spinner size="m" />
                             </Placeholder>
