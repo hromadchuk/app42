@@ -1,15 +1,15 @@
-import { Cell } from '@telegram-apps/telegram-ui';
 import { createElement, CSSProperties, JSX } from 'react';
+import { Cell } from '@telegram-apps/telegram-ui';
 import { Link } from 'react-router-dom';
 import { Api } from 'telegram';
-import { IconCheck, IconChevronRight, TablerIconsProps } from '@tabler/icons-react';
+import { IconCheck, IconChevronRight, IconRosetteDiscountCheckFilled, TablerIcon } from '@tabler/icons-react';
 import { classNames, TOwnerInfo } from '../lib/helpers.ts';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
 
 interface IOwnerRow {
     owner: TOwnerInfo;
     description?: string;
-    rightIcon?: (props: TablerIconsProps) => JSX.Element;
+    rightIcon?: (props: TablerIcon) => JSX.Element;
     withoutLink?: boolean;
     disabled?: boolean;
     callback?: () => void;
@@ -81,17 +81,13 @@ export function OwnerRow({
         name.push('Unknown name');
     }
 
-    // function getBadge(): null | JSX.Element {
-    //     if ((isUser || isChannel) && owner.verified) {
-    //         return (
-    //             <Center inline ml={5}>
-    //                 <IconCheck size={14} color="#1c93e3" />
-    //             </Center>
-    //         );
-    //     }
-    //
-    //     return null;
-    // }
+    function getBadge() {
+        if ((isUser || isChannel) && owner.verified) {
+            return <IconRosetteDiscountCheckFilled size={18} color="#1c93e3" />;
+        }
+
+        return undefined;
+    }
 
     const style: CSSProperties = {};
 
@@ -156,6 +152,7 @@ export function OwnerRow({
         return (
             <Cell
                 {...linkProps}
+                titleBadge={getBadge()}
                 before={<OwnerAvatar owner={owner} size={48} />}
                 // before={OwnerAvatar({ owner, size: 28 })}
                 description={description}

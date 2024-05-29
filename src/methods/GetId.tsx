@@ -1,7 +1,8 @@
 import { useContext, useState } from 'react';
 import { Button, Input, Section, Tappable } from '@telegram-apps/telegram-ui';
-import { IconAt, IconCopy, IconX } from '@tabler/icons-react';
+import { IconAt, IconX } from '@tabler/icons-react';
 import { Api } from 'telegram';
+import { CopyButton } from '../components/CopyButton.tsx';
 import { CallAPI, TOwnerInfo } from '../lib/helpers.ts';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 
@@ -91,7 +92,7 @@ export default function GetId() {
                     <OwnerRow owner={ownerInfo} />
 
                     <Input
-                        after={<IconCopy size={24} />}
+                        after={<CopyButton value={ownerInfo.id.toString()} />}
                         value={ownerInfo.id.valueOf()}
                         readOnly
                         // onClick={copy}
