@@ -1,6 +1,15 @@
-import { createElement, FunctionComponentElement, JSX, lazy, Suspense } from 'react';
+import {
+    createElement,
+    ForwardRefExoticComponent,
+    FunctionComponentElement,
+    JSX,
+    lazy,
+    RefAttributes,
+    Suspense
+} from 'react';
 import { Placeholder, Spinner } from '@telegram-apps/telegram-ui';
 import {
+    Icon,
     Icon123,
     IconAddressBook,
     IconArchive,
@@ -17,6 +26,7 @@ import {
     IconMessageCircleUp,
     IconPhoneCall,
     IconPhotoPentagon,
+    IconProps,
     IconReportAnalytics,
     IconThumbDownOff,
     IconTransfer,
@@ -43,7 +53,7 @@ export enum AuthType {
 export interface IMethod {
     id: string;
     name: string;
-    icon: (props: TablerIcon) => JSX.Element;
+    icon: ForwardRefExoticComponent<IconProps & RefAttributes<Icon>>;
     categories: MethodCategory[];
     authType: AuthType;
     element: JSX.Element;
@@ -56,7 +66,7 @@ export interface IRouter {
 
 export interface IMethodComponent {
     id: string;
-    icon: (props: TablerIcon) => JSX.Element;
+    icon: ForwardRefExoticComponent<IconProps & RefAttributes<Icon>>;
     categories: MethodCategory[];
     authType: AuthType;
     element: JSX.Element;
@@ -123,7 +133,7 @@ const appMethods: IMethodComponent[] = [
     {
         id: 'inactive_channels',
         icon: IconHourglassLow,
-        // element: createElement(lazy(() => import('./methods/InactiveChannels.tsx'))),
+        element: createElement(lazy(() => import('./methods/InactiveChannels.tsx'))),
         categories: [MethodCategory.CHANNELS],
         authType: AuthType.TG
     },
@@ -165,7 +175,7 @@ const appMethods: IMethodComponent[] = [
     {
         id: 'channels_registration',
         icon: IconCalendarPlus,
-        // element: createElement(lazy(() => import('./methods/ChannelsRegistration.tsx'))),
+        element: createElement(lazy(() => import('./methods/ChannelsRegistration.tsx'))),
         categories: [MethodCategory.CHANNELS],
         authType: AuthType.TG
     },
@@ -235,8 +245,7 @@ const appMethods: IMethodComponent[] = [
     {
         id: 'contacts_names',
         icon: IconWritingSign,
-        // element: createElement(lazy(() => import('./methods/ContactsNames.tsx'))),
-        // element: wrapElement(createElement(lazy(() => import('./methods/ContactsNames.tsx')))),
+        element: createElement(lazy(() => import('./methods/ContactsNames.tsx'))),
         categories: [MethodCategory.CONTACTS, MethodCategory.ACCOUNT],
         authType: AuthType.TG
     }

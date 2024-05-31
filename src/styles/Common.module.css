@@ -8,9 +8,25 @@
     }
 }
 
+.showHr {
+    hr {
+        display: block;
+    }
+}
+
 .footerCount {
     display: block;
     text-align: center;
     padding: 5px;
     color: var(--tgui--secondary_hint_color);
+}
+
+.partWidth {
+    width: 50%;
+}
+
+.center {
+    text-align: center;
+    margin: 0 auto;
+    justify-content: center;
 }

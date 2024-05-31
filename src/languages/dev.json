@@ -94,6 +94,16 @@
     }
   },
   "share": {
+    "success": "You have successfully shared the information!",
+    "error": "Something went wrong. Try again later.",
+    "cant_share": {
+      "title": "Can't share",
+      "description": "You can't share this information"
+    },
+    "tabs": {
+      "post": "Post",
+      "story": "Story"
+    },
     "stories": {
       "button": "Share in story",
       "publish_header": "This is the picture that will be published in your channel's stories",
@@ -108,9 +118,7 @@
       "button": "Share in message",
       "publish_header": "This is the picture that will be published in group",
       "publish_button": "Send message"
-    },
-    "success": "You have successfully shared the information!",
-    "error": "Something went wrong. Try again later."
+    }
   },
   "routes": {
     "get_id": "Get account or channel ID",

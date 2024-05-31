@@ -112,7 +112,7 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
             onAuthComplete();
             onOpenChange(false);
         }
-    }, [user]);
+    }, [isOpen, user]);
 
     async function checkCurrentSession() {
         const currentUser = await getCurrentUser();

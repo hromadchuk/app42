@@ -1,5 +1,6 @@
 import { createContext } from 'react';
 import { Api } from 'telegram';
+import { IShareButtonsOptions } from '../modals/ShareModal.tsx';
 import { IMethod, MethodCategory } from '../routes.tsx';
 
 export interface IInitData {
@@ -23,6 +24,7 @@ export interface IAppContext {
     setAccountsModalOpen: (state: boolean) => void;
     initData: IInitData | null;
     setInitData: (user: IInitData | null) => void;
+    showShareModal: (options: IShareButtonsOptions) => void;
     // isAppLoading: boolean;
     // setAppLoading: (state: boolean) => void;
     // markOnboardingAsCompleted(): Promise<void>;

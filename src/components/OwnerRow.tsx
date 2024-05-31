@@ -1,15 +1,15 @@
-import { createElement, CSSProperties, JSX } from 'react';
+import { createElement, CSSProperties, ForwardRefExoticComponent, RefAttributes } from 'react';
 import { Cell } from '@telegram-apps/telegram-ui';
 import { Link } from 'react-router-dom';
 import { Api } from 'telegram';
-import { IconCheck, IconChevronRight, IconRosetteDiscountCheckFilled, TablerIcon } from '@tabler/icons-react';
-import { classNames, TOwnerInfo } from '../lib/helpers.ts';
+import { Icon, IconCheck, IconChevronRight, IconProps, IconRosetteDiscountCheckFilled } from '@tabler/icons-react';
+import { TOwnerInfo } from '../lib/helpers.ts';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
 
 interface IOwnerRow {
     owner: TOwnerInfo;
     description?: string;
-    rightIcon?: (props: TablerIcon) => JSX.Element;
+    rightIcon?: ForwardRefExoticComponent<IconProps & RefAttributes<Icon>>;
     withoutLink?: boolean;
     disabled?: boolean;
     callback?: () => void;
@@ -146,14 +146,17 @@ export function OwnerRow({
     //     </Container>
     // );
 
-    console.log('owner', owner);
-
     function CellRow() {
         return (
             <Cell
                 {...linkProps}
                 titleBadge={getBadge()}
                 before={<OwnerAvatar owner={owner} size={description ? 48 : 40} />}
+                after={
+                    linkProps.component &&
+                    !isCheckbox &&
+                    createElement(rightIcon || IconChevronRight, { size: 14, stroke: 1.5 })
+                }
                 description={description}
             >
                 {name.join(' ')}

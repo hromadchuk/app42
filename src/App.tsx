@@ -11,7 +11,9 @@ import { Constants } from './constants.ts';
 import { clearOldCache, getCache, removeCache, setCache } from './lib/cache.ts';
 import { decodeString, getCurrentUser, getParams, isDev, Server, wrapCallMAMethod } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
-import { AuthType, IMethod, IRouter, MethodCategory, routes } from './routes.tsx';
+import { AuthType, getMethodById, IMethod, IRouter, MethodCategory, routes } from './routes.tsx';
+
+import { IShareButtonsOptions, ShareModal } from './modals/ShareModal.tsx';
 import { AccountsModal } from './modals/AccountsModal.tsx';
 import { AuthorizationModal } from './modals/AuthorizationModal.tsx';
 
@@ -26,7 +28,7 @@ declare global {
         alreadyVisitedRefLink: boolean;
         showSnackbar: (options: ISnackbarOptions) => void;
         hideSnackbar: () => void;
-        // eruda: { init: () => void };
+        eruda: { init: () => void };
     }
 }
 
@@ -45,6 +47,8 @@ export function App() {
 
     const [user, setUser] = useState<null | Api.User>(null);
     const [isAccountsModalOpen, setAccountsModalOpen] = useState(false);
+    const [isShareModalOpen, setShareModalOpen] = useState(false);
+    const [shareModalData, setShareModalData] = useState<IShareButtonsOptions | null>(null);
     const [isAuthorizationModalOpen, setAuthorizationModalOpen] = useState(false);
     const [initData, setInitData] = useState<null | IInitData>(null);
     const [snackbarOptions, setSnackbarOptions] = useState<null | ISnackbarOptions>(null);
@@ -125,17 +129,30 @@ export function App() {
                 }
 
                 const param = new URLSearchParams(location.search).get('tgWebAppStartParam');
-                const methodId = await getCache(Constants.AUTH_STATE_METHOD_KEY);
+                const value = await getCache(Constants.AUTH_STATE_METHOD_KEY);
 
-                console.log({param, methodId});
-                // if (methodId) {
-                //     openAuth();
-                // } else if (param === 'cn' && !window.alreadyVisitedRefLink) {
-                //     const method = getMethods().find((item) => item.id === 'contacts_names');
-                //     if (method) {
-                //         openMethod(method);
-                //     }
-                // }
+                if (value) {
+                    if (value) {
+                        const { methodId, authType } = value as {
+                            methodId: string;
+                            authType: AuthType;
+                        };
+
+                        if (authType === AuthType.TG) {
+                            const method = getMethodById(methodId);
+                            method && openMethod(method);
+                        }
+                    }
+                } else if (param === 'cn' && !window.alreadyVisitedRefLink) {
+                    const method = getMethodById('contacts_names');
+                    method && openMethod(method);
+                }
+
+                if (isDev) {
+                    // TODO only test
+                    // const method = getMethodById('channels_registration');
+                    // method && openMethod(method);
+                }
             }
         })();
     }, [initData]);
@@ -250,13 +267,14 @@ export function App() {
     function openMethod(method: IMethod, categoryId?: MethodCategory) {
         const categoryPath = categoryId || method.categories[0];
         const methodPath = `/methods/${categoryPath}/${method.id}`;
+        const data = { methodId: method.id, methodPath, authType: method.authType };
 
         if (method.authType === AuthType.TON) {
             if (tonWallet) {
                 window.alreadyVisitedRefLink = true;
                 navigate(methodPath);
             } else {
-                setCache(Constants.AUTH_STATE_METHOD_KEY, { methodPath, authType: method.authType }, 15).then(() => {
+                setCache(Constants.AUTH_STATE_METHOD_KEY, data, 15).then(() => {
                     tonAuth();
                 });
             }
@@ -267,11 +285,16 @@ export function App() {
                 window.alreadyVisitedRefLink = true;
                 navigate(methodPath);
             } else {
-                setCache(Constants.AUTH_STATE_METHOD_KEY, { methodPath, authType: method.authType }, 15).then(() => {
+                setCache(Constants.AUTH_STATE_METHOD_KEY, data, 15).then(() => {
                     setAuthorizationModalOpen(true);
                 });
             }
         }
+    }
+
+    function showShareModal(options: IShareButtonsOptions) {
+        setShareModalData(options);
+        setShareModalOpen(true);
     }
 
     return (
@@ -283,6 +306,7 @@ export function App() {
                 setAccountsModalOpen,
                 initData,
                 setInitData,
+                showShareModal
                 // setAppLoading,
                 // markOnboardingAsCompleted,
                 // checkIsOnboardingCompleted
@@ -291,6 +315,17 @@ export function App() {
             <Routes>{routes.map(GetRouter)}</Routes>
 
             <AccountsModal isOpen={isAccountsModalOpen} onOpenChange={(open) => setAccountsModalOpen(open)} />
+            <ShareModal
+                isOpen={isShareModalOpen}
+                onOpenChange={(open) => {
+                    setShareModalOpen(open);
+
+                    if (!open) {
+                        setShareModalData(null);
+                    }
+                }}
+                modalData={shareModalData}
+            />
             <AuthorizationModal
                 isOpen={isAuthorizationModalOpen}
                 onOpenChange={(open) => setAuthorizationModalOpen(open)}

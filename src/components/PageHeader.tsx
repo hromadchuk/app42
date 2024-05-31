@@ -14,6 +14,7 @@ export function PageHeader(props: IPageHeaderProps) {
 
     return (
         <div
+            id="method_header"
             className={classNames(classes.block, { [classes.headerAnimation]: !subheader })}
             style={{
                 backgroundColor: color

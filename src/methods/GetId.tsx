@@ -97,7 +97,6 @@ export default function GetId() {
                         after={<CopyButton value={ownerInfo.id.toString()} />}
                         value={ownerInfo.id.valueOf()}
                         readOnly
-                        // onClick={copy}
                     />
                 </Section>
             )}

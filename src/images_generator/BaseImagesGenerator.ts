@@ -280,12 +280,12 @@ export class BaseImagesGenerator {
                 return;
             }
 
-            const rootStyle = getComputedStyle(document.documentElement);
+            const rootStyle = getComputedStyle(document.getElementById('method_header') as HTMLElement);
             const letter = channelTitle[0].toUpperCase();
-            ctx.fillStyle = rootStyle.getPropertyValue('--mantine-color-grape-light').trim();
+            ctx.fillStyle = rootStyle.getPropertyValue('background-color');
             ctx.fillRect(0, 0, processedAvatarSize, processedAvatarSize);
             ctx.font = `${processedAvatarSize / 2}px ${this.fontFamilyBold}`;
-            ctx.fillStyle = rootStyle.getPropertyValue('--mantine-color-grape-light-color').trim();
+            ctx.fillStyle = this.mainColor;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(letter, processedAvatarSize / 2, processedAvatarSize / 2);
