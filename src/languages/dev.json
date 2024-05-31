@@ -515,7 +515,9 @@
     "dialog_joined": {
       "no_created": "You don't have any dialogs",
       "created": "{time} ago",
-      "today": "Less than 24 hours"
+      "today": "Less than 24 hours",
+      "share_description": "ago channel was created",
+      "was_created_date": "was created on {date}"
     },
     "clear_dialog_members": {
       "get_members": "Getting the dialog participants",
@@ -555,7 +557,12 @@
       "no_contacts": "You don't have any contacts",
       "no_contacts_with_nft": "You don't have contacts with NFT",
       "get_users_info": "Getting users info",
-      "bought": "Bought {date}"
+      "bought": "Bought {date}",
+      "titles": {
+        "usernames": "Usernames",
+        "phones": "Anonymous phones",
+        "wallets": "TON Wallets"
+      }
     },
     "ton_jettons_analysis": {
       "no_jettons": "You don't have any jettons",

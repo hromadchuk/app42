@@ -90,6 +90,15 @@ export function OwnerRow({
     }
 
     const style: CSSProperties = {};
+    let interactiveAnimation: 'opacity' | 'background' = 'background';
+
+    if (withoutLink || disabled) {
+        style.cursor = 'default';
+        style.opacity = '1 !important';
+        style.background = 'unset !important';
+
+        interactiveAnimation = 'opacity';
+    }
 
     if (disabled) {
         style.opacity = 0.5;
@@ -151,7 +160,9 @@ export function OwnerRow({
             <Cell
                 {...linkProps}
                 titleBadge={getBadge()}
+                interactiveAnimation={interactiveAnimation}
                 before={<OwnerAvatar owner={owner} size={description ? 48 : 40} />}
+                style={style}
                 after={
                     linkProps.component &&
                     !isCheckbox &&
@@ -165,7 +176,7 @@ export function OwnerRow({
     }
 
     return linkProps.href ? (
-        <Link to={linkProps.href as string} target="_blank">
+        <Link to={linkProps.href} target="_blank">
             {CellRow()}
         </Link>
     ) : (

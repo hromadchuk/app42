@@ -161,7 +161,7 @@ const appMethods: IMethodComponent[] = [
     {
         id: 'common_chats_top',
         icon: IconCreativeCommonsNd,
-        // element: createElement(lazy(() => import('./methods/CommonChatsTop.tsx'))),
+        element: createElement(lazy(() => import('./methods/CommonChatsTop.tsx'))),
         categories: [MethodCategory.CONTACTS, MethodCategory.CHATS],
         authType: AuthType.TG
     },
@@ -196,7 +196,7 @@ const appMethods: IMethodComponent[] = [
     {
         id: 'dialog_joined',
         icon: IconDoorEnter,
-        // element: createElement(lazy(() => import('./methods/DialogJoined.tsx'))),
+        element: createElement(lazy(() => import('./methods/DialogJoined.tsx'))),
         categories: [MethodCategory.CHANNELS, MethodCategory.CHATS],
         authType: AuthType.TG
     },
@@ -210,28 +210,28 @@ const appMethods: IMethodComponent[] = [
     {
         id: 'birthdays',
         icon: IconCake,
-        // element: createElement(lazy(() => import('./methods/Birthdays.tsx'))),
+        element: createElement(lazy(() => import('./methods/Birthdays.tsx'))),
         categories: [MethodCategory.CONTACTS],
         authType: AuthType.TG
     },
     {
         id: 'own_channels',
         icon: IconUsersGroup,
-        // element: createElement(lazy(() => import('./methods/OwnChannels.tsx'))),
+        element: createElement(lazy(() => import('./methods/OwnChannels.tsx'))),
         categories: [MethodCategory.CONTACTS],
         authType: AuthType.TG
     },
     {
         id: 'ton_contacts',
         icon: IconArchive,
-        // element: createElement(lazy(() => import('./methods/TonContactsWithNFT.tsx'))),
+        element: createElement(lazy(() => import('./methods/TonContactsWithNFT.tsx'))),
         categories: [MethodCategory.TON, MethodCategory.CONTACTS],
         authType: AuthType.TG
     },
     {
         id: 'ton_jettons_analysis',
         icon: IconCoins,
-        // element: createElement(lazy(() => import('./methods/TonJettonsAnalysis.tsx'))),
+        element: createElement(lazy(() => import('./methods/TonJettonsAnalysis.tsx'))),
         categories: [MethodCategory.TON],
         authType: AuthType.TON
     },

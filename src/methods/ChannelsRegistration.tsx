@@ -48,6 +48,4 @@ export default function ChannelsRegistration() {
     if (channels) {
         return <DialogWithDate dialogs={channels} />;
     }
-
-    return null;
 }

@@ -12,7 +12,13 @@ import { MethodContext } from '../contexts/MethodContext.tsx';
 
 import commonClasses from '../styles/Common.module.css';
 
-export function DialogWithDate({ dialogs }: { dialogs: Api.Channel[] | Api.Chat[] }) {
+export function DialogWithDate({
+    dialogs,
+    withoutSharing
+}: {
+    dialogs: Api.Channel[] | Api.Chat[];
+    withoutSharing?: boolean;
+}) {
     const { showShareModal } = useContext(AppContext);
     const { mt, t } = useContext(MethodContext);
     const [avatars, setAvatars] = useState<Map<number, string | null>>(new Map());
@@ -43,6 +49,7 @@ export function DialogWithDate({ dialogs }: { dialogs: Api.Channel[] | Api.Chat[
                     owner={dialog}
                     description={`${createdText} (${createdDateText})`}
                     rightIcon={IconShare2}
+                    withoutLink={withoutSharing}
                     callback={() => {
                         canShare(dialog).then((share) => {
                             if (share.canPost) {

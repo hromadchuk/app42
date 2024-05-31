@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { IFinishBlock, IProgress, ISetListAction, MethodContext } from '../contexts/MethodContext.tsx';
 import { Server } from '../lib/helpers.ts';
 import { t, td } from '../lib/lang.ts';
-import { getMethodById, IRouter, MethodCategory, routes } from '../routes.tsx';
+import { getMethodById, MethodCategory } from '../routes.tsx';
 import { getCardById } from '../cards.ts';
 import { PageHeader } from '../components/PageHeader.tsx';
 import { MethodLoader } from '../components/MethodLoader.tsx';
@@ -13,7 +13,6 @@ import { MethodPlaceholder } from '../components/MethodPlaceholder.tsx';
 let progressSafe: IProgress | null = null;
 
 export default function AbstractMethod() {
-    const location = useLocation();
     const categoryId = useParams().categoryId as MethodCategory;
     const methodId = useParams().methodId as string;
     const card = getCardById(categoryId);
@@ -22,10 +21,6 @@ export default function AbstractMethod() {
     const [progress, _setProgress] = useState<IProgress | null>();
     const [finishBlock, _setFinishBlock] = useState<IFinishBlock>();
     const [listAction, _setListAction] = useState<ISetListAction | null>(null);
-
-    const routerInfo = routes.find((router: IRouter) => router.path === location.pathname) as IRouter;
-
-    console.log('routerInfo', routerInfo);
 
     const needHideContent = (): boolean => {
         return [progress, finishBlock, listAction].some(Boolean);
