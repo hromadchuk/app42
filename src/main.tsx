@@ -30,4 +30,6 @@ if (isDevUser) {
 import '@telegram-apps/telegram-ui/dist/styles.css';
 import './App.css';
 
+import 'chartkick/chart.js';
+
 createRoot(document.getElementById('root') as HTMLElement).render(<MiniAppWrapper />);

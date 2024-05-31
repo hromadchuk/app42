@@ -42,3 +42,12 @@
     opacity: 1 !important;
     cursor: default;
 }
+
+.tinySegment {
+    margin-bottom: 5px;
+
+    & button {
+        height: 30px;
+        padding: unset;
+    }
+}

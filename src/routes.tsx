@@ -238,7 +238,7 @@ const appMethods: IMethodComponent[] = [
     {
         id: 'ton_transactions',
         icon: IconTransfer,
-        // element: createElement(lazy(() => import('./methods/TonTransactions.tsx'))),
+        element: createElement(lazy(() => import('./methods/TonTransactions.tsx'))),
         categories: [MethodCategory.TON],
         authType: AuthType.TON
     },

@@ -150,7 +150,7 @@ export function App() {
 
                 if (isDev) {
                     // TODO only test
-                    const method = getMethodById('common_chats_top');
+                    // const method = getMethodById('ton_transactions');
                     // method && openMethod(method);
                 }
             }
