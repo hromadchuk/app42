@@ -10,7 +10,7 @@ export interface IInitData {
 }
 
 export interface ISnackbarOptions {
-    title: string;
+    title?: string;
     message: string;
     icon: JSX.Element;
     duration: number;

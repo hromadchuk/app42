@@ -150,8 +150,8 @@ export function App() {
 
                 if (isDev) {
                     // TODO only test
-                    // const method = getMethodById('ton_transactions');
-                    // method && openMethod(method);
+                    const method = getMethodById('import_messages');
+                    method && openMethod(method);
                 }
             }
         })();

@@ -74,7 +74,7 @@ export default function GetId() {
                     }
                 />
 
-                <div style={{ padding: 16 }}>
+                <div style={{ padding: 10 }}>
                     <Button
                         stretched
                         size="l"

@@ -1,17 +1,18 @@
-import { JSX } from 'react';
+import { ForwardRefExoticComponent, RefAttributes } from 'react';
 import {
+    Icon,
     IconAddressBook,
     IconMessages,
+    IconProps,
     IconUser,
     IconUsersGroup,
-    IconWallet,
-    TablerIconsProps
+    IconWallet
 } from '@tabler/icons-react';
 import { getMethods, MethodCategory } from './routes.tsx';
 
 export interface ICard {
     id: MethodCategory;
-    icon: (props: TablerIconsProps) => JSX.Element;
+    icon: ForwardRefExoticComponent<IconProps & RefAttributes<Icon>>;
     color: `#${string}`;
 }
 

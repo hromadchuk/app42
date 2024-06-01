@@ -314,7 +314,6 @@
       "sending_message": "Sending message",
       "sending_message_error": "Message sending error",
       "message_recipient": "Select a message recipient",
-      "few_animation": "There will be more animation in the future",
       "read_wait": "Waiting for the message to be read",
       "send_button": "Send animation",
       "has_message_after_animation": "Has custom message after animation",
@@ -344,7 +343,7 @@
       "last_active": "Last active {diff_time}"
     },
     "import_messages": {
-      "read_warning": "Before using the method, you need to read the documentation",
+      "read_warning": "Before using the method, you need to {link}read the documentation{/link}",
       "read_warning_link": "Read documentation",
       "button_import": "Select ZIP archive",
       "select_move_message_from": "Select the {network} user whose messages we will transfer",

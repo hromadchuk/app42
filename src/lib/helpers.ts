@@ -384,7 +384,7 @@ export function notifySuccess({ title, message }: { title: string; message: stri
     });
 }
 
-export function notifyError({ title, message }: { title: string; message: string }) {
+export function notifyError({ title, message }: { title?: string; message: string }) {
     window.showSnackbar({
         title,
         message,

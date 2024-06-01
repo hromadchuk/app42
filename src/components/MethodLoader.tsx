@@ -48,8 +48,14 @@ export function MethodLoader(progress: IProgress) {
 
         return (
             <>
-                {progress.warningText && <Blockquote type="text">{progress.warningText}</Blockquote>}
+                {progress.warningText && (
+                    <Blockquote type="text" style={{ marginBottom: 10 }}>
+                        {progress.warningText}
+                    </Blockquote>
+                )}
+
                 <Progress value={percent} />
+
                 <Caption level="1" weight="3">
                     {progress.text || t('common.progress')}
                     {counts.length > 0 && ` (${counts.map(formatNumber).join(' / ')})`}

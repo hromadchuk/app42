@@ -1,22 +1,22 @@
-import { useDisclosure } from '@mantine/hooks';
-import { JSX, useContext, useEffect, useState } from 'react';
-import { Badge, Button, Card, Group, Image, Input, Modal, Notification, Space, Text, TextInput } from '@mantine/core';
+import { ForwardRefExoticComponent, RefAttributes, useContext, useEffect, useState } from 'react';
+import { Blockquote, Button, Cell, Input, Modal, Placeholder, Section } from '@telegram-apps/telegram-ui';
+import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
 import {
+    Icon,
+    IconClock,
     IconHeart,
-    IconMail,
+    IconProps,
     IconRocket,
     IconTextWrapDisabled,
-    IconTicTac,
-    TablerIconsProps
+    IconTicTac
 } from '@tabler/icons-react';
-import { OwnerRow } from '../components/OwnerRow.tsx';
 import { Api } from 'telegram';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
-import { CallAPI, getTextTime, notifyError, sleep } from '../lib/helpers.ts';
+import { CallAPI, classNames, getTextTime, notifyError, sleep } from '../lib/helpers.ts';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
 
-import classes from '../styles/AnimatedMessages.module.css';
+import commonClasses from '../styles/Common.module.css';
 
 import HeartAnimation from '../assets/animated_messages/heart.tsx';
 import SpaceInvadersAnimation from '../assets/animated_messages/space-invaders.tsx';
@@ -28,7 +28,7 @@ import emojiText from '../assets/animated_messages/emoji-text.ts';
 
 interface IOption {
     id: string;
-    icon: (props: TablerIconsProps) => JSX.Element;
+    icon: ForwardRefExoticComponent<IconProps & RefAttributes<Icon>>;
     withEndText?: boolean;
     description?: string;
     requireText?: boolean;
@@ -45,7 +45,7 @@ const stateReadMessages = new Map<number, number>();
 
 export default function AnimatedMessages() {
     const { mt, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
-    const [opened, { open, close }] = useDisclosure(false);
+    // const [opened, { open, close }] = useDisclosure(false);
 
     const [selectedOwner, setSelectedOwner] = useState<Api.User | null>(null);
     const [textToAnimate, setTextToAnimate] = useState<string | null>(null);
@@ -200,37 +200,38 @@ export default function AnimatedMessages() {
         }
     }
 
-    function showModal(option: IOption) {
-        setSelectedOption(option);
-        open();
-    }
-
     function calculateFramesRenderTime(option: IOption): number {
         return Math.ceil(option.frames.length / (1000 / FRAME_TIME));
     }
 
     function OptionRow(option: IOption, key: number) {
         const seconds = calculateFramesRenderTime(option);
+        const description: string[] = [];
+
+        if (seconds) {
+            description.push(`~${getTextTime(seconds)}`);
+        }
+
+        if (option.withEndText) {
+            description.push(mt('has_message_after_animation'));
+        }
+
+        if (option.requireText) {
+            description.push(mt('animated_text.require'));
+        }
 
         return (
-            <Card mb={5} withBorder radius="md" key={key} className={classes.card} onClick={() => showModal(option)}>
-                <Group>
-                    <div>
-                        <Text fw={500}>{option.title}</Text>
-                        {option.withEndText && (
-                            <Text fz="xs" c="dimmed">
-                                {mt('has_message_after_animation')}
-                            </Text>
-                        )}
-                        {option.requireText && (
-                            <Text fz="xs" c="dimmed">
-                                {mt('animated_text.require')}
-                            </Text>
-                        )}
-                    </div>
-                    {seconds && <Badge size="xs">~{getTextTime(seconds)}</Badge>}
-                </Group>
-            </Card>
+            <Cell
+                key={key}
+                before={<option.icon size={28} stroke={1.2} />}
+                multiline={true}
+                description={description.map((text) => (
+                    <div key={text}>{text}</div>
+                ))}
+                onClick={() => setSelectedOption(option)}
+            >
+                {option.title}
+            </Cell>
         );
     }
 
@@ -239,66 +240,83 @@ export default function AnimatedMessages() {
     if (selectedOwner) {
         const framesRenderTime = selectedOption ? calculateFramesRenderTime(selectedOption) : 0;
 
+        console.log('framesRenderTime', framesRenderTime);
+
         return (
-            <>
-                <Modal opened={opened} onClose={close} title={selectedOption?.title}>
-                    {framesRenderTime > 0 && <Badge size="xs">~{getTextTime(framesRenderTime)}</Badge>}
-
-                    {selectedOption?.gif && (
-                        <Image maw={240} mx="auto" mb="xs" radius="md" src={selectedOption?.gif} alt="Random image" />
-                    )}
-                    {selectedOption?.withEndText && (
-                        <Input
-                            leftSection={<IconMail size={16} />}
-                            placeholder={mt('message_after_animation')}
-                            onChange={(event) => setLastMessage(event.target.value)}
-                        />
-                    )}
-
-                    {selectedOption?.requireText && (
-                        <TextInput
-                            label={selectedOption.description || ''}
-                            leftSection={<IconMail size="1rem" />}
-                            placeholder={mt('animated_text.text')}
-                            onChange={(event) => setTextToAnimate(event.target.value)}
-                        />
-                    )}
-
-                    <Button
-                        fullWidth
-                        variant="outline"
-                        disabled={selectedOption?.requireText && !textToAnimate && framesRenderTime <= 0}
-                        mt="xs"
-                        onClick={sendAnimation}
-                    >
-                        {mt('send_button')}
-                    </Button>
-                </Modal>
-
-                <Notification withCloseButton={false} mb="xs" color="gray">
-                    {mt('few_animation')}
-                </Notification>
-
-                <OwnerRow owner={selectedOwner} withoutLink={true} />
-                <Space h={20} />
+            <Section className={classNames(commonClasses.sectionBox, commonClasses.showHr)}>
                 {options.map(OptionRow)}
-            </>
+
+                {selectedOption && (
+                    <Modal
+                        header={<ModalHeader />}
+                        open={Boolean(selectedOption)}
+                        onOpenChange={(open) => {
+                            if (!open) {
+                                setSelectedOption(null);
+                            }
+                        }}
+                    >
+                        <Section className={commonClasses.hideHr}>
+                            <div style={{ padding: 10 }}>
+                                {framesRenderTime > 0 && (
+                                    <Blockquote topRightIcon={<IconClock size={12} />}>
+                                        ~{getTextTime(framesRenderTime)}
+                                    </Blockquote>
+                                )}
+
+                                {selectedOption.gif && (
+                                    <Placeholder>
+                                        <img height={150} src={selectedOption.gif as string} alt="example" />
+                                    </Placeholder>
+                                )}
+
+                                {selectedOption.withEndText && (
+                                    <Input
+                                        type="text"
+                                        placeholder={mt('message_after_animation')}
+                                        onChange={(event) => setLastMessage(event.target.value)}
+                                    />
+                                )}
+
+                                {selectedOption.requireText && (
+                                    <Input
+                                        type="text"
+                                        placeholder={mt('animated_text.text')}
+                                        onChange={(event) => setTextToAnimate(event.target.value)}
+                                    />
+                                )}
+
+                                <Button
+                                    stretched
+                                    size="l"
+                                    disabled={selectedOption?.requireText && !textToAnimate && framesRenderTime <= 0}
+                                    onClick={sendAnimation}
+                                >
+                                    {mt('send_button')}
+                                </Button>
+                            </div>
+                        </Section>
+                    </Modal>
+                )}
+            </Section>
         );
     }
 
     return (
         <>
-            <Notification withCloseButton={false} mb="xs" color="gray">
-                {mt('message_recipient')}
-            </Notification>
+            <Section className={commonClasses.sectionBox}>
+                <Blockquote>{mt('message_recipient')}</Blockquote>
+            </Section>
 
-            <SelectDialog
-                allowTypes={[EOwnerType.user]}
-                selfIgnore={true}
-                onOwnerSelect={(owner) => {
-                    setSelectedOwner(owner as Api.User);
-                }}
-            />
+            <Section className={commonClasses.sectionBox}>
+                <SelectDialog
+                    allowTypes={[EOwnerType.user]}
+                    selfIgnore={true}
+                    onOwnerSelect={(owner) => {
+                        setSelectedOwner(owner as Api.User);
+                    }}
+                />
+            </Section>
         </>
     );
 }

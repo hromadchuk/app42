@@ -112,7 +112,7 @@ const appMethods: IMethodComponent[] = [
     {
         id: 'contacts_analysis',
         icon: IconAddressBook,
-        // element: createElement(lazy(() => import('./methods/ContactsAnalysis.tsx'))),
+        element: createElement(lazy(() => import('./methods/ContactsAnalysis.tsx'))),
         categories: [MethodCategory.CONTACTS],
         authType: AuthType.TG
     },
@@ -126,7 +126,7 @@ const appMethods: IMethodComponent[] = [
     {
         id: 'animated_messages',
         icon: IconKeyframes,
-        // element: createElement(lazy(() => import('./methods/AnimatedMessages.tsx'))),
+        element: createElement(lazy(() => import('./methods/AnimatedMessages.tsx'))),
         categories: [MethodCategory.CHATS],
         authType: AuthType.TG
     },
@@ -140,7 +140,7 @@ const appMethods: IMethodComponent[] = [
     {
         id: 'import_messages',
         icon: IconMessageCircleUp,
-        // element: createElement(lazy(() => import('./methods/ImportMessages.tsx'))),
+        element: createElement(lazy(() => import('./methods/ImportMessages.tsx'))),
         categories: [MethodCategory.CHATS],
         authType: AuthType.TG
     },

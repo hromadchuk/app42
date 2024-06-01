@@ -327,7 +327,6 @@
       "last_active": "Last active {diff_time}"
     },
     "import_messages": {
-      "read_warning": "Before using the method, you need to read the documentation",
       "read_warning_link": "Read documentation",
       "button_import": "Select ZIP archive",
       "select_move_message_from": "Select the {network} user whose messages we will transfer",

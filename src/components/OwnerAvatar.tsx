@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Avatar } from '@telegram-apps/telegram-ui';
 import { Api } from 'telegram';
-import { useIntersection } from '../hooks/intersection.ts';
+import { useIntersection } from '../hooks/useIntersection.ts';
 import { getAvatar, getDocumentThumb, TOwnerInfo } from '../lib/helpers.ts';
 
 interface IOwnerAvatar {
