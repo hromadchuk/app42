@@ -94,6 +94,7 @@
     }
   },
   "share": {
+    "button": "Share",
     "success": "You have successfully shared the information!",
     "error": "Something went wrong. Try again later.",
     "cant_share": {

@@ -168,7 +168,7 @@ const appMethods: IMethodComponent[] = [
     {
         id: 'calls_stat',
         icon: IconPhoneCall,
-        // element: createElement(lazy(() => import('./methods/CallsStat.tsx'))),
+        element: createElement(lazy(() => import('./methods/CallsStat.tsx'))),
         categories: [MethodCategory.CONTACTS],
         authType: AuthType.TG
     },
@@ -189,7 +189,7 @@ const appMethods: IMethodComponent[] = [
     {
         id: 'stories_stat',
         icon: IconPhotoPentagon,
-        // element: createElement(lazy(() => import('./methods/StoriesStat.tsx'))),
+        element: createElement(lazy(() => import('./methods/StoriesStat.tsx'))),
         categories: [MethodCategory.ACCOUNT],
         authType: AuthType.TG
     },

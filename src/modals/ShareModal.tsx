@@ -26,7 +26,7 @@ export enum ActionType {
     POST = 'post'
 }
 
-export interface IShareButtonsOptions {
+export interface IShareOptions {
     owner: TOwnerType;
     type: ShareType;
     data: IRegDateImagesOptions | IMessagesStatImagesOptions | ICallStatImagesOptions;
@@ -46,10 +46,10 @@ interface IActionData {
 interface IAccountsModalProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
-    modalData: IShareButtonsOptions | null;
+    modalData: IShareOptions | null;
 }
 
-function runGenerator(type: ShareType, data: IShareButtonsOptions['data']): Promise<IImagesGeneratorResponse> {
+function runGenerator(type: ShareType, data: IShareOptions['data']): Promise<IImagesGeneratorResponse> {
     if (type === ShareType.REG_DATE) {
         return new RegDateImagesGenerator().generate(data as IRegDateImagesOptions);
     }
@@ -239,7 +239,7 @@ export function ShareModal({ isOpen, onOpenChange, modalData }: IAccountsModalPr
     }
 
     function ContentRow() {
-        const actionData = getActionData((modalData as IShareButtonsOptions).owner, actionType);
+        const actionData = getActionData((modalData as IShareOptions).owner, actionType);
         const showSelect = Boolean(canMakeMessages && canMakeStories && storyImage && messageImage);
         const image = actionType === ActionType.POST ? messageImage : storyImage;
 

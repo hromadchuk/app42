@@ -13,7 +13,7 @@ import { decodeString, getCurrentUser, getParams, isDev, Server, wrapCallMAMetho
 import { getAppLangCode } from './lib/lang.ts';
 import { AuthType, getMethodById, IMethod, IRouter, MethodCategory, routes } from './routes.tsx';
 
-import { IShareButtonsOptions, ShareModal } from './modals/ShareModal.tsx';
+import { IShareOptions, ShareModal } from './modals/ShareModal.tsx';
 import { AccountsModal } from './modals/AccountsModal.tsx';
 import { AuthorizationModal } from './modals/AuthorizationModal.tsx';
 
@@ -48,7 +48,7 @@ export function App() {
     const [user, setUser] = useState<null | Api.User>(null);
     const [isAccountsModalOpen, setAccountsModalOpen] = useState(false);
     const [isShareModalOpen, setShareModalOpen] = useState(false);
-    const [shareModalData, setShareModalData] = useState<IShareButtonsOptions | null>(null);
+    const [shareModalData, setShareModalData] = useState<IShareOptions | null>(null);
     const [isAuthorizationModalOpen, setAuthorizationModalOpen] = useState(false);
     const [initData, setInitData] = useState<null | IInitData>(null);
     const [snackbarOptions, setSnackbarOptions] = useState<null | ISnackbarOptions>(null);
@@ -150,8 +150,8 @@ export function App() {
 
                 if (isDev) {
                     // TODO only test
-                    const method = getMethodById('import_messages');
-                    method && openMethod(method);
+                    // const method = getMethodById('stories_stat');
+                    // method && openMethod(method);
                 }
             }
         })();
@@ -292,7 +292,7 @@ export function App() {
         }
     }
 
-    function showShareModal(options: IShareButtonsOptions) {
+    function showShareModal(options: IShareOptions) {
         setShareModalData(options);
         setShareModalOpen(true);
     }

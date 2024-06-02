@@ -599,3 +599,27 @@ export async function wrapCallMAMethod<T>(func: Function) {
 
     return null;
 }
+
+export function rgbToHex(nr: number, ng: number, nb: number): string {
+    return '#' + ((1 << 24) + (nr << 16) + (ng << 8) + nb).toString(16).slice(1);
+}
+
+export function generateColorGradation(hex: string, steps: number): string[] {
+    const bigint = parseInt(hex.slice(1), 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+
+    const gradation: string[] = [];
+
+    for (let i = 0; i < steps; i++) {
+        const ratio = i / (steps - 1);
+        const newR = Math.round(r + (255 - r) * ratio);
+        const newG = Math.round(g + (255 - g) * ratio);
+        const newB = Math.round(b + (255 - b) * ratio);
+
+        gradation.unshift(rgbToHex(newR, newG, newB));
+    }
+
+    return gradation;
+}
