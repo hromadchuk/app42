@@ -2,7 +2,7 @@ import { createElement, CSSProperties, ForwardRefExoticComponent, RefAttributes 
 import { Cell } from '@telegram-apps/telegram-ui';
 import { Link } from 'react-router-dom';
 import { Api } from 'telegram';
-import { Icon, IconCheck, IconChevronRight, IconProps, IconRosetteDiscountCheckFilled } from '@tabler/icons-react';
+import { Icon, IconChevronRight, IconProps, IconRosetteDiscountCheckFilled } from '@tabler/icons-react';
 import { TOwnerInfo } from '../lib/helpers.ts';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
 
@@ -13,9 +13,6 @@ interface IOwnerRow {
     withoutLink?: boolean;
     disabled?: boolean;
     callback?: () => void;
-    ml?: string | number;
-    mr?: string | number;
-    styles?: object;
     checked?: boolean;
 }
 
@@ -26,18 +23,7 @@ interface ILinkProps {
     component?: 'a' | 'button';
 }
 
-export function OwnerRow({
-    owner,
-    description,
-    rightIcon,
-    withoutLink,
-    callback,
-    disabled,
-    ml,
-    mr,
-    styles,
-    checked
-}: IOwnerRow) {
+export function OwnerRow({ owner, description, rightIcon, withoutLink, callback, disabled, checked }: IOwnerRow) {
     const name: string[] = [];
     const linkProps: ILinkProps = {};
     const isUser = owner instanceof Api.User;
@@ -154,6 +140,8 @@ export function OwnerRow({
     //         )}
     //     </Container>
     // );
+
+    console.log('linkProps', linkProps);
 
     function CellRow() {
         return (

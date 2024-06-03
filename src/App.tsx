@@ -150,7 +150,7 @@ export function App() {
 
                 if (isDev) {
                     // TODO only test
-                    // const method = getMethodById('stories_stat');
+                    // const method = getMethodById('messages_stat');
                     // method && openMethod(method);
                 }
             }

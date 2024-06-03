@@ -1,7 +1,8 @@
-import { JSX, useContext, useState } from 'react';
-import { Button, Center, Container, Divider, Flex, Group, Modal, Notification, Text } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { ForwardRefExoticComponent, RefAttributes, useContext, useState } from 'react';
+import { Blockquote, Button, Cell, Modal, Placeholder, Section } from '@telegram-apps/telegram-ui';
+import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
 import {
+    Icon,
     IconHeart,
     IconMessage,
     IconMessage2Bolt,
@@ -9,21 +10,20 @@ import {
     IconMoodSmile,
     IconPaperclip,
     IconPhone,
+    IconProps,
     IconSticker,
-    IconVideo,
-    TablerIconsProps
+    IconVideo
 } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import { Api } from 'telegram';
 import { usePopup } from '@tma.js/sdk-react';
-import { ShareButtons, ShareType } from '../components/Share.tsx';
-
-import { MethodContext, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
+import { Padding } from '../components/Helpers.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { ActivityChart } from '../components/charts/Activity.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
 import { IMessagesStatImagesOptions } from '../images_generator/MessageStatImagesGenerator.ts';
+import { t } from '../lib/lang.ts';
 import {
     calculatePeriodsMessagesCount,
     filterMessages,
@@ -37,6 +37,7 @@ import {
 } from '../lib/methods/messages.ts';
 import {
     CallAPI,
+    classNames,
     declineAndFormat,
     formatNumber,
     getAvatars,
@@ -44,6 +45,7 @@ import {
     getStringsTimeArray,
     getTextTime,
     getUserId,
+    isDev,
     notifyError,
     TOwnerType
 } from '../lib/helpers.ts';
@@ -51,6 +53,12 @@ import { StatsPeriodPicker } from '../components/StatsPeriodPicker.tsx';
 import { CalculateActivityTime } from '../components/charts/chart_helpers.ts';
 import { ReactionsList } from '../components/ReactionsList.tsx';
 import { getDialogMembers, kickMemberFromDialog } from '../lib/methods/dialogs.ts';
+import { canShare, ShareType } from '../modals/ShareModal.tsx';
+
+import { AppContext } from '../contexts/AppContext.tsx';
+import { MethodContext, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
+
+import commonClasses from '../styles/Common.module.css';
 
 type TCorrectMessage = Api.Message | Api.MessageService;
 
@@ -125,7 +133,7 @@ enum ETabId {
 interface ITabTops {
     id: ETabId;
     lang: string;
-    icon: (props: TablerIconsProps) => JSX.Element;
+    icon: ForwardRefExoticComponent<IconProps & RefAttributes<Icon>>;
     owners: ITopItem[];
 }
 
@@ -137,12 +145,11 @@ interface ITopic {
 const ownersInfo = new Map<number, TOwnerType>();
 
 export default function MessagesStat() {
+    const { showShareModal } = useContext(AppContext);
     const { mt, md, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
     const popup = usePopup();
 
     const [userActivityModalData, setUserActivityModalData] = useState<ITopItem | null>(null);
-    const [isUserActivityModalOpened, { open: openUserActivityModal, close: closeUserActivityModal }] =
-        useDisclosure(false);
 
     const [ownerMessages, setOwnerMessages] = useState<Api.TypeMessage[]>([]);
     const [ownerPeriods, setOwnerPeriods] = useState<IPeriodData[]>([]);
@@ -568,7 +575,9 @@ export default function MessagesStat() {
                 : 0;
 
         if ((isSimpleChat || isMegaGroupChat) && membersCount <= 200) {
-            const activeUserIds = usersDataArray.filter((user) => user.count > 0).map((user) => user.peerId);
+            const activeUserIds = usersDataArray
+                .filter((activeUser) => activeUser.count > 0)
+                .map((activeUser) => activeUser.peerId);
             const members = await getDialogMembers(selectedOwner as TDialogWithoutUser);
             const membersWithoutMessages = members.filter((member) => {
                 const userId = member.id.valueOf();
@@ -598,11 +607,18 @@ export default function MessagesStat() {
                 avatar: avatars.get(item.owner.id.valueOf()) || undefined
             }));
 
-            setShareData({
-                title: mt('share_title'),
-                description: mt('share_description').replace('{name}', getOwnerName(selectedOwner as TOwnerType)),
-                bottomText: mt('stat_date').replace('{date}', stat.period),
-                users
+            canShare(selectedOwner as TOwnerType).then(({ canPost }) => {
+                if (canPost) {
+                    setShareData({
+                        title: mt('share_title'),
+                        description: mt('share_description').replace(
+                            '{name}',
+                            getOwnerName(selectedOwner as TOwnerType)
+                        ),
+                        bottomText: mt('stat_date').replace('{date}', stat.period),
+                        users
+                    });
+                }
             });
         }
     }
@@ -729,14 +745,6 @@ export default function MessagesStat() {
                 }) as ITabItem
         );
 
-        const getRowBackground = (index: number): string => {
-            if (index % 2) {
-                return `var(--tg-color-secondary-bg-color)`;
-            }
-
-            return '';
-        };
-
         const getTabDescription = () => {
             let langKey = null;
 
@@ -750,21 +758,21 @@ export default function MessagesStat() {
 
             if (langKey) {
                 return (
-                    <Notification withCloseButton={false} my="xs" color="gray">
-                        {mt(langKey)}
-                    </Notification>
+                    <Padding>
+                        <Blockquote type="text">{mt(langKey)}</Blockquote>
+                    </Padding>
                 );
             }
 
             return null;
         };
 
-        const onTopOwnerClick = (top: ITopItem) => {
-            setUserActivityModalData(top);
-            openUserActivityModal();
-        };
-
         const onKickUserClick = (owner: Api.User) => {
+            if (isDev) {
+                console.log('kickMember', owner.id.valueOf());
+                return;
+            }
+
             popup
                 .open({
                     message: mt('kick_question').replace('{name}', owner.firstName || 'No name'),
@@ -791,72 +799,60 @@ export default function MessagesStat() {
 
         return (
             <>
-                <Modal
-                    opened={isUserActivityModalOpened}
-                    onClose={closeUserActivityModal}
-                    title={mt('user_activity.modal_title')}
-                >
-                    {userActivityModalData && (
-                        <>
-                            <OwnerRow owner={userActivityModalData.owner as Api.User} />
-                            <Divider my="sm" />
-                            {userActivityModalData.activity && <ActivityChart data={userActivityModalData.activity} />}
-                        </>
+                <Section className={commonClasses.sectionBox}>
+                    <OwnerRow
+                        owner={selectedOwner}
+                        withoutLink={true}
+                        description={mt('stat_date').replace('{date}', statResult.period)}
+                    />
+
+                    {shareData && (
+                        <Padding>
+                            <Button
+                                mode="filled"
+                                size="m"
+                                stretched
+                                onClick={() => {
+                                    showShareModal({
+                                        owner: selectedOwner as TOwnerType,
+                                        type: ShareType.MESSAGE_STAT,
+                                        data: shareData
+                                    });
+                                }}
+                            >
+                                {t('share.button')}
+                            </Button>
+                        </Padding>
                     )}
-                </Modal>
+                </Section>
 
-                <OwnerRow
-                    owner={selectedOwner}
-                    withoutLink={true}
-                    description={mt('stat_date').replace('{date}', statResult.period)}
-                />
-
-                {shareData && selectedOwner && (
-                    <ShareButtons owner={selectedOwner} type={ShareType.MESSAGE_STAT} data={shareData} />
-                )}
-
-                <Divider my="xs" label={mt('headers.counts')} labelPosition="center" mb={0} />
-                {counts.map((item, key) => (
-                    <Flex
-                        key={key}
-                        gap="md"
-                        p={5}
-                        justify="flex-start"
-                        align="center"
-                        direction="row"
-                        wrap="wrap"
-                        bg={getRowBackground(key)}
-                    >
-                        <item.icon size={14} />
-                        <Text size="sm" inline>
+                <Section
+                    className={classNames(commonClasses.sectionBox, commonClasses.showHr)}
+                    header={mt('headers.counts')}
+                >
+                    {counts.map((item, key) => (
+                        <Cell key={key} before={<item.icon size={14} />} after={item.value}>
                             {item.label}
-                        </Text>
+                        </Cell>
+                    ))}
 
-                        <Container p={0} mr={0}>
-                            <Text size="12px" c="dimmed">
-                                {item.value}
-                            </Text>
-                        </Container>
-                    </Flex>
-                ))}
+                    <Padding>
+                        <ReactionsList reactions={statResult.reactions} />
+                    </Padding>
+                </Section>
 
-                <ReactionsList reactions={statResult.reactions} />
-                <ActivityChart data={statResult.activity} />
+                <Section className={commonClasses.sectionBox}>
+                    <Padding>
+                        <ActivityChart data={statResult.activity} />
+                    </Padding>
+                </Section>
 
                 {chatInactiveMembers.length > 0 && (
-                    <>
-                        <Divider
-                            my="xs"
-                            label={`${mt('headers.inactive_users')} (${chatInactiveMembers.length})`}
-                            labelPosition="center"
-                            mb={0}
-                        />
-
-                        <Center>
-                            <Text size="xs" mb="xs">
-                                {mt('inactive_users_description')}
-                            </Text>
-                        </Center>
+                    <Section
+                        className={commonClasses.sectionBox}
+                        header={`${mt('headers.inactive_users')} (${chatInactiveMembers.length})`}
+                    >
+                        <Placeholder description={mt('inactive_users_description')} />
 
                         {chatInactiveMembers.slice(0, chatInactiveMembersShowCount).map((owner, key) => (
                             <div key={owner.id.valueOf() + key}>
@@ -872,63 +868,87 @@ export default function MessagesStat() {
 
                         {chatInactiveMembers.length >
                             chatInactiveMembers.slice(0, chatInactiveMembersShowCount).length && (
-                            <Group mt="xs">
+                            <Padding>
                                 <Button
-                                    variant="light"
+                                    mode="filled"
                                     color="gray"
-                                    fullWidth
+                                    stretched
                                     onClick={() => setChatInactiveMembersShowCount(1e3)}
                                 >
                                     {mt('inactive_users_show_more')}
                                 </Button>
-                            </Group>
+                            </Padding>
                         )}
-                    </>
+                    </Section>
                 )}
 
-                <Divider my="xs" label={mt('headers.tops')} labelPosition="center" mb={0} />
-                <TabsList tabs={tabsList} onChange={(tabId) => setSelectedTab(tabId as ETabId)} />
-                {getTabDescription()}
-                {topOwners.map((top) => (
-                    <OwnerRow
-                        key={selectedTab + top.owner.id.valueOf()}
-                        owner={top.owner}
-                        description={getDescription(selectedTab, top.count, false)}
-                        callback={top.activity ? () => onTopOwnerClick(top) : undefined}
-                    />
-                ))}
+                <Section className={commonClasses.sectionBox} header={mt('headers.tops')}>
+                    <TabsList tabs={tabsList} onChange={(tabId) => setSelectedTab(tabId as ETabId)} />
+                    {getTabDescription()}
+                    {topOwners.map((top) => (
+                        <OwnerRow
+                            key={selectedTab + top.owner.id.valueOf()}
+                            owner={top.owner}
+                            description={getDescription(selectedTab, top.count, false)}
+                            callback={top.activity ? () => setUserActivityModalData(top) : undefined}
+                        />
+                    ))}
+                </Section>
+
+                {userActivityModalData && (
+                    <Modal
+                        header={<ModalHeader />}
+                        open={Boolean(userActivityModalData)}
+                        onOpenChange={(open) => {
+                            if (!open) {
+                                setUserActivityModalData(null);
+                            }
+                        }}
+                    >
+                        <OwnerRow owner={userActivityModalData.owner as Api.User} />
+                        {userActivityModalData.activity && (
+                            <Padding>
+                                <ActivityChart data={userActivityModalData.activity} />
+                            </Padding>
+                        )}
+                    </Modal>
+                )}
             </>
         );
     }
 
     if (ownerPeriods.length) {
         return (
-            <>
+            <Section className={commonClasses.sectionBox}>
                 <OwnerRow owner={selectedOwner} withoutLink={true} />
 
                 {chatTopics.length > 0 && (
-                    <>
-                        <Divider my="xs" label={mt('headers.topics')} labelPosition="center" mb={0} />
-                        <Button
-                            fullWidth
-                            onClick={() => setSelectedChatTopic(0)}
-                            variant={selectedChatTopic === 0 ? 'primary' : 'light'}
-                        >
-                            {mt('all_messages_button')}
-                        </Button>
+                    <Section header={mt('headers.topics')}>
+                        {/* <Divider my="xs" label={mt('headers.topics')} labelPosition="center" mb={0} /> */}
+                        <Padding>
+                            <Button
+                                stretched
+                                size="s"
+                                onClick={() => setSelectedChatTopic(0)}
+                                mode={selectedChatTopic === 0 ? 'bezeled' : 'filled'}
+                            >
+                                {mt('all_messages_button')}
+                            </Button>
+                        </Padding>
 
                         {chatTopics.map((topic) => (
-                            <Button
-                                key={topic.id}
-                                mt="xs"
-                                fullWidth
-                                onClick={() => setSelectedChatTopic(topic.id)}
-                                variant={topic.id === selectedChatTopic ? 'primary' : 'light'}
-                            >
-                                {topic.name}
-                            </Button>
+                            <div key={topic.id} style={{ padding: '0 10px 10px 10px' }}>
+                                <Button
+                                    stretched
+                                    size="s"
+                                    onClick={() => setSelectedChatTopic(topic.id)}
+                                    mode={selectedChatTopic === topic.id ? 'bezeled' : 'filled'}
+                                >
+                                    {topic.name}
+                                </Button>
+                            </div>
                         ))}
-                    </>
+                    </Section>
                 )}
 
                 <StatsPeriodPicker
@@ -937,18 +957,19 @@ export default function MessagesStat() {
                     setStatsPeriod={setRecordsPeriod}
                     calcStatistic={calcStatistic}
                 />
-            </>
+            </Section>
         );
     }
 
     return (
-        <SelectDialog
-            allowTypes={[EOwnerType.user, EOwnerType.chat, EOwnerType.supergroup]}
-            onOwnerSelect={(owner) => {
-                console.log('owner', owner);
-                setSelectedOwner(owner);
-                getOptions(owner);
-            }}
-        />
+        <Section className={commonClasses.sectionBox}>
+            <SelectDialog
+                allowTypes={[EOwnerType.user, EOwnerType.chat, EOwnerType.supergroup]}
+                onOwnerSelect={(owner) => {
+                    setSelectedOwner(owner);
+                    getOptions(owner);
+                }}
+            />
+        </Section>
     );
 }

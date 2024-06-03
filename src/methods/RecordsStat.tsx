@@ -1,5 +1,5 @@
-import { Divider } from '@mantine/core';
 import {
+    Icon,
     IconEye,
     IconHeart,
     IconMessage,
@@ -7,19 +7,20 @@ import {
     IconMicrophone,
     IconPaperclip,
     IconPhone,
+    IconProps,
     IconSticker,
-    IconVideo,
-    TablerIconsProps
+    IconVideo
 } from '@tabler/icons-react';
-import { JSX, useContext, useState } from 'react';
+import { Cell, Section } from '@telegram-apps/telegram-ui';
+import { ForwardRefExoticComponent, JSX, RefAttributes, useContext, useState } from 'react';
 import { Api } from 'telegram';
 
-import { MethodContext } from '../contexts/MethodContext.tsx';
+import { Padding } from '../components/Helpers.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
+import { RecordRow } from '../components/RecordRow.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
-import { declineAndFormat, getTextTime, notifyError } from '../lib/helpers.ts';
-import { InfoRow } from '../components/InfoRow.tsx';
+import { declineAndFormat, formatNumber, getTextTime, notifyError } from '../lib/helpers.ts';
 import { ActivityChart } from '../components/charts/Activity.tsx';
 import { CalculateActivityTime } from '../components/charts/chart_helpers.ts';
 import {
@@ -34,10 +35,14 @@ import {
     TPeriodType,
     ValidationError
 } from '../lib/methods/messages.ts';
-import { RecordRow } from '../components/RecordRow.tsx';
+// import { RecordRow } from '../components/RecordRow.tsx';
 import dayjs from 'dayjs';
 import { ReactionsList } from '../components/ReactionsList.tsx';
 import { StatsPeriodPicker } from '../components/StatsPeriodPicker.tsx';
+
+import { MethodContext } from '../contexts/MethodContext.tsx';
+
+import commonClasses from '../styles/Common.module.css';
 
 type DocumentAttributeType =
     | typeof Api.DocumentAttributeSticker
@@ -90,7 +95,7 @@ interface IScanDataResult {
 }
 
 interface IStatRow {
-    icon: (props: TablerIconsProps) => JSX.Element;
+    icon: ForwardRefExoticComponent<IconProps & RefAttributes<Icon>>;
     label: string;
     value: number | string;
     isInteger: boolean;
@@ -105,7 +110,7 @@ interface ITabTops {
     id: ETabId | string;
     lang: string;
     parentTab?: ETabId;
-    icon?: (props: TablerIconsProps) => JSX.Element;
+    icon?: ForwardRefExoticComponent<IconProps & RefAttributes<Icon>>;
     records: IStatsRecords;
 }
 
@@ -580,27 +585,30 @@ export default function RecordsStat() {
         const tabRecords = (getSelectedTabObject(tabs) as ITabTops).records;
 
         return (
-            <>
+            <Section className={commonClasses.sectionBox}>
                 <OwnerRow
                     owner={selectedChannel}
                     withoutLink={true}
                     description={mt('stat_date').replace('{period}', statResult.period)}
                 />
-                <Divider my="xs" />
 
                 {counts.map((item, key) => (
-                    <InfoRow
+                    <Cell
                         key={key}
-                        title={item.label}
                         description={!item.isInteger ? String(item.value) : undefined}
-                        count={item.isInteger ? Number(item.value) : undefined}
-                        icon={item.icon}
-                    />
+                        before={<item.icon />}
+                        after={item.isInteger ? formatNumber(Number(item.value)) : undefined}
+                    >
+                        {item.label}
+                    </Cell>
                 ))}
 
                 {getReactionsElement(statResult)}
 
-                <ActivityChart data={recordsByTime.get(Number(selectedChannel?.id.valueOf()))} />
+                <Padding>
+                    <ActivityChart data={recordsByTime.get(Number(selectedChannel?.id.valueOf()))} />
+                </Padding>
+
                 <TabsList tabs={tabsList} onChange={(tabId) => setSelectedTab(tabId as ETabId | string)} />
 
                 {prepareRecordsStatsToDisplay(tabRecords).map((statCount: string) =>
@@ -612,13 +620,13 @@ export default function RecordsStat() {
                         />
                     ))
                 )}
-            </>
+            </Section>
         );
     }
 
     if (channelPeriods.length) {
         return (
-            <>
+            <Section className={commonClasses.sectionBox}>
                 <OwnerRow owner={selectedChannel} withoutLink={true} />
                 <StatsPeriodPicker
                     statsPeriods={channelPeriods}
@@ -626,17 +634,19 @@ export default function RecordsStat() {
                     setStatsPeriod={setRecordsPeriod}
                     calcStatistic={calcStatistic}
                 />
-            </>
+            </Section>
         );
     }
 
     return (
-        <SelectDialog
-            allowTypes={[EOwnerType.channel]}
-            onOwnerSelect={(channel) => {
-                setSelectedChannel(channel as Api.Channel);
-                calculateEmbeddedPeriods(channel as Api.Channel);
-            }}
-        />
+        <Section className={commonClasses.sectionBox}>
+            <SelectDialog
+                allowTypes={[EOwnerType.channel]}
+                onOwnerSelect={(channel) => {
+                    setSelectedChannel(channel as Api.Channel);
+                    calculateEmbeddedPeriods(channel as Api.Channel);
+                }}
+            />
+        </Section>
     );
 }

@@ -15,7 +15,7 @@ export function ReactionsList({ reactions }: IReactionsList) {
     return (
         <div>
             {reactionsArray.map(([reactionEmoji, reactionCount]) => (
-                <Button before={reactionEmoji} mode="outline" size="s" style={{ marginRight: 10 }}>
+                <Button before={reactionEmoji} mode="outline" size="s" style={{ marginRight: 10, marginTop: 10 }}>
                     {formatNumber(reactionCount)}
                 </Button>
             ))}

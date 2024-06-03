@@ -31,8 +31,7 @@ import {
     IconThumbDownOff,
     IconTransfer,
     IconUsersGroup,
-    IconWritingSign,
-    TablerIcon
+    IconWritingSign
 } from '@tabler/icons-react';
 
 import { t } from './lib/lang.ts';
@@ -74,7 +73,7 @@ export interface IMethodComponent {
 
 interface IAppMethodRouter {
     id: string;
-    icon: (props: TablerIcon) => JSX.Element;
+    icon: ForwardRefExoticComponent<IconProps & RefAttributes<Icon>>;
     element: JSX.Element;
     categories: MethodCategory[];
     authType: AuthType;
@@ -119,7 +118,7 @@ const appMethods: IMethodComponent[] = [
     {
         id: 'messages_stat',
         icon: IconMessageCircleSearch,
-        // element: createElement(lazy(() => import('./methods/MessagesStat.tsx'))),
+        element: createElement(lazy(() => import('./methods/MessagesStat.tsx'))),
         categories: [MethodCategory.CHATS],
         authType: AuthType.TG
     },
@@ -182,7 +181,7 @@ const appMethods: IMethodComponent[] = [
     {
         id: 'records_stat',
         icon: IconReportAnalytics,
-        // element: createElement(lazy(() => import('./methods/RecordsStat.tsx'))),
+        element: createElement(lazy(() => import('./methods/RecordsStat.tsx'))),
         categories: [MethodCategory.CHANNELS],
         authType: AuthType.TG
     },

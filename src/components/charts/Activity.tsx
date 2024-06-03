@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Caption, Text } from '@telegram-apps/telegram-ui';
+import { Caption } from '@telegram-apps/telegram-ui';
+import { SectionHeader } from '@telegram-apps/telegram-ui/dist/components/Blocks/Section/components/SectionHeader/SectionHeader';
 import dayjs from 'dayjs';
 import { generateColorGradation, getPercent, rgbToHex } from '../../lib/helpers.ts';
 import { chartLang } from './chart_helpers.ts';
@@ -87,7 +88,7 @@ export function ActivityChart({ data }: IActivityChartProps) {
 
     return (
         <>
-            <Text>{lang('title')}</Text>
+            <SectionHeader style={{ paddingLeft: 10 }}>{lang('title')}</SectionHeader>
 
             <div className={classes.header}>
                 {headerRows.map((row, key) => (
