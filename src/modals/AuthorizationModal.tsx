@@ -91,6 +91,7 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
             console.log('Auth.storageSession', Boolean(storageSession));
 
             const authStateNumber = (await getCache(Constants.AUTH_STATE_NUMBER_KEY)) as IAuthStateNumber;
+            console.log('Auth.authStateNumber', authStateNumber);
             if (authStateNumber || !storageSession) {
                 await getAuthData();
             }

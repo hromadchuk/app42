@@ -140,6 +140,9 @@ export function App() {
                 const param = new URLSearchParams(location.search).get('tgWebAppStartParam');
                 const value = await getCache(Constants.AUTH_STATE_METHOD_KEY);
 
+                console.log('tgWebAppStartParam', param);
+                console.log('value', value && JSON.stringify(value));
+
                 if (value) {
                     if (value) {
                         const { methodId, authType } = value as {
