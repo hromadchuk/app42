@@ -35,6 +35,7 @@ export function ActivityChart({ data }: IActivityChartProps) {
     function getColorStyle(level: number): { backgroundColor: string } {
         const rootStyle = getComputedStyle(document.getElementById('method_header') as HTMLElement);
         const headerColor = rootStyle.getPropertyValue('background-color');
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const [r, g, b] = headerColor.match(/\d+/g)!.map(Number);
         const nexColor = rgbToHex(r, g, b);
         const colors = generateColorGradation(nexColor, 6);

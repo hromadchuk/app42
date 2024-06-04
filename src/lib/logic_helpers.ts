@@ -97,4 +97,4 @@ export async function getDialogs(
     setProgress(null);
 
     return filteredDialogs.list;
-};
+}
