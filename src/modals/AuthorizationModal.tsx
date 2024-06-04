@@ -389,7 +389,7 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
                                             href="https://t.me/+42777"
                                             target="_blank"
                                         >
-                                            {t('auth_page.code_account_button')}
+                                            {t('auth_modal.code_account_button')}
                                         </Button>
 
                                         <form
