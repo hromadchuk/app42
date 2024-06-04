@@ -5,6 +5,7 @@ import { Server } from '../lib/helpers.ts';
 import { t, td } from '../lib/lang.ts';
 import { getMethodById, MethodCategory } from '../routes.tsx';
 import { getCardById } from '../cards.ts';
+import { ListAction } from '../components/ListAction.tsx';
 import { PageHeader } from '../components/PageHeader.tsx';
 import { MethodLoader } from '../components/MethodLoader.tsx';
 import { MethodPlaceholder } from '../components/MethodPlaceholder.tsx';
@@ -20,7 +21,7 @@ export default function AbstractMethod() {
 
     const [progress, _setProgress] = useState<IProgress | null>();
     const [finishBlock, _setFinishBlock] = useState<IFinishBlock>();
-    const [listAction, _setListAction] = useState<ISetListAction | null>(null);
+    const [listAction, setListAction] = useState<ISetListAction | null>(null);
 
     const needHideContent = (): boolean => {
         return [progress, finishBlock, listAction].some(Boolean);
@@ -70,16 +71,6 @@ export default function AbstractMethod() {
         return td(`methods.${method.id}.${key}`);
     };
 
-    const setListAction = ({ buttonText, loadingText, owners, requestSleep, action }: ISetListAction) => {
-        _setListAction({
-            buttonText,
-            loadingText,
-            owners,
-            requestSleep,
-            action
-        });
-    };
-
     function HelpersBlock() {
         if (progress) {
             return <MethodLoader {...progress} />;
@@ -87,6 +78,10 @@ export default function AbstractMethod() {
 
         if (finishBlock) {
             return <MethodPlaceholder {...finishBlock} />;
+        }
+
+        if (listAction) {
+            return <ListAction setProgress={setProgress} setFinishBlock={setFinishBlock} {...listAction} />;
         }
 
         return null;

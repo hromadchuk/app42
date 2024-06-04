@@ -146,7 +146,7 @@ const appMethods: IMethodComponent[] = [
     {
         id: 'clear_blacklist',
         icon: IconThumbDownOff,
-        // element: createElement(lazy(() => import('./methods/ClearBlacklist.tsx'))),
+        element: createElement(lazy(() => import('./methods/ClearBlacklist.tsx'))),
         categories: [MethodCategory.ACCOUNT],
         authType: AuthType.TG
     },
@@ -202,7 +202,7 @@ const appMethods: IMethodComponent[] = [
     {
         id: 'clear_dialog_members',
         icon: IconFriendsOff,
-        // element: createElement(lazy(() => import('./methods/ClearDialogMembers.tsx'))),
+        element: createElement(lazy(() => import('./methods/ClearDialogMembers.tsx'))),
         categories: [MethodCategory.CHANNELS, MethodCategory.CHATS],
         authType: AuthType.TG
     },

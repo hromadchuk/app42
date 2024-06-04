@@ -1,11 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
-import { Button, Flex } from '@mantine/core';
+import { Button, Cell, Multiselectable, Section } from '@telegram-apps/telegram-ui';
+import { IconRobot, IconUser } from '@tabler/icons-react';
 import { Api } from 'telegram';
-import { CallAPI, declineAndFormat } from '../lib/helpers.ts';
+import { Padding } from '../components/Helpers.tsx';
+import { CallAPI, declineAndFormat, isDev } from '../lib/helpers.ts';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
-import { CheckboxCard } from '../components/CheckboxCard.tsx';
-import { IconRobot, IconUser } from '@tabler/icons-react';
+import commonClasses from '../styles/Common.module.css';
 
 interface IBannedResult {
     count: number;
@@ -16,8 +17,8 @@ interface IBannedResult {
 export default function ClearBlacklist() {
     const { mt, md, needHideContent, setFinishBlock, setProgress, setListAction } = useContext(MethodContext);
 
-    const [needRemoveUsers, setNeedRemoveUsers] = useState(true);
-    const [needRemoveBots, setNeedRemoveBots] = useState(true);
+    const [needRemoveUsers, setNeedRemoveUsers] = useState(false);
+    const [needRemoveBots, setNeedRemoveBots] = useState(false);
     const [blockedResult, setBlockedResult] = useState<IBannedResult | null>(null);
 
     useEffect(() => {
@@ -114,6 +115,13 @@ export default function ClearBlacklist() {
             requestSleep: 777,
             owners: deletedList,
             action: async (owner) => {
+                if (isDev) {
+                    console.log('Unblock', {
+                        id: owner.id
+                    });
+                    return;
+                }
+
                 await CallAPI(
                     new Api.contacts.Unblock({
                         id: owner.id
@@ -127,37 +135,47 @@ export default function ClearBlacklist() {
 
     if (blockedResult) {
         return (
-            <>
-                <Flex gap={5}>
-                    <CheckboxCard
-                        icon={<IconUser />}
-                        title={declineAndFormat(blockedResult.users.length, md('checkbox_users'))}
-                        disabled={blockedResult.users.length === 0}
-                        checked={needRemoveUsers}
-                        setChecked={(isChecked) => setNeedRemoveUsers(isChecked)}
-                    />
-
-                    <CheckboxCard
-                        icon={<IconRobot />}
-                        title={declineAndFormat(blockedResult.bots.length, md('checkbox_bots'))}
-                        disabled={blockedResult.bots.length === 0}
-                        checked={needRemoveBots}
-                        setChecked={(isChecked) => setNeedRemoveBots(isChecked)}
-                    />
-                </Flex>
-
-                <Button
-                    fullWidth
-                    variant="outline"
-                    mt="xs"
-                    disabled={blockedResult.count === 0 || (!needRemoveUsers && !needRemoveBots)}
-                    onClick={clearBlacklist}
+            <Section className={commonClasses.sectionBox}>
+                <Cell
+                    Component="label"
+                    before={<IconUser />}
+                    after={
+                        <Multiselectable
+                            disabled={blockedResult.users.length === 0}
+                            defaultChecked={needRemoveUsers}
+                            onChange={(e) => setNeedRemoveUsers(e.target.checked)}
+                        />
+                    }
+                    disabled={blockedResult.users.length === 0}
                 >
-                    {mt('button_clear_preview')}
-                </Button>
-            </>
+                    {declineAndFormat(blockedResult.users.length, md('checkbox_users'))}
+                </Cell>
+                <Cell
+                    Component="label"
+                    before={<IconRobot />}
+                    after={
+                        <Multiselectable
+                            disabled={blockedResult.bots.length === 0}
+                            defaultChecked={needRemoveBots}
+                            onChange={(e) => setNeedRemoveBots(e.target.checked)}
+                        />
+                    }
+                    disabled={blockedResult.bots.length === 0}
+                >
+                    {declineAndFormat(blockedResult.bots.length, md('checkbox_bots'))}
+                </Cell>
+
+                <Padding>
+                    <Button
+                        stretched
+                        mode="filled"
+                        disabled={blockedResult.count === 0 || (!needRemoveUsers && !needRemoveBots)}
+                        onClick={clearBlacklist}
+                    >
+                        {mt('button_clear_preview')}
+                    </Button>
+                </Padding>
+            </Section>
         );
     }
-
-    return null;
 }

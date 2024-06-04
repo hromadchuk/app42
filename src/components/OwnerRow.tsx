@@ -1,5 +1,5 @@
 import { createElement, CSSProperties, ForwardRefExoticComponent, RefAttributes } from 'react';
-import { Cell } from '@telegram-apps/telegram-ui';
+import { Cell, Multiselectable } from '@telegram-apps/telegram-ui';
 import { Link } from 'react-router-dom';
 import { Api } from 'telegram';
 import { Icon, IconChevronRight, IconProps, IconRosetteDiscountCheckFilled } from '@tabler/icons-react';
@@ -95,53 +95,17 @@ export function OwnerRow({ owner, description, rightIcon, withoutLink, callback,
         style.filter = 'grayscale(1)';
     }
 
-    // const Row = (
-    //     <Flex
-    //         gap="md"
-    //         p={5}
-    //         justify="flex-start"
-    //         align="center"
-    //         direction="row"
-    //         wrap="nowrap"
-    //         style={style}
-    //         className={classNames({ [classes.row]: linkProps.component })}
-    //     >
-    //         <OwnerAvatar owner={owner} />
-    //
-    //         <div>
-    //             <Group gap={0}>
-    //                 <Text size="sm" inline>
-    //                     {name.join(' ')}
-    //                 </Text>
-    //                 {getBadge()}
-    //             </Group>
-    //             <Text c="dimmed" fz="xs">
-    //                 {description}
-    //             </Text>
-    //         </div>
-    //
-    //         <Container p={0} mr={0}>
-    //             {isCheckbox && <Checkbox checked={checked} readOnly />}
-    //             {linkProps.component &&
-    //                 !isCheckbox &&
-    //                 createElement(rightIcon || IconChevronRight, { size: 14, stroke: 1.5 })}
-    //         </Container>
-    //     </Flex>
-    // );
+    function RightBlock() {
+        if (isCheckbox) {
+            return <Multiselectable checked={checked} readOnly />;
+        }
 
-    // return (
-    //     <Container p={0} ml={ml ?? 'auto'} mr={mr ?? 'auto'} styles={styles ?? {}}>
-    //         {!linkProps.component ? (
-    //             Row
-    //         ) : (
-    //             <UnstyledButton {...linkProps} disabled={true}>
-    //                 {Row}
-    //             </UnstyledButton>
-    //         )}
-    //     </Container>
-    // );
+        if (linkProps.component) {
+            return createElement(rightIcon || IconChevronRight, { size: 14, stroke: 1.5 });
+        }
 
-    console.log('linkProps', linkProps);
+        return null;
+    }
 
     function CellRow() {
         return (
@@ -151,11 +115,7 @@ export function OwnerRow({ owner, description, rightIcon, withoutLink, callback,
                 interactiveAnimation={interactiveAnimation}
                 before={<OwnerAvatar owner={owner} size={description ? 48 : 40} />}
                 style={style}
-                after={
-                    linkProps.component &&
-                    !isCheckbox &&
-                    createElement(rightIcon || IconChevronRight, { size: 14, stroke: 1.5 })
-                }
+                after={RightBlock()}
                 description={description}
             >
                 {name.join(' ')}

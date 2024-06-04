@@ -150,7 +150,7 @@ export function App() {
 
                 if (isDev) {
                     // TODO only test
-                    // const method = getMethodById('messages_stat');
+                    // const method = getMethodById('clear_dialog_members');
                     // method && openMethod(method);
                 }
             }
@@ -307,9 +307,6 @@ export function App() {
                 initData,
                 setInitData,
                 showShareModal
-                // setAppLoading,
-                // markOnboardingAsCompleted,
-                // checkIsOnboardingCompleted
             }}
         >
             <Routes>{routes.map(GetRouter)}</Routes>
