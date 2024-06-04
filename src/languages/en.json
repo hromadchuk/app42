@@ -1,16 +1,21 @@
 {
-  "auth_page": {
+  "auth_modal": {
+    "title": "Authorization",
+    "phone_title": "Phone number",
     "description": "To be able to work with Telegram API, you need to log in to your account. Don't worry, the data is not transferred anywhere and the session is stored on your device.",
-    "input_number": "Phone number",
-    "input_code": "Verification code",
-    "input_password": "Password",
+    "code_title": "Verification code",
+    "code_description": "The code should come to the service account with +42777 number",
+    "password_title": "Enter a password",
+    "password_description": "Please enter your 2fa password",
     "button_send_code": "Send code",
     "button_confirm_code": "Confirm code",
     "button_confirm_password": "Confirm password",
     "search_placeholder": "Type to search",
-    "reset_auth_button": "Reset authorization",
-    "code_description": "The code should come to the service account with +42777 number",
     "code_account_button": "Open service account"
+  },
+  "accounts_modal": {
+    "wallet_disconnect": "Disconnect the wallet?",
+    "account_disconnect": "Disconnect account?"
   },
   "common": {
     "progress": "Loading",
@@ -19,6 +24,7 @@
     "getting_dialogs": "Getting dialogs",
     "selected_button_subtext": "Selected {count} from {total}",
     "errors": {
+      "api_error": "API error",
       "api_rate_limit": "You have reached the limit of API requests, you need to wait {time} and try again"
     },
     "time_short": {
@@ -68,23 +74,37 @@
     "record": "Record"
   },
   "menu": {
+    "search_placeholder": "Type to search",
     "documentation": "Documentation",
     "donate": "Support the project",
     "telegram_channel": "Telegram channel with updates",
-    "developer": "Contact the developer",
-    "auth_modal_title": "Authorization",
-    "wallet_disconnect": "Disconnect the wallet?",
-    "account_disconnect": "Disconnect account?",
+    "info": "If you have a question, bug or request, you can always {link}write to the developer{/link} about it!",
+    "no_methods": "No methods founds",
     "cards": {
       "account": "Account",
+      "account_description": "Analyse your account and keep it clean",
       "contacts": "Contacts",
+      "contacts_description": "Analyse your contacts",
       "channels": "Channels",
+      "channels_description": "Analyse your channels and clear your personal channels",
       "chats": "Chats",
-      "ton": "TON"
+      "chats_description": "Analyse chats and clean up private chats",
+      "ton": "TON",
+      "ton_description": "Analysing your wallet in the TON network"
     }
   },
-  "beta": "This is beta version of the product and there may be bugs. If you find a bug or have a suggestion, please send a message to the developer. Features will be added as the product is developed.",
   "share": {
+    "button": "Share",
+    "success": "You have successfully shared the information!",
+    "error": "Something went wrong. Try again later.",
+    "cant_share": {
+      "title": "Can't share",
+      "description": "You can't share this information"
+    },
+    "tabs": {
+      "post": "Post",
+      "story": "Story"
+    },
     "stories": {
       "button": "Share in story",
       "publish_header": "This is the picture that will be published in your channel's stories",
@@ -99,9 +119,7 @@
       "button": "Share in message",
       "publish_header": "This is the picture that will be published in group",
       "publish_button": "Send message"
-    },
-    "success": "You have successfully shared the information!",
-    "error": "Something went wrong. Try again later."
+    }
   },
   "routes": {
     "get_id": "Get account or channel ID",
@@ -155,6 +173,99 @@
         "description": "The app runs on the official API from Telegram. The application does not use a server, all session and data are stored only in your Telegram account."
       }
     }
+  },
+  "date_selector": {
+    "created": "Created",
+    "months": [
+      [
+        "January",
+        "Jan"
+      ],
+      [
+        "February",
+        "Feb"
+      ],
+      [
+        "March",
+        "Mar"
+      ],
+      [
+        "April",
+        "Apr"
+      ],
+      [
+        "May",
+        "May"
+      ],
+      [
+        "June",
+        "Jun"
+      ],
+      [
+        "July",
+        "Jul"
+      ],
+      [
+        "August",
+        "Aug"
+      ],
+      [
+        "September",
+        "Sep"
+      ],
+      [
+        "October",
+        "Oct"
+      ],
+      [
+        "November",
+        "Nov"
+      ],
+      [
+        "December",
+        "Dec"
+      ]
+    ],
+    "weekDays": [
+      [
+        "Saturday",
+        "Sat"
+      ],
+      [
+        "Sunday",
+        "Sun"
+      ],
+      [
+        "Monday",
+        "Mon"
+      ],
+      [
+        "Tuesday",
+        "Tue"
+      ],
+      [
+        "Wednesday",
+        "Wed"
+      ],
+      [
+        "Thursday",
+        "Thu"
+      ],
+      [
+        "Friday",
+        "Fri"
+      ]
+    ],
+    "meridiems": [
+      [
+        "AM",
+        "am"
+      ],
+      [
+        "PM",
+        "pm"
+      ]
+    ]
   },
   "methods": {
     "get_id": {
@@ -297,7 +408,6 @@
       "sending_message": "Sending message",
       "sending_message_error": "Message sending error",
       "message_recipient": "Select a message recipient",
-      "few_animation": "There will be more animation in the future",
       "read_wait": "Waiting for the message to be read",
       "send_button": "Send animation",
       "has_message_after_animation": "Has custom message after animation",
@@ -327,6 +437,7 @@
       "last_active": "Last active {diff_time}"
     },
     "import_messages": {
+      "read_warning": "Before using the method, you need to {link}read the documentation{/link}",
       "read_warning_link": "Read documentation",
       "button_import": "Select ZIP archive",
       "select_move_message_from": "Select the {network} user whose messages we will transfer",
@@ -497,7 +608,9 @@
     "dialog_joined": {
       "no_created": "You don't have any dialogs",
       "created": "{time} ago",
-      "today": "Less than 24 hours"
+      "today": "Less than 24 hours",
+      "share_description": "ago channel was created",
+      "was_created_date": "was created on {date}"
     },
     "clear_dialog_members": {
       "get_members": "Getting the dialog participants",
@@ -537,7 +650,12 @@
       "no_contacts": "You don't have any contacts",
       "no_contacts_with_nft": "You don't have contacts with NFT",
       "get_users_info": "Getting users info",
-      "bought": "Bought {date}"
+      "bought": "Bought {date}",
+      "titles": {
+        "usernames": "Usernames",
+        "phones": "Anonymous phones",
+        "wallets": "TON Wallets"
+      }
     },
     "ton_jettons_analysis": {
       "no_jettons": "You don't have any jettons",
