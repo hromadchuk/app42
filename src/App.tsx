@@ -124,7 +124,16 @@ export function App() {
                         : null;
                     console.log('storageSession', Boolean(storageSession));
                     if (storageSession) {
-                        setUser(await getCurrentUser());
+                        try {
+                            const loggedUser = await getCurrentUser();
+
+                            console.log('loggedUser', loggedUser);
+                            if (loggedUser) {
+                                setUser(loggedUser);
+                            }
+                        } catch (error) {
+                            console.error('Error init current user', error);
+                        }
                     }
                 }
 
