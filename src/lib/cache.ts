@@ -1,8 +1,8 @@
-import { CacheDataType, ICacheData, Kit42Database } from './database.ts';
+import { App42Database, CacheDataType, ICacheData } from './database.ts';
 import { Constants } from '../constants.ts';
 import { getUserId } from './helpers.ts';
 
-const db = new Kit42Database();
+const db = new App42Database();
 
 function getPrefix(key: string): string {
     if ([Constants.AUTH_STATE_NUMBER_KEY, Constants.AUTH_STATE_METHOD_KEY].includes(key)) {

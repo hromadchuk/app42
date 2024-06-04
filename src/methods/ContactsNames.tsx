@@ -1,28 +1,29 @@
 import {
-    ActionIcon,
-    Alert,
-    Box,
+    Badge,
+    Blockquote,
     Button,
-    Center,
-    Container,
-    CopyButton,
-    Divider,
-    Flex,
-    Group,
+    Caption,
+    Cell,
+    InlineButtons,
     Input,
-    Stack,
-    Text
-} from '@mantine/core';
-import { IconCheck, IconCopy, IconShieldLock } from '@tabler/icons-react';
+    Placeholder,
+    Section
+} from '@telegram-apps/telegram-ui';
 import { useCloudStorage } from '@tma.js/sdk-react';
 import dayjs from 'dayjs';
+import Lottie from 'lottie-react';
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Api } from 'telegram';
+import { CopyButton } from '../components/CopyButton.tsx';
 import { Constants } from '../constants.ts';
-
 import { MethodContext } from '../contexts/MethodContext.tsx';
-import { CallAPI, isDev, Server } from '../lib/helpers.ts';
+import { getCache, setCache } from '../lib/cache.ts';
+import { CallAPI, classNames, isDev, Server, wrapCallMAMethod } from '../lib/helpers.ts';
+
+import AnimatedDuckFaceControl from '../assets/animated_stickers/duck_face_control.json';
+
+import commonClasses from '../styles/Common.module.css';
 
 interface IServerData {
     date: number;
@@ -31,6 +32,8 @@ interface IServerData {
         count: number;
     }[];
 }
+
+const PART_LIMIT = 300;
 
 export default function ContactsNames() {
     const { mt, needHideContent, setProgress } = useContext(MethodContext);
@@ -43,7 +46,10 @@ export default function ContactsNames() {
     useEffect(() => {
         setProgress({});
 
-        storage.get(Constants.ALLOW_USE_CONTACTS_NAMES_KEY).then((allowUseMethod) => {
+        const storageData = isDev
+            ? getCache(Constants.ALLOW_USE_CONTACTS_NAMES_KEY)
+            : wrapCallMAMethod<string>(() => storage.get(Constants.ALLOW_USE_CONTACTS_NAMES_KEY));
+        storageData.then((allowUseMethod) => {
             if (allowUseMethod !== 'allow') {
                 setShowWarning(true);
                 setProgress(null);
@@ -57,56 +63,77 @@ export default function ContactsNames() {
         setProgress({});
 
         const result = (await CallAPI(new Api.contacts.GetContacts({}))) as Api.contacts.Contacts;
-        const initValue: { [key: number]: string } = {};
-        const syncList = result.users.reduce((list, user) => {
+        const usersParts: [number, string][] = [];
+
+        result.users.forEach((user) => {
             if (user instanceof Api.User) {
-                list[user.id.valueOf()] = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+                usersParts.push([user.id.valueOf(), `${user.firstName || ''} ${user.lastName || ''}`.trim()]);
             }
+        });
 
-            return list;
-        }, initValue);
+        const firstSyncPart = getPart(usersParts.splice(0, PART_LIMIT));
+        const data = await Server<IServerData>('get-my-names', { list: firstSyncPart });
 
-        const data = await Server<IServerData>('get-my-names', { list: syncList });
+        while (usersParts.length) {
+            const part = getPart(usersParts.splice(0, PART_LIMIT));
+
+            Server<IServerData>('get-my-names', { list: part, onlySync: part });
+        }
 
         setServerData(data);
         setProgress(null);
+    }
+
+    function getPart(users: [number, string][]) {
+        const result: { [key: number]: string } = {};
+
+        users.forEach(([id, name]) => {
+            result[id] = name;
+        });
+
+        return result;
     }
 
     if (needHideContent()) return null;
 
     if (needShowWarning) {
         return (
-            <Box p="lg">
-                <Center>
-                    <IconShieldLock size={72} />
-                </Center>
-                <Center mt="md" ta="center">
-                    {mt('allow_description')}
-                </Center>
-                <Group grow mt="md">
+            <>
+                <Placeholder description={mt('allow_description')}>
+                    <Lottie animationData={AnimatedDuckFaceControl} loop className={commonClasses.partWidth} />
+                </Placeholder>
+
+                <InlineButtons className={commonClasses.center}>
                     <Button
-                        variant="light"
-                        color="red"
+                        mode="gray"
+                        size="s"
                         onClick={() => {
                             navigate('/');
                         }}
                     >
                         {mt('decline_button')}
                     </Button>
+
                     <Button
-                        variant="light"
-                        color="green"
+                        mode="filled"
+                        size="s"
                         onClick={() => {
-                            storage.set(Constants.ALLOW_USE_CONTACTS_NAMES_KEY, 'allow').then(() => {
-                                setShowWarning(false);
-                                getContactsNames();
-                            });
+                            if (isDev) {
+                                setCache(Constants.ALLOW_USE_CONTACTS_NAMES_KEY, 'allow', 15);
+                            } else {
+                                wrapCallMAMethod<string>(() => {
+                                    storage.set(Constants.ALLOW_USE_CONTACTS_NAMES_KEY, 'allow');
+                                });
+                            }
+
+                            setShowWarning(false);
+                            getContactsNames();
                         }}
                     >
                         {mt('allow_button')}
                     </Button>
-                </Group>
-            </Box>
+                </InlineButtons>
+            </>
         );
     }
 
@@ -114,27 +141,11 @@ export default function ContactsNames() {
         const link = isDev ? 'https://t.me/kit42_bot/kit42?startapp=cn' : 'https://t.me/app42/app?startapp=cn';
 
         return (
-            <>
-                <Alert variant="light" color="gray" mt="md">
-                    {mt('share_description')}
-                </Alert>
+            <Section className={commonClasses.sectionBox}>
+                <Blockquote>{mt('share_description')}</Blockquote>
 
-                <Input
-                    mt="md"
-                    value={link}
-                    readOnly={true}
-                    rightSectionPointerEvents="all"
-                    rightSection={
-                        <CopyButton value={link} timeout={2000}>
-                            {({ copied, copy }) => (
-                                <ActionIcon color={copied ? 'teal' : 'gray'} variant="subtle" onClick={copy}>
-                                    {copied ? <IconCheck style={{ width: 16 }} /> : <IconCopy style={{ width: 16 }} />}
-                                </ActionIcon>
-                            )}
-                        </CopyButton>
-                    }
-                />
-            </>
+                <Input after={<CopyButton value={link} />} value={link} readOnly />
+            </Section>
         );
     }
 
@@ -142,36 +153,21 @@ export default function ContactsNames() {
         if (serverData.names.length) {
             return (
                 <>
-                    {serverData.names.map(({ name, count }, key) => (
-                        <>
-                            {key > 0 && <Divider my={3} />}
-                            <Flex
-                                gap="md"
-                                p={5}
-                                justify="flex-start"
-                                align="center"
-                                direction="row"
-                                wrap="wrap"
+                    <Section className={classNames(commonClasses.sectionBox, commonClasses.showHr)}>
+                        {serverData.names.map(({ name, count }, key) => (
+                            <Cell
                                 key={key}
+                                after={<Badge type="number">{count}</Badge>}
+                                titleBadge={<Badge type="dot" />}
                             >
-                                <Text size="sm" inline>
-                                    {name}
-                                </Text>
+                                {name}
+                            </Cell>
+                        ))}
+                    </Section>
 
-                                <Container p={0} mr={0}>
-                                    <Text size="12px" c="dimmed">
-                                        {count}
-                                    </Text>
-                                </Container>
-                            </Flex>
-                        </>
-                    ))}
-
-                    <Center>
-                        <Text c="dimmed" size="sm" mt="md">
-                            {mt('updated').replace('{date}', dayjs(serverData.date).format('MMM D, YYYY h:mm:ss A'))}
-                        </Text>
-                    </Center>
+                    <Caption className={commonClasses.footerCount}>
+                        {mt('updated').replace('{date}', dayjs(serverData.date).format('MMM D, YYYY h:mm:ss A'))}
+                    </Caption>
 
                     <LinkRow />
                 </>
@@ -179,18 +175,14 @@ export default function ContactsNames() {
         }
 
         return (
-            <Stack ta="center">
-                <Text c="dimmed" size="sm" mt="md" ta="center">
-                    {mt('no_records')}
-                </Text>
-                <Text c="dimmed" size="sm" mt="md">
+            <>
+                <Placeholder description={mt('no_records')} />
+                <Caption className={commonClasses.footerCount}>
                     {mt('updated').replace('{date}', dayjs(serverData.date).format('MMM D, YYYY h:mm:ss A'))}
-                </Text>
+                </Caption>
 
                 <LinkRow />
-            </Stack>
+            </>
         );
     }
-
-    return null;
 }

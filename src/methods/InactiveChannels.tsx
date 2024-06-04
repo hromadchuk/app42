@@ -1,10 +1,13 @@
+import { Section } from '@telegram-apps/telegram-ui';
 import { useContext, useEffect, useState } from 'react';
 import { Api } from 'telegram';
-import { CallAPI } from '../lib/helpers.ts';
+import { CallAPI, classNames } from '../lib/helpers.ts';
 import dayjs from 'dayjs';
+import { OwnerRow } from '../components/OwnerRow.tsx';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
-import { OwnerRow } from '../components/OwnerRow.tsx';
+
+import commonClasses from '../styles/Common.module.css';
 
 type TOwner = Api.Channel | Api.Chat;
 
@@ -47,7 +50,7 @@ export default function InactiveChannels() {
 
     if (inactiveOwners) {
         return (
-            <>
+            <Section className={classNames(commonClasses.sectionBox, commonClasses.showHr)}>
                 {inactiveOwners.map((owner, key) => (
                     <OwnerRow
                         key={key}
@@ -58,9 +61,7 @@ export default function InactiveChannels() {
                         )}
                     />
                 ))}
-            </>
+            </Section>
         );
     }
-
-    return null;
 }

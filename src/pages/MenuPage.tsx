@@ -1,396 +1,161 @@
+import { useContext, useEffect, useState } from 'react';
 import {
     Avatar,
-    Button,
-    Container,
-    getThemeColor,
-    Group,
-    Modal,
-    Notification,
-    SimpleGrid,
-    Text,
-    UnstyledButton,
-    useMantineTheme
-} from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import {
-    IconAddressBook,
-    IconBook2,
-    IconLogout,
-    IconMessages,
-    IconPigMoney,
-    IconUser,
-    IconUsersGroup,
-    IconWallet,
-    TablerIconsProps
-} from '@tabler/icons-react';
-import { useCloudStorage, usePopup } from '@tma.js/sdk-react';
-import { Locales, useTonAddress, useTonConnectModal, useTonConnectUI } from '@tonconnect/ui-react';
-import { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Api } from 'telegram';
-import Logo from '../components/Logo.tsx';
-import Onboarding from '../components/Onboarding.tsx';
+    AvatarStack,
+    Blockquote,
+    Cell,
+    Divider,
+    Input,
+    List,
+    Placeholder,
+    Section,
+    Tappable
+} from '@telegram-apps/telegram-ui';
+import { IconBook2, IconNews, IconPigMoney, IconSearch } from '@tabler/icons-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useMiniApp } from '@tma.js/sdk-react';
+import { useTonAddress } from '@tonconnect/ui-react';
+import { cards } from '../cards.ts';
 import { OwnerAvatar } from '../components/OwnerAvatar.tsx';
 import { Constants } from '../constants.ts';
+import { getCache } from '../lib/cache.ts';
+import { getDocLink, wrapCallMAMethod } from '../lib/helpers.ts';
+import { getMethodsByName } from '../routes.tsx';
+import { t } from '../lib/lang.ts';
+
 import { AppContext } from '../contexts/AppContext.tsx';
-import { getCache, removeCache, setCache } from '../lib/cache.ts';
-import { CallAPI, classNames, decodeString, getCurrentUser, getDocLink } from '../lib/helpers.ts';
-import { getAppLangCode, t } from '../lib/lang.ts';
-import { hexToRgba } from '../lib/theme.ts';
-import { TonApiCall } from '../lib/TonApi.ts';
-import { AuthType, getMethods, IMethod, MethodCategory } from '../routes.tsx';
 
 import classes from '../styles/MenuPage.module.css';
-import AuthPage from './AuthPage.tsx';
+import TonLogo from '../assets/ton_logo.svg';
+import { MethodRow } from './MethodsPage.tsx';
 
-interface ICard {
-    id: MethodCategory;
-    icon: (props: TablerIconsProps) => JSX.Element;
-    color: string;
+function getInfoTextWithLink() {
+    return t('menu.info')
+        .replace('{link}', '<a href="https://t.me/iamhro" target="_blank">')
+        .replace('{/link}', '</a>');
 }
 
-const cards = [
-    {
-        id: MethodCategory.ACCOUNT,
-        icon: IconUser,
-        color: 'violet'
-    },
-    {
-        id: MethodCategory.CONTACTS,
-        icon: IconAddressBook,
-        color: 'teal'
-    },
-    {
-        id: MethodCategory.CHANNELS,
-        icon: IconUsersGroup,
-        color: 'yellow'
-    },
-    {
-        id: MethodCategory.CHATS,
-        icon: IconMessages,
-        color: 'pink'
-    },
-    {
-        id: MethodCategory.TON,
-        icon: IconWallet,
-        color: 'blue'
-    }
-];
+export default function MenuPage() {
+    const { user, setAccountsModalOpen } = useContext(AppContext);
 
-const MenuPage = () => {
-    const { user, setUser, initData, checkIsOnboardingCompleted, markOnboardingAsCompleted } = useContext(AppContext);
-
-    const theme = useMantineTheme();
-    const storage = useCloudStorage();
-    const navigate = useNavigate();
-    const popup = usePopup();
-    const { open: tonOpen } = useTonConnectModal();
     const userFriendlyAddress = useTonAddress();
-    const [wallet, setOptions] = useTonConnectUI();
+    const miniApp = useMiniApp();
+    const navigate = useNavigate();
 
-    const [isModalOpened, { open, close }] = useDisclosure(false);
-    const [isModalAuthOpened, { open: openAuth, close: closeAuth }] = useDisclosure(false);
-
-    const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
-    const [needShowOnboarding, setShowOnboarding] = useState(false);
-    const [walletAddress, setWalletAddress] = useState<string | null>(null);
-
-    useEffect(() => {
-        setOptions({ language: getAppLangCode() as Locales });
-
-        (async () => {
-            const isOnboardingCompleted = await checkIsOnboardingCompleted();
-
-            if (!isOnboardingCompleted) {
-                setShowOnboarding(true);
-            } else if (initData) {
-                if (!user && initData?.status === 'ok') {
-                    const storageSession = decodeString(await storage.get(Constants.SESSION_KEY), initData.storageHash);
-                    console.log('storageSession', Boolean(storageSession));
-                    if (storageSession) {
-                        setUser(await getCurrentUser());
-                    }
-                }
-
-                const param = new URLSearchParams(location.search).get('tgWebAppStartParam');
-                const methodId = await getCache(Constants.AUTH_STATE_METHOD_KEY);
-                if (methodId) {
-                    openAuth();
-                } else if (param === 'cn' && !window.alreadyVisitedRefLink) {
-                    const method = getMethods().find((item) => item.id === 'contacts_names');
-                    if (method) {
-                        openMethod(method);
-                    }
-                }
-            }
-        })();
-    }, [initData]);
+    const [searchText, setSearchText] = useState('');
 
     useEffect(() => {
         if (!userFriendlyAddress) {
-            setWalletAddress(null);
             return;
         }
 
-        TonApiCall.getWallet(userFriendlyAddress).then((accountInfo) => {
-            setWalletAddress(accountInfo.name || TonApiCall.getShortAddress(userFriendlyAddress));
-
-            getCache(Constants.AUTH_STATE_METHOD_KEY).then((cacheMethodId) => {
-                if (cacheMethodId) {
-                    removeCache(Constants.AUTH_STATE_METHOD_KEY);
-                    navigate(`/methods/${cacheMethodId}`);
-                }
-            });
+        getCache(Constants.AUTH_STATE_METHOD_KEY).then((cacheMethodId) => {
+            if (cacheMethodId) {
+                // removeCache(Constants.AUTH_STATE_METHOD_KEY);
+                // navigate(`/methods/${cacheMethodId}`);
+            }
         });
     }, [userFriendlyAddress]);
 
-    const methods = getMethods();
-
-    function openMethod(method: IMethod) {
-        close();
-
-        if (method.authType === AuthType.TON) {
-            if (userFriendlyAddress) {
-                window.alreadyVisitedRefLink = true;
-                navigate(`/methods/${method.id}`);
-            } else {
-                setCache(Constants.AUTH_STATE_METHOD_KEY, method.id, 15).then(() => {
-                    tonOpen();
-                });
-            }
-        } else if (method.authType === AuthType.TG) {
-            if (user) {
-                window.alreadyVisitedRefLink = true;
-                navigate(`/methods/${method.id}`);
-            } else {
-                setCache(Constants.AUTH_STATE_METHOD_KEY, method.id, 15).then(() => {
-                    openAuth();
-                });
-            }
-        }
-    }
-
-    function getMethodsList(category: MethodCategory) {
-        return methods.filter((item) => item.categories.includes(category)).map(MethodRow);
-    }
-
-    function MethodRow(method: IMethod, key: number) {
-        return (
-            <div key={key} className={classes.link} onClick={() => openMethod(method)}>
-                <method.icon className={classes.linkIcon} stroke={1.5} />
-                <span>{method.name}</span>
-            </div>
-        );
-    }
-
-    function CategoryBlock(card: ICard, key: number) {
-        const color = getThemeColor(card.color, theme);
-        const cardStyle = {
-            backgroundColor: hexToRgba(theme.colors[card.color][9], 0.1)
-        };
-
-        return (
-            <UnstyledButton
-                key={key}
-                className={classes.item}
-                style={cardStyle}
-                onClick={() => {
-                    setSelectedCard(card);
-                    open();
-                }}
-            >
-                <card.icon size={32} color={color} stroke={1.2} />
-                <Text size="xs" mt={7}>
-                    {t(`menu.cards.${card.id}`)}
-                </Text>
-            </UnstyledButton>
-        );
-    }
-
-    if (needShowOnboarding) {
-        return (
-            <Onboarding
-                onOnboardingEnd={() => {
-                    setShowOnboarding(false);
-                    markOnboardingAsCompleted();
-                }}
-            />
-        );
-    }
-
-    function UserRow() {
-        if (!user) {
+    function AccountsRow() {
+        if (!user && !userFriendlyAddress) {
             return null;
         }
 
-        let usernames = '';
+        const avatars = [];
 
-        if (user.usernames) {
-            usernames = user.usernames.map(({ username }) => `@${username}`).join(', ');
-        } else if (user.username) {
-            usernames = `@${user.username}`;
+        if (user) {
+            avatars.push(<OwnerAvatar key="user" owner={user} size={28} />);
+        }
+
+        if (userFriendlyAddress) {
+            avatars.push(<Avatar key="wallet" size={28} src={TonLogo} />);
         }
 
         return (
-            <UnstyledButton
-                className={classes.user}
-                onClick={() => {
-                    popup
-                        .open({
-                            message: t('menu.account_disconnect'),
-                            buttons: [
-                                { id: 'exit', type: 'ok' },
-                                { id: 'cancel', type: 'cancel' }
-                            ]
-                        })
-                        .then(async (result) => {
-                            if (result === 'exit') {
-                                await CallAPI(new Api.auth.LogOut());
-
-                                await storage.delete(Constants.SESSION_KEY);
-                                setUser(null);
-                                navigate('/');
-
-                                localStorage.clear();
-                                markOnboardingAsCompleted();
-                                location.reload();
-                            }
-                        });
-                }}
+            <Tappable
+                onClick={() => setAccountsModalOpen(true)}
+                className={classes.avatarsBox}
+                interactiveAnimation="opacity"
             >
-                <Group>
-                    <OwnerAvatar owner={user} />
-
-                    <div style={{ flex: 1 }}>
-                        <Text size="sm" fw={500}>
-                            {user.firstName} {user.lastName}
-                        </Text>
-
-                        {usernames && (
-                            <Text c="dimmed" size="xs">
-                                {usernames}
-                            </Text>
-                        )}
-                    </div>
-
-                    <IconLogout size={16} stroke={1.5} />
-                </Group>
-            </UnstyledButton>
+                <AvatarStack>{avatars}</AvatarStack>
+            </Tappable>
         );
     }
 
-    function WalletRow() {
-        if (!walletAddress) {
-            return null;
+    function Content() {
+        if (searchText) {
+            const methods = getMethodsByName(searchText);
+
+            if (!methods.length) {
+                return <Placeholder description={t('menu.no_methods')} />;
+            }
+
+            return <Section className={classes.categories}>{methods.map(MethodRow)}</Section>;
         }
 
         return (
-            <UnstyledButton
-                className={classes.user}
-                onClick={() => {
-                    popup
-                        .open({
-                            message: t('menu.wallet_disconnect'),
-                            buttons: [
-                                { id: 'exit', type: 'ok' },
-                                { id: 'cancel', type: 'cancel' }
-                            ]
-                        })
-                        .then((result) => {
-                            if (result === 'exit') {
-                                wallet.disconnect();
+            <>
+                <Section className={classes.categories}>
+                    {cards.map((card, key) => (
+                        <Cell
+                            key={key}
+                            before={
+                                <Avatar size={40} style={{ backgroundColor: card.color }}>
+                                    <card.icon size={28} stroke={1.2} />
+                                </Avatar>
                             }
-                        });
-                }}
-            >
-                <Group>
-                    <IconWallet stroke={1} color="var(--mantine-color-blue-filled)" />
+                            description={t(`menu.cards.${card.id}_description`)}
+                            multiline={true}
+                            onClick={() => {
+                                navigate(`/methods/${card.id}`);
+                                wrapCallMAMethod(() => miniApp.setHeaderColor(card.color));
+                            }}
+                        >
+                            {t(`menu.cards.${card.id}`)}
+                        </Cell>
+                    ))}
+                </Section>
 
-                    <div style={{ flex: 1 }}>
-                        <Text size="sm" fw={500}>
-                            {walletAddress}
-                        </Text>
-                    </div>
+                <Section className={classes.categories}>
+                    <Link to={getDocLink('')} target="_blank" className={classes.link}>
+                        <Cell before={<IconBook2 size={28} stroke={1.2} />}>{t('menu.documentation')}</Cell>
+                    </Link>
+                    <Link to="https://t.me/tribute?start=sd1c" target="_blank" className={classes.link}>
+                        <Cell before={<IconPigMoney size={28} stroke={1.2} className={classes.donutIcon} />}>
+                            {t('menu.donate')}
+                        </Cell>
+                    </Link>
+                    <Link to="https://t.me/app42news" target="_blank" className={classes.link}>
+                        <Cell before={<IconNews size={28} stroke={1.2} />}>{t('menu.telegram_channel')}</Cell>
+                    </Link>
+                </Section>
 
-                    <IconLogout size={16} stroke={1.5} />
-                </Group>
-            </UnstyledButton>
+                <Blockquote>
+                    <div dangerouslySetInnerHTML={{ __html: getInfoTextWithLink() }}></div>
+                </Blockquote>
+            </>
         );
     }
 
     return (
         <>
-            <Modal.Root opened={isModalOpened} onClose={close}>
-                <Modal.Overlay />
-                <Modal.Content>
-                    <Modal.Header>
-                        <Modal.Title>{selectedCard && t(`menu.cards.${selectedCard.id}`)}</Modal.Title>
-                        <Modal.CloseButton />
-                    </Modal.Header>
-                    <Modal.Body className={classes.modalContent}>
-                        {selectedCard && getMethodsList(selectedCard.id)}
-                    </Modal.Body>
-                </Modal.Content>
-            </Modal.Root>
+            <div className={classes.headerBox}>
+                <div className={classes.searchBox}>
+                    <Input
+                        before={<IconSearch opacity={0.3} />}
+                        placeholder={t('menu.search_placeholder')}
+                        className={classes.searchInput}
+                        onChange={(e) => setSearchText(e.target.value)}
+                    />
+                </div>
 
-            <Modal
-                opened={isModalAuthOpened}
-                onClose={() => {
-                    removeCache(Constants.AUTH_STATE_METHOD_KEY);
-                    closeAuth();
-                }}
-                title={t('menu.auth_modal_title')}
-            >
-                <AuthPage
-                    onAuthComplete={() => {
-                        getCache(Constants.AUTH_STATE_METHOD_KEY).then((cacheMethodId) => {
-                            window.alreadyVisitedRefLink = true;
-                            navigate(`/methods/${cacheMethodId}`);
-                            removeCache(Constants.AUTH_STATE_METHOD_KEY);
-                        });
-                    }}
-                />
-            </Modal>
+                {AccountsRow()}
+            </div>
 
-            <Container p={5}>
-                {UserRow()}
-                {WalletRow()}
+            <Divider />
 
-                <SimpleGrid cols={2} m="xs">
-                    {cards.map(CategoryBlock)}
-                </SimpleGrid>
-
-                <UnstyledButton className={classes.link} component="a" href={getDocLink('')} target="_blank">
-                    <IconBook2 className={classes.linkIcon} stroke={1} />
-                    <span>{t('menu.documentation')}</span>
-                </UnstyledButton>
-
-                <UnstyledButton
-                    className={classes.link}
-                    component="a"
-                    href="https://t.me/tribute?start=sd1c"
-                    target="_blank"
-                >
-                    <IconPigMoney className={classNames(classes.linkIcon, classes.donutIcon)} stroke={1} />
-                    <span>{t('menu.donate')}</span>
-                </UnstyledButton>
-
-                <UnstyledButton className={classes.link} component="a" href="https://t.me/app42news" target="_blank">
-                    <Avatar size="sm" color="blue" radius="xl" mr="xs">
-                        <Logo size={14} />
-                    </Avatar>
-                    <span>{t('menu.telegram_channel')}</span>
-                </UnstyledButton>
-            </Container>
-
-            <Notification withCloseButton={false} m="xs" color="gray">
-                {t('beta')}
-                <Button fullWidth variant="outline" mt="xs" component="a" href="https://t.me/iamhro">
-                    {t('menu.developer')}
-                </Button>
-            </Notification>
+            <List style={{ padding: 16 }}>{Content()}</List>
         </>
     );
-};
-
-export default MenuPage;
+}

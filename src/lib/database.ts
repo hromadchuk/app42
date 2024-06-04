@@ -8,11 +8,11 @@ export interface ICacheData {
     data: CacheDataType;
 }
 
-export class Kit42Database extends Dexie {
+export class App42Database extends Dexie {
     cache!: Dexie.Table<ICacheData, string>;
 
     constructor() {
-        super('Kit42Database');
+        super('App42Database');
 
         this.version(1).stores({
             cache: 'key'

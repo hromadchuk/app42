@@ -1,11 +1,12 @@
-import { Avatar, Badge, Center, Divider, Group, Stack, Text } from '@mantine/core';
+import { Avatar, Blockquote, Caption, Cell, Section } from '@telegram-apps/telegram-ui';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import { useContext, useEffect, useState } from 'react';
 
-import { MethodContext } from '../contexts/MethodContext.tsx';
-import { formatNumberFloat } from '../lib/helpers.ts';
+import { classNames, formatNumberFloat } from '../lib/helpers.ts';
 import { getAppLangCode, LangType } from '../lib/lang.ts';
 import { TonApiCall } from '../lib/TonApi.ts';
+import { MethodContext } from '../contexts/MethodContext.tsx';
+import commonClasses from '../styles/Common.module.css';
 
 interface IJetton {
     name: string;
@@ -89,43 +90,77 @@ export default function TonJettonsAnalysis() {
     if (needHideContent()) return null;
 
     if (jettonsList.length) {
-        return jettonsList.map((jetton, key) => {
-            return (
-                <Stack gap={0} key={key}>
-                    <Group wrap="nowrap" justify="space-between">
-                        <Group wrap="nowrap">
-                            <Avatar src={jetton.image} radius="sm" />
-
-                            <div>
-                                <Text fw={500}>{jetton.name}</Text>
-                                <Text fz="xs" c="dimmed">
-                                    {jetton.formattedBalance} {jetton.symbol}
-                                </Text>
-                            </div>
-                        </Group>
-
-                        <Stack gap={0} align="end">
+        return jettonsList.map((jetton, key) => (
+            <Section className={classNames(commonClasses.sectionBox, commonClasses.showHr)} key={key}>
+                <Cell
+                    className={commonClasses.disabledCell}
+                    interactiveAnimation="opacity"
+                    before={<Avatar size={48} src={jetton.image} />}
+                    description={`${jetton.formattedBalance} ${jetton.symbol}`}
+                    style={{ borderLeft: jetton.holderPosition > -1 ? '3px solid var(--tgui--link_color)' : '' }}
+                    after={
+                        <div style={{ display: 'block', opacity: 0.5 }}>
                             {jetton.amounts.map((amount, amountKey) => (
-                                <Badge variant="transparent" color="blue" size="sm" key={amountKey}>
+                                <h6 key={amountKey} style={{ margin: 3, textAlign: 'right' }}>
                                     ~{amount}
-                                </Badge>
+                                </h6>
                             ))}
-                        </Stack>
-                    </Group>
+                        </div>
+                    }
+                >
+                    {jetton.name}
+                </Cell>
 
-                    {jetton.holderPosition > -1 && (
-                        <Center>
-                            <Badge variant="light" color="indigo" mt="xs">
-                                {mt('top_holders').replace('{position}', String(jetton.holderPosition + 1))}
-                            </Badge>
-                        </Center>
-                    )}
-
-                    {key < jettonsList.length - 1 && <Divider my="md" />}
-                </Stack>
-            );
-        });
+                {jetton.holderPosition > -1 && (
+                    <Blockquote
+                        style={{
+                            borderTopLeftRadius: 0,
+                            borderTopRightRadius: 0,
+                            textAlign: 'center',
+                            padding: 3
+                        }}
+                        topRightIcon={null}
+                    >
+                        <Caption>{mt('top_holders').replace('{position}', String(jetton.holderPosition + 1))}</Caption>
+                    </Blockquote>
+                )}
+            </Section>
+        ));
+        //     return jettonsList.map((jetton, key) => {
+        //         return (
+        //             <Stack gap={0} key={key}>
+        //                 <Group wrap="nowrap" justify="space-between">
+        //                     <Group wrap="nowrap">
+        //                         <Avatar src={jetton.image} radius="sm" />
+        //
+        //                         <div>
+        //                             <Text fw={500}>{jetton.name}</Text>
+        //                             <Text fz="xs" c="dimmed">
+        //                                 {jetton.formattedBalance} {jetton.symbol}
+        //                             </Text>
+        //                         </div>
+        //                     </Group>
+        //
+        //                     <Stack gap={0} align="end">
+        //                         {jetton.amounts.map((amount, amountKey) => (
+        //                             <Badge variant="transparent" color="blue" size="sm" key={amountKey}>
+        //                                 ~{amount}
+        //                             </Badge>
+        //                         ))}
+        //                     </Stack>
+        //                 </Group>
+        //
+        //                 {jetton.holderPosition > -1 && (
+        //                     <Center>
+        //                         <Badge variant="light" color="indigo" mt="xs">
+        //                             {mt('top_holders').replace('{position}', String(jetton.holderPosition + 1))}
+        //                         </Badge>
+        //                     </Center>
+        //                 )}
+        //
+        //                 {key < jettonsList.length - 1 && <Divider my="md" />}
+        //             </Stack>
+        //         );
+        //     });
     }
-
-    return null;
 }

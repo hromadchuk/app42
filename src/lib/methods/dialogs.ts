@@ -1,5 +1,5 @@
 import { Api } from 'telegram';
-import { CallAPI } from '../helpers.ts';
+import { CallAPI, isDev } from '../helpers.ts';
 import { TDialogWithoutUser } from '../../contexts/MethodContext.tsx';
 
 export async function getDialogMembers(dialog: TDialogWithoutUser): Promise<Api.User[]> {
@@ -34,6 +34,11 @@ export async function getDialogParticipants(
 }
 
 export async function kickMemberFromDialog(memberId: number, dialog: TDialogWithoutUser) {
+    if (isDev) {
+        console.log('kickMemberFromDialog', memberId, dialog);
+        return;
+    }
+
     if (dialog instanceof Api.Chat) {
         await CallAPI(
             new Api.messages.DeleteChatUser({

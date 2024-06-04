@@ -1,0 +1,17 @@
+.box {
+    text-align: center;
+}
+
+.content {
+    padding-bottom: 20px;
+}
+
+.animation {
+    width: 100px;
+    margin: 0 auto;
+}
+
+.text {
+    opacity: 0.8;
+    margin-top: 8px !important;
+}

@@ -1,15 +1,18 @@
-import { Button, Center, Divider, Flex, SimpleGrid, Stack, Text } from '@mantine/core';
-import { declineAndFormat } from '../lib/helpers.ts';
-import React, { useContext } from 'react';
-import { MethodContext } from '../contexts/MethodContext.tsx';
-import { DatePicker } from '@mantine/dates';
-import { getAppLangCode } from '../lib/lang.ts';
+import { Dispatch, SetStateAction, useContext } from 'react';
+import { Button, InlineButtons, Section } from '@telegram-apps/telegram-ui';
+import { SectionHeader } from '@telegram-apps/telegram-ui/dist/components/Blocks/Section/components/SectionHeader/SectionHeader';
+import { InlineButtonsItem } from '@telegram-apps/telegram-ui/dist/components/Blocks/InlineButtons/components/InlineButtonsItem/InlineButtonsItem';
+import { formatNumber } from '../lib/helpers.ts';
 import { IPeriodData, TPeriodType } from '../lib/methods/messages.ts';
+
+import { MethodContext } from '../contexts/MethodContext.tsx';
+import commonClasses from '../styles/Common.module.css';
+import { DateSelector } from './DateSelector.tsx';
 
 interface IStatsPeriodPickerProps {
     statsPeriod: TPeriodType;
     statsPeriods: IPeriodData[];
-    setStatsPeriod: React.Dispatch<React.SetStateAction<TPeriodType>>;
+    setStatsPeriod: Dispatch<SetStateAction<TPeriodType>>;
     calcStatistic: () => {};
 }
 
@@ -19,7 +22,7 @@ export function StatsPeriodPicker({
     setStatsPeriod,
     calcStatistic
 }: IStatsPeriodPickerProps) {
-    const { mt, md } = useContext(MethodContext);
+    const { mt } = useContext(MethodContext);
 
     function setDatePeriod(period: IPeriodData) {
         setStatsPeriod([new Date(period.periodDate * 1000), new Date()]);
@@ -27,51 +30,51 @@ export function StatsPeriodPicker({
 
     function getButtons(list: IPeriodData[]) {
         return list.map((period, key) => (
-            <Button
-                size="md"
-                fullWidth
-                variant="default"
+            <InlineButtonsItem
                 key={key}
-                disabled={period.disabled}
+                mode="bezeled"
+                text={`${period.circa ? '~' : ''}${formatNumber(period.count)}`}
+                disabled={period.count === 0}
                 onClick={() => setDatePeriod(period)}
+                style={{
+                    flex: '1 0 100px'
+                }}
             >
-                <Stack gap={0} align="center">
-                    <Text size="sm">{mt(`periods.${period.period}`)}</Text>
-                    <Text c="dimmed" size="xs">
-                        {period.circa ? '~' : ''}
-                        {declineAndFormat(period.count, md('decline.stats'))}
-                    </Text>
-                </Stack>
-            </Button>
+                {mt(`periods.${period.period}`)}
+            </InlineButtonsItem>
         ));
     }
 
     return (
-        <>
-            <Divider my="xs" label={mt('headers.period')} labelPosition="center" mb={0} />
-            <Flex direction="column" gap="xl">
-                <Center>
-                    <DatePicker type="range" value={statsPeriod} onChange={setStatsPeriod} locale={getAppLangCode()} />
-                </Center>
+        <Section className={commonClasses.sectionBox}>
+            <SectionHeader style={{ paddingLeft: 10 }}>{mt('headers.period')}</SectionHeader>
 
-                <Flex direction="column" gap="xs">
-                    <Button
-                        size="md"
-                        fullWidth
-                        component="button"
-                        disabled={!statsPeriod.filter((period) => period !== null).length}
-                        onClick={() => calcStatistic()}
-                    >
-                        {mt('get_stats')}
-                    </Button>
+            <DateSelector dates={statsPeriod} onChange={setStatsPeriod} />
 
-                    {getButtons(statsPeriods.slice(statsPeriods.length - 1))}
+            <Button
+                mode="filled"
+                size="m"
+                stretched
+                disabled={!statsPeriod.filter((period) => period !== null).length}
+                onClick={() => calcStatistic()}
+                style={{
+                    margin: '10px 0'
+                }}
+            >
+                {mt('get_stats')}
+            </Button>
 
-                    <SimpleGrid cols={2} spacing="xs" verticalSpacing="xs">
-                        {getButtons(statsPeriods.slice(0, statsPeriods.length - 1))}
-                    </SimpleGrid>
-                </Flex>
-            </Flex>
-        </>
+            <InlineButtons
+                style={{
+                    display: 'flex',
+                    gap: 12,
+                    width: 'fit-content',
+                    flexWrap: 'wrap',
+                    marginBottom: 10
+                }}
+            >
+                {getButtons(statsPeriods)}
+            </InlineButtons>
+        </Section>
     );
 }

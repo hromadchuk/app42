@@ -1,15 +1,20 @@
 import { useContext, useEffect, useState } from 'react';
+import { Cell, Section } from '@telegram-apps/telegram-ui';
 import { IconEye, IconHeart, IconMapPin, IconPhoto, IconThumbUp, IconVideo } from '@tabler/icons-react';
 import { Api } from 'telegram';
 import { ActivityChart } from '../components/charts/Activity.tsx';
 import { CalculateActivityTime } from '../components/charts/chart_helpers.ts';
-import { InfoRow } from '../components/InfoRow.tsx';
+import { Padding } from '../components/Helpers.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
 
-import { MethodContext } from '../contexts/MethodContext.tsx';
-import { CallAPI } from '../lib/helpers.ts';
-import { StoriesCarousel } from '../components/StoriesCarousel.tsx';
+import { CallAPI, classNames } from '../lib/helpers.ts';
+import { StoryCard } from '../components/StoryCard.tsx';
 import { ReactionsList } from '../components/ReactionsList.tsx';
+
+import { AppContext } from '../contexts/AppContext.tsx';
+import { MethodContext } from '../contexts/MethodContext.tsx';
+
+import commonClasses from '../styles/Common.module.css';
 
 enum ETabId {
     views = 'views',
@@ -56,6 +61,7 @@ interface IStatResult {
 }
 
 export default function CallsStat() {
+    const { user } = useContext(AppContext);
     const { mt, needHideContent, setFinishBlock, setProgress } = useContext(MethodContext);
 
     const [stat, setStat] = useState<IStatResult | null>(null);
@@ -300,7 +306,20 @@ export default function CallsStat() {
 
         const topStories = stat.tops[selectedTab];
 
-        return <StoriesCarousel storiesStats={topStories} />;
+        return (
+            <div className={commonClasses.scroll}>
+                {topStories.map((storyTop, key) =>
+                    StoryCard({
+                        story: storyTop.story,
+                        actionCount: storyTop.count,
+                        peer: user,
+                        key: selectedTab + key
+                    })
+                )}
+            </div>
+        );
+
+        // return <StoriesCarousel storiesStats={topStories} />;
     }
 
     if (needHideContent()) return null;
@@ -330,25 +349,37 @@ export default function CallsStat() {
         tabsList.push(...emojiTabs);
 
         return (
-            <>
-                <InfoRow title={mt('counts.photos')} count={stat.counts.photos} icon={IconPhoto} />
-                <InfoRow title={mt('counts.videos')} count={stat.counts.videos} icon={IconVideo} />
-                <InfoRow title={mt('counts.views')} count={stat.counts.views} icon={IconEye} />
-                <InfoRow title={mt('counts.reactions')} count={stat.counts.reactions} icon={IconHeart} />
-                <InfoRow title={mt('counts.geo_media_areas')} count={stat.counts.geoMediaAreas} icon={IconMapPin} />
-                <InfoRow
-                    title={mt('counts.reaction_media_areas')}
-                    count={stat.counts.reactionMediaAreas}
-                    icon={IconThumbUp}
-                />
-                <ReactionsList reactions={stat.reactions?.total} />
-                <ActivityChart data={stat.activity} />
+            <Section className={classNames(commonClasses.sectionBox, commonClasses.showHr)}>
+                <Cell before={<IconPhoto />} after={stat.counts.photos}>
+                    {mt('counts.photos')}
+                </Cell>
+                <Cell before={<IconVideo />} after={stat.counts.videos}>
+                    {mt('counts.videos')}
+                </Cell>
+                <Cell before={<IconEye />} after={stat.counts.views}>
+                    {mt('counts.views')}
+                </Cell>
+                <Cell before={<IconHeart />} after={stat.counts.reactions}>
+                    {mt('counts.reactions')}
+                </Cell>
+                <Cell before={<IconMapPin />} after={stat.counts.geoMediaAreas}>
+                    {mt('counts.geo_media_areas')}
+                </Cell>
+                <Cell before={<IconThumbUp />} after={stat.counts.reactionMediaAreas}>
+                    {mt('counts.reaction_media_areas')}
+                </Cell>
+
+                <Padding>
+                    <ReactionsList reactions={stat.reactions?.total} />
+                </Padding>
+
+                <Padding>
+                    <ActivityChart data={stat.activity} />
+                </Padding>
 
                 <TabsList tabs={tabsList} onChange={(tabId) => setSelectedTab(tabId as ETabId)} />
                 <TopStoriesContent />
-            </>
+            </Section>
         );
     }
-
-    return null;
 }

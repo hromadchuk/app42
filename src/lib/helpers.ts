@@ -1,14 +1,16 @@
 import { Buffer } from 'buffer';
 import { AES, enc } from 'crypto-js';
+import { createElement } from 'react';
 import { HttpClient, Api as TonApiSDK } from 'tonapi-sdk-js';
-import { notifications } from '@mantine/notifications';
 import { Api } from 'telegram';
+import { Spinner } from '@telegram-apps/telegram-ui';
+import { IconCircleCheck, IconExclamationCircle } from '@tabler/icons-react';
 import { FloodWaitError } from 'telegram/errors';
 import { AbortRequestError } from '../errors/AbortRequestError.ts';
 import { getCache, setCache } from './cache.ts';
-import { getHideUser, isHideMode } from './hide.ts';
 import { getAppLangCode, LangType, t, td } from './lang';
 import { ServerMock } from './mock.ts';
+import { ISnackbarOptions } from '../contexts/AppContext.tsx';
 
 export type TOwnerInfo = null | Api.TypeUser | Api.TypeChat;
 type TDocumentThumb = Api.TypeDocument | Api.TypePhoto | Api.UserProfilePhoto | Api.ChatPhoto | undefined;
@@ -35,6 +37,8 @@ interface IUser {
     photo_url: string;
     username: string;
 }
+
+export type TOwnerType = Api.User | Api.Chat | Api.Channel;
 
 export function getParams() {
     return new URLSearchParams(location.hash.slice(1));
@@ -294,20 +298,6 @@ export async function CallAPI<R extends Api.AnyRequest>(
         console.log('Result:', result);
         console.groupEnd();
 
-        if (isHideMode && Object.prototype.hasOwnProperty.call(result, 'users')) {
-            // @ts-ignore super cringe code
-            for (const user of result.users) {
-                if (user instanceof Api.User) {
-                    const hideUser = await getHideUser(user.id.valueOf());
-
-                    const [firstName, lastName] = (hideUser.name as string).split(' ');
-
-                    user.firstName = firstName;
-                    user.lastName = lastName || '';
-                }
-            }
-        }
-
         return result;
     } catch (error: unknown) {
         console.group(`API.${method}`);
@@ -337,24 +327,26 @@ function getFloodWaitErrorMessage(seconds: number): string {
 async function handleFloodWaitError(error: FloodWaitError, request: Api.AnyRequest, options?: ICallApiOptions) {
     const totalWaitSeconds = error.seconds + 1; // +1 for safety
 
-    const id = notifications.show({
-        loading: true,
+    const snackbarParams: ISnackbarOptions = {
+        title: t('common.errors.api_error'),
         message: getFloodWaitErrorMessage(totalWaitSeconds),
-        autoClose: false,
-        withCloseButton: false
-    });
+        icon: createElement(Spinner, { size: 's' }),
+        type: 'loading',
+        duration: 1e9
+    };
+
+    window.showSnackbar(snackbarParams);
 
     let secondsToRetry = totalWaitSeconds;
     const updatedInterval = setInterval(() => {
         secondsToRetry -= 1;
         if (secondsToRetry <= 0) {
-            notifications.hide(id);
+            window.hideSnackbar();
             clearInterval(updatedInterval);
         } else {
-            notifications.update({
-                id,
-                message: getFloodWaitErrorMessage(secondsToRetry),
-                loading: true
+            window.showSnackbar({
+                ...snackbarParams,
+                message: getFloodWaitErrorMessage(secondsToRetry)
             });
         }
     }, 1000);
@@ -382,21 +374,27 @@ export function classNames(...classes: (string | object)[]): string {
     return list.join(' ');
 }
 
-export function notifySuccess({ title, message }: { title?: string; message?: string } = {}) {
-    notifications.show({
-        color: 'green',
+export function notifySuccess({ title, message }: { title: string; message: string }) {
+    window.showSnackbar({
         title,
         message,
-        autoClose: true
+        type: 'success',
+        icon: createElement(IconCircleCheck, { size: 24, stroke: 1.2, color: 'var(--tgui--green)' }),
+        duration: 3000
     });
 }
 
-export function notifyError({ title, message }: { title?: string; message?: string } = {}) {
-    notifications.show({
-        color: 'red',
+export function notifyError({ title, message }: { title?: string; message: string }) {
+    window.showSnackbar({
         title,
         message,
-        autoClose: false
+        type: 'error',
+        icon: createElement(IconExclamationCircle, {
+            size: 24,
+            stroke: 1.2,
+            color: 'var(--tg-theme-destructive-text-color)'
+        }),
+        duration: 30000
     });
 }
 
@@ -460,13 +458,6 @@ export async function Server<T>(method: string, params: object = {}): Promise<T>
 }
 
 export async function getAvatar(owner: Api.User | Api.Channel | Api.Chat): Promise<string | null> {
-    if (isHideMode) {
-        const hideUser = await getHideUser(owner.id.valueOf());
-        if (hideUser.photo) {
-            return hideUser.photo;
-        }
-    }
-
     const userPhoto = owner.photo as Api.UserProfilePhoto;
     const cacheKey = `owner-avatar-${userPhoto?.photoId}`;
     const cache = await getCache(cacheKey);
@@ -590,7 +581,45 @@ export function encodeString(string: string, key: string) {
 }
 
 export function decodeString(encodedString: string, key: string) {
-    return AES.decrypt(encodedString, key).toString(enc.Utf8);
+    try {
+        return AES.decrypt(encodedString, key).toString(enc.Utf8);
+    } catch (error) {
+        console.error('decodeString error', error);
+    }
+
+    return '';
 }
 
-export type TOwnerType = Api.User | Api.Chat | Api.Channel;
+export async function wrapCallMAMethod<T>(func: Function) {
+    try {
+        return (await func()) as T;
+    } catch (error) {
+        console.log('wrapCallMAMethod error', error?.toString());
+    }
+
+    return null;
+}
+
+export function rgbToHex(nr: number, ng: number, nb: number): string {
+    return '#' + ((1 << 24) + (nr << 16) + (ng << 8) + nb).toString(16).slice(1);
+}
+
+export function generateColorGradation(hex: string, steps: number): string[] {
+    const bigint = parseInt(hex.slice(1), 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+
+    const gradation: string[] = [];
+
+    for (let i = 0; i < steps; i++) {
+        const ratio = i / (steps - 1);
+        const newR = Math.round(r + (255 - r) * ratio);
+        const newG = Math.round(g + (255 - g) * ratio);
+        const newB = Math.round(b + (255 - b) * ratio);
+
+        gradation.unshift(rgbToHex(newR, newG, newB));
+    }
+
+    return gradation;
+}

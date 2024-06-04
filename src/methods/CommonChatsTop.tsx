@@ -1,11 +1,13 @@
-import { JSX, useContext, useEffect, useState } from 'react';
-import { Divider, Modal } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { useContext, useEffect, useState } from 'react';
+import { Modal, Section } from '@telegram-apps/telegram-ui';
+import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
 import { Api } from 'telegram';
-
-import { CallAPI, declineAndFormat } from '../lib/helpers.ts';
-import { MethodContext } from '../contexts/MethodContext.tsx';
+import { CallAPI, classNames, declineAndFormat } from '../lib/helpers.ts';
 import { OwnerRow } from '../components/OwnerRow.tsx';
+
+import { MethodContext } from '../contexts/MethodContext.tsx';
+
+import commonClasses from '../styles/Common.module.css';
 
 interface ICommonChats {
     chats: Api.TypeChat[];
@@ -17,13 +19,11 @@ interface IUserData {
     commonChats: ICommonChats;
 }
 
-export default function CommonChatsTop(): JSX.Element | null {
+export default function CommonChatsTop() {
     const { mt, md, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
 
-    const [isModalOpened, { open, close }] = useDisclosure(false);
-    const [modalChats, setModalChats] = useState<Api.TypeChat[]>([]);
-    const [modalContact, setModalContact] = useState<Api.User | null>(null);
     const [usersData, setUsersData] = useState<IUserData[]>([]);
+    const [selectedUser, setSelectedUser] = useState<IUserData | null>(null);
 
     useEffect(() => {
         getContacts();
@@ -80,17 +80,11 @@ export default function CommonChatsTop(): JSX.Element | null {
         return result.chats;
     }
 
-    function openModal(owner: IUserData): void {
-        setModalContact(owner.user);
-        setModalChats(owner.commonChats.chats);
-        open();
-    }
-
     function SectionBlock() {
         return usersData.map((owner, key) => (
             <OwnerRow
                 key={key}
-                callback={() => openModal(owner)}
+                callback={() => setSelectedUser(owner)}
                 owner={owner.user}
                 description={declineAndFormat(owner.commonChats.count, md('decline.chats'))}
             />
@@ -100,27 +94,34 @@ export default function CommonChatsTop(): JSX.Element | null {
     if (needHideContent()) return null;
 
     return (
-        <>
-            <Modal opened={isModalOpened} onClose={close} title={mt('modal_title')}>
-                <OwnerRow owner={modalContact} />
-                <Divider my="sm" />
-
-                {modalChats.map((chat, key) => {
-                    const membersCount = Number(
-                        (chat instanceof Api.Channel || chat instanceof Api.Chat) && chat.participantsCount
-                    );
-
-                    return (
-                        <OwnerRow
-                            key={key}
-                            owner={chat}
-                            description={declineAndFormat(membersCount, md('decline.members'))}
-                        />
-                    );
-                })}
-            </Modal>
-
+        <Section className={classNames(commonClasses.sectionBox, commonClasses.showHr)}>
             <SectionBlock />
-        </>
+
+            {usersData && (
+                <Modal
+                    header={<ModalHeader />}
+                    open={Boolean(selectedUser)}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            setSelectedUser(null);
+                        }
+                    }}
+                >
+                    {selectedUser?.commonChats.chats.map((chat, key) => {
+                        const membersCount = Number(
+                            (chat instanceof Api.Channel || chat instanceof Api.Chat) && chat.participantsCount
+                        );
+
+                        return (
+                            <OwnerRow
+                                key={key}
+                                owner={chat}
+                                description={declineAndFormat(membersCount, md('decline.members'))}
+                            />
+                        );
+                    })}
+                </Modal>
+            )}
+        </Section>
     );
 }

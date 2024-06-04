@@ -1,15 +1,20 @@
 import { useEffect, useState } from 'react';
-import { useIntersection } from '@mantine/hooks';
+import { Avatar } from '@telegram-apps/telegram-ui';
 import { Api } from 'telegram';
+import { useIntersection } from '../hooks/useIntersection.ts';
 import { getAvatar, getDocumentThumb, TOwnerInfo } from '../lib/helpers.ts';
-import { ExAvatar } from './ExAvatar.tsx';
 
 interface IOwnerAvatar {
     owner: TOwnerInfo;
+    size: 20 | 24 | 28 | 40 | 48 | 96;
 }
 
-export function OwnerAvatar({ owner }: IOwnerAvatar) {
-    const { ref, entry } = useIntersection();
+export function OwnerAvatar({ owner, size }: IOwnerAvatar) {
+    const [ref, entry] = useIntersection({
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1
+    });
     const [alreadyRequested, setAlreadyRequested] = useState<boolean>(false);
     const [userAvatar, setUserAvatar] = useState<null | string>(null);
 
@@ -53,13 +58,10 @@ export function OwnerAvatar({ owner }: IOwnerAvatar) {
         }
     }
 
-    if (userAvatar) {
-        return <ExAvatar src={userAvatar} radius="xl" />;
-    }
-
     return (
-        <div ref={ref}>
-            <ExAvatar id={Number(owner?.id.valueOf())} letters={name} />
+        // @ts-ignore
+        <div ref={ref} style={{ boxShadow: 'none' }}>
+            <Avatar acronym={name} size={size} src={userAvatar || ''} />
         </div>
     );
 }

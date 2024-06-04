@@ -1,13 +1,15 @@
+import { IconUser } from '@tabler/icons-react';
+import { Button, Cell, Multiselectable, Radio, Section } from '@telegram-apps/telegram-ui';
 import { Dispatch, SetStateAction, useContext, useState } from 'react';
-import { Button, Flex, Radio } from '@mantine/core';
 import { Api } from 'telegram';
+import { Padding } from '../components/Helpers.tsx';
 import { formatNumber, notifyError, TOwnerType } from '../lib/helpers.ts';
 
 import { MethodContext, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { getDialogParticipants, kickMemberFromDialog } from '../lib/methods/dialogs.ts';
 import { calculatePeriodTimestamp } from '../lib/methods/messages.ts';
-import { CheckboxCard } from '../components/CheckboxCard.tsx';
+import commonClasses from '../styles/Common.module.css';
 
 interface IRemovableCheckboxProps {
     checked: boolean;
@@ -151,16 +153,20 @@ export default function ClearDialogMembers() {
 
     function RemovableCheckbox({ checked, members, text, onChange }: IRemovableCheckboxProps) {
         return (
-            <Flex mb={5}>
-                <CheckboxCard
-                    size="md"
-                    checked={checked}
-                    title={`${mt(text)} (${formatNumber(Number(members?.length))})`}
-                    disabled={members?.length === 0}
-                    setChecked={(isChecked) => onChange(isChecked)}
-                    isHorizontal={true}
-                />
-            </Flex>
+            <Cell
+                Component="label"
+                before={<IconUser />}
+                after={
+                    <Multiselectable
+                        // disabled={members?.length === 0}
+                        defaultChecked={checked}
+                        onChange={(e) => onChange(e.target.checked)}
+                    />
+                }
+                // disabled={members?.length === 0}
+            >
+                {`${mt(text)} (${formatNumber(Number(members?.length))})`}
+            </Cell>
         );
     }
 
@@ -168,24 +174,26 @@ export default function ClearDialogMembers() {
 
     if (!selectedDialog) {
         return (
-            <SelectDialog
-                allowTypes={[EOwnerType.chat, EOwnerType.supergroup, EOwnerType.channel]}
-                isOnlyWithKickPermissions={true}
-                onOwnerSelect={async (owner: TOwnerType) => {
-                    if (owner instanceof Api.User) {
-                        return;
-                    }
+            <Section className={commonClasses.sectionBox}>
+                <SelectDialog
+                    allowTypes={[EOwnerType.chat, EOwnerType.supergroup, EOwnerType.channel]}
+                    isOnlyWithKickPermissions={true}
+                    onOwnerSelect={async (owner: TOwnerType) => {
+                        if (owner instanceof Api.User) {
+                            return;
+                        }
 
-                    setSelectedDialog(owner);
-                    await onDialogSelect(owner);
-                }}
-            />
+                        setSelectedDialog(owner);
+                        await onDialogSelect(owner);
+                    }}
+                />
+            </Section>
         );
     }
 
     if (dialogMembers) {
         return (
-            <>
+            <Section className={commonClasses.sectionBox}>
                 <RemovableCheckbox
                     checked={needRemoveBots}
                     members={getBots()}
@@ -207,28 +215,23 @@ export default function ClearDialogMembers() {
                     onChange={setNeedRemoveNotBeenForLongTime}
                 />
 
-                {needRemoveNotBeenForLongTime && (
-                    <Radio.Group
-                        value={String(countOfOfflineDaysToRemove)}
-                        onChange={(value) => setCountOfOfflineDaysToRemove(Number(value))}
-                        withAsterisk
-                    >
-                        <Flex mt="xs" direction="column" gap={10} mb={20}>
-                            {offlineDays.map((period, index) => (
-                                <Radio
-                                    key={period}
-                                    checked={index === 0}
-                                    value={String(period)}
-                                    disabled={getNotBeenForLongTime(period)?.length === 0}
-                                    label={
-                                        mt('radio_offline_for').replace('{days}', mt(`periods.${period}`)) +
-                                        ` (${formatNumber(Number(getNotBeenForLongTime(period)?.length))})`
-                                    }
-                                />
-                            ))}
-                        </Flex>
-                    </Radio.Group>
-                )}
+                {needRemoveNotBeenForLongTime &&
+                    offlineDays.map((period, key) => (
+                        <Cell
+                            key={key}
+                            Component="label"
+                            before={
+                                <Radio name="radio" value="1" disabled={getNotBeenForLongTime(period)?.length === 0} />
+                            }
+                            disabled={getNotBeenForLongTime(period)?.length === 0}
+                            onClick={() =>
+                                getNotBeenForLongTime(period)?.length && setCountOfOfflineDaysToRemove(period)
+                            }
+                        >
+                            {mt('radio_offline_for').replace('{days}', mt(`periods.${period}`)) +
+                                ` (${formatNumber(Number(getNotBeenForLongTime(period)?.length))})`}
+                        </Cell>
+                    ))}
 
                 <RemovableCheckbox
                     checked={needRemoveClosedOnline}
@@ -251,26 +254,25 @@ export default function ClearDialogMembers() {
                     onChange={setNeedRemoveWithoutAvatar}
                 />
 
-                <Button
-                    fullWidth
-                    variant="outline"
-                    mt="xs"
-                    disabled={
-                        dialogMembers.length === 0 ||
-                        (!needRemoveClosedOnline &&
-                            !needRemoveBots &&
-                            !needRemoveNotContact &&
-                            !needRemoveNotBeenForLongTime &&
-                            !needRemoveNotPremium &&
-                            !needRemoveWithoutAvatar)
-                    }
-                    onClick={clearDialogMembers}
-                >
-                    {mt('button_clear_preview')}
-                </Button>
-            </>
+                <Padding>
+                    <Button
+                        stretched
+                        mode="filled"
+                        disabled={
+                            dialogMembers.length === 0 ||
+                            (!needRemoveClosedOnline &&
+                                !needRemoveBots &&
+                                !needRemoveNotContact &&
+                                !needRemoveNotBeenForLongTime &&
+                                !needRemoveNotPremium &&
+                                !needRemoveWithoutAvatar)
+                        }
+                        onClick={clearDialogMembers}
+                    >
+                        {mt('button_clear_preview')}
+                    </Button>
+                </Padding>
+            </Section>
         );
     }
-
-    return null;
 }

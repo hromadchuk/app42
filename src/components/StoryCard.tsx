@@ -1,14 +1,16 @@
-import { Container, Flex, Text, UnstyledButton } from '@mantine/core';
+import { useEffect, useState } from 'react';
 import { Api } from 'telegram';
-import { classNames } from '../lib/helpers.ts';
-import { StoryImage } from './StoryImage.tsx';
+import { Caption, Image } from '@telegram-apps/telegram-ui';
+import { useIntersection } from '../hooks/useIntersection.ts';
+import { formatNumber, getDocumentThumb, getMediaPhoto, getMediaVideoPreview, TOwnerType } from '../lib/helpers.ts';
 
-import classes from '../styles/OwnerRow.module.css';
+import classes from '../styles/StoryCard.module.css';
 
 interface IStoriesCarousel {
     story: Api.StoryItem;
     actionCount: number;
-    peer?: string | null;
+    key: string;
+    peer?: TOwnerType | null;
 }
 
 interface ILinkProps {
@@ -18,7 +20,38 @@ interface ILinkProps {
     component: 'a' | 'button';
 }
 
-export function StoryCard({ story, actionCount, peer }: IStoriesCarousel) {
+export function StoryCard({ story, actionCount, key, peer }: IStoriesCarousel) {
+    const [ref, entry] = useIntersection({
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1
+    });
+    const [alreadyRequested, setAlreadyRequested] = useState<boolean>(false);
+    const [mediaPhoto, setMediaPhoto] = useState<null | string>(null);
+
+    let storyMediaDocument: Api.TypePhoto | Api.TypeDocument | undefined = undefined;
+    if (story.media instanceof Api.MessageMediaPhoto) {
+        storyMediaDocument = story.media.photo;
+    } else if (story.media instanceof Api.MessageMediaDocument) {
+        storyMediaDocument = story.media.document;
+    }
+
+    useEffect(() => {
+        if (storyMediaDocument && entry?.isIntersecting && !alreadyRequested) {
+            setAlreadyRequested(true);
+
+            if (storyMediaDocument instanceof Api.Photo) {
+                getMediaPhoto(storyMediaDocument).then((photoBase64) => {
+                    setMediaPhoto(photoBase64);
+                });
+            } else if (storyMediaDocument instanceof Api.Document) {
+                getMediaVideoPreview(storyMediaDocument).then((photoBase64) => {
+                    setMediaPhoto(photoBase64);
+                });
+            }
+        }
+    }, [entry?.isIntersecting]);
+
     const linkProps: ILinkProps = { component: 'button' };
 
     if (peer) {
@@ -28,32 +61,19 @@ export function StoryCard({ story, actionCount, peer }: IStoriesCarousel) {
         linkProps.target = '_blank';
     }
 
-    let storyMediaDocument = undefined;
-    if (story.media instanceof Api.MessageMediaPhoto) {
-        storyMediaDocument = story.media.photo;
-    } else if (story.media instanceof Api.MessageMediaDocument) {
-        storyMediaDocument = story.media.document;
+    function ImageRow() {
+        if (mediaPhoto) {
+            return <Image className={classes.card} src={mediaPhoto} />;
+        }
+
+        return <Image className={classes.card} src={getDocumentThumb(storyMediaDocument)} />;
     }
 
-    const Row = (
-        <Flex
-            gap="md"
-            p={5}
-            justify="flex-start"
-            align="center"
-            direction="column"
-            wrap="wrap"
-            className={classNames({ [classes.row]: 'a' })}
-        >
-            <StoryImage storyDocument={storyMediaDocument} />
-
-            <Text>{actionCount}</Text>
-        </Flex>
-    );
-
     return (
-        <UnstyledButton {...linkProps}>
-            <Container p={0}>{Row}</Container>
-        </UnstyledButton>
+        // @ts-ignore
+        <div ref={ref} key={key}>
+            {ImageRow()}
+            <Caption className={classes.caption}>{formatNumber(actionCount)}</Caption>
+        </div>
     );
 }

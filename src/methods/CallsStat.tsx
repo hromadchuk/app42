@@ -1,19 +1,22 @@
-import { useDisclosure } from '@mantine/hooks';
 import { useContext, useEffect, useState } from 'react';
-import { Divider, Modal } from '@mantine/core';
+import { Button, Cell, Modal, Section } from '@telegram-apps/telegram-ui';
+import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
 import { IconClock, IconClockUp, IconPhone, IconUsers } from '@tabler/icons-react';
 import { Api } from 'telegram';
 import { ActivityChart } from '../components/charts/Activity.tsx';
 import { CalculateActivityTime } from '../components/charts/chart_helpers.ts';
-import { InfoRow } from '../components/InfoRow.tsx';
-import { ShareButtons, ShareType } from '../components/Share.tsx';
+import { Padding } from '../components/Helpers.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
 import { ICallStatImagesOptions } from '../images_generator/CallStatImagesGenerator.ts';
-import { CallAPI, declineAndFormat, getShortTextTime, getTextTime } from '../lib/helpers.ts';
+import { CallAPI, classNames, declineAndFormat, getShortTextTime, getTextTime } from '../lib/helpers.ts';
+import { OwnerRow } from '../components/OwnerRow.tsx';
+import { t } from '../lib/lang.ts';
+import { canShare, ShareType } from '../modals/ShareModal.tsx';
 
 import { AppContext } from '../contexts/AppContext.tsx';
 import { MethodContext } from '../contexts/MethodContext.tsx';
-import { OwnerRow } from '../components/OwnerRow.tsx';
+
+import commonClasses from '../styles/Common.module.css';
 
 enum ETabId {
     calls = 'calls',
@@ -48,10 +51,10 @@ interface IStatResult {
 }
 
 export default function CallsStat() {
-    const { user: appUser } = useContext(AppContext);
+    const { user: appUser, showShareModal } = useContext(AppContext);
     const { mt, md, needHideContent, setFinishBlock, setProgress } = useContext(MethodContext);
 
-    const [isModalOpened, { open, close }] = useDisclosure(false);
+    // const [isModalOpened, { open, close }] = useDisclosure(false);
     const [stat, setStat] = useState<IStatResult | null>(null);
     const [modalData, setModalData] = useState<IUserTop | null>(null);
     const [shareData, setShareData] = useState<ICallStatImagesOptions | null>(null);
@@ -184,16 +187,20 @@ export default function CallsStat() {
                 }
             };
 
-            setShareData({
-                title: mt('sharing.title'),
-                totalDurationCount: getShortTextTime(totalDuration, 3),
-                totalDurationLabel: mt('sharing.total_duration'),
-                callsCount: totalCalls,
-                callsLabel: mt('sharing.total_calls'),
-                participantsCount: users.size,
-                participantsLabel: mt('sharing.participants'),
-                maxDurationCount: getShortTextTime(maxDuration, 3),
-                maxDurationLabel: mt('sharing.max_duration')
+            canShare(appUser as Api.User).then((share) => {
+                if (share.canPost) {
+                    setShareData({
+                        title: mt('sharing.title'),
+                        totalDurationCount: getShortTextTime(totalDuration, 3),
+                        totalDurationLabel: mt('sharing.total_duration'),
+                        callsCount: totalCalls,
+                        callsLabel: mt('sharing.total_calls'),
+                        participantsCount: users.size,
+                        participantsLabel: mt('sharing.participants'),
+                        maxDurationCount: getShortTextTime(maxDuration, 3),
+                        maxDurationLabel: mt('sharing.max_duration')
+                    });
+                }
             });
 
             setStat(result);
@@ -223,10 +230,7 @@ export default function CallsStat() {
                 key={selectedTab + key}
                 owner={row.user}
                 description={getDescription(row)}
-                callback={() => {
-                    setModalData(row);
-                    open();
-                }}
+                callback={() => setModalData(row)}
             />
         ));
     }
@@ -254,50 +258,77 @@ export default function CallsStat() {
     if (stat) {
         return (
             <>
-                <Modal opened={isModalOpened} onClose={close} title={mt('modal_title')}>
-                    {modalData && (
-                        <>
-                            <OwnerRow owner={modalData.user as Api.User} />
-                            <Divider my="sm" />
-                            <InfoRow title={mt('counts.calls')} count={modalData.calls} icon={IconPhone} />
-                            <InfoRow
-                                title={mt('counts.duration')}
-                                description={getTextTime(modalData.duration)}
-                                icon={IconClock}
-                            />
-                            <InfoRow
-                                title={mt('counts.max_duration')}
-                                description={getTextTime(modalData.maxDuration)}
-                                icon={IconClockUp}
-                            />
-                            <Divider my="sm" />
-                            <ActivityChart data={modalData.time} />
-                        </>
+                <Section className={classNames(commonClasses.sectionBox, commonClasses.showHr)}>
+                    <Cell before={<IconPhone />} after={stat.counts.calls}>
+                        {mt('counts.calls')}
+                    </Cell>
+                    <Cell before={<IconUsers />} after={stat.counts.participants}>
+                        {mt('counts.participants')}
+                    </Cell>
+                    <Cell before={<IconClock />} description={getTextTime(stat.counts.duration)}>
+                        {mt('counts.duration')}
+                    </Cell>
+                    <Cell before={<IconClockUp />} description={getTextTime(stat.counts.maxDuration)}>
+                        {mt('counts.max_duration')}
+                    </Cell>
+
+                    {shareData && (
+                        <Padding>
+                            <Button
+                                mode="filled"
+                                size="m"
+                                stretched
+                                onClick={() => {
+                                    showShareModal({
+                                        owner: appUser as Api.User,
+                                        type: ShareType.CALL_STAT,
+                                        data: shareData
+                                    });
+                                }}
+                            >
+                                {t('share.button')}
+                            </Button>
+                        </Padding>
                     )}
-                </Modal>
 
-                <InfoRow title={mt('counts.calls')} count={stat.counts.calls} icon={IconPhone} />
-                <InfoRow title={mt('counts.participants')} count={stat.counts.participants} icon={IconUsers} />
-                <InfoRow
-                    title={mt('counts.duration')}
-                    description={getTextTime(stat.counts.duration)}
-                    icon={IconClock}
-                />
-                <InfoRow
-                    title={mt('counts.max_duration')}
-                    description={getTextTime(stat.counts.maxDuration)}
-                    icon={IconClockUp}
-                />
+                    <Padding>
+                        <ActivityChart data={stat.activity} />
+                    </Padding>
+                </Section>
 
-                {shareData && <ShareButtons owner={appUser as Api.User} type={ShareType.CALL_STAT} data={shareData} />}
+                <Section className={classNames(commonClasses.sectionBox, commonClasses.showHr)}>
+                    <TabsList tabs={tabsList} onChange={(tabId) => setSelectedTab(tabId as ETabId)} />
+                    <UsersContent />
 
-                <ActivityChart data={stat.activity} />
+                    {modalData && (
+                        <Modal
+                            header={<ModalHeader />}
+                            open={Boolean(modalData)}
+                            onOpenChange={(open) => {
+                                if (!open) {
+                                    setModalData(null);
+                                }
+                            }}
+                        >
+                            <OwnerRow owner={modalData.user as Api.User} />
 
-                <TabsList tabs={tabsList} onChange={(tabId) => setSelectedTab(tabId as ETabId)} />
-                <UsersContent />
+                            <Cell before={<IconPhone />} after={modalData.calls}>
+                                {mt('counts.calls')}
+                            </Cell>
+                            <Cell before={<IconClock />} description={getTextTime(modalData.duration)}>
+                                {mt('counts.duration')}
+                            </Cell>
+                            <Cell before={<IconClockUp />} description={getTextTime(modalData.maxDuration)}>
+                                {mt('counts.max_duration')}
+                            </Cell>
+
+                            <Padding>
+                                <ActivityChart data={stat.activity} />
+                            </Padding>
+                        </Modal>
+                    )}
+                </Section>
             </>
         );
     }
-
-    return null;
 }

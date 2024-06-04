@@ -12,7 +12,7 @@ jobs:
                     cache: 'npm'
 
             -   name: Install NPM dependencies
-                run: npm ci
+                run: npm ci --force
 
             -   name: Run lint
                 run: npm run lint

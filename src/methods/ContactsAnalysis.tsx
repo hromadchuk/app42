@@ -1,12 +1,14 @@
-import { JSX, useContext, useEffect, useState } from 'react';
-import { Badge, Box, Button, Container, Divider, Group, Modal } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { useContext, useEffect, useState } from 'react';
+import { ButtonCell, Caption, Modal, Section } from '@telegram-apps/telegram-ui';
+import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
 import { Api } from 'telegram';
 import dayjs from 'dayjs';
-import { CallAPI } from '../lib/helpers.ts';
+import { CallAPI, classNames } from '../lib/helpers.ts';
+import { OwnerRow } from '../components/OwnerRow.tsx';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
-import { OwnerRow } from '../components/OwnerRow.tsx';
+
+import commonClasses from '../styles/Common.module.css';
 
 enum EFilerType {
     PREMIUM = 'premium',
@@ -27,8 +29,6 @@ enum EFilerType {
 export default function ContactsAnalysis() {
     const { mt, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
 
-    const [opened, { open, close }] = useDisclosure(false);
-
     const [premiumUsersData, setPremiumUsers] = useState<Api.User[]>([]);
     const [mutualUsersData, setMutualUsers] = useState<Api.User[]>([]);
     const [nonMutualUsersData, setNonMutualUsers] = useState<Api.User[]>([]);
@@ -43,7 +43,7 @@ export default function ContactsAnalysis() {
     const [recentOnlineUsersData, serRecentOnlineUsers] = useState<Api.User[]>([]);
     const [oldUsersData, setOldUsers] = useState<Api.User[]>([]);
     const [modalName, setModalName] = useState<string>('');
-    const [modalUsers, setModalUsers] = useState<Api.User[]>([]);
+    const [modalUsers, setModalUsers] = useState<Api.User[] | null>(null);
     const [modalDescriptionType, setModalDescriptionType] = useState<EFilerType>(EFilerType.OLD);
 
     useEffect(() => {
@@ -160,13 +160,6 @@ export default function ContactsAnalysis() {
         setProgress(null);
     }
 
-    function openModal(name: string, users: Api.User[], descriptionType: EFilerType) {
-        setModalName(name);
-        setModalUsers(users);
-        setModalDescriptionType(descriptionType);
-        open();
-    }
-
     function getDescription(type: EFilerType, user: Api.User): string | undefined {
         if (type === EFilerType.OLD) {
             return user.id.valueOf().toLocaleString().replace(/,/g, ' ');
@@ -185,47 +178,43 @@ export default function ContactsAnalysis() {
         return undefined;
     }
 
-    function SectionBlock(type: EFilerType, users: Api.User[], lang: string): JSX.Element | null {
+    function SectionBlock(type: EFilerType, users: Api.User[], lang: string) {
         if (!users.length) {
             return null;
         }
 
         return (
-            <>
-                <Container px={0}>
-                    <Divider
-                        my="xs"
-                        label={
-                            <>
-                                <Box fz={13} mr={5}>
-                                    {mt(`headers.${lang}`)}
-                                </Box>
-                                <Badge size="xs" display="-webkit-box">
-                                    {users.length}
-                                </Badge>
-                            </>
-                        }
-                        labelPosition="center"
-                    />
-
-                    {users.slice(0, 3).map((owner, key) => (
-                        <div key={key}>{OwnerRow({ owner, description: getDescription(type, owner) })}</div>
-                    ))}
-                </Container>
+            <Section
+                header={
+                    <Section.Header>
+                        {mt(`headers.${lang}`)}
+                        <Caption
+                            level="1"
+                            weight="3"
+                            style={{ marginLeft: 5, color: 'var(--tgui--secondary_hint_color)' }}
+                        >
+                            {users.length}
+                        </Caption>
+                    </Section.Header>
+                }
+                className={classNames(commonClasses.sectionBox, commonClasses.showHr)}
+            >
+                {users.slice(0, 3).map((owner, key) => (
+                    <div key={key}>{OwnerRow({ owner, description: getDescription(type, owner) })}</div>
+                ))}
 
                 {users.length > 3 && (
-                    <Group mt="xs">
-                        <Button
-                            variant="light"
-                            color="gray"
-                            fullWidth
-                            onClick={() => openModal(mt(`headers.${lang}`), users, type)}
-                        >
-                            {mt('show_all_users')}
-                        </Button>
-                    </Group>
+                    <ButtonCell
+                        onClick={() => {
+                            setModalUsers(users);
+                            setModalDescriptionType(type);
+                            setModalName(mt(`headers.${lang}`));
+                        }}
+                    >
+                        {mt('show_all_users')}
+                    </ButtonCell>
                 )}
-            </>
+            </Section>
         );
     }
 
@@ -233,12 +222,6 @@ export default function ContactsAnalysis() {
 
     return (
         <>
-            <Modal opened={opened} onClose={close} title={modalName}>
-                {modalUsers.map((owner, key) => (
-                    <div key={key}>{OwnerRow({ owner, description: getDescription(modalDescriptionType, owner) })}</div>
-                ))}
-            </Modal>
-
             {SectionBlock(EFilerType.PREMIUM, premiumUsersData, 'premium')}
             {SectionBlock(EFilerType.MUTUAL, mutualUsersData, 'mutual')}
             {SectionBlock(EFilerType.NON_MUTUAL, nonMutualUsersData, 'non_mutual')}
@@ -252,6 +235,26 @@ export default function ContactsAnalysis() {
             {SectionBlock(EFilerType.FEW_USERNAMES, fewUsernamesUsersData, 'few_usernames')}
             {SectionBlock(EFilerType.HIDE_ONLINE, hideOnlineUsersData, 'hide_online')}
             {SectionBlock(EFilerType.OLD, oldUsersData, 'old')}
+
+            {modalUsers && (
+                <Modal
+                    header={<ModalHeader />}
+                    open={Boolean(modalUsers)}
+                    onOpenChange={(open) => {
+                        if (!open) {
+                            setModalUsers(null);
+                        }
+                    }}
+                >
+                    <Section header={modalName}>
+                        {modalUsers.map((owner, key) => (
+                            <div key={key}>
+                                {OwnerRow({ owner, description: getDescription(modalDescriptionType, owner) })}
+                            </div>
+                        ))}
+                    </Section>
+                </Modal>
+            )}
         </>
     );
 }

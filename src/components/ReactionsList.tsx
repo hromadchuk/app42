@@ -1,4 +1,4 @@
-import { Badge, Group } from '@mantine/core';
+import { Button } from '@telegram-apps/telegram-ui';
 import { formatNumber } from '../lib/helpers.ts';
 
 interface IReactionsList {
@@ -13,12 +13,12 @@ export function ReactionsList({ reactions }: IReactionsList) {
     const reactionsArray = Array.from(reactions.entries()).sort((a, b) => b[1] - a[1]);
 
     return (
-        <Group pt={10} gap={8}>
+        <div>
             {reactionsArray.map(([reactionEmoji, reactionCount]) => (
-                <Badge key={reactionEmoji} leftSection={reactionEmoji} size="lg" color="gray">
+                <Button before={reactionEmoji} mode="outline" size="s" style={{ marginRight: 10, marginTop: 10 }}>
                     {formatNumber(reactionCount)}
-                </Badge>
+                </Button>
             ))}
-        </Group>
+        </div>
     );
 }
