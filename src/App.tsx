@@ -46,6 +46,7 @@ export function App() {
     const [, setOptions] = useTonConnectUI();
 
     const [user, setUser] = useState<null | Api.User>(null);
+    const [isUserChecked, setUserChecked] = useState(false);
     const [isAccountsModalOpen, setAccountsModalOpen] = useState(false);
     const [isShareModalOpen, setShareModalOpen] = useState(false);
     const [shareModalData, setShareModalData] = useState<IShareOptions | null>(null);
@@ -124,18 +125,14 @@ export function App() {
                         : null;
                     console.log('storageSession', Boolean(storageSession));
                     if (storageSession) {
-                        try {
-                            const loggedUser = await getCurrentUser();
-
-                            console.log('loggedUser', loggedUser);
-                            if (loggedUser) {
-                                setUser(loggedUser);
-                            }
-                        } catch (error) {
-                            console.error('Error init current user', error);
+                        const loggedUser = await getCurrentUser();
+                        if (loggedUser) {
+                            setUser(await getCurrentUser());
                         }
                     }
                 }
+
+                setUserChecked(true);
 
                 const param = new URLSearchParams(location.search).get('tgWebAppStartParam');
                 const value = await getCache(Constants.AUTH_STATE_METHOD_KEY);
@@ -314,6 +311,7 @@ export function App() {
             value={{
                 user,
                 setUser,
+                isUserChecked,
                 openMethod,
                 setAccountsModalOpen,
                 initData,

@@ -20,7 +20,7 @@ import { getCache, removeCache, setCache } from '../lib/cache.ts';
 import { CountryFlag } from '../components/CountryFlag.tsx';
 import { Constants } from '../constants.ts';
 import { AppContext } from '../contexts/AppContext.tsx';
-import { CallAPI, decodeString, encodeString, getCurrentUser, isDev, wrapCallMAMethod } from '../lib/helpers.ts';
+import { CallAPI, encodeString, getCurrentUser, isDev, wrapCallMAMethod } from '../lib/helpers.ts';
 import { getAppLangCode, t } from '../lib/lang.ts';
 import { AnimatedHeader } from '../components/AnimatedHeader.tsx';
 
@@ -51,7 +51,7 @@ interface IAuthorizationModalProps {
 }
 
 export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAuthorizationModalProps) {
-    const { user, setUser, initData } = useContext(AppContext);
+    const { user, setUser, initData, isUserChecked } = useContext(AppContext);
 
     const storage = useCloudStorage();
 
@@ -82,17 +82,9 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
                 return;
             }
 
-            const storageSessionHashed = isDev
-                ? await getCache(Constants.SESSION_KEY)
-                : await wrapCallMAMethod<string>(() => storage.get(Constants.SESSION_KEY));
-            const storageSession = storageSessionHashed
-                ? decodeString(storageSessionHashed as string, initData?.storageHash || '')
-                : null;
-            console.log('Auth.storageSession', Boolean(storageSession));
-
             const authStateNumber = (await getCache(Constants.AUTH_STATE_NUMBER_KEY)) as IAuthStateNumber;
             console.log('Auth.authStateNumber', authStateNumber);
-            if (authStateNumber || !storageSession) {
+            if (authStateNumber || (isUserChecked && !user)) {
                 await getAuthData();
             }
 
@@ -106,7 +98,7 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
                 onOpenChange(true);
             }
         })();
-    }, [initData]);
+    }, [initData, isUserChecked]);
 
     useEffect(() => {
         if (isOpen && user) {
