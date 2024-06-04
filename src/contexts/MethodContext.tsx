@@ -17,10 +17,6 @@ export interface IFinishBlock {
 
 export type TDialogWithoutUser = Exclude<TOwnerType, Api.User>;
 
-export interface IGetDialogOption {
-    types: (typeof Api.Chat | typeof Api.Channel | typeof Api.User)[];
-}
-
 export interface ISetListAction {
     buttonText: string;
     loadingText: string;
@@ -41,7 +37,6 @@ export interface IMethodContext {
     td: (key: string) => string[];
     mt: (key: string) => string;
     md: (key: string) => string[];
-    getDialogs: (options: IGetDialogOption) => Promise<TOwnerType[]>;
 }
 
 // @ts-ignore

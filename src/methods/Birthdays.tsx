@@ -1,10 +1,13 @@
-import dayjs from 'dayjs';
+import { Section } from '@telegram-apps/telegram-ui';
 import { useContext, useEffect, useState } from 'react';
 import { Api } from 'telegram';
+import dayjs from 'dayjs';
+import { CallAPI, classNames, sleep } from '../lib/helpers.ts';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
-import { CallAPI, sleep } from '../lib/helpers.ts';
+
+import commonClasses from '../styles/Common.module.css';
 
 interface IUserItem {
     user: Api.TypeUser;
@@ -61,14 +64,16 @@ export default function Birthdays() {
     if (needHideContent()) return null;
 
     if (usersList.length) {
-        return usersList.map(({ user, birthday }, key) => {
-            const date = dayjs()
-                .date(birthday.day)
-                .month(birthday.month - 1);
+        return (
+            <Section className={classNames(commonClasses.sectionBox, commonClasses.showHr)}>
+                {usersList.map(({ user, birthday }, key) => {
+                    const date = dayjs()
+                        .date(birthday.day)
+                        .month(birthday.month - 1);
 
-            return <OwnerRow key={key} owner={user} description={date.format('DD MMMM')} />;
-        });
+                    return <OwnerRow key={key} owner={user} description={date.format('DD MMMM')} />;
+                })}
+            </Section>
+        );
     }
-
-    return null;
 }

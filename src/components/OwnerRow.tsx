@@ -1,22 +1,18 @@
-import { createElement, CSSProperties, JSX } from 'react';
-import { Center, Checkbox, Container, Flex, Group, Text, UnstyledButton } from '@mantine/core';
+import { createElement, CSSProperties, ForwardRefExoticComponent, RefAttributes } from 'react';
+import { Cell, Multiselectable } from '@telegram-apps/telegram-ui';
+import { Link } from 'react-router-dom';
 import { Api } from 'telegram';
-import { IconCheck, IconChevronRight, TablerIconsProps } from '@tabler/icons-react';
-import { classNames, TOwnerInfo } from '../lib/helpers.ts';
+import { Icon, IconChevronRight, IconProps, IconRosetteDiscountCheckFilled } from '@tabler/icons-react';
+import { TOwnerInfo } from '../lib/helpers.ts';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
-
-import classes from '../styles/OwnerRow.module.css';
 
 interface IOwnerRow {
     owner: TOwnerInfo;
     description?: string;
-    rightIcon?: (props: TablerIconsProps) => JSX.Element;
+    rightIcon?: ForwardRefExoticComponent<IconProps & RefAttributes<Icon>>;
     withoutLink?: boolean;
     disabled?: boolean;
     callback?: () => void;
-    ml?: string | number;
-    mr?: string | number;
-    styles?: object;
     checked?: boolean;
 }
 
@@ -27,18 +23,7 @@ interface ILinkProps {
     component?: 'a' | 'button';
 }
 
-export function OwnerRow({
-    owner,
-    description,
-    rightIcon,
-    withoutLink,
-    callback,
-    disabled,
-    ml,
-    mr,
-    styles,
-    checked
-}: IOwnerRow) {
+export function OwnerRow({ owner, description, rightIcon, withoutLink, callback, disabled, checked }: IOwnerRow) {
     const name: string[] = [];
     const linkProps: ILinkProps = {};
     const isUser = owner instanceof Api.User;
@@ -82,19 +67,24 @@ export function OwnerRow({
         name.push('Unknown name');
     }
 
-    function getBadge(): null | JSX.Element {
+    function getBadge() {
         if ((isUser || isChannel) && owner.verified) {
-            return (
-                <Center inline ml={5}>
-                    <IconCheck size={14} color="#1c93e3" />
-                </Center>
-            );
+            return <IconRosetteDiscountCheckFilled size={18} color="#1c93e3" />;
         }
 
-        return null;
+        return undefined;
     }
 
     const style: CSSProperties = {};
+    let interactiveAnimation: 'opacity' | 'background' = 'background';
+
+    if (withoutLink || disabled) {
+        style.cursor = 'default';
+        style.opacity = '1 !important';
+        style.background = 'unset !important';
+
+        interactiveAnimation = 'opacity';
+    }
 
     if (disabled) {
         style.opacity = 0.5;
@@ -105,49 +95,39 @@ export function OwnerRow({
         style.filter = 'grayscale(1)';
     }
 
-    const Row = (
-        <Flex
-            gap="md"
-            p={5}
-            justify="flex-start"
-            align="center"
-            direction="row"
-            wrap="nowrap"
-            style={style}
-            className={classNames({ [classes.row]: linkProps.component })}
-        >
-            <OwnerAvatar owner={owner} />
+    function RightBlock() {
+        if (isCheckbox) {
+            return <Multiselectable checked={checked} readOnly />;
+        }
 
-            <div>
-                <Group gap={0}>
-                    <Text size="sm" inline>
-                        {name.join(' ')}
-                    </Text>
-                    {getBadge()}
-                </Group>
-                <Text c="dimmed" fz="xs">
-                    {description}
-                </Text>
-            </div>
+        if (linkProps.component) {
+            return createElement(rightIcon || IconChevronRight, { size: 14, stroke: 1.5 });
+        }
 
-            <Container p={0} mr={0}>
-                {isCheckbox && <Checkbox checked={checked} readOnly />}
-                {linkProps.component &&
-                    !isCheckbox &&
-                    createElement(rightIcon || IconChevronRight, { size: 14, stroke: 1.5 })}
-            </Container>
-        </Flex>
-    );
+        return null;
+    }
 
-    return (
-        <Container p={0} ml={ml ?? 'auto'} mr={mr ?? 'auto'} styles={styles ?? {}}>
-            {!linkProps.component ? (
-                Row
-            ) : (
-                <UnstyledButton {...linkProps} disabled={true}>
-                    {Row}
-                </UnstyledButton>
-            )}
-        </Container>
+    function CellRow() {
+        return (
+            <Cell
+                {...linkProps}
+                titleBadge={getBadge()}
+                interactiveAnimation={interactiveAnimation}
+                before={<OwnerAvatar owner={owner} size={description ? 48 : 40} />}
+                style={style}
+                after={RightBlock()}
+                description={description}
+            >
+                {name.join(' ')}
+            </Cell>
+        );
+    }
+
+    return linkProps.href ? (
+        <Link to={linkProps.href} target="_blank">
+            {CellRow()}
+        </Link>
+    ) : (
+        CellRow()
     );
 }

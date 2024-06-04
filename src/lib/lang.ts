@@ -10,7 +10,7 @@ export enum LangType {
 }
 
 export interface ILang {
-    [key: string]: string | string[] | ILang;
+    [key: string]: string | string[] | string[][] | ILang;
 }
 
 const appLangSources: ILang = {
@@ -113,4 +113,14 @@ export const td = (path: string): string[] => {
     }
 
     return found as string[];
+};
+
+export const to = (path: string): object => {
+    const found = findLevel(path);
+
+    if (!found) {
+        return {};
+    }
+
+    return found as object;
 };

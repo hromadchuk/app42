@@ -1,13 +1,9 @@
-import { Container, Flex, Group, UnstyledButton } from '@mantine/core';
-import { IconChevronRight } from '@tabler/icons-react';
+import { Cell } from '@telegram-apps/telegram-ui';
+import { Link } from 'react-router-dom';
 import { Api } from 'telegram';
-import { classNames } from '../lib/helpers.ts';
 import { t } from '../lib/lang.ts';
 import { TCorrectMessage } from '../lib/methods/messages.ts';
-import { InfoRow } from './InfoRow.tsx';
 import { RecordPhoto } from './RecordPhoto.tsx';
-
-import classes from '../styles/OwnerRow.module.css';
 
 interface IRecordRow {
     record: TCorrectMessage;
@@ -17,7 +13,7 @@ interface IRecordRow {
 
 interface ILinkProps {
     onClick?: () => void;
-    href?: string;
+    to?: string;
     target?: string;
     component: 'a';
 }
@@ -30,38 +26,16 @@ export function RecordRow({ record, description, callback }: IRecordRow) {
     if (callback) {
         linkProps.onClick = () => callback();
     } else if (record.peerId instanceof Api.PeerChannel && record.peerId?.channelId.valueOf()) {
-        linkProps.href = `https://t.me/c/${record.peerId.channelId.valueOf()}/${record.id}`;
+        linkProps.to = `https://t.me/c/${record.peerId.channelId.valueOf()}/${record.id}`;
         linkProps.target = '_blank';
     }
 
-    const Row = (
-        <Flex
-            gap="md"
-            p={5}
-            justify="flex-start"
-            align="center"
-            direction="row"
-            wrap="nowrap"
-            className={classNames({ [classes.row]: 'a' })}
-        >
-            <Group wrap="nowrap">
-                <RecordPhoto photo={record.photo} />
-                <InfoRow
-                    title={record.message || t('record_row.record')}
-                    titleLineClamp={2}
-                    description={description}
-                />
-            </Group>
-
-            <Container p={0} mr={0}>
-                <IconChevronRight size={14} stroke={1.5} />
-            </Container>
-        </Flex>
-    );
-
     return (
-        <UnstyledButton {...linkProps}>
-            <Container p={0}>{Row}</Container>
-        </UnstyledButton>
+        // @ts-ignore
+        <Link {...linkProps}>
+            <Cell description={description} before={<RecordPhoto photo={record.photo} />}>
+                {record.message || t('record_row.record')}
+            </Cell>
+        </Link>
     );
 }

@@ -1,21 +1,29 @@
 import { useContext, useEffect, useState } from 'react';
-import { Text } from '@mantine/core';
+import { Caption, Section } from '@telegram-apps/telegram-ui';
 import { Api } from 'telegram';
 
-import { MethodContext, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { TOwnerType } from '../lib/helpers.ts';
+import { getDialogs } from '../lib/logic_helpers.ts';
+import { MethodContext, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
+
+import commonClasses from '../styles/Common.module.css';
 
 export default function Administered() {
-    const { mt, needHideContent, setFinishBlock, getDialogs } = useContext(MethodContext);
+    const { mt, needHideContent, setFinishBlock, setProgress } = useContext(MethodContext);
 
     const [adminsList, setAdminsList] = useState<TOwnerType[] | null>(null);
 
     useEffect(() => {
         (async () => {
-            const dialogs = await getDialogs({
-                types: [Api.Chat, Api.Channel]
-            });
+            const dialogs = await getDialogs(
+                {
+                    types: [Api.Chat, Api.Channel]
+                },
+                {
+                    setProgress
+                }
+            );
 
             const adminChats = dialogs.filter((dialog) => {
                 const correctType = dialog as TDialogWithoutUser;
@@ -40,9 +48,7 @@ export default function Administered() {
 
     if (adminsList?.length) {
         return (
-            <>
-                <Text c="dimmed">{mt('title').replace('{count}', adminsList.length.toString())}</Text>
-
+            <Section className={commonClasses.sectionBox}>
                 {adminsList.map((dialog, key) => {
                     const correctType = dialog as TDialogWithoutUser;
 
@@ -54,9 +60,11 @@ export default function Administered() {
                         />
                     );
                 })}
-            </>
+
+                <Caption className={commonClasses.footerCount}>
+                    {mt('title').replace('{count}', adminsList.length.toString())}
+                </Caption>
+            </Section>
         );
     }
-
-    return null;
 }

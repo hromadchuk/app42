@@ -1,11 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
 import { Api } from 'telegram';
+import { DialogWithDate } from '../components/DialogWithDate.tsx';
+import { getDialogs } from '../lib/logic_helpers.ts';
 
 import { MethodContext, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
-import DialogWithDate from '../components/DialogWithDate.tsx';
 
-export default function ChannelsRegistration() {
-    const { mt, needHideContent, setProgress, setFinishBlock, getDialogs } = useContext(MethodContext);
+export default function DialogJoined() {
+    const { mt, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
 
     const [channels, setChannels] = useState<Api.Channel[] | null>(null);
 
@@ -16,9 +17,12 @@ export default function ChannelsRegistration() {
     async function getChannels() {
         setProgress({});
 
-        const dialogs = await getDialogs({
-            types: [Api.Chat, Api.Channel]
-        });
+        const dialogs = await getDialogs(
+            {
+                types: [Api.Chat, Api.Channel]
+            },
+            { setProgress }
+        );
 
         const createdChannels = dialogs.filter((dialog) => {
             const correctType = dialog as TDialogWithoutUser;
@@ -40,8 +44,6 @@ export default function ChannelsRegistration() {
     if (needHideContent()) return null;
 
     if (channels) {
-        return <DialogWithDate dialogs={channels} />;
+        return <DialogWithDate dialogs={channels} withoutSharing={true} />;
     }
-
-    return null;
 }

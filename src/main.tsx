@@ -1,9 +1,7 @@
 import { createRoot } from 'react-dom/client';
-import { getParams, isDevUser } from './lib/helpers.ts';
+import { MiniAppWrapper } from './MiniAppWrapper.tsx';
+import { isDevUser } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
-import { updateThemeFromParams } from './lib/theme.ts';
-
-import App from './App.tsx';
 
 import dayjs from 'dayjs';
 import toObject from 'dayjs/plugin/toObject';
@@ -29,14 +27,9 @@ if (isDevUser) {
     };
 }
 
-// only for test!!!
-// import TestImages from '../TestImages.tsx';
-// createRoot(document.getElementById('root') as HTMLElement).render(<TestImages />);
+import '@telegram-apps/telegram-ui/dist/styles.css';
+import './App.css';
 
-const tgWebAppData = getParams().get('tgWebAppData');
-if (tgWebAppData) {
-    updateThemeFromParams();
-    createRoot(document.getElementById('root') as HTMLElement).render(<App />);
-} else {
-    location.href = 'https://t.me/app42';
-}
+import 'chartkick/chart.js';
+
+createRoot(document.getElementById('root') as HTMLElement).render(<MiniAppWrapper />);

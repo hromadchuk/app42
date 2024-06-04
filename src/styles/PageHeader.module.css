@@ -1,0 +1,25 @@
+.block {
+    padding: 12px 16px;
+    border-radius: 0 0 10px 10px;
+    animation-duration: 0.5s;
+    animation-timing-function: ease;
+    transition: .5s;
+}
+
+.description {
+    opacity: 0.5;
+}
+
+.headerAnimation {
+    animation: animation .5s;
+}
+
+@keyframes animation {
+    0% {
+        margin-top: -150px;
+    }
+
+    100% {
+        margin-top: -8px;
+    }
+}

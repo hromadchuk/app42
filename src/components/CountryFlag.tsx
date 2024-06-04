@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Image, Skeleton } from '@mantine/core';
+import { Skeleton } from '@telegram-apps/telegram-ui';
 
 interface ICountryFlag {
     code: string;
@@ -9,9 +9,8 @@ interface ICountryFlag {
 export function CountryFlag({ code, size }: ICountryFlag) {
     const [imageUrl, setImageUrl] = useState<string>('');
 
-    const defaultSize = 48;
-    const defaultMargin = 8;
-    const margin = Math.round((size * defaultMargin) / defaultSize);
+    const aspectRatio = 32 / 48;
+    const skeletonHeight = size * aspectRatio;
 
     useEffect(() => {
         setImageUrl('');
@@ -22,7 +21,6 @@ export function CountryFlag({ code, size }: ICountryFlag) {
 
                 setImageUrl(flag.default);
             } catch (error) {
-                // @ts-ignore
                 const UNFlag = await import('../assets/flags/UN.svg');
 
                 setImageUrl(UNFlag.default);
@@ -30,9 +28,24 @@ export function CountryFlag({ code, size }: ICountryFlag) {
         })();
     }, [code]);
 
-    if (!imageUrl) {
-        return <Skeleton h={size - margin * 2} w={size} mt={margin} mb={margin} radius={0} />;
-    }
-
-    return <Image src={imageUrl} alt={code} h={size} w="auto" radius={0} />;
+    return (
+        <Skeleton
+            visible={!imageUrl}
+            style={{
+                height: imageUrl ? size : skeletonHeight,
+                width: size
+            }}
+        >
+            {Boolean(imageUrl) && (
+                <img
+                    style={{
+                        height: size,
+                        width: size
+                    }}
+                    src={imageUrl}
+                    alt={code}
+                />
+            )}
+        </Skeleton>
+    );
 }

@@ -57,7 +57,7 @@ module.exports = {
         'linebreak-style': 2,
         'lines-around-comment': 0,
         'max-depth': [2, { max: 6 }],
-        'max-len': [1, { code: 120 }],
+        'max-len': [1, { code: 200 }],
         'max-lines': [2, { max: 2000, skipBlankLines: true }],
         'max-statements-per-line': 2,
         'no-async-promise-executor': 2,

@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Affix, Button, Container, Space, Stack, Text } from '@mantine/core';
-import { IFinishBlock, IProgress, ISetListAction } from '../contexts/MethodContext.tsx';
+import { Button, FixedLayout, Section } from '@telegram-apps/telegram-ui';
 import { formatNumber, sleep } from '../lib/helpers.ts';
 import { t } from '../lib/lang.ts';
+import commonClasses from '../styles/Common.module.css';
 import { OwnerRow } from './OwnerRow.tsx';
+
+import { IFinishBlock, IProgress, ISetListAction } from '../contexts/MethodContext.tsx';
 
 interface IListActionProps extends ISetListAction {
     setProgress: (progress: IProgress | null) => void;
@@ -57,7 +59,7 @@ export function ListAction({
         .replace('{total}', formatNumber(owners.length));
 
     return (
-        <>
+        <Section className={commonClasses.sectionBox}>
             {owners.map((owner, key) => {
                 const peerId = owner.id.valueOf();
 
@@ -78,20 +80,55 @@ export function ListAction({
                 );
             })}
 
-            <Space h="xs" />
-
-            <Affix position={{ bottom: 0 }} style={{ width: '100%' }}>
-                <Container p="xs">
-                    <Button fullWidth disabled={!selected.length} onClick={run} h={40}>
-                        <Stack gap={0}>
-                            {buttonText}
-                            <Text size="xs" opacity={0.5}>
-                                {selectedButtonText}
-                            </Text>
-                        </Stack>
-                    </Button>
-                </Container>
-            </Affix>
-        </>
+            <FixedLayout
+                style={{
+                    padding: 16
+                }}
+            >
+                <Button stretched disabled={!selected.length} onClick={run}>
+                    <div style={{ marginBottom: -5 }}>{buttonText}</div>
+                    <div style={{ fontSize: 11, opacity: 0.6 }}>{selectedButtonText}</div>
+                </Button>
+            </FixedLayout>
+        </Section>
     );
+
+    // return (
+    //     <>
+    //         {owners.map((owner, key) => {
+    //             const peerId = owner.id.valueOf();
+    //
+    //             return (
+    //                 <div key={key}>
+    //                     <OwnerRow
+    //                         owner={owner}
+    //                         checked={selected.includes(peerId)}
+    //                         callback={() => {
+    //                             if (selected.includes(peerId)) {
+    //                                 setSelected(selected.filter((id) => id !== peerId));
+    //                             } else {
+    //                                 setSelected([...selected, peerId]);
+    //                             }
+    //                         }}
+    //                     />
+    //                 </div>
+    //             );
+    //         })}
+    //
+    //         <Space h="xs" />
+    //
+    //         <Affix position={{ bottom: 0 }} style={{ width: '100%' }}>
+    //             <Container p="xs">
+    //                 <Button fullWidth disabled={!selected.length} onClick={run} h={40}>
+    //                     <Stack gap={0}>
+    //                         {buttonText}
+    //                         <Text size="xs" opacity={0.5}>
+    //                             {selectedButtonText}
+    //                         </Text>
+    //                     </Stack>
+    //                 </Button>
+    //             </Container>
+    //         </Affix>
+    //     </>
+    // );
 }

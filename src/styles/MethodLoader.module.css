@@ -1,0 +1,14 @@
+.animationSection {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+    height: calc(100vh - 16px * 2 - 8px * 2 - 36px - 78px);
+    margin: 0 auto;
+}
+
+.progressSection {
+    width: 90%;
+    text-align: center;
+    margin: 0 auto;
+}

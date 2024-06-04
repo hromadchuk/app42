@@ -1,21 +1,18 @@
-import { AreaChart, BarChart } from '@mantine/charts';
-import { Button, Container, Divider, Flex, Group, SegmentedControl, Text, Title } from '@mantine/core';
-import {
-    IconBrandTether,
-    IconDiamond,
-    IconInfoSquareRounded,
-    IconTransfer,
-    TablerIconsProps
-} from '@tabler/icons-react';
+import { useContext, useEffect, useState } from 'react';
+import { Cell, Modal, Section, SegmentedControl } from '@telegram-apps/telegram-ui';
+import { SegmentedControlItem } from '@telegram-apps/telegram-ui/dist/components/Navigation/SegmentedControl/components/SegmentedControlItem/SegmentedControlItem';
+import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
+import { IconBrandTether, IconDiamond, IconTransfer } from '@tabler/icons-react';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import dayjs from 'dayjs';
-import { modals } from '@mantine/modals';
-import { useContext, useEffect, useState } from 'react';
+import { BarChart, LineChart } from 'react-chartkick';
 import { JettonTransferAction } from 'tonapi-sdk-js';
 import { TonApiCall } from '../lib/TonApi.ts';
-import { formatNumber, formatNumberFloat } from '../lib/helpers.ts';
+import { classNames, formatNumber, formatNumberFloat } from '../lib/helpers.ts';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
+
+import commonClasses from '../styles/Common.module.css';
 
 interface IStatPeriod {
     eventsCount: number;
@@ -54,22 +51,6 @@ interface IChartItem {
     received: number;
 }
 
-interface IDexChartItem {
-    [EDexNames.STON]?: number;
-    [EDexNames.DEDUST]?: number;
-    [EDexNames.MEGATON]?: number;
-}
-
-interface IChartData {
-    data: IChartItem[];
-    series: { name: string; label: string; color: string }[];
-}
-
-interface IDexChartData {
-    data: IDexChartItem[];
-    series: { name: string; label: string; color: string }[];
-}
-
 interface IStatResult extends IStatCalc {
     needShowPeriodSegment: boolean;
     needShowCurrencySegment: boolean;
@@ -98,6 +79,7 @@ export default function TonTransactions() {
     const [stat, setStat] = useState<IStatResult | null>(null);
     const [selectedChartPeriod, setSelectedChartPeriod] = useState<string>('months');
     const [selectedChartCurrency, setSelectedChartCurrency] = useState<string>('TON');
+    const [selectedPeriod, setSelectedPeriod] = useState<IStatPeriod | null>(null);
     const [wallet] = useTonConnectUI();
     const userWallet = wallet.account?.address as string;
 
@@ -292,43 +274,44 @@ export default function TonTransactions() {
         return null;
     }
 
-    function getChartData(): IChartData {
+    function getChartData() {
         const walletStat = stat as IStatResult;
         const isTON = selectedChartCurrency === 'TON';
         const selectedCurrency = isTON ? walletStat.chartDataTON : walletStat.chartDataUSDT;
-        const selectedPeriod = selectedChartPeriod === 'months' ? selectedCurrency.months : selectedCurrency.years;
-        const firstColor = isTON ? 'blue.3' : 'teal.4';
-        const secondColor = isTON ? 'blue.9' : 'teal.9';
+        const chartPeriod = selectedChartPeriod === 'months' ? selectedCurrency.months : selectedCurrency.years;
+        const firstColor = isTON ? '#289ed0' : '#28b980';
+        const secondColor = isTON ? '#095584' : '#1f6b4d';
+        const sentData: { [key: string]: number } = {};
+        const receivedData: { [key: string]: number } = {};
 
-        return {
-            data: selectedPeriod,
-            series: [
-                {
-                    name: 'sent',
-                    label: mt('sent'),
-                    color: firstColor
-                },
-                {
-                    name: 'received',
-                    label: mt('received'),
-                    color: secondColor
-                }
-            ]
-        };
+        chartPeriod.forEach((item) => {
+            const date = selectedChartPeriod === 'months' ? dayjs(item.date * 1000).format('YYYY-MM-DD') : item.label;
+
+            sentData[date] = item.sent;
+            receivedData[date] = item.received;
+        });
+
+        return [
+            { name: mt('sent'), data: sentData, color: firstColor },
+            { name: mt('received'), data: receivedData, color: secondColor }
+        ];
     }
 
-    function getDexChartData(): IDexChartData {
+    function getDexChartData() {
         const walletStat = stat as IStatResult;
         const dexData = walletStat.total.dex;
         const keys = Object.keys(dexData) as EDexNames[];
         const dexColors = {
-            [EDexNames.STON]: 'blue.6',
-            [EDexNames.DEDUST]: 'orange.6',
-            [EDexNames.MEGATON]: 'teal.6'
+            [EDexNames.STON]: '#3cadf9',
+            [EDexNames.DEDUST]: '#d57f14',
+            [EDexNames.MEGATON]: '#2b43a0'
         };
 
         const dataRow: { [key: string]: number } = {};
         const series = [];
+
+        const data: [string, number][] = [];
+        const colors: string[] = [];
 
         for (const key of keys) {
             dataRow[key] = dexData[key];
@@ -337,244 +320,175 @@ export default function TonTransactions() {
                 label: dexNames[key],
                 color: dexColors[key]
             });
+
+            data.push([dexNames[key], dexData[key]]);
+            colors.push(dexColors[key]);
         }
 
-        console.log('dataRow', dataRow);
-        console.log('series', series);
-
-        return {
-            data: [dataRow],
-            series
-        };
+        return { data, colors };
     }
 
-    function openPeriod(title: string, period: IStatPeriod) {
-        modals.open({
-            title,
-            children: (
-                <>
-                    <Title order={4}>{mt('counts')}</Title>
-                    <CountBlock {...period} />
-
-                    <Title order={4} mt="md">
-                        {mt('events')}
-                    </Title>
-                    <EventsBlock {...period} />
-                </>
-            )
-        });
-    }
-
-    function InfoRow(item: {
-        icon?: (props: TablerIconsProps) => JSX.Element;
-        iconColor?: string;
-        label: string;
-        value: string;
-    }) {
+    function CountBlock(period: IStatPeriod, header: string, className?: string) {
         return (
-            <Flex gap="md" p={5} justify="flex-start" align="center" direction="row" wrap="wrap">
-                {item.icon && <item.icon size={14} color={item.iconColor} />}
-                <Text size="sm" inline>
-                    {item.label}
-                </Text>
+            <Section className={className} header={header}>
+                <Cell before={<IconTransfer />} after={formatNumberFloat(period.eventsCount)}>
+                    {mt('total_events')}
+                </Cell>
 
-                <Container p={0} mr={0}>
-                    <Text size="12px" c="dimmed">
-                        {item.value}
-                    </Text>
-                </Container>
-            </Flex>
+                {period.sentTON > 0 && (
+                    <Cell before={<IconDiamond color="#095584" />} after={formatNumberFloat(period.sentTON)}>
+                        {mt('sent_ton')}
+                    </Cell>
+                )}
+
+                {period.receivedTON > 0 && (
+                    <Cell before={<IconDiamond color="#095584" />} after={formatNumberFloat(period.receivedTON)}>
+                        {mt('received_ton')}
+                    </Cell>
+                )}
+
+                {period.sentUSDT > 0 && (
+                    <Cell before={<IconBrandTether color="#1f6b4d" />} after={formatNumberFloat(period.sentUSDT)}>
+                        {mt('sent_usdt')}
+                    </Cell>
+                )}
+
+                {period.receivedUSDT > 0 && (
+                    <Cell before={<IconBrandTether color="#1f6b4d" />} after={formatNumberFloat(period.receivedUSDT)}>
+                        {mt('received_usdt')}
+                    </Cell>
+                )}
+            </Section>
         );
     }
 
-    function CountBlock(period: IStatPeriod) {
-        return (
-            <>
-                <InfoRow icon={IconTransfer} label={mt('total_events')} value={formatNumberFloat(period.eventsCount)} />
-                <Divider my={3} />
-                <InfoRow
-                    icon={IconDiamond}
-                    iconColor="var(--mantine-color-blue-6)"
-                    label={mt('sent_ton')}
-                    value={formatNumberFloat(period.sentTON)}
-                />
-                <Divider my={3} />
-                <InfoRow
-                    icon={IconDiamond}
-                    iconColor="var(--mantine-color-blue-6)"
-                    label={mt('received_ton')}
-                    value={formatNumberFloat(period.receivedTON)}
-                />
-                <Divider my={3} />
-                <InfoRow
-                    icon={IconBrandTether}
-                    iconColor="var(--mantine-color-teal-7)"
-                    label={mt('sent_usdt')}
-                    value={formatNumberFloat(period.sentUSDT)}
-                />
-                <Divider my={3} />
-                <InfoRow
-                    icon={IconBrandTether}
-                    iconColor="var(--mantine-color-teal-7)"
-                    label={mt('received_usdt')}
-                    value={formatNumberFloat(period.receivedUSDT)}
-                />
-            </>
-        );
-    }
-
-    function EventsBlock(period: IStatPeriod) {
+    function EventsBlock(period: IStatPeriod, header: string, className?: string) {
         const actions = Object.keys(period.actions);
 
-        return actions
-            .sort((a, b) => period.actions[b] - period.actions[a])
-            .map((action, key) => (
-                <div key={key}>
-                    {key > 0 && <Divider my={3} />}
-                    <InfoRow label={action} value={formatNumberFloat(period.actions[action])} />
-                </div>
-            ));
+        return (
+            <Section className={className} header={header}>
+                {actions
+                    .sort((a, b) => period.actions[b] - period.actions[a])
+                    .map((action, key) => (
+                        <Cell key={key} after={formatNumberFloat(period.actions[action])}>
+                            {action}
+                        </Cell>
+                    ))}
+            </Section>
+        );
     }
 
     if (needHideContent()) return null;
 
     if (stat) {
-        const chart = getChartData();
+        const chartData = getChartData();
         const dexChart = getDexChartData();
-
-        console.log('dexChart', dexChart);
 
         return (
             <>
-                <Title order={4}>{mt('total_counts')}</Title>
-                <CountBlock {...stat.total} />
+                {CountBlock(stat.total, mt('total_counts'), classNames(commonClasses.sectionBox, commonClasses.showHr))}
 
-                <Title order={4} mt="md">
-                    {mt('total_events')}
-                </Title>
-                <EventsBlock {...stat.total} />
+                {EventsBlock(
+                    stat.total,
+                    mt('total_events'),
+                    classNames(commonClasses.sectionBox, commonClasses.showHr)
+                )}
 
-                <Title mt="md" order={4}>
-                    {mt('chart')}
-                </Title>
-                {stat.needShowPeriodSegment && (
-                    <SegmentedControl
-                        fullWidth
-                        size="xs"
-                        data={[
-                            {
-                                value: 'months',
-                                label: mt('by_months')
-                            },
-                            {
-                                value: 'years',
-                                label: mt('by_years')
-                            }
-                        ]}
-                        onChange={setSelectedChartPeriod}
-                    />
-                )}
-                {stat.needShowCurrencySegment && (
-                    <SegmentedControl fullWidth size="xs" data={['TON', 'USDT']} onChange={setSelectedChartCurrency} />
-                )}
-                <AreaChart
-                    h={300}
-                    mt="md"
-                    data={chart.data}
-                    dataKey="label"
-                    withLegend
-                    legendProps={{ verticalAlign: 'bottom', height: 50 }}
-                    tooltipProps={{ labelFormatter: (value) => formatNumberFloat(value) }}
-                    series={chart.series}
-                    curveType="bump"
-                />
+                <Section className={commonClasses.sectionBox} header={mt('chart')}>
+                    <div style={{ padding: 10 }}>
+                        {stat.needShowPeriodSegment && (
+                            <SegmentedControl className={commonClasses.tinySegment}>
+                                <SegmentedControlItem
+                                    onClick={() => setSelectedChartPeriod('months')}
+                                    selected={selectedChartPeriod === 'months'}
+                                >
+                                    {mt('by_months')}
+                                </SegmentedControlItem>
+                                <SegmentedControlItem
+                                    onClick={() => setSelectedChartPeriod('years')}
+                                    selected={selectedChartPeriod === 'years'}
+                                >
+                                    {mt('by_years')}
+                                </SegmentedControlItem>
+                            </SegmentedControl>
+                        )}
+
+                        {stat.needShowCurrencySegment && (
+                            <SegmentedControl className={commonClasses.tinySegment}>
+                                <SegmentedControlItem
+                                    onClick={() => setSelectedChartCurrency('TON')}
+                                    selected={selectedChartCurrency === 'TON'}
+                                >
+                                    TON
+                                </SegmentedControlItem>
+                                <SegmentedControlItem
+                                    onClick={() => setSelectedChartCurrency('USDT')}
+                                    selected={selectedChartCurrency === 'USDT'}
+                                >
+                                    USDT
+                                </SegmentedControlItem>
+                            </SegmentedControl>
+                        )}
+
+                        <LineChart data={chartData} />
+                    </div>
+                </Section>
 
                 {dexChart.data.length > 0 && (
-                    <>
-                        <Title mt="md" order={4}>
-                            {mt('dex_events')}
-                        </Title>
-                        <BarChart
-                            h={100}
-                            data={dexChart.data}
-                            dataKey="month"
-                            type="percent"
-                            orientation="vertical"
-                            withLegend
-                            legendProps={{ verticalAlign: 'bottom', height: 50 }}
-                            series={dexChart.series}
-                            tickLine="none"
-                            gridAxis="none"
-                            withXAxis={false}
-                            withYAxis={false}
-                        />
-                    </>
+                    <Section className={commonClasses.sectionBox} header={mt('dex_events')}>
+                        <div style={{ padding: 10 }}>
+                            <BarChart data={dexChart.data} colors={dexChart.colors} />
+                        </div>
+                    </Section>
                 )}
 
                 {stat.yearsKeys.length > 1 && (
-                    <>
-                        <Title mt="md" order={4}>
-                            {mt('grouped_by_years')}
-                        </Title>
-
+                    <Section className={commonClasses.sectionBox} header={mt('grouped_by_years')}>
                         {stat.yearsKeys.map((year, key) => (
-                            <div key={key}>
-                                {key > 0 && <Divider my={3} />}
-                                <Button
-                                    variant="subtle"
-                                    justify="space-between"
-                                    rightSection={
-                                        <Group>
-                                            <Text c="dimmed" size="xs">
-                                                {formatNumber(stat.years[year].eventsCount)}
-                                            </Text>
-                                            <IconInfoSquareRounded size={16} />
-                                        </Group>
-                                    }
-                                    fullWidth
-                                    onClick={() => openPeriod(year, stat.years[year])}
-                                >
-                                    {year}
-                                </Button>
-                            </div>
+                            <Cell
+                                key={key}
+                                after={formatNumber(stat.years[year].eventsCount)}
+                                onClick={() => {
+                                    setSelectedPeriod(stat.years[year]);
+                                }}
+                            >
+                                {year}
+                            </Cell>
                         ))}
-                    </>
+                    </Section>
                 )}
 
                 {stat.monthsKeys.length > 1 && (
-                    <>
-                        <Title mt="md" order={4}>
-                            {mt('grouped_by_months')}
-                        </Title>
-
+                    <Section className={commonClasses.sectionBox} header={mt('grouped_by_years')}>
                         {stat.monthsKeys.map((month, key) => (
-                            <div key={key}>
-                                {key > 0 && <Divider my={3} />}
-                                <Button
-                                    variant="subtle"
-                                    justify="space-between"
-                                    rightSection={
-                                        <Group>
-                                            <Text c="dimmed" size="xs">
-                                                {formatNumber(stat.months[month].eventsCount)}
-                                            </Text>
-                                            <IconInfoSquareRounded size={16} />
-                                        </Group>
-                                    }
-                                    fullWidth
-                                    onClick={() => {
-                                        openPeriod(dayjs(month, 'MM.YYYY').format('MMM YY'), stat.months[month]);
-                                    }}
-                                >
-                                    {dayjs(month, 'MM.YYYY').format('MMM YY')}
-                                </Button>
-                            </div>
+                            <Cell
+                                key={key}
+                                after={formatNumber(stat.months[month].eventsCount)}
+                                onClick={() => {
+                                    setSelectedPeriod(stat.months[month]);
+                                }}
+                            >
+                                {dayjs(month, 'MM.YYYY').format('MMM YY')}
+                            </Cell>
                         ))}
-                    </>
+                    </Section>
+                )}
+
+                {selectedPeriod && (
+                    <Modal
+                        header={<ModalHeader />}
+                        open={Boolean(selectedPeriod)}
+                        onOpenChange={(open) => {
+                            if (!open) {
+                                setSelectedPeriod(null);
+                            }
+                        }}
+                    >
+                        {CountBlock(selectedPeriod, mt('counts'))}
+                        {EventsBlock(selectedPeriod, mt('events'))}
+                    </Modal>
                 )}
             </>
         );
     }
-
-    return null;
 }

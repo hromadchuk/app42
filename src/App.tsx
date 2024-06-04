@@ -1,30 +1,23 @@
-import { PropsWithChildren, useEffect, useState } from 'react';
-import { AppShell, Center, Loader, MantineProvider } from '@mantine/core';
-import { useColorScheme } from '@mantine/hooks';
-import { TonConnectUIProvider } from '@tonconnect/ui-react';
-import { ModalsProvider } from '@mantine/modals';
-import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { IconButton, Snackbar } from '@telegram-apps/telegram-ui';
+import { IconX } from '@tabler/icons-react';
+import ReactGA from 'react-ga4';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { useBackButton, useCloudStorage, useLaunchParams, useMiniApp, useViewport } from '@tma.js/sdk-react';
+import { Locales, useTonAddress, useTonConnectModal, useTonConnectUI } from '@tonconnect/ui-react';
 import { Api, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
-import { AppContext, IInitData } from './contexts/AppContext.tsx';
-import { SDKProvider, useBackButton, useCloudStorage, useMiniApp, useSDKContext, useViewport } from '@tma.js/sdk-react';
-import { AppNotifications } from './components/AppNotifications.tsx';
 import { Constants } from './constants.ts';
-import { clearOldCache } from './lib/cache.ts';
-import { decodeString, getParams, isDev, isDevUser, Server } from './lib/helpers.ts';
+import { clearOldCache, getCache, removeCache, setCache } from './lib/cache.ts';
+import { decodeString, getCurrentUser, getParams, isDev, Server, wrapCallMAMethod } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
-import { setColors } from './lib/theme.ts';
-import { TonApiCall } from './lib/TonApi.ts';
-import { IRouter, routes } from './routes.tsx';
-import ReactGA from 'react-ga4';
+import { AuthType, getMethodById, IMethod, IRouter, MethodCategory, routes } from './routes.tsx';
 
-import { AppFooter } from './components/AppFooter.tsx';
+import { IShareOptions, ShareModal } from './modals/ShareModal.tsx';
+import { AccountsModal } from './modals/AccountsModal.tsx';
+import { AuthorizationModal } from './modals/AuthorizationModal.tsx';
 
-import '@mantine/core/styles.css';
-import '@mantine/dates/styles.css';
-import '@mantine/carousel/styles.css';
-import '@mantine/charts/styles.css';
-import './App.css';
+import { AppContext, IInitData, ISnackbarOptions } from './contexts/AppContext.tsx';
 
 declare global {
     interface Window {
@@ -33,27 +26,142 @@ declare global {
         isProgress: boolean;
         isNeedToThrowErrorOnRequest: boolean;
         alreadyVisitedRefLink: boolean;
+        showSnackbar: (options: ISnackbarOptions) => void;
+        hideSnackbar: () => void;
         eruda: { init: () => void };
     }
 }
 
-const App = () => {
+export function App() {
     const miniApp = useMiniApp();
     const viewport = useViewport();
     const backButton = useBackButton();
     const storage = useCloudStorage();
-    const navigate = useNavigate();
     const location = useLocation();
+    const navigate = useNavigate();
+    const currentLocation = useLocation();
+    const launchParams = useLaunchParams();
+    const tonWallet = useTonAddress();
+    const { open: tonAuth } = useTonConnectModal();
+    const [, setOptions] = useTonConnectUI();
 
     const [user, setUser] = useState<null | Api.User>(null);
+    const [isAccountsModalOpen, setAccountsModalOpen] = useState(false);
+    const [isShareModalOpen, setShareModalOpen] = useState(false);
+    const [shareModalData, setShareModalData] = useState<IShareOptions | null>(null);
+    const [isAuthorizationModalOpen, setAuthorizationModalOpen] = useState(false);
     const [initData, setInitData] = useState<null | IInitData>(null);
-    const [isAppLoading, setAppLoading] = useState<boolean>(false);
+    const [snackbarOptions, setSnackbarOptions] = useState<null | ISnackbarOptions>(null);
+
+    const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
+
+    useEffect(() => {
+        const MALib = getComputedStyle(document.querySelector('#root > div') as Element);
+        const body = document.body.style;
+
+        const backgroundColor = MALib.getPropertyValue('--tgui--secondary_bg_color');
+        const textColor = MALib.getPropertyValue('--tgui--text_color');
+
+        body.setProperty('--app-background-color', backgroundColor);
+        body.setProperty('--app-text-color', textColor);
+
+        backButton.on('click', () => {
+            navigate('/');
+        });
+
+        window.showSnackbar = (options: ISnackbarOptions) => setSnackbarOptions(options);
+        window.hideSnackbar = () => setSnackbarOptions(null);
+    }, []);
+
+    useEffect(() => {
+        if (['/'].includes(currentLocation.pathname)) {
+            wrapCallMAMethod(() => backButton.hide());
+            wrapCallMAMethod(() => {
+                miniApp.setHeaderColor(launchParams.themeParams.headerBackgroundColor as `#${string}`);
+            });
+        } else {
+            wrapCallMAMethod(() => backButton.show());
+        }
+    }, [currentLocation]);
+
+    useEffect(() => {
+        if (!tonWallet) {
+            return;
+        }
+
+        getCache(Constants.AUTH_STATE_METHOD_KEY).then((value) => {
+            if (value) {
+                const { methodPath, authType } = value as {
+                    methodPath: string;
+                    authType: AuthType;
+                };
+
+                if (authType === AuthType.TON) {
+                    removeCache(Constants.AUTH_STATE_METHOD_KEY);
+                    navigate(methodPath as string);
+                }
+            }
+        });
+    }, [tonWallet]);
+
+    useEffect(() => {
+        setOptions({ language: getAppLangCode() as Locales });
+
+        (async () => {
+            // TODO return onboarding
+            // const isOnboardingCompleted = await checkIsOnboardingCompleted();
+            // if (!isOnboardingCompleted) {
+            //     setShowOnboarding(true);
+            // }
+
+            if (initData) {
+                if (!user && initData?.status === 'ok') {
+                    const storageSessionHashed = isDev
+                        ? await getCache(Constants.SESSION_KEY)
+                        : await wrapCallMAMethod<string>(() => storage.get(Constants.SESSION_KEY));
+                    const storageSession = storageSessionHashed
+                        ? decodeString(storageSessionHashed as string, initData?.storageHash || '')
+                        : null;
+                    console.log('storageSession', Boolean(storageSession));
+                    if (storageSession) {
+                        setUser(await getCurrentUser());
+                    }
+                }
+
+                const param = new URLSearchParams(location.search).get('tgWebAppStartParam');
+                const value = await getCache(Constants.AUTH_STATE_METHOD_KEY);
+
+                if (value) {
+                    if (value) {
+                        const { methodId, authType } = value as {
+                            methodId: string;
+                            authType: AuthType;
+                        };
+
+                        if (authType === AuthType.TG) {
+                            const method = getMethodById(methodId);
+                            method && openMethod(method);
+                        }
+                    }
+                } else if (param === 'cn' && !window.alreadyVisitedRefLink) {
+                    const method = getMethodById('contacts_names');
+                    method && openMethod(method);
+                }
+
+                if (isDev) {
+                    // TODO only test
+                    // const method = getMethodById('clear_dialog_members');
+                    // method && openMethod(method);
+                }
+            }
+        })();
+    }, [initData]);
 
     useEffect(() => {
         (async () => {
             // init mini app
-            miniApp.ready();
-            viewport.expand();
+            wrapCallMAMethod(() => miniApp.ready());
+            wrapCallMAMethod(() => viewport.expand());
 
             backButton.on('click', () => {
                 navigate('/');
@@ -92,7 +200,12 @@ const App = () => {
             // init app
             let storageSession = '';
             try {
-                storageSession = decodeString(await storage.get(Constants.SESSION_KEY), serverData?.storageHash || '');
+                const storageSessionHashed = isDev
+                    ? await getCache(Constants.SESSION_KEY)
+                    : await wrapCallMAMethod<string>(() => storage.get(Constants.SESSION_KEY));
+                storageSession = storageSessionHashed
+                    ? decodeString(storageSessionHashed as string, serverData?.storageHash || '')
+                    : '';
             } catch (error) {
                 console.log('Error get session from storage', error);
             }
@@ -116,14 +229,14 @@ const App = () => {
             if (!currentVersion) {
                 localStorage.setItem(versionKey, version);
             } else if (currentVersion !== version) {
-                const isOnboardingCompleted = await checkIsOnboardingCompleted();
+                // const isOnboardingCompleted = await checkIsOnboardingCompleted();
 
                 localStorage.removeItem('GramJs:apiCache');
                 localStorage.setItem(versionKey, version);
 
-                if (isOnboardingCompleted) {
-                    await markOnboardingAsCompleted();
-                }
+                // if (isOnboardingCompleted) {
+                //     await markOnboardingAsCompleted();
+                // }
 
                 window.location.reload();
                 return;
@@ -137,121 +250,112 @@ const App = () => {
                 }
             });
 
-            window.addEventListener('message', ({ data }) => {
-                const { eventType, eventData } = JSON.parse(data);
-
-                if (eventType !== 'viewport_changed') {
-                    console.log('event', eventType, '=>', eventData);
-                }
-
-                if (eventType === 'theme_changed') {
-                    setColors(eventData.theme_params);
-                }
-            });
-
-            console.log({ isDevUser });
-            if (isDevUser) {
-                sendSecureData({ test: 1, test2: [1, '21', { test4: 4 }] });
-                console.log('sendSecureData');
-            }
+            // window.addEventListener('message', ({ data }) => {
+            //     const { eventType, eventData } = JSON.parse(data);
+            //
+            //     if (eventType !== 'viewport_changed') {
+            //         console.log('event', eventType, '=>', eventData);
+            //     }
+            //
+            //     if (eventType === 'theme_changed') {
+            //         setColors(eventData.theme_params);
+            //     }
+            // });
         })();
     }, []);
 
-    useEffect(() => {
-        if (!isDev) {
-            ReactGA.send({ hitType: 'pageview', page: location.pathname });
+    function openMethod(method: IMethod, categoryId?: MethodCategory) {
+        const categoryPath = categoryId || method.categories[0];
+        const methodPath = `/methods/${categoryPath}/${method.id}`;
+        const data = { methodId: method.id, methodPath, authType: method.authType };
+
+        if (method.authType === AuthType.TON) {
+            if (tonWallet) {
+                window.alreadyVisitedRefLink = true;
+                navigate(methodPath);
+            } else {
+                setCache(Constants.AUTH_STATE_METHOD_KEY, data, 15).then(() => {
+                    tonAuth();
+                });
+            }
         }
 
-        const excludeBackButton = ['/'];
-
-        if (excludeBackButton.includes(location.pathname)) {
-            backButton.hide();
-        } else {
-            backButton.show();
+        if (method.authType === AuthType.TG) {
+            if (user) {
+                window.alreadyVisitedRefLink = true;
+                navigate(methodPath);
+            } else {
+                setCache(Constants.AUTH_STATE_METHOD_KEY, data, 15).then(() => {
+                    setAuthorizationModalOpen(true);
+                });
+            }
         }
-    }, [location]);
-
-    function sendSecureData(data: object) {
-        miniApp.sendData(JSON.stringify(data));
     }
 
-    async function markOnboardingAsCompleted(): Promise<void> {
-        await storage.set(Constants.ONBOARDING_COMPLETED_KEY, '1');
+    function showShareModal(options: IShareOptions) {
+        setShareModalData(options);
+        setShareModalOpen(true);
     }
-
-    async function checkIsOnboardingCompleted(): Promise<boolean> {
-        return Boolean(await storage.get(Constants.ONBOARDING_COMPLETED_KEY));
-    }
-
-    const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
 
     return (
         <AppContext.Provider
             value={{
                 user,
                 setUser,
+                openMethod,
+                setAccountsModalOpen,
                 initData,
                 setInitData,
-                isAppLoading,
-                setAppLoading,
-                markOnboardingAsCompleted,
-                checkIsOnboardingCompleted,
-                sendSecureData
+                showShareModal
             }}
         >
             <Routes>{routes.map(GetRouter)}</Routes>
-            <AppFooter />
-            <AppNotifications />
+
+            <AccountsModal isOpen={isAccountsModalOpen} onOpenChange={(open) => setAccountsModalOpen(open)} />
+            <ShareModal
+                isOpen={isShareModalOpen}
+                onOpenChange={(open) => {
+                    setShareModalOpen(open);
+
+                    if (!open) {
+                        setShareModalData(null);
+                    }
+                }}
+                modalData={shareModalData}
+            />
+            <AuthorizationModal
+                isOpen={isAuthorizationModalOpen}
+                onOpenChange={(open) => setAuthorizationModalOpen(open)}
+                onAuthComplete={() => {
+                    getCache(Constants.AUTH_STATE_METHOD_KEY).then((value) => {
+                        if (value) {
+                            const { methodPath } = value as { methodPath: string };
+
+                            window.alreadyVisitedRefLink = true;
+                            navigate(methodPath);
+                            removeCache(Constants.AUTH_STATE_METHOD_KEY);
+                        }
+                    });
+                }}
+            />
+
+            {snackbarOptions && (
+                <Snackbar
+                    before={snackbarOptions.icon}
+                    after={
+                        snackbarOptions.type !== 'loading' && (
+                            <IconButton mode="plain" size="s" onClick={() => setSnackbarOptions(null)}>
+                                <IconX />
+                            </IconButton>
+                        )
+                    }
+                    description={snackbarOptions.message}
+                    duration={snackbarOptions.duration}
+                    onClose={() => setSnackbarOptions(null)}
+                >
+                    {snackbarOptions.title}
+                </Snackbar>
+            )}
         </AppContext.Provider>
     );
-};
-
-function MiniAppLoader({ children }: PropsWithChildren) {
-    const { loading, initResult, error } = useSDKContext();
-
-    if (!loading && !error && !initResult) {
-        return (
-            <Center h={100} mx="auto">
-                SDK init function is not yet called.
-            </Center>
-        );
-    }
-
-    if (error) {
-        return (
-            <Center h={100} mx="auto">
-                Something went wrong: {error instanceof Error ? error.message : JSON.stringify(error)}
-            </Center>
-        );
-    }
-
-    if (loading) {
-        return (
-            <Center h={100} mx="auto">
-                <Loader />
-            </Center>
-        );
-    }
-
-    return <>{children}</>;
 }
-
-const MiniAppWrapper = () => (
-    <SDKProvider options={{ async: true }}>
-        <TonConnectUIProvider manifestUrl={TonApiCall.manifestUrl}>
-            <MantineProvider forceColorScheme={useColorScheme()}>
-                <ModalsProvider>
-                    <MiniAppLoader>
-                        <MemoryRouter>
-                            <AppShell>
-                                <App />
-                            </AppShell>
-                        </MemoryRouter>
-                    </MiniAppLoader>
-                </ModalsProvider>
-            </MantineProvider>
-        </TonConnectUIProvider>
-    </SDKProvider>
-);
-
-export default MiniAppWrapper;

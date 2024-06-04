@@ -1,34 +1,27 @@
-import { useContext, useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Box, Center, Container, Notification, Progress, Text } from '@mantine/core';
-import { IconCircleCheck, IconExclamationCircle } from '@tabler/icons-react';
-import { ListAction } from '../components/ListAction.tsx';
-import { Api } from 'telegram';
-
-import { AppContext } from '../contexts/AppContext.tsx';
-import {
-    IFinishBlock,
-    IGetDialogOption,
-    IProgress,
-    ISetListAction,
-    MethodContext
-} from '../contexts/MethodContext.tsx';
-import { CallAPI, formatNumber, Server, sleep, TOwnerType } from '../lib/helpers.ts';
-import { IRouter, routes } from '../routes.tsx';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { IFinishBlock, IProgress, ISetListAction, MethodContext } from '../contexts/MethodContext.tsx';
+import { Server } from '../lib/helpers.ts';
 import { t, td } from '../lib/lang.ts';
+import { getMethodById, MethodCategory } from '../routes.tsx';
+import { getCardById } from '../cards.ts';
+import { ListAction } from '../components/ListAction.tsx';
+import { PageHeader } from '../components/PageHeader.tsx';
+import { MethodLoader } from '../components/MethodLoader.tsx';
+import { MethodPlaceholder } from '../components/MethodPlaceholder.tsx';
 
 // TODO need fix this, progress always null in child components
 let progressSafe: IProgress | null = null;
 
 export default function AbstractMethod() {
-    const location = useLocation();
-    const { setAppLoading } = useContext(AppContext);
+    const categoryId = useParams().categoryId as MethodCategory;
+    const methodId = useParams().methodId as string;
+    const card = getCardById(categoryId);
+    const method = getMethodById(methodId);
 
     const [progress, _setProgress] = useState<IProgress | null>();
     const [finishBlock, _setFinishBlock] = useState<IFinishBlock>();
-    const [listAction, _setListAction] = useState<ISetListAction | null>(null);
-
-    const routerInfo = routes.find((router: IRouter) => router.path === location.pathname) as IRouter;
+    const [listAction, setListAction] = useState<ISetListAction | null>(null);
 
     const needHideContent = (): boolean => {
         return [progress, finishBlock, listAction].some(Boolean);
@@ -52,13 +45,11 @@ export default function AbstractMethod() {
             progressSafe = data;
         }
 
-        setAppLoading(Boolean(progressSafe));
-
         _setProgress(progressSafe);
     };
 
     useEffect(() => {
-        Server('method', { method: routerInfo.methodId });
+        Server('method', { method: method.id });
 
         return () => setProgress(null);
     }, []);
@@ -73,153 +64,20 @@ export default function AbstractMethod() {
     };
 
     const mt = (key: string): string => {
-        return t(`methods.${routerInfo.methodId}.${key}`);
+        return t(`methods.${method.id}.${key}`);
     };
 
     const md = (key: string): string[] => {
-        return td(`methods.${routerInfo.methodId}.${key}`);
+        return td(`methods.${method.id}.${key}`);
     };
 
-    const setListAction = ({ buttonText, loadingText, owners, requestSleep, action }: ISetListAction) => {
-        _setListAction({
-            buttonText,
-            loadingText,
-            owners,
-            requestSleep,
-            action
-        });
-    };
-
-    const getDialogs = async (options: IGetDialogOption): Promise<TOwnerType[]> => {
-        const { types } = options;
-
-        const allDialogs: TOwnerType[] = [];
-
-        setProgress({ text: t('common.getting_dialogs') });
-
-        const params = {
-            offsetPeer: new Api.InputPeerEmpty(),
-            limit: 100,
-            offsetDate: 0
-        };
-
-        while (true) {
-            const { count, chats, users, dialogs, messages } = (await CallAPI(
-                new Api.messages.GetDialogs(params)
-            )) as Api.messages.DialogsSlice;
-
-            setProgress({
-                total: count || dialogs.length,
-                addCount: dialogs.length
-            });
-
-            if (count > 2000) {
-                await sleep(333);
-            }
-
-            if (dialogs.length) {
-                dialogs.forEach((dialog) => {
-                    if (dialog.peer instanceof Api.PeerUser && types.includes(Api.User)) {
-                        const findUser = users.find(
-                            (user) => user.id.valueOf() === (dialog.peer as Api.PeerUser).userId.valueOf()
-                        ) as Api.User;
-
-                        allDialogs.push(findUser);
-                    } else if (dialog.peer instanceof Api.PeerChat && types.includes(Api.Chat)) {
-                        const findChat = chats.find(
-                            (chat) => chat.id.valueOf() === (dialog.peer as Api.PeerChat).chatId.valueOf()
-                        ) as Api.Chat;
-
-                        // skip system chats
-                        if (findChat.migratedTo) {
-                            return;
-                        }
-
-                        allDialogs.push(findChat);
-                    } else if (dialog.peer instanceof Api.PeerChannel && types.includes(Api.Channel)) {
-                        const findChannel = chats.find(
-                            (channel) => channel.id.valueOf() === (dialog.peer as Api.PeerChannel).channelId.valueOf()
-                        ) as Api.Channel;
-
-                        allDialogs.push(findChannel);
-                    }
-                });
-
-                const lastDialog = dialogs[dialogs.length - 1];
-                const dialogPeer = JSON.stringify(lastDialog.peer.toJSON());
-
-                const lastMessage = messages.find((message) => {
-                    return JSON.stringify((message as Api.Message).peerId.toJSON()) === dialogPeer;
-                }) as Api.Message;
-
-                params.offsetDate = lastMessage.date;
-            } else {
-                break;
-            }
-        }
-
-        const filteredDialogs = allDialogs.reduce(
-            (result, dialog) => {
-                if (!result.ids.includes(dialog.id.valueOf())) {
-                    result.list.push(dialog);
-                    result.ids.push(dialog.id.valueOf());
-                }
-
-                return result;
-            },
-            { list: [], ids: [] } as { list: TOwnerType[]; ids: number[] }
-        );
-
-        setProgress(null);
-
-        return filteredDialogs.list;
-    };
-
-    const HelperBlock = () => {
+    function HelpersBlock() {
         if (progress) {
-            let percent = 100;
-            const counts: number[] = [];
-
-            if (progress.count !== undefined) {
-                counts.push(progress.count);
-            }
-
-            if (progress.total !== undefined) {
-                if (progress.count === undefined) {
-                    progress.count = 0;
-                    counts.push(progress.count);
-                }
-
-                counts.push(progress.total);
-                percent = Math.floor((progress.count / progress.total) * 100);
-            }
-
-            return (
-                <>
-                    {progress.warningText && (
-                        <Notification withCloseButton={false} mb="xl" color="orange">
-                            {progress.warningText}
-                        </Notification>
-                    )}
-                    <Progress value={percent} animated />
-                    <Text ta="center" size="xs">
-                        {progress.text || t('common.progress')}
-                        {counts.length > 0 && ` (${counts.map(formatNumber).join(' / ')})`}
-                    </Text>
-                </>
-            );
+            return <MethodLoader {...progress} />;
         }
 
         if (finishBlock) {
-            return (
-                <Box p="lg">
-                    <Center>
-                        {finishBlock.state === 'error' && <IconExclamationCircle size={50} color="#E03131" />}
-                        {finishBlock.state === 'done' && <IconCircleCheck size={50} color="#2F9E44" />}
-                    </Center>
-                    <Center ta="center">{finishBlock.text}</Center>
-                </Box>
-            );
+            return <MethodPlaceholder {...finishBlock} />;
         }
 
         if (listAction) {
@@ -227,7 +85,7 @@ export default function AbstractMethod() {
         }
 
         return null;
-    };
+    }
 
     return (
         <MethodContext.Provider
@@ -242,14 +100,19 @@ export default function AbstractMethod() {
                 md,
                 t,
                 td,
-                getDialogs,
                 setListAction
             }}
         >
-            <Container mt="xs" p="xs">
-                {HelperBlock()}
-                {routerInfo.childElement}
-            </Container>
+            <PageHeader header={method.name} subheader={t(`menu.cards.${categoryId}`)} color={card.color} />
+
+            {HelpersBlock()}
+            {method.element || (
+                <>
+                    <div>Method not found</div>
+                    <div>categoryId: {categoryId}</div>
+                    <div>methodId: {methodId}</div>
+                </>
+            )}
         </MethodContext.Provider>
     );
 }

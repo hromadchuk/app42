@@ -1,0 +1,27 @@
+.codeSection {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    gap: 16px;
+    margin-top: 32px;
+
+    input {
+        font-size: 18px;
+
+        color: inherit;
+        text-align: center;
+
+        width: 30px;
+        height: 40px;
+
+        border-radius: 12px;
+        background: none;
+        border: 1px solid var(--tgui--outline);
+        outline: none;
+
+        &:focus {
+            border-color: var(--tgui--accent_text_color);
+        }
+    }
+}

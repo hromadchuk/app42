@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
+import { Image } from '@telegram-apps/telegram-ui';
 import { IconPhoto } from '@tabler/icons-react';
-import { useIntersection } from '@mantine/hooks';
+import { useIntersection } from '../hooks/useIntersection.ts';
 import { getMediaPhoto } from '../lib/helpers.ts';
-import { ExAvatar } from './ExAvatar.tsx';
 import { Api } from 'telegram';
 
 export function RecordPhoto({ photo }: { photo?: Api.TypePhoto }) {
-    const { ref, entry } = useIntersection();
+    const [ref, entry] = useIntersection({
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1
+    });
     const [alreadyRequested, setAlreadyRequested] = useState<boolean>(false);
     const [mediaPhoto, setMediaPhoto] = useState<null | string>(null);
 
@@ -21,23 +25,16 @@ export function RecordPhoto({ photo }: { photo?: Api.TypePhoto }) {
         }
     }, [entry?.isIntersecting]);
 
-    function Avatar({ src, children }: { src?: string; children?: JSX.Element }) {
-        return (
-            <ExAvatar src={src} radius="xs" size="lg">
-                {children}
-            </ExAvatar>
-        );
-    }
-
     if (mediaPhoto) {
-        return <Avatar src={mediaPhoto} />;
+        return <Image src={mediaPhoto} />;
     }
 
     return (
+        // @ts-ignore
         <div ref={ref}>
-            <Avatar>
+            <Image>
                 <IconPhoto size={24} />
-            </Avatar>
+            </Image>
         </div>
     );
 }

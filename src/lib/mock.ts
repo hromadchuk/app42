@@ -37,11 +37,11 @@ export function ServerMock<T>(method: string) {
                 },
                 {
                     ownerWallet: '0:d8cd999fb2b1b384e6ca254c3883375e23111a8b78c015b886286c31bf11e29d',
-                    username: 'paul'
+                    username: 'myth'
                 },
                 {
                     ownerWallet: '0:d8cd999fb2b1b384e6ca254c3883375e23111a8b78c015b886286c31bf11e29d',
-                    username: 'paulo'
+                    username: 'nerd'
                 }
             ],
             numbers: [

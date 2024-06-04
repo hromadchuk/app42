@@ -1,11 +1,14 @@
 import { useContext, useState } from 'react';
-import { ActionIcon, Button, CopyButton, Input, Space, TextInput } from '@mantine/core';
-import { IconAt, IconCheck, IconCopy } from '@tabler/icons-react';
+import { Button, Input, Section, Tappable } from '@telegram-apps/telegram-ui';
+import { IconAt, IconX } from '@tabler/icons-react';
 import { Api } from 'telegram';
+import { CopyButton } from '../components/CopyButton.tsx';
 import { CallAPI, TOwnerInfo } from '../lib/helpers.ts';
+import { OwnerRow } from '../components/OwnerRow.tsx';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
-import { OwnerRow } from '../components/OwnerRow.tsx';
+
+import commonClasses from '../styles/Common.module.css';
 
 export default function GetId() {
     const { mt, needHideContent } = useContext(MethodContext);
@@ -24,7 +27,10 @@ export default function GetId() {
             const result = await CallAPI(
                 new Api.contacts.ResolveUsername({
                     username
-                })
+                }),
+                {
+                    hideErrorAlert: true
+                }
             );
 
             if (result.users.length) {
@@ -44,55 +50,56 @@ export default function GetId() {
 
     if (needHideContent()) return null;
 
-    const ResultRow = () => {
-        if (!ownerInfo) {
-            return null;
-        }
-
-        return (
-            <>
-                <OwnerRow owner={ownerInfo} />
-                <TextInput
-                    value={ownerInfo?.id.toString()}
-                    readOnly
-                    mt="xs"
-                    rightSection={
-                        <CopyButton value={ownerInfo.id.toString()} timeout={2000}>
-                            {({ copied, copy }) => (
-                                <ActionIcon variant="transparent" color={copied ? 'teal' : 'gray'} onClick={copy}>
-                                    {copied ? <IconCheck /> : <IconCopy />}
-                                </ActionIcon>
-                            )}
-                        </CopyButton>
-                    }
-                />
-            </>
-        );
-    };
-
     return (
         <>
-            <Input.Wrapper error={inputError}>
+            <Section className={commonClasses.sectionBox}>
                 <Input
-                    leftSection={<IconAt />}
                     placeholder={mt('input_placeholder')}
+                    value={username}
+                    status={inputError ? 'error' : 'default'}
+                    header={inputError}
+                    before={<IconAt size={24} />}
                     onChange={(event) => setUsername(event.target.value)}
-                    error={Boolean(inputError)}
+                    after={
+                        <Tappable
+                            Component="div"
+                            style={{
+                                display: 'flex',
+                                opacity: 0.5
+                            }}
+                            onClick={() => setUsername('')}
+                        >
+                            <IconX size={16} />
+                        </Tappable>
+                    }
                 />
-            </Input.Wrapper>
-            <Button
-                fullWidth
-                variant="outline"
-                mt="xs"
-                onClick={getOwnerInfo}
-                loading={isLoading}
-                disabled={!username.length}
-            >
-                {mt('button_get')}
-            </Button>
-            <Space mt="xs" />
 
-            {ResultRow()}
+                <div style={{ padding: 10 }}>
+                    <Button
+                        stretched
+                        size="l"
+                        loading={isLoading}
+                        disabled={!username.length || isLoading}
+                        onClick={getOwnerInfo}
+                    >
+                        {mt('button_get')}
+                    </Button>
+                </div>
+            </Section>
+
+            {ownerInfo && (
+                <Section className={commonClasses.sectionBox}>
+                    <div style={{ paddingTop: 8 }}>
+                        <OwnerRow owner={ownerInfo} />
+                    </div>
+
+                    <Input
+                        after={<CopyButton value={ownerInfo.id.toString()} />}
+                        value={ownerInfo.id.valueOf()}
+                        readOnly
+                    />
+                </Section>
+            )}
         </>
     );
 }

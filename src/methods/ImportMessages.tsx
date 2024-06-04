@@ -1,29 +1,18 @@
 import { createElement, useContext, useEffect, useState } from 'react';
-import {
-    Button,
-    CloseButton,
-    FileButton,
-    Input,
-    Notification,
-    Stack,
-    Text,
-    Title,
-    UnstyledButton
-} from '@mantine/core';
-import { IconBrandFacebook, IconBrandInstagram, IconBrandVk, IconSearch } from '@tabler/icons-react';
+import { Avatar, Blockquote, Cell, FileInput, Input, Placeholder, Section } from '@telegram-apps/telegram-ui';
+import { IconBrandFacebook, IconBrandInstagram, IconBrandVk, IconCheck, IconSearch } from '@tabler/icons-react';
 import { Buffer } from 'buffer';
 import JSZip from 'jszip';
 import dayjs from 'dayjs';
 import { Api } from 'telegram';
 import { CustomFile } from 'telegram/client/uploads';
-import { ExAvatar } from '../components/ExAvatar.tsx';
-
-import { MethodContext } from '../contexts/MethodContext.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { CallAPI, getDocLink, parallelLimit } from '../lib/helpers.ts';
-import { getAppLangCode, LangType, t } from '../lib/lang.ts';
+import { getAppLangCode, LangType } from '../lib/lang.ts';
 
-import classes from '../styles/MenuPage.module.css';
+import { MethodContext } from '../contexts/MethodContext.tsx';
+
+import commonClasses from '../styles/Common.module.css';
 
 enum ImportType {
     VK = 'vk',
@@ -106,7 +95,6 @@ export default function ImportMessages() {
     const [fileUsers, setFileUsers] = useState<IFileUser[]>([]);
     const [file, setFile] = useState<File | null>(null);
     const [selectedUserFrom, setSelectedUserFrom] = useState<IFileUser | null>(null);
-    const [isLoading, setLoading] = useState<boolean>(false);
     const [errorText, setErrorText] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -119,7 +107,6 @@ export default function ImportMessages() {
     }, [file]);
 
     async function readFile(uploadedFile: File) {
-        setLoading(true);
         setErrorText(null);
 
         const archive = await new JSZip().loadAsync(uploadedFile);
@@ -127,7 +114,6 @@ export default function ImportMessages() {
 
         const path = files.includes('messages.json') || files.find((filePath) => filePath.endsWith('messages/'));
         if (!path) {
-            setLoading(false);
             setErrorText(mt('errors.no_messages'));
             return;
         }
@@ -135,12 +121,9 @@ export default function ImportMessages() {
         const users = await getUsers(archive, files);
 
         if (!users.length) {
-            setLoading(false);
             setErrorText(mt('errors.no_users'));
             return;
         }
-
-        setLoading(false);
 
         if (importType === ImportType.VK) {
             selectUserFrom(users[0]);
@@ -420,42 +403,54 @@ export default function ImportMessages() {
 
     function RadioRow({ type }: { type: ImportType }) {
         const icon = createElement(icons[type], { size: 14 });
-        const variant = importType === type ? 'light' : 'default';
+        const isSelected = importType === type;
 
         return (
-            <Button leftSection={icon} variant={variant} onClick={() => setImportType(type)}>
+            <Cell
+                key={type}
+                Component="label"
+                // before={<Radio name="social" value={type} />}
+                before={icon}
+                after={isSelected && <IconCheck size={12} />}
+                style={{ borderLeft: isSelected ? '3px solid var(--tgui--link_color)' : 'none' }}
+                onClick={() => setImportType(type)}
+            >
                 {mt(`networks.${type}`)}
-            </Button>
+            </Cell>
         );
     }
 
     function FixFileButton() {
         return (
-            // @ts-ignore fix incorrect props for FileButtonProps
-            <FileButton onChange={setFile} accept=".zip" mt="md" fullWidth loading={isLoading}>
-                {(props) => (
-                    <Button disabled={!importType} {...props}>
-                        {mt('button_import')}
-                    </Button>
-                )}
-            </FileButton>
+            <FileInput
+                multiple
+                label={mt('button_import')}
+                disabled={!importType}
+                onChange={(e) => {
+                    // @ts-ignore
+                    setFile(e.currentTarget.files[0]);
+                }}
+                accept=".zip"
+            />
         );
     }
 
     if (selectedUserFrom) {
         return (
             <>
-                <Notification withCloseButton={false} mb="sm">
-                    {mt('select_move_message_to')}
-                </Notification>
+                <Section className={commonClasses.sectionBox}>
+                    <Blockquote>{mt('select_move_message_to')}</Blockquote>
+                </Section>
 
-                <SelectDialog
-                    allowTypes={[EOwnerType.user]}
-                    selfIgnore={true}
-                    onOwnerSelect={(owner) => {
-                        selectUserTo(owner as Api.User);
-                    }}
-                />
+                <Section className={commonClasses.sectionBox}>
+                    <SelectDialog
+                        allowTypes={[EOwnerType.user]}
+                        selfIgnore={true}
+                        onOwnerSelect={(owner) => {
+                            selectUserTo(owner as Api.User);
+                        }}
+                    />
+                </Section>
             </>
         );
     }
@@ -463,64 +458,60 @@ export default function ImportMessages() {
     if (fileUsers.length) {
         return (
             <>
-                <Notification withCloseButton={false}>
-                    {mt('select_move_message_from').replace('{network}', mt(`networks.${importType}`))}
-                </Notification>
+                <Section className={commonClasses.sectionBox}>
+                    <Blockquote>
+                        {mt('select_move_message_from').replace('{network}', mt(`networks.${importType}`))}
+                    </Blockquote>
+                </Section>
 
-                <Input
-                    leftSection={<IconSearch />}
-                    mt="sm"
-                    mb="sm"
-                    placeholder={t('search_placeholder')}
-                    value={searchQuery}
-                    rightSectionPointerEvents="all"
-                    rightSection={searchQuery && <CloseButton onClick={() => setSearchQuery('')} />}
-                    onChange={(event) => setSearchQuery(event.currentTarget.value)}
-                />
+                <Section className={commonClasses.sectionBox}>
+                    <Input
+                        before={<IconSearch opacity={0.3} />}
+                        placeholder={mt('search_placeholder')}
+                        value={searchQuery}
+                        onChange={(event) => setSearchQuery(event.currentTarget.value)}
+                    />
 
-                {filterList(fileUsers).map((user, key) => (
-                    <UnstyledButton key={key} className={classes.link} onClick={() => selectUserFrom(user)}>
-                        <ExAvatar id={key} letters={user.name[0]} mr="xs" />
-                        <span>{user.name}</span>
-                    </UnstyledButton>
-                ))}
+                    {filterList(fileUsers).map((user, key) => (
+                        <Cell
+                            key={key}
+                            onClick={() => selectUserFrom(user)}
+                            before={<Avatar acronym={user.name[0]} size={28} src={''} />}
+                        >
+                            {user.name}
+                        </Cell>
+                    ))}
+                </Section>
             </>
         );
     }
 
     return (
         <>
-            <Notification withCloseButton={false} color="yellow">
-                {mt('read_warning')}
-                <Button
-                    variant="light"
-                    size="xs"
-                    mt="xs"
-                    fullWidth
-                    component="a"
-                    href={getDocLink('methods/import_messages')}
-                    target="_blank"
-                >
-                    {mt('read_warning_link')}
-                </Button>
-            </Notification>
+            <Section className={commonClasses.sectionBox}>
+                <Blockquote>
+                    <div
+                        dangerouslySetInnerHTML={{
+                            __html: mt('read_warning')
+                                .replace(
+                                    '{link}',
+                                    `<a href="${getDocLink('methods/import_messages')}" target="_blank">`
+                                )
+                                .replace('{/link}', '</a>')
+                        }}
+                    ></div>
+                </Blockquote>
+            </Section>
 
-            <Title order={4} mt="xs">
-                {mt('networks.title')}
-            </Title>
-
-            <Stack mt="xs" gap="xs">
+            <Section className={commonClasses.sectionBox} header={mt('networks.title')}>
                 {sortButtons.map((type) => (
                     <RadioRow key={type} type={type} />
                 ))}
-            </Stack>
 
-            <FixFileButton />
-            {errorText && (
-                <Text c="red" ta="center">
-                    {errorText}
-                </Text>
-            )}
+                <FixFileButton />
+
+                {errorText && <Placeholder description={errorText} />}
+            </Section>
         </>
     );
 }

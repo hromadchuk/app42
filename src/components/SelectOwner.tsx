@@ -1,12 +1,13 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Center, CloseButton, Input, Loader } from '@mantine/core';
-import { useDebouncedValue } from '@mantine/hooks';
-import { IconSearch, IconUsersGroup } from '@tabler/icons-react';
+import { Input, Placeholder, Spinner } from '@telegram-apps/telegram-ui';
+import { IconSearch } from '@tabler/icons-react';
 import { Api } from 'telegram';
 import { CallAPI, getPeerId, TOwnerType } from '../lib/helpers.ts';
 import { t } from '../lib/lang.ts';
 import { AppContext } from '../contexts/AppContext.tsx';
+import classes from '../styles/MenuPage.module.css';
 import { OwnerRow } from './OwnerRow.tsx';
+import { useDebouncedInput } from '../hooks/useDebouncedInput.ts';
 import { TDialogWithoutUser } from '../contexts/MethodContext.tsx';
 
 export enum EOwnerType {
@@ -40,8 +41,8 @@ function SelectOwner({ getOwners, onOwnerSelect, searchOwners }: IOptionsSelectO
     const [isLoading, setLoading] = useState(true);
     const [dialogsList, setDialogsList] = useState<IOwnerRow[]>([]);
     const [searchDialogsList, setSearchDialogsList] = useState<IOwnerRow[] | null>(null);
-    const [searchQuery, setSearchQuery] = useState<string>('');
-    const [debouncedSearchQuery] = useDebouncedValue(searchQuery, 500);
+    // const [searchQuery, setSearchQuery] = useState<string>('');
+    const [debouncedSearchQuery, setSearchQuery] = useDebouncedInput('', 500);
 
     useEffect(() => {
         (async () => {
@@ -71,9 +72,9 @@ function SelectOwner({ getOwners, onOwnerSelect, searchOwners }: IOptionsSelectO
     const UsersBlock = () => {
         if (isLoading) {
             return (
-                <Center h={100} mx="auto">
-                    <Loader />
-                </Center>
+                <Placeholder>
+                    <Spinner size="m" />
+                </Placeholder>
             );
         }
 
@@ -89,14 +90,7 @@ function SelectOwner({ getOwners, onOwnerSelect, searchOwners }: IOptionsSelectO
         }
 
         if (!dialogsList.length || (searchDialogsList && !searchDialogsList.length)) {
-            return (
-                <Box p="lg">
-                    <Center>
-                        <IconUsersGroup size={50} />
-                    </Center>
-                    <Center>{t('select_owner.no_dialogs')}</Center>
-                </Box>
-            );
+            return <Placeholder description={t('select_owner.no_dialogs')} />;
         }
 
         return dialogsList.map((row) => (
@@ -112,21 +106,19 @@ function SelectOwner({ getOwners, onOwnerSelect, searchOwners }: IOptionsSelectO
     return (
         <>
             <Input
-                leftSection={<IconSearch />}
-                mb="sm"
-                placeholder={t('select_owner.search_placeholder')}
-                value={searchQuery}
-                rightSectionPointerEvents="all"
-                rightSection={searchQuery && <CloseButton onClick={() => setSearchQuery('')} />}
-                onChange={(event) => setSearchQuery(event.currentTarget.value)}
+                before={<IconSearch opacity={0.3} />}
+                placeholder={t('menu.search_placeholder')}
+                className={classes.searchInput}
+                onChange={setSearchQuery}
             />
+
             {UsersBlock()}
         </>
     );
 }
 
 export function SelectDialog(options: IOptionsSelectDialog) {
-    const { user, setAppLoading } = useContext(AppContext);
+    const { user } = useContext(AppContext);
 
     function checkIsCanKickUsers(owner: TDialogWithoutUser): boolean {
         return !options.isOnlyWithKickPermissions || owner.creator || Boolean(owner?.adminRights?.banUsers);
@@ -191,16 +183,12 @@ export function SelectDialog(options: IOptionsSelectDialog) {
     }
 
     async function getOwners(): Promise<IOwnerRow[]> {
-        setAppLoading(true);
-
         const result = (await CallAPI(
             new Api.messages.GetDialogs({
                 offsetPeer: user?.id.valueOf(),
                 limit: 100
             })
         )) as Api.messages.Dialogs;
-
-        setAppLoading(false);
 
         return formatRows(
             result.dialogs.map((dialog) => dialog.peer),
@@ -212,16 +200,12 @@ export function SelectDialog(options: IOptionsSelectDialog) {
     }
 
     async function searchOwners(query: string): Promise<IOwnerRow[]> {
-        setAppLoading(true);
-
         const result = await CallAPI(
             new Api.contacts.Search({
                 q: query,
                 limit: 100
             })
         );
-
-        setAppLoading(false);
 
         return formatRows(result.myResults, result.users as Api.User[], result.chats as (Api.Chat | Api.Channel)[])
             .filter(filterOwner)

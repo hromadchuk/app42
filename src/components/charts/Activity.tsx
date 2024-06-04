@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { Text } from '@mantine/core';
+import { Caption } from '@telegram-apps/telegram-ui';
+import { SectionHeader } from '@telegram-apps/telegram-ui/dist/components/Blocks/Section/components/SectionHeader/SectionHeader';
 import dayjs from 'dayjs';
-import { getPercent } from '../../lib/helpers.ts';
+import { generateColorGradation, getPercent, rgbToHex } from '../../lib/helpers.ts';
 import { chartLang } from './chart_helpers.ts';
 
 import classes from './Activity.module.css';
@@ -32,7 +33,14 @@ export function ActivityChart({ data }: IActivityChartProps) {
     }
 
     function getColorStyle(level: number): { backgroundColor: string } {
-        return { backgroundColor: `var(--mantine-color-blue-${level * 2})` };
+        const rootStyle = getComputedStyle(document.getElementById('method_header') as HTMLElement);
+        const headerColor = rootStyle.getPropertyValue('background-color');
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const [r, g, b] = headerColor.match(/\d+/g)!.map(Number);
+        const nexColor = rgbToHex(r, g, b);
+        const colors = generateColorGradation(nexColor, 6);
+
+        return { backgroundColor: colors[level + 1] };
     }
 
     function getDayName(day: number): string {
@@ -81,7 +89,7 @@ export function ActivityChart({ data }: IActivityChartProps) {
 
     return (
         <>
-            <Text mt="xs">{lang('title')}</Text>
+            <SectionHeader style={{ paddingLeft: 10 }}>{lang('title')}</SectionHeader>
 
             <div className={classes.header}>
                 {headerRows.map((row, key) => (
@@ -128,9 +136,9 @@ export function ActivityChart({ data }: IActivityChartProps) {
                 </div>
             </div>
 
-            <Text size="xs" mb="xs">
+            <Caption level="1" weight="3">
                 {lang('description')}
-            </Text>
+            </Caption>
         </>
     );
 }
