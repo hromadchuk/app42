@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import {
     Avatar,
     AvatarStack,
@@ -13,13 +13,10 @@ import {
 } from '@telegram-apps/telegram-ui';
 import { IconBook2, IconNews, IconPigMoney, IconSearch } from '@tabler/icons-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useMiniApp } from '@tma.js/sdk-react';
 import { useTonAddress } from '@tonconnect/ui-react';
 import { cards } from '../cards.ts';
 import { OwnerAvatar } from '../components/OwnerAvatar.tsx';
-import { Constants } from '../constants.ts';
-import { getCache } from '../lib/cache.ts';
-import { getDocLink, wrapCallMAMethod } from '../lib/helpers.ts';
+import { getDocLink } from '../lib/helpers.ts';
 import { getMethodsByName } from '../routes.tsx';
 import { t } from '../lib/lang.ts';
 
@@ -39,23 +36,9 @@ export default function MenuPage() {
     const { user, setAccountsModalOpen } = useContext(AppContext);
 
     const userFriendlyAddress = useTonAddress();
-    const miniApp = useMiniApp();
     const navigate = useNavigate();
 
     const [searchText, setSearchText] = useState('');
-
-    useEffect(() => {
-        if (!userFriendlyAddress) {
-            return;
-        }
-
-        getCache(Constants.AUTH_STATE_METHOD_KEY).then((cacheMethodId) => {
-            if (cacheMethodId) {
-                // removeCache(Constants.AUTH_STATE_METHOD_KEY);
-                // navigate(`/methods/${cacheMethodId}`);
-            }
-        });
-    }, [userFriendlyAddress]);
 
     function AccountsRow() {
         if (!user && !userFriendlyAddress) {
@@ -109,7 +92,6 @@ export default function MenuPage() {
                             multiline={true}
                             onClick={() => {
                                 navigate(`/methods/${card.id}`);
-                                wrapCallMAMethod(() => miniApp.setHeaderColor(card.color));
                             }}
                         >
                             {t(`menu.cards.${card.id}`)}
