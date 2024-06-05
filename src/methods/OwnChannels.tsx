@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
-import { Cell, Section } from '@telegram-apps/telegram-ui';
+import { Section } from '@telegram-apps/telegram-ui';
 import { Link } from 'react-router-dom';
 import { Api } from 'telegram';
+import { WrappedCell } from '../components/Helpers.tsx';
 import { OwnerAvatar } from '../components/OwnerAvatar.tsx';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
@@ -89,7 +90,7 @@ export default function OwnChannels() {
                 {usersList.map(({ user, personalChannel }, key) => {
                     return (
                         <Link to={getChannelUrl(personalChannel)} target="_blank" key={key}>
-                            <Cell
+                            <WrappedCell
                                 before={<OwnerAvatar size={48} owner={personalChannel} />}
                                 description={
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
@@ -99,7 +100,7 @@ export default function OwnChannels() {
                                 style={{ borderRadius: 'inherit' }}
                             >
                                 {personalChannel.title}
-                            </Cell>
+                            </WrappedCell>
                         </Link>
                     );
                 })}

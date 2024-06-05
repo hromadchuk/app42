@@ -1,4 +1,4 @@
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, useEffect } from 'react';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import { SDKProvider, useSDKContext } from '@tma.js/sdk-react';
 import { AppRoot, Placeholder, Spinner } from '@telegram-apps/telegram-ui';
@@ -29,17 +29,36 @@ function MiniAppLoader({ children }: PropsWithChildren) {
 }
 
 export function MiniAppWrapper() {
+    useEffect(() => {
+        const htmlElement = document.documentElement;
+        const styleString = htmlElement.getAttribute('style') as string;
+        const regExp = '(--[\\w-]+)\\s*:\\s*([^;]+)';
+        const allColors = styleString.match(new RegExp(regExp, 'g')) || [];
+
+        for (const color of allColors) {
+            const [key, value] = color.split(':');
+
+            if (key.startsWith('--tg') && key.includes('background') && key.endsWith('-color')) {
+                const fixName = key.replace('background', 'bg');
+
+                console.log({ key, value, fixName });
+
+                htmlElement.style.setProperty(fixName, value.trim());
+            }
+        }
+    }, []);
+
     return (
-        <SDKProvider options={{ acceptCustomStyles: true, cssVars: true, complete: true }}>
-            <TonConnectUIProvider manifestUrl={TonApiCall.manifestUrl}>
-                <AppRoot>
+        <AppRoot>
+            <SDKProvider options={{ cssVars: true }}>
+                <TonConnectUIProvider manifestUrl={TonApiCall.manifestUrl}>
                     <MiniAppLoader>
                         <MemoryRouter>
                             <App />
                         </MemoryRouter>
                     </MiniAppLoader>
-                </AppRoot>
-            </TonConnectUIProvider>
-        </SDKProvider>
+                </TonConnectUIProvider>
+            </SDKProvider>
+        </AppRoot>
     );
 }

@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
-import { Button, Cell, Multiselectable, Section } from '@telegram-apps/telegram-ui';
+import { Button, Multiselectable, Section } from '@telegram-apps/telegram-ui';
 import { IconRobot, IconUser } from '@tabler/icons-react';
 import { Api } from 'telegram';
-import { Padding } from '../components/Helpers.tsx';
+import { Padding, WrappedCell } from '../components/Helpers.tsx';
 import { CallAPI, declineAndFormat, isDev } from '../lib/helpers.ts';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
@@ -136,7 +136,7 @@ export default function ClearBlacklist() {
     if (blockedResult) {
         return (
             <Section className={commonClasses.sectionBox}>
-                <Cell
+                <WrappedCell
                     Component="label"
                     before={<IconUser />}
                     after={
@@ -149,8 +149,8 @@ export default function ClearBlacklist() {
                     disabled={blockedResult.users.length === 0}
                 >
                     {declineAndFormat(blockedResult.users.length, md('checkbox_users'))}
-                </Cell>
-                <Cell
+                </WrappedCell>
+                <WrappedCell
                     Component="label"
                     before={<IconRobot />}
                     after={
@@ -163,7 +163,7 @@ export default function ClearBlacklist() {
                     disabled={blockedResult.bots.length === 0}
                 >
                     {declineAndFormat(blockedResult.bots.length, md('checkbox_bots'))}
-                </Cell>
+                </WrappedCell>
 
                 <Padding>
                     <Button

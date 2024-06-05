@@ -11,11 +11,10 @@ import {
     IconSticker,
     IconVideo
 } from '@tabler/icons-react';
-import { Cell, Section } from '@telegram-apps/telegram-ui';
+import { Section } from '@telegram-apps/telegram-ui';
 import { ForwardRefExoticComponent, JSX, RefAttributes, useContext, useState } from 'react';
 import { Api } from 'telegram';
-
-import { Padding } from '../components/Helpers.tsx';
+import { Padding, WrappedCell } from '../components/Helpers.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { RecordRow } from '../components/RecordRow.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
@@ -593,14 +592,14 @@ export default function RecordsStat() {
                 />
 
                 {counts.map((item, key) => (
-                    <Cell
+                    <WrappedCell
                         key={key}
                         description={!item.isInteger ? String(item.value) : undefined}
                         before={<item.icon />}
                         after={item.isInteger ? formatNumber(Number(item.value)) : undefined}
                     >
                         {item.label}
-                    </Cell>
+                    </WrappedCell>
                 ))}
 
                 {getReactionsElement(statResult)}

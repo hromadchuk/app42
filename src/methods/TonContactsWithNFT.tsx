@@ -1,9 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
-import { Cell, Divider, Modal, Section } from '@telegram-apps/telegram-ui';
+import { Divider, Modal, Section } from '@telegram-apps/telegram-ui';
 import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
 import { IconAt, IconInfoCircle, IconLink, IconPhone, IconWallet } from '@tabler/icons-react';
 import { Api } from 'telegram';
 import dayjs from 'dayjs';
+import { WrappedCell } from '../components/Helpers.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { CallAPI, classNames, formatNumberFloat, Server } from '../lib/helpers.ts';
 import { TonApiCall } from '../lib/TonApi.ts';
@@ -227,14 +228,14 @@ export default function TonContactsWithNFT() {
                                 ].join(' ');
 
                                 return (
-                                    <Cell
+                                    <WrappedCell
                                         key={usKey}
                                         before={<IconAt size={28} color="var(--tgui--link_color)" />}
                                         description={`${date}, ${formatNumberFloat(cryptoAmount)} ${fragment.cryptoCurrency}`}
                                         hint={sum}
                                     >
                                         @{name}
-                                    </Cell>
+                                    </WrappedCell>
                                 );
                             })}
                         </Section>
@@ -260,14 +261,14 @@ export default function TonContactsWithNFT() {
                                 ].join(' ');
 
                                 return (
-                                    <Cell
+                                    <WrappedCell
                                         key={numKey}
                                         before={<IconPhone size={28} color="var(--tgui--link_color)" />}
                                         description={`${date}, ${formatNumberFloat(cryptoAmount)} ${fragment.cryptoCurrency}`}
                                         hint={sum}
                                     >
                                         +{phone}
-                                    </Cell>
+                                    </WrappedCell>
                                 );
                             })}
                         </Section>
@@ -281,7 +282,7 @@ export default function TonContactsWithNFT() {
                                 );
 
                                 return (
-                                    <Cell
+                                    <WrappedCell
                                         key={walletKey}
                                         before={<IconWallet size={28} color="var(--tgui--link_color)" />}
                                         description={`${formatNumberFloat(balance)} TON`}
@@ -291,7 +292,7 @@ export default function TonContactsWithNFT() {
                                         after={<IconLink size={18} />}
                                     >
                                         {TonApiCall.getShortAddress(selectedUser.walletsAlias.get(wallet) || wallet)}
-                                    </Cell>
+                                    </WrappedCell>
                                 );
                             })}
                         </Section>

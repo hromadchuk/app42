@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from 'react';
-import { Button, Cell, Modal, Section } from '@telegram-apps/telegram-ui';
+import { Button, Modal, Section } from '@telegram-apps/telegram-ui';
 import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
 import { IconClock, IconClockUp, IconPhone, IconUsers } from '@tabler/icons-react';
 import { Api } from 'telegram';
 import { ActivityChart } from '../components/charts/Activity.tsx';
 import { CalculateActivityTime } from '../components/charts/chart_helpers.ts';
-import { Padding } from '../components/Helpers.tsx';
+import { Padding, WrappedCell } from '../components/Helpers.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
 import { ICallStatImagesOptions } from '../images_generator/CallStatImagesGenerator.ts';
 import { CallAPI, classNames, declineAndFormat, getShortTextTime, getTextTime } from '../lib/helpers.ts';
@@ -259,18 +259,18 @@ export default function CallsStat() {
         return (
             <>
                 <Section className={classNames(commonClasses.sectionBox, commonClasses.showHr)}>
-                    <Cell before={<IconPhone />} after={stat.counts.calls}>
+                    <WrappedCell before={<IconPhone />} after={stat.counts.calls}>
                         {mt('counts.calls')}
-                    </Cell>
-                    <Cell before={<IconUsers />} after={stat.counts.participants}>
+                    </WrappedCell>
+                    <WrappedCell before={<IconUsers />} after={stat.counts.participants}>
                         {mt('counts.participants')}
-                    </Cell>
-                    <Cell before={<IconClock />} description={getTextTime(stat.counts.duration)}>
+                    </WrappedCell>
+                    <WrappedCell before={<IconClock />} description={getTextTime(stat.counts.duration)}>
                         {mt('counts.duration')}
-                    </Cell>
-                    <Cell before={<IconClockUp />} description={getTextTime(stat.counts.maxDuration)}>
+                    </WrappedCell>
+                    <WrappedCell before={<IconClockUp />} description={getTextTime(stat.counts.maxDuration)}>
                         {mt('counts.max_duration')}
-                    </Cell>
+                    </WrappedCell>
 
                     {shareData && (
                         <Padding>
@@ -312,15 +312,15 @@ export default function CallsStat() {
                         >
                             <OwnerRow owner={modalData.user as Api.User} />
 
-                            <Cell before={<IconPhone />} after={modalData.calls}>
+                            <WrappedCell before={<IconPhone />} after={modalData.calls}>
                                 {mt('counts.calls')}
-                            </Cell>
-                            <Cell before={<IconClock />} description={getTextTime(modalData.duration)}>
+                            </WrappedCell>
+                            <WrappedCell before={<IconClock />} description={getTextTime(modalData.duration)}>
                                 {mt('counts.duration')}
-                            </Cell>
-                            <Cell before={<IconClockUp />} description={getTextTime(modalData.maxDuration)}>
+                            </WrappedCell>
+                            <WrappedCell before={<IconClockUp />} description={getTextTime(modalData.maxDuration)}>
                                 {mt('counts.max_duration')}
-                            </Cell>
+                            </WrappedCell>
 
                             <Padding>
                                 <ActivityChart data={stat.activity} />

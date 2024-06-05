@@ -1,11 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
-import { Avatar, Cell, Modal } from '@telegram-apps/telegram-ui';
+import { Avatar, Modal } from '@telegram-apps/telegram-ui';
 import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
 import { IconLogout } from '@tabler/icons-react';
 import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
 import { useCloudStorage, usePopup } from '@tma.js/sdk-react';
 import { useNavigate } from 'react-router-dom';
 import { Api } from 'telegram';
+import { WrappedCell } from '../components/Helpers.tsx';
 import { Constants } from '../constants.ts';
 import { removeCache } from '../lib/cache.ts';
 import { CallAPI, isDev } from '../lib/helpers.ts';
@@ -69,7 +70,7 @@ export function AccountsModal({ isOpen, onOpenChange }: IAccountsModalProps) {
         <Modal header={<ModalHeader />} open={isOpen} onOpenChange={onOpenChange}>
             <div style={{ paddingBottom: 16 }}>
                 {Boolean(user) && (
-                    <Cell
+                    <WrappedCell
                         before={<OwnerAvatar owner={user} size={40} />}
                         description={getUserData()?.username}
                         after={<IconLogout size={24} stroke={1.2} />}
@@ -111,10 +112,10 @@ export function AccountsModal({ isOpen, onOpenChange }: IAccountsModalProps) {
                         }}
                     >
                         {getUserData()?.name}
-                    </Cell>
+                    </WrappedCell>
                 )}
                 {Boolean(userFriendlyAddress) && (
-                    <Cell
+                    <WrappedCell
                         before={<Avatar src={TonLogo} />}
                         after={<IconLogout size={24} stroke={1.2} />}
                         description={walletAddress}
@@ -144,7 +145,7 @@ export function AccountsModal({ isOpen, onOpenChange }: IAccountsModalProps) {
                         }}
                     >
                         TON Wallet
-                    </Cell>
+                    </WrappedCell>
                 )}
             </div>
         </Modal>

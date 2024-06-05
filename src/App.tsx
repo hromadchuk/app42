@@ -57,24 +57,6 @@ export function App() {
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
 
     useEffect(() => {
-        const MALib = getComputedStyle(document.querySelector('#root > div') as Element);
-        const body = document.body.style;
-
-        const backgroundColor = MALib.getPropertyValue('--tgui--secondary_bg_color');
-        const textColor = MALib.getPropertyValue('--tgui--text_color');
-
-        body.setProperty('--app-background-color', backgroundColor);
-        body.setProperty('--app-text-color', textColor);
-
-        backButton.on('click', () => {
-            navigate('/');
-        });
-
-        window.showSnackbar = (options: ISnackbarOptions) => setSnackbarOptions(options);
-        window.hideSnackbar = () => setSnackbarOptions(null);
-    }, []);
-
-    useEffect(() => {
         if (['/'].includes(currentLocation.pathname)) {
             wrapCallMAMethod(() => backButton.hide());
             wrapCallMAMethod(() => {

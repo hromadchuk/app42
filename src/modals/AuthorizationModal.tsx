@@ -2,7 +2,6 @@ import { FormEvent, useContext, useEffect, useState } from 'react';
 import {
     Button,
     Caption,
-    Cell,
     Divider,
     Input,
     List,
@@ -16,6 +15,7 @@ import { IconSearch } from '@tabler/icons-react';
 import { useCloudStorage } from '@tma.js/sdk-react';
 import { Api } from 'telegram';
 import { computeCheck } from 'telegram/Password';
+import { WrappedCell } from '../components/Helpers.tsx';
 import { getCache, removeCache, setCache } from '../lib/cache.ts';
 import { CountryFlag } from '../components/CountryFlag.tsx';
 import { Constants } from '../constants.ts';
@@ -338,12 +338,12 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
                                     subtitle={t('auth_modal.description')}
                                 />
 
-                                <Cell
+                                <WrappedCell
                                     before={<CountryFlag code={selectedCountry.code} size={30} />}
                                     onClick={() => setSelectingCountry(true)}
                                 >
                                     {selectedCountry.name}
-                                </Cell>
+                                </WrappedCell>
                                 <Divider style={{ margin: 0 }} />
                                 <Input
                                     status={numberError ? 'error' : 'default'}
@@ -499,7 +499,7 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
                                             return item.name.toLowerCase().includes(searchCountry.toLowerCase());
                                         })
                                         .map((country, key) => (
-                                            <Cell
+                                            <WrappedCell
                                                 key={key}
                                                 before={<CountryFlag code={country.code} size={28} />}
                                                 after={`+${country.prefix}`}
@@ -509,7 +509,7 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
                                                 }}
                                             >
                                                 {country.name}
-                                            </Cell>
+                                            </WrappedCell>
                                         ))}
                                 </Section>
                             </List>

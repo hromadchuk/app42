@@ -18,14 +18,17 @@ body {
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.5;
 
-    --app-background-color: transparent;
-    --app-text-color: black;
+    background-color: var(--tg-theme-secondary-bg-color);
 
-    background: var(--app-background-color);
-    color: var(--app-text-color);
+    --tgui--tertiary_bg_color: yellow !important;
 }
 
 a {
     text-decoration: none;
     color: var(--tgui--link_color);
+}
+
+[name="wrapped-cell"]:hover {
+    background: var(--tgui--bg_color);
+    opacity: 0.5;
 }

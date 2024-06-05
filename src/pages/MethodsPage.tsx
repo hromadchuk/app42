@@ -1,7 +1,8 @@
-import { Cell, List, Section } from '@telegram-apps/telegram-ui';
+import { List, Section } from '@telegram-apps/telegram-ui';
 import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { getCardById, getMethodsByCardId } from '../cards.ts';
+import { WrappedCell } from '../components/Helpers.tsx';
 import { PageHeader } from '../components/PageHeader.tsx';
 import { IMethod, MethodCategory } from '../routes.tsx';
 import { t } from '../lib/lang.ts';
@@ -15,13 +16,13 @@ export function MethodRow(method: IMethod) {
     const categoryId = useParams().categoryId as MethodCategory;
 
     return (
-        <Cell
+        <WrappedCell
             key={method.id}
             before={<method.icon size={28} stroke={1.2} />}
             onClick={() => openMethod(method, categoryId)}
         >
             {method.name}
-        </Cell>
+        </WrappedCell>
     );
 }
 

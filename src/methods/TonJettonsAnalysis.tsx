@@ -1,11 +1,13 @@
-import { Avatar, Blockquote, Caption, Cell, Section } from '@telegram-apps/telegram-ui';
+import { Avatar, Blockquote, Caption, Section } from '@telegram-apps/telegram-ui';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import { useContext, useEffect, useState } from 'react';
-
+import { WrappedCell } from '../components/Helpers.tsx';
 import { classNames, formatNumberFloat } from '../lib/helpers.ts';
 import { getAppLangCode, LangType } from '../lib/lang.ts';
 import { TonApiCall } from '../lib/TonApi.ts';
+
 import { MethodContext } from '../contexts/MethodContext.tsx';
+
 import commonClasses from '../styles/Common.module.css';
 
 interface IJetton {
@@ -92,7 +94,7 @@ export default function TonJettonsAnalysis() {
     if (jettonsList.length) {
         return jettonsList.map((jetton, key) => (
             <Section className={classNames(commonClasses.sectionBox, commonClasses.showHr)} key={key}>
-                <Cell
+                <WrappedCell
                     className={commonClasses.disabledCell}
                     interactiveAnimation="opacity"
                     before={<Avatar size={48} src={jetton.image} />}
@@ -109,7 +111,7 @@ export default function TonJettonsAnalysis() {
                     }
                 >
                     {jetton.name}
-                </Cell>
+                </WrappedCell>
 
                 {jetton.holderPosition > -1 && (
                     <Blockquote

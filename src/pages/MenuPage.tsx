@@ -3,7 +3,6 @@ import {
     Avatar,
     AvatarStack,
     Blockquote,
-    Cell,
     Divider,
     Input,
     List,
@@ -15,6 +14,7 @@ import { IconBook2, IconNews, IconPigMoney, IconSearch } from '@tabler/icons-rea
 import { Link, useNavigate } from 'react-router-dom';
 import { useTonAddress } from '@tonconnect/ui-react';
 import { cards } from '../cards.ts';
+import { WrappedCell } from '../components/Helpers.tsx';
 import { OwnerAvatar } from '../components/OwnerAvatar.tsx';
 import { getDocLink } from '../lib/helpers.ts';
 import { getMethodsByName } from '../routes.tsx';
@@ -81,7 +81,7 @@ export default function MenuPage() {
             <>
                 <Section className={classes.categories}>
                     {cards.map((card, key) => (
-                        <Cell
+                        <WrappedCell
                             key={key}
                             before={
                                 <Avatar size={40} style={{ backgroundColor: card.color }}>
@@ -95,25 +95,29 @@ export default function MenuPage() {
                             }}
                         >
                             {t(`menu.cards.${card.id}`)}
-                        </Cell>
+                        </WrappedCell>
                     ))}
                 </Section>
 
                 <Section className={classes.categories}>
                     <Link to={getDocLink('')} target="_blank" className={classes.link}>
-                        <Cell before={<IconBook2 size={28} stroke={1.2} />}>{t('menu.documentation')}</Cell>
+                        <WrappedCell before={<IconBook2 size={28} stroke={1.2} />}>
+                            {t('menu.documentation')}
+                        </WrappedCell>
                     </Link>
                     <Link
                         to="https://t.me/tribute/app?startapp=donation_13215"
                         target="_blank"
                         className={classes.link}
                     >
-                        <Cell before={<IconPigMoney size={28} stroke={1.2} className={classes.donutIcon} />}>
+                        <WrappedCell before={<IconPigMoney size={28} stroke={1.2} className={classes.donutIcon} />}>
                             {t('menu.donate')}
-                        </Cell>
+                        </WrappedCell>
                     </Link>
                     <Link to="https://t.me/app42news" target="_blank" className={classes.link}>
-                        <Cell before={<IconNews size={28} stroke={1.2} />}>{t('menu.telegram_channel')}</Cell>
+                        <WrappedCell before={<IconNews size={28} stroke={1.2} />}>
+                            {t('menu.telegram_channel')}
+                        </WrappedCell>
                     </Link>
                 </Section>
 

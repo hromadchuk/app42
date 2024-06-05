@@ -1,9 +1,10 @@
 import { createElement, CSSProperties, ForwardRefExoticComponent, RefAttributes } from 'react';
-import { Cell, Multiselectable } from '@telegram-apps/telegram-ui';
+import { Multiselectable } from '@telegram-apps/telegram-ui';
 import { Link } from 'react-router-dom';
 import { Api } from 'telegram';
 import { Icon, IconChevronRight, IconProps, IconRosetteDiscountCheckFilled } from '@tabler/icons-react';
 import { TOwnerInfo } from '../lib/helpers.ts';
+import { WrappedCell } from './Helpers.tsx';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
 
 interface IOwnerRow {
@@ -109,7 +110,7 @@ export function OwnerRow({ owner, description, rightIcon, withoutLink, callback,
 
     function CellRow() {
         return (
-            <Cell
+            <WrappedCell
                 {...linkProps}
                 titleBadge={getBadge()}
                 interactiveAnimation={interactiveAnimation}
@@ -119,7 +120,7 @@ export function OwnerRow({ owner, description, rightIcon, withoutLink, callback,
                 description={description}
             >
                 {name.join(' ')}
-            </Cell>
+            </WrappedCell>
         );
     }
 

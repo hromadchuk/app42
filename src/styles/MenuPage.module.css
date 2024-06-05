@@ -24,6 +24,12 @@
 .categories {
     border-radius: 10px;
     overflow: hidden;
+
+    /*& > div > div > div:hover,*/
+    /*& > div > div > a > div:hover{*/
+    /*    background: var(--tgui--bg_color);*/
+    /*    opacity: 0.5;*/
+    /*}*/
 }
 
 .link {
