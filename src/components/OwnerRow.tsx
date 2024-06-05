@@ -118,6 +118,7 @@ export function OwnerRow({ owner, description, rightIcon, withoutLink, callback,
                 style={style}
                 after={RightBlock()}
                 description={description}
+                multiline={true}
             >
                 {name.join(' ')}
             </WrappedCell>

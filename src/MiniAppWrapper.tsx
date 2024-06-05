@@ -3,6 +3,7 @@ import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import { SDKProvider, useSDKContext } from '@tma.js/sdk-react';
 import { AppRoot, Placeholder, Spinner } from '@telegram-apps/telegram-ui';
 import { MemoryRouter } from 'react-router-dom';
+import { hexToRgba } from './lib/helpers.ts';
 import { TonApiCall } from './lib/TonApi.ts';
 import { App } from './App.tsx';
 
@@ -41,9 +42,14 @@ export function MiniAppWrapper() {
             if (key.startsWith('--tg') && key.includes('background') && key.endsWith('-color')) {
                 const fixName = key.replace('background', 'bg');
 
-                console.log({ key, value, fixName });
-
                 htmlElement.style.setProperty(fixName, value.trim());
+            }
+
+            if (key === '--tg-background-color') {
+                const rgba = hexToRgba(value.trim(), 0.4);
+                if (rgba) {
+                    htmlElement.style.setProperty('--tg-background-color-hover', rgba);
+                }
             }
         }
     }, []);

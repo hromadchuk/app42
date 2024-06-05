@@ -152,6 +152,8 @@ export function App() {
 
     useEffect(() => {
         (async () => {
+            window.showSnackbar = (options: ISnackbarOptions) => setSnackbarOptions(options);
+
             // init mini app
             wrapCallMAMethod(() => miniApp.ready());
             wrapCallMAMethod(() => viewport.expand());

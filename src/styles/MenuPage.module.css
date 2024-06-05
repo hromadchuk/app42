@@ -1,7 +1,7 @@
 .headerBox {
     display: flex;
     align-items: center;
-    background: var(--tg-theme-header-bg-color);
+    background: var(--tg-theme-bg-color);
 }
 
 .searchBox {
@@ -9,12 +9,12 @@
     margin-right: -22px;
 
     & > div {
-        background: var(--tg-theme-header-bg-color);
+        background: var(--tg-theme-bg-color);
     }
 }
 
 .searchInput {
-    background: var(--tgui--bg_color);
+    background-color: var(--tg-theme-secondary-bg-color);
 }
 
 .avatarsBox {
@@ -24,6 +24,10 @@
 .categories {
     border-radius: 10px;
     overflow: hidden;
+
+    & > div > div {
+        background-color: var(--tg-theme-secondary-bg-color);
+    }
 }
 
 .link {

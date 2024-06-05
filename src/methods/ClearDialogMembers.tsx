@@ -156,14 +156,15 @@ export default function ClearDialogMembers() {
             <WrappedCell
                 Component="label"
                 before={<IconUser />}
+                multiline={true}
                 after={
                     <Multiselectable
-                        // disabled={members?.length === 0}
+                        disabled={members?.length === 0}
                         defaultChecked={checked}
                         onChange={(e) => onChange(e.target.checked)}
                     />
                 }
-                // disabled={members?.length === 0}
+                disabled={members?.length === 0}
             >
                 {`${mt(text)} (${formatNumber(Number(members?.length))})`}
             </WrappedCell>
