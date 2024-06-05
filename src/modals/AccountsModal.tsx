@@ -96,7 +96,7 @@ export function AccountsModal({ isOpen, onOpenChange }: IAccountsModalProps) {
                             } else {
                                 popup
                                     .open({
-                                        message: t('menu.account_disconnect'),
+                                        message: t('accounts_modal.account_disconnect'),
                                         buttons: [
                                             { id: 'exit', type: 'ok' },
                                             { id: 'cancel', type: 'cancel' }
