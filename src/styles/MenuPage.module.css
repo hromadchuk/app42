@@ -1,7 +1,7 @@
 .headerBox {
     display: flex;
     align-items: center;
-    background: var(--tgui--secondary_bg_color);
+    background: var(--tg-theme-header-bg-color);
 }
 
 .searchBox {
@@ -9,7 +9,7 @@
     margin-right: -22px;
 
     & > div {
-        background: var(--tgui--secondary_bg_color);
+        background: var(--tg-theme-header-bg-color);
     }
 }
 
@@ -24,12 +24,6 @@
 .categories {
     border-radius: 10px;
     overflow: hidden;
-
-    /*& > div > div > div:hover,*/
-    /*& > div > div > a > div:hover{*/
-    /*    background: var(--tgui--bg_color);*/
-    /*    opacity: 0.5;*/
-    /*}*/
 }
 
 .link {
