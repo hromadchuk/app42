@@ -116,6 +116,8 @@ export function App() {
             // }
 
             if (initData) {
+                console.log('location', JSON.stringify(location));
+
                 if (!user && initData?.status === 'ok') {
                     const storageSessionHashed = isDev
                         ? await getCache(Constants.SESSION_KEY)
@@ -134,34 +136,39 @@ export function App() {
 
                 setUserChecked(true);
 
-                const param = new URLSearchParams(location.search.slice(1)).get('tgWebAppStartParam');
-                const value = await getCache(Constants.AUTH_STATE_METHOD_KEY);
+                const paramZero = new URLSearchParams(location.search.slice(1)).get('tgWebAppStartParam');
+                console.log('tgWebAppStartParam', paramZero);
 
-                console.log('tgWebAppStartParam', param);
-                console.log('value', value && JSON.stringify(value));
+                setTimeout(async () => {
+                    const param = new URLSearchParams(location.search.slice(1)).get('tgWebAppStartParam');
+                    const value = await getCache(Constants.AUTH_STATE_METHOD_KEY);
 
-                if (value) {
+                    console.log('tgWebAppStartParam', param);
+                    console.log('value', value && JSON.stringify(value));
+
                     if (value) {
-                        const { methodId, authType } = value as {
-                            methodId: string;
-                            authType: AuthType;
-                        };
+                        if (value) {
+                            const { methodId, authType } = value as {
+                                methodId: string;
+                                authType: AuthType;
+                            };
 
-                        if (authType === AuthType.TG) {
-                            const method = getMethodById(methodId);
-                            method && openMethod(method);
+                            if (authType === AuthType.TG) {
+                                const method = getMethodById(methodId);
+                                method && openMethod(method);
+                            }
                         }
+                    } else if (param === 'cn' && !window.alreadyVisitedRefLink) {
+                        const method = getMethodById('contacts_names');
+                        method && openMethod(method);
                     }
-                } else if (param === 'cn' && !window.alreadyVisitedRefLink) {
-                    const method = getMethodById('contacts_names');
-                    method && openMethod(method);
-                }
 
-                if (isDev) {
-                    // TODO only test
-                    // const method = getMethodById('clear_dialog_members');
-                    // method && openMethod(method);
-                }
+                    if (isDev) {
+                        // TODO only test
+                        // const method = getMethodById('clear_dialog_members');
+                        // method && openMethod(method);
+                    }
+                }, 300);
             }
         })();
     }, [initData]);
