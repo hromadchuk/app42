@@ -134,7 +134,7 @@ export function App() {
 
                 setUserChecked(true);
 
-                const param = new URLSearchParams(location.search).get('tgWebAppStartParam');
+                const param = new URLSearchParams(location.search.slice(1)).get('tgWebAppStartParam');
                 const value = await getCache(Constants.AUTH_STATE_METHOD_KEY);
 
                 console.log('tgWebAppStartParam', param);
