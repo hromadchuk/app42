@@ -121,7 +121,11 @@ export default function MenuPage() {
                     <Link to={getDocLink('')} target="_blank" className={classes.link}>
                         <Cell before={<IconBook2 size={28} stroke={1.2} />}>{t('menu.documentation')}</Cell>
                     </Link>
-                    <Link to="https://t.me/tribute?start=sd1c" target="_blank" className={classes.link}>
+                    <Link
+                        to="https://t.me/tribute/app?startapp=donation_13215"
+                        target="_blank"
+                        className={classes.link}
+                    >
                         <Cell before={<IconPigMoney size={28} stroke={1.2} className={classes.donutIcon} />}>
                             {t('menu.donate')}
                         </Cell>
