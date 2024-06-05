@@ -42,6 +42,8 @@ export function OwnerRow({ owner, description, rightIcon, withoutLink, callback,
             linkProps.href = `https://t.me/${username}`;
         } else if (owner?.id && (isChannel || isChat)) {
             linkProps.href = `https://t.me/c/${owner.id}/999999999`;
+        } else if (isUser && owner?.phone) {
+            linkProps.href = `https://t.me/+${owner.phone}`;
         }
 
         if (linkProps.href) {
