@@ -136,39 +136,34 @@ export function App() {
 
                 setUserChecked(true);
 
-                const paramZero = new URLSearchParams(location.search.slice(1)).get('tgWebAppStartParam');
-                console.log('tgWebAppStartParam', paramZero);
+                const param = new URLSearchParams(window.location.search.slice(1)).get('tgWebAppStartParam');
+                const value = await getCache(Constants.AUTH_STATE_METHOD_KEY);
 
-                setTimeout(async () => {
-                    const param = new URLSearchParams(location.search.slice(1)).get('tgWebAppStartParam');
-                    const value = await getCache(Constants.AUTH_STATE_METHOD_KEY);
+                console.log('tgWebAppStartParam', param);
+                console.log('value', value && JSON.stringify(value));
 
-                    console.log('tgWebAppStartParam', param);
-                    console.log('value', value && JSON.stringify(value));
-
+                if (value) {
                     if (value) {
-                        if (value) {
-                            const { methodId, authType } = value as {
-                                methodId: string;
-                                authType: AuthType;
-                            };
+                        const { methodId, authType } = value as {
+                            methodId: string;
+                            authType: AuthType;
+                        };
 
-                            if (authType === AuthType.TG) {
-                                const method = getMethodById(methodId);
-                                method && openMethod(method);
-                            }
+                        if (authType === AuthType.TG) {
+                            const method = getMethodById(methodId);
+                            method && openMethod(method);
                         }
-                    } else if (param === 'cn' && !window.alreadyVisitedRefLink) {
-                        const method = getMethodById('contacts_names');
-                        method && openMethod(method);
                     }
+                } else if (param === 'cn' && !window.alreadyVisitedRefLink) {
+                    const method = getMethodById('contacts_names');
+                    method && openMethod(method);
+                }
 
-                    if (isDev) {
-                        // TODO only test
-                        // const method = getMethodById('clear_dialog_members');
-                        // method && openMethod(method);
-                    }
-                }, 300);
+                if (isDev) {
+                    // TODO only test
+                    // const method = getMethodById('clear_dialog_members');
+                    // method && openMethod(method);
+                }
             }
         })();
     }, [initData]);
