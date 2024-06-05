@@ -31,3 +31,7 @@ a {
 [name="wrapped-cell"]:hover {
     background: var(--tg-background-color-hover);
 }
+
+[role="dialog"] [name="wrapped-cell"]:hover {
+    background: var(--tg-theme-header-bg-color-hover);
+}

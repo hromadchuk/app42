@@ -6,6 +6,14 @@
     hr {
         display: none;
     }
+
+    & > div {
+        background-color: var(--tg-theme-header-bg-color) !important;
+    }
+
+    & > div > div {
+        background-color: var(--tg-theme-header-bg-color) !important;
+    }
 }
 
 .showHr {

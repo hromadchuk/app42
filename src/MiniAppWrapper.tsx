@@ -45,10 +45,10 @@ export function MiniAppWrapper() {
                 htmlElement.style.setProperty(fixName, value.trim());
             }
 
-            if (key === '--tg-background-color') {
+            if (['--tg-background-color', '--tg-theme-header-bg-color']) {
                 const rgba = hexToRgba(value.trim(), 0.4);
                 if (rgba) {
-                    htmlElement.style.setProperty('--tg-background-color-hover', rgba);
+                    htmlElement.style.setProperty(`${key}-hover`, rgba);
                 }
             }
         }

@@ -153,6 +153,7 @@ export function App() {
     useEffect(() => {
         (async () => {
             window.showSnackbar = (options: ISnackbarOptions) => setSnackbarOptions(options);
+            window.hideSnackbar = () => setSnackbarOptions(null);
 
             // init mini app
             wrapCallMAMethod(() => miniApp.ready());
