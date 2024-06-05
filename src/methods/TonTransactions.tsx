@@ -466,7 +466,7 @@ export default function TonTransactions() {
                 )}
 
                 {stat.monthsKeys.length > 1 && (
-                    <Section className={commonClasses.sectionBox} header={mt('grouped_by_years')}>
+                    <Section className={commonClasses.sectionBox} header={mt('grouped_by_months')}>
                         {stat.monthsKeys.map((month, key) => (
                             <WrappedCell
                                 key={key}

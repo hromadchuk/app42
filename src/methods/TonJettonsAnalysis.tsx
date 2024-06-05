@@ -128,41 +128,5 @@ export default function TonJettonsAnalysis() {
                 )}
             </Section>
         ));
-        //     return jettonsList.map((jetton, key) => {
-        //         return (
-        //             <Stack gap={0} key={key}>
-        //                 <Group wrap="nowrap" justify="space-between">
-        //                     <Group wrap="nowrap">
-        //                         <Avatar src={jetton.image} radius="sm" />
-        //
-        //                         <div>
-        //                             <Text fw={500}>{jetton.name}</Text>
-        //                             <Text fz="xs" c="dimmed">
-        //                                 {jetton.formattedBalance} {jetton.symbol}
-        //                             </Text>
-        //                         </div>
-        //                     </Group>
-        //
-        //                     <Stack gap={0} align="end">
-        //                         {jetton.amounts.map((amount, amountKey) => (
-        //                             <Badge variant="transparent" color="blue" size="sm" key={amountKey}>
-        //                                 ~{amount}
-        //                             </Badge>
-        //                         ))}
-        //                     </Stack>
-        //                 </Group>
-        //
-        //                 {jetton.holderPosition > -1 && (
-        //                     <Center>
-        //                         <Badge variant="light" color="indigo" mt="xs">
-        //                             {mt('top_holders').replace('{position}', String(jetton.holderPosition + 1))}
-        //                         </Badge>
-        //                     </Center>
-        //                 )}
-        //
-        //                 {key < jettonsList.length - 1 && <Divider my="md" />}
-        //             </Stack>
-        //         );
-        //     });
     }
 }
