@@ -8,7 +8,8 @@ import {
     Modal,
     Placeholder,
     Section,
-    Spinner
+    Spinner,
+    Title
 } from '@telegram-apps/telegram-ui';
 import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
 import { IconSearch } from '@tabler/icons-react';
@@ -76,6 +77,8 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
     const [password, setPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
+    const [keyboardIsOpen, setKeyboardIsOpen] = useState(false);
+
     useEffect(() => {
         (async () => {
             if (!initData) {
@@ -106,6 +109,23 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
             onOpenChange(false);
         }
     }, [isOpen, user]);
+
+    function handleFocus() {
+        setKeyboardIsOpen(true);
+    }
+
+    function handleBlur() {
+        setKeyboardIsOpen(false);
+
+        setTimeout(() => {
+            ['auth_phone_modal', 'auth_code_modal'].forEach((modalId) => {
+                const el = document.getElementById(modalId);
+                if (el) {
+                    el.style.height = '';
+                }
+            });
+        }, 1000);
+    }
 
     async function checkCurrentSession() {
         const currentUser = await getCurrentUser();
@@ -292,6 +312,8 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
 
     function onCodeChange(e: FormEvent<HTMLInputElement>) {
         const inputEvent = e.nativeEvent as InputEvent;
+        // @ts-ignore
+        const key = e.target.dataset.key as string;
         const isCorrectValue = Boolean((inputEvent.data || '').match(/[0-9]/));
 
         e.currentTarget.value = String(isCorrectValue ? inputEvent.data : '');
@@ -299,6 +321,10 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
         const nextElement = e.currentTarget.nextElementSibling as HTMLInputElement;
         if (nextElement && isCorrectValue) {
             nextElement.focus();
+        }
+
+        if (Number(key) === codeLength && isCorrectValue) {
+            setTimeout(() => confirmCode());
         }
     }
 
@@ -325,32 +351,46 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
         <div>
             {isOpen && (
                 <>
-                    <Modal header={<ModalHeader />} open={isOpen} onOpenChange={onOpenChange}>
+                    <Modal id="auth_phone_modal" header={<ModalHeader />} open={isOpen} onOpenChange={onOpenChange}>
                         {!selectedCountry ? (
                             <Placeholder>
                                 <Spinner size="m" />
                             </Placeholder>
                         ) : (
                             <List style={{ padding: 16, paddingBottom: 32 }}>
-                                <AnimatedHeader
-                                    animationData={AnimatedPhone}
-                                    title={t('auth_modal.phone_title')}
-                                    subtitle={t('auth_modal.description')}
-                                />
+                                {keyboardIsOpen ? (
+                                    <Title level="1" weight="1">
+                                        {t('auth_modal.phone_title')}
+                                    </Title>
+                                ) : (
+                                    <>
+                                        <AnimatedHeader
+                                            animationData={AnimatedPhone}
+                                            title={t('auth_modal.phone_title')}
+                                            subtitle={t('auth_modal.description')}
+                                        />
 
-                                <WrappedCell
-                                    before={<CountryFlag code={selectedCountry.code} size={30} />}
-                                    onClick={() => setSelectingCountry(true)}
-                                >
-                                    {selectedCountry.name}
-                                </WrappedCell>
-                                <Divider style={{ margin: 0 }} />
+                                        <WrappedCell
+                                            before={<CountryFlag code={selectedCountry.code} size={30} />}
+                                            onClick={() => setSelectingCountry(true)}
+                                        >
+                                            {selectedCountry.name}
+                                        </WrappedCell>
+
+                                        <Divider style={{ margin: 0 }} />
+                                    </>
+                                )}
+
                                 <Input
+                                    type="num"
+                                    inputMode="numeric"
                                     status={numberError ? 'error' : 'default'}
                                     header={numberError}
                                     before={`+${selectedCountry.prefix}`}
                                     placeholder={selectedCountry.pattern}
                                     onChange={(e) => setNumber(e.currentTarget.value)}
+                                    onFocus={handleFocus}
+                                    onBlur={handleBlur}
                                 />
 
                                 <Button
@@ -368,6 +408,7 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
 
                     {(isWaitingCode || isWaitingPassword) && (
                         <Modal
+                            id="auth_code_modal"
                             header={<ModalHeader>Authorization</ModalHeader>}
                             open={isWaitingCode}
                             onOpenChange={(open) => !open && setWaitingCode(false)}
@@ -375,22 +416,30 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
                             <div style={{ padding: '32px 16px' }}>
                                 {isWaitingCode && !isWaitingPassword && (
                                     <>
-                                        <AnimatedHeader
-                                            animationData={AnimatedCloud}
-                                            title={t('auth_modal.code_title')}
-                                            subtitle={t('auth_modal.code_description')}
-                                        />
+                                        {keyboardIsOpen ? (
+                                            <Title level="1" weight="1">
+                                                {t('auth_modal.code_title')}
+                                            </Title>
+                                        ) : (
+                                            <>
+                                                <AnimatedHeader
+                                                    animationData={AnimatedCloud}
+                                                    title={t('auth_modal.code_title')}
+                                                    subtitle={t('auth_modal.code_description')}
+                                                />
 
-                                        <Button
-                                            mode="plain"
-                                            size="s"
-                                            stretched
-                                            Component="a"
-                                            href="https://t.me/+42777"
-                                            target="_blank"
-                                        >
-                                            {t('auth_modal.code_account_button')}
-                                        </Button>
+                                                <Button
+                                                    mode="plain"
+                                                    size="s"
+                                                    stretched
+                                                    Component="a"
+                                                    href="https://t.me/+42777"
+                                                    target="_blank"
+                                                >
+                                                    {t('auth_modal.code_account_button')}
+                                                </Button>
+                                            </>
+                                        )}
 
                                         <form
                                             className={classes.codeSection}
@@ -401,12 +450,15 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
                                         >
                                             {new Array(codeLength).fill(0).map((_, key) => (
                                                 <input
+                                                    key={key}
+                                                    data-key={key + 1}
                                                     autoFocus={key === 0}
                                                     className="smsCode"
                                                     type="num"
-                                                    key={key}
                                                     inputMode="numeric"
                                                     onChange={onCodeChange}
+                                                    onFocus={handleFocus}
+                                                    onBlur={handleBlur}
                                                 />
                                             ))}
                                         </form>
