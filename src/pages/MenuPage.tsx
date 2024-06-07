@@ -10,14 +10,14 @@ import {
     Section,
     Tappable
 } from '@telegram-apps/telegram-ui';
-import { IconBook2, IconNews, IconPigMoney, IconSearch } from '@tabler/icons-react';
+import { IconNews, IconPigMoney, IconSearch } from '@tabler/icons-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTonAddress } from '@tonconnect/ui-react';
 import { cards } from '../cards.ts';
 import { useMiniApp } from '@tma.js/sdk-react';
 import { WrappedCell } from '../components/Helpers.tsx';
 import { OwnerAvatar } from '../components/OwnerAvatar.tsx';
-import { getDocLink, wrapCallMAMethod } from '../lib/helpers.ts';
+import { wrapCallMAMethod } from '../lib/helpers.ts';
 import { getMethodsByName } from '../routes.tsx';
 import { t } from '../lib/lang.ts';
 
@@ -103,11 +103,6 @@ export default function MenuPage() {
                 </Section>
 
                 <Section className={classes.categories}>
-                    <Link to={getDocLink('')} target="_blank" className={classes.link}>
-                        <WrappedCell before={<IconBook2 size={28} stroke={1.2} />}>
-                            {t('menu.documentation')}
-                        </WrappedCell>
-                    </Link>
                     <Link
                         to="https://t.me/tribute/app?startapp=donation_13215"
                         target="_blank"

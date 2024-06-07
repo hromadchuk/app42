@@ -293,12 +293,18 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
     function onCodeChange(e: FormEvent<HTMLInputElement>) {
         const inputEvent = e.nativeEvent as InputEvent;
         const isCorrectValue = Boolean((inputEvent.data || '').match(/[0-9]/));
+        // @ts-ignore
+        const key = e.target.dataset.key as string;
 
         e.currentTarget.value = String(isCorrectValue ? inputEvent.data : '');
 
         const nextElement = e.currentTarget.nextElementSibling as HTMLInputElement;
         if (nextElement && isCorrectValue) {
             nextElement.focus();
+        }
+
+        if (Number(key) === codeLength && isCorrectValue) {
+            setTimeout(() => confirmCode());
         }
     }
 
@@ -401,10 +407,11 @@ export function AuthorizationModal({ isOpen, onOpenChange, onAuthComplete }: IAu
                                         >
                                             {new Array(codeLength).fill(0).map((_, key) => (
                                                 <input
+                                                    key={key}
+                                                    data-key={key + 1}
                                                     autoFocus={key === 0}
                                                     className="smsCode"
                                                     type="num"
-                                                    key={key}
                                                     inputMode="numeric"
                                                     onChange={onCodeChange}
                                                 />
