@@ -87,9 +87,7 @@ export function AccountsModal({ isOpen, onOpenChange }: IAccountsModalProps) {
                                 setUser(null);
                                 navigate('/');
 
-                                localStorage.clear();
                                 // markOnboardingAsCompleted();
-                                location.reload();
                             };
 
                             if (isDev) {

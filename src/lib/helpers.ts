@@ -631,3 +631,7 @@ export function generateColorGradation(hex: string, steps: number): string[] {
 
     return gradation;
 }
+
+export function isMobile() {
+    return /Mobi|Android/i.test(navigator.userAgent);
+}
