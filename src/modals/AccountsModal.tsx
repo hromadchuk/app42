@@ -43,6 +43,12 @@ export function AccountsModal({ isOpen, onOpenChange }: IAccountsModalProps) {
         });
     }, [userFriendlyAddress]);
 
+    useEffect(() => {
+        if (!userFriendlyAddress && !user) {
+            onOpenChange(false);
+        }
+    }, [userFriendlyAddress, user]);
+
     function getUserData() {
         if (!user) {
             return null;

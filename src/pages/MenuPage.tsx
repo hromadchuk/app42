@@ -14,10 +14,8 @@ import { IconNews, IconPigMoney, IconSearch } from '@tabler/icons-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTonAddress } from '@tonconnect/ui-react';
 import { cards } from '../cards.ts';
-import { useMiniApp } from '@tma.js/sdk-react';
 import { WrappedCell } from '../components/Helpers.tsx';
 import { OwnerAvatar } from '../components/OwnerAvatar.tsx';
-import { wrapCallMAMethod } from '../lib/helpers.ts';
 import { getMethodsByName } from '../routes.tsx';
 import { t } from '../lib/lang.ts';
 
@@ -38,7 +36,6 @@ export default function MenuPage() {
 
     const userFriendlyAddress = useTonAddress();
     const navigate = useNavigate();
-    const miniApp = useMiniApp();
 
     const [searchText, setSearchText] = useState('');
 
@@ -94,7 +91,6 @@ export default function MenuPage() {
                             multiline={true}
                             onClick={() => {
                                 navigate(`/methods/${card.id}`);
-                                wrapCallMAMethod(() => miniApp.setHeaderColor(card.color));
                             }}
                         >
                             {t(`menu.cards.${card.id}`)}

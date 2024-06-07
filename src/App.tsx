@@ -7,6 +7,7 @@ import { useBackButton, useCloudStorage, useLaunchParams, useMiniApp, useViewpor
 import { Locales, useTonAddress, useTonConnectModal, useTonConnectUI } from '@tonconnect/ui-react';
 import { Api, TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
+import { getCardById } from './cards.ts';
 import { Constants } from './constants.ts';
 import { clearOldCache, getCache, removeCache, setCache } from './lib/cache.ts';
 import { decodeString, getCurrentUser, getParams, isDev, Server, wrapCallMAMethod } from './lib/helpers.ts';
@@ -15,7 +16,6 @@ import { AuthType, getMethodById, IMethod, IRouter, MethodCategory, routes } fro
 
 import { IShareOptions, ShareModal } from './modals/ShareModal.tsx';
 import { AccountsModal } from './modals/AccountsModal.tsx';
-import { AuthorizationModal } from './modals/AuthorizationModal.tsx';
 
 import { AppContext, IInitData, ISnackbarOptions } from './contexts/AppContext.tsx';
 
@@ -50,7 +50,6 @@ export function App() {
     const [isAccountsModalOpen, setAccountsModalOpen] = useState(false);
     const [isShareModalOpen, setShareModalOpen] = useState(false);
     const [shareModalData, setShareModalData] = useState<IShareOptions | null>(null);
-    const [isAuthorizationModalOpen, setAuthorizationModalOpen] = useState(false);
     const [initData, setInitData] = useState<null | IInitData>(null);
     const [snackbarOptions, setSnackbarOptions] = useState<null | ISnackbarOptions>(null);
 
@@ -63,6 +62,17 @@ export function App() {
                 miniApp.setHeaderColor(launchParams.themeParams.headerBackgroundColor as `#${string}`);
             });
         } else {
+            if (currentLocation.pathname.startsWith('/methods/')) {
+                const [, , categoryId] = currentLocation.pathname.split('/');
+                if (categoryId) {
+                    const card = getCardById(categoryId as MethodCategory);
+
+                    wrapCallMAMethod(() => {
+                        miniApp.setHeaderColor(card.color);
+                    });
+                }
+            }
+
             wrapCallMAMethod(() => backButton.show());
         }
     }, [currentLocation]);
@@ -282,7 +292,7 @@ export function App() {
                 navigate(methodPath);
             } else {
                 setCache(Constants.AUTH_STATE_METHOD_KEY, data, 15).then(() => {
-                    setAuthorizationModalOpen(true);
+                    navigate(methodPath);
                 });
             }
         }
@@ -319,21 +329,6 @@ export function App() {
                     }
                 }}
                 modalData={shareModalData}
-            />
-            <AuthorizationModal
-                isOpen={isAuthorizationModalOpen}
-                onOpenChange={(open) => setAuthorizationModalOpen(open)}
-                onAuthComplete={() => {
-                    getCache(Constants.AUTH_STATE_METHOD_KEY).then((value) => {
-                        if (value) {
-                            const { methodPath } = value as { methodPath: string };
-
-                            window.alreadyVisitedRefLink = true;
-                            navigate(methodPath);
-                            removeCache(Constants.AUTH_STATE_METHOD_KEY);
-                        }
-                    });
-                }}
             />
 
             {snackbarOptions && (
