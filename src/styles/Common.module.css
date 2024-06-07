@@ -70,3 +70,9 @@
         margin-right: 5px;
     }
 }
+
+.fixSearchBackground {
+    & > div {
+        background-color: var(--tg-theme-header-bg-color) !important;
+    }
+}

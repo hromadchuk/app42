@@ -466,12 +466,14 @@ export default function ImportMessages() {
                 </Section>
 
                 <Section className={commonClasses.sectionBox}>
-                    <Input
-                        before={<IconSearch opacity={0.3} />}
-                        placeholder={mt('search_placeholder')}
-                        value={searchQuery}
-                        onChange={(event) => setSearchQuery(event.currentTarget.value)}
-                    />
+                    <div className={commonClasses.fixSearchBackground}>
+                        <Input
+                            before={<IconSearch opacity={0.3} />}
+                            placeholder={mt('search_placeholder')}
+                            value={searchQuery}
+                            onChange={(event) => setSearchQuery(event.currentTarget.value)}
+                        />
+                    </div>
 
                     {filterList(fileUsers).map((user, key) => (
                         <WrappedCell
