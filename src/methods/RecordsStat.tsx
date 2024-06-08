@@ -501,7 +501,11 @@ export default function RecordsStat() {
             })
         );
 
-        return <ReactionsList reactions={reactions} />;
+        return (
+            <Padding>
+                <ReactionsList reactions={reactions} />
+            </Padding>
+        );
     }
 
     function getSelectedTabObject(tabs: ITabTops[]) {
