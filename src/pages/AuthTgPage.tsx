@@ -513,6 +513,7 @@ export default function AuthTgPage() {
                                         onClick={() => {
                                             setSelectedCountryCode(country.code);
                                             setSelectingCountry(false);
+                                            setSearchCountry('');
                                         }}
                                     >
                                         {country.name}

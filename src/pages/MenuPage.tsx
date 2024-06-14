@@ -8,6 +8,7 @@ import {
     List,
     Placeholder,
     Section,
+    Spinner,
     Tappable
 } from '@telegram-apps/telegram-ui';
 import { IconNews, IconPigMoney, IconSearch } from '@tabler/icons-react';
@@ -32,7 +33,7 @@ function getInfoTextWithLink() {
 }
 
 export default function MenuPage() {
-    const { user, setAccountsModalOpen } = useContext(AppContext);
+    const { user, setAccountsModalOpen, isUserChecked } = useContext(AppContext);
 
     const userFriendlyAddress = useTonAddress();
     const navigate = useNavigate();
@@ -40,18 +41,24 @@ export default function MenuPage() {
     const [searchText, setSearchText] = useState('');
 
     function AccountsRow() {
-        if (!user && !userFriendlyAddress) {
+        if (!user && !userFriendlyAddress && isUserChecked) {
             return null;
         }
 
         const avatars = [];
 
-        if (user) {
-            avatars.push(<OwnerAvatar key="user" owner={user} size={28} />);
-        }
-
         if (userFriendlyAddress) {
             avatars.push(<Avatar key="wallet" size={28} src={TonLogo} />);
+        }
+
+        if (user) {
+            avatars.push(<OwnerAvatar key="user" owner={user} size={28} />);
+        } else if (!isUserChecked) {
+            avatars.push(
+                <div key="avatar-spinner" style={{ marginTop: 3, zIndex: 99, boxShadow: 'none' }}>
+                    <Spinner size="s" />
+                </div>
+            );
         }
 
         return (

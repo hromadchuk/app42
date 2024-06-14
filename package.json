@@ -29,7 +29,7 @@
     "react-imask": "^7.6.0",
     "react-multi-date-picker": "^4.5.1",
     "react-router-dom": "^6.23.0",
-    "telegram": "^2.21.1",
+    "telegram": "^2.22.1",
     "tonapi-sdk-js": "^1.0.9"
   },
   "devDependencies": {
