@@ -144,7 +144,9 @@ export default function ContactsNames() {
             <Section className={commonClasses.sectionBox}>
                 <Blockquote>{mt('share_description')}</Blockquote>
 
-                <Input after={<CopyButton value={link} />} value={link} readOnly />
+                <div className={commonClasses.fixSearchBackground}>
+                    <Input after={<CopyButton value={link} />} value={link} readOnly />
+                </div>
             </Section>
         );
     }

@@ -41,12 +41,11 @@
 }
 
 .avatarSpinner {
-    margin-top: 6px;
-    margin-left: 1px;
     z-index: 99;
 
     & > div {
         color: #6741d9;
+        display: flex;
     }
 }
 
