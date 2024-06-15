@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port 4242 --host",
-    "build": "npm run lint && tsc && vite build",
+    "build": "npm run lint && NODE_OPTIONS=--max-old-space-size=32768 vite build",
     "build-vite": "vite build",
     "build-watch": "vite build --watch",
-    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0 && tsc",
     "preview": "vite preview"
   },
   "dependencies": {
