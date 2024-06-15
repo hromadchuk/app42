@@ -40,6 +40,16 @@
     color: #c2255c;
 }
 
+.avatarSpinner {
+    margin-top: 3px;
+    z-index: 99;
+    box-shadow: none;
+
+    & > div {
+        color: #6741d9;
+    }
+}
+
 @keyframes donateAnimation {
     0% {
         color: #c2255c;

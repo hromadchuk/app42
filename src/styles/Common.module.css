@@ -3,7 +3,7 @@
     overflow: hidden;
     margin: 16px;
 
-    hr {
+    :is(hr) {
         display: none;
     }
 
@@ -17,13 +17,13 @@
 }
 
 .showHr {
-    hr {
+    :is(hr) {
         display: block;
     }
 }
 
 .hideHr {
-    hr {
+    :is(hr) {
         display: none;
     }
 }

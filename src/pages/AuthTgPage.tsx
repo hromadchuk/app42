@@ -29,7 +29,7 @@ import AnimatedPhone from '../assets/animated_stickers/phone.json';
 import AnimatedCloud from '../assets/animated_stickers/cloud.json';
 import AnimatedMonkey from '../assets/animated_stickers/monkey.json';
 
-import classes from '../styles/AuthorizationModal.module.css';
+import classes from '../styles/AuthorizationPage.module.css';
 
 interface IInputCountry {
     name: string;
@@ -283,7 +283,7 @@ export default function AuthTgPage() {
 
     function getCode() {
         // @ts-ignore
-        return [...document.getElementsByClassName('smsCode')].map((el) => el.value).join('');
+        return [...document.getElementsByClassName(classes.pinInput)].map((el) => el.value).join('');
     }
 
     function getSelectCountry(): IInputCountry {
@@ -365,7 +365,7 @@ export default function AuthTgPage() {
                                     key={key}
                                     data-key={key + 1}
                                     autoFocus={key === 0}
-                                    className="smsCode"
+                                    className={classes.pinInput}
                                     type="num"
                                     inputMode="numeric"
                                     onChange={onCodeChange}

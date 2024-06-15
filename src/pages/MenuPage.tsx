@@ -55,7 +55,7 @@ export default function MenuPage() {
             avatars.push(<OwnerAvatar key="user" owner={user} size={28} />);
         } else if (!isUserChecked) {
             avatars.push(
-                <div key="avatar-spinner" style={{ marginTop: 3, zIndex: 99, boxShadow: 'none' }}>
+                <div key="avatar-spinner" className={classes.avatarSpinner}>
                     <Spinner size="s" />
                 </div>
             );
