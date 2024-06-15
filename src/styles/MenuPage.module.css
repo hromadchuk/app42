@@ -41,9 +41,8 @@
 }
 
 .avatarSpinner {
-    margin-top: 3px;
+    margin-top: 6px;
     z-index: 99;
-    box-shadow: none;
 
     & > div {
         color: #6741d9;
