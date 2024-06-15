@@ -42,6 +42,7 @@
 
 .avatarSpinner {
     margin-top: 6px;
+    margin-left: 1px;
     z-index: 99;
 
     & > div {
