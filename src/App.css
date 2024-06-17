@@ -35,3 +35,9 @@ a {
 [role="dialog"] [name="wrapped-cell"]:hover {
     background: var(--tg-theme-header-bg-color-hover);
 }
+
+[datatype="disabled"]:hover {
+    background: none;
+    opacity: 1;
+    cursor: default;
+}

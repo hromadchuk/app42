@@ -1,5 +1,4 @@
 import { Headline, Subheadline } from '@telegram-apps/telegram-ui';
-import { classNames } from '../lib/helpers.ts';
 
 import classes from '../styles/PageHeader.module.css';
 
@@ -15,7 +14,7 @@ export function PageHeader(props: IPageHeaderProps) {
     return (
         <div
             id="method_header"
-            className={classNames(classes.block, { [classes.headerAnimation]: !subheader })}
+            className={classes.block}
             style={{
                 backgroundColor: color
             }}

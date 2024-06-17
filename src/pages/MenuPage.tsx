@@ -11,7 +11,7 @@ import {
     Tappable
 } from '@telegram-apps/telegram-ui';
 import { IconNews, IconPigMoney, IconSearch } from '@tabler/icons-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTonAddress } from '@tonconnect/ui-react';
 import { cards } from '../cards.ts';
 import { WrappedCell } from '../components/Helpers.tsx';
@@ -109,20 +109,21 @@ export default function MenuPage() {
                 </Section>
 
                 <Section className={classes.categories}>
-                    <Link
-                        to="https://t.me/tribute/app?startapp=donation_13215"
-                        target="_blank"
+                    <WrappedCell
+                        before={<IconPigMoney size={28} stroke={1.2} className={classes.donutIcon} />}
+                        href="https://t.me/tribute/app?startapp=donation_13215"
                         className={classes.link}
                     >
-                        <WrappedCell before={<IconPigMoney size={28} stroke={1.2} className={classes.donutIcon} />}>
-                            {t('menu.donate')}
-                        </WrappedCell>
-                    </Link>
-                    <Link to="https://t.me/app42news" target="_blank" className={classes.link}>
-                        <WrappedCell before={<IconNews size={28} stroke={1.2} />}>
-                            {t('menu.telegram_channel')}
-                        </WrappedCell>
-                    </Link>
+                        {t('menu.donate')}
+                    </WrappedCell>
+
+                    <WrappedCell
+                        before={<IconNews size={28} stroke={1.2} />}
+                        href="https://t.me/app42news"
+                        className={classes.link}
+                    >
+                        {t('menu.telegram_channel')}
+                    </WrappedCell>
                 </Section>
 
                 {/* <Blockquote> */}

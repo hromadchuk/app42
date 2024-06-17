@@ -229,7 +229,7 @@ export function App() {
                 }
             );
 
-            window.TelegramClient.setLogLevel(isDev ? LogLevel.DEBUG : LogLevel.INFO);
+            window.TelegramClient.setLogLevel(LogLevel.INFO);
 
             const versionKey = 'TGLibVersion';
             const version = window.TelegramClient.__version__;

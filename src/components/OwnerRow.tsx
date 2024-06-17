@@ -1,6 +1,5 @@
 import { createElement, CSSProperties, ForwardRefExoticComponent, RefAttributes } from 'react';
 import { Multiselectable } from '@telegram-apps/telegram-ui';
-import { Link } from 'react-router-dom';
 import { Api } from 'telegram';
 import { Icon, IconChevronRight, IconProps, IconRosetteDiscountCheckFilled } from '@tabler/icons-react';
 import { TOwnerInfo } from '../lib/helpers.ts';
@@ -20,8 +19,6 @@ interface IOwnerRow {
 interface ILinkProps {
     onClick?: () => void;
     href?: string;
-    target?: string;
-    component?: 'a' | 'button';
 }
 
 export function OwnerRow({ owner, description, rightIcon, withoutLink, callback, disabled, checked }: IOwnerRow) {
@@ -35,20 +32,15 @@ export function OwnerRow({ owner, description, rightIcon, withoutLink, callback,
     if (!withoutLink && !disabled) {
         if (callback) {
             linkProps.onClick = () => callback();
-            linkProps.component = 'a';
         } else if ((isUser || isChannel) && (owner.username || owner.usernames)) {
             const username = (owner.usernames ? owner.usernames[0].username : owner.username) as string;
 
             linkProps.href = `https://t.me/${username}`;
         } else if (owner?.id && (isChannel || isChat)) {
-            linkProps.href = `https://t.me/c/${owner.id}/999999999`;
+            // TODO fix this
+            // linkProps.href = `https://t.me/c/${owner.id}/999999999`;
         } else if (isUser && owner?.phone) {
             linkProps.href = `https://t.me/+${owner.phone}`;
-        }
-
-        if (linkProps.href) {
-            linkProps.target = '_blank';
-            linkProps.component = 'a';
         }
     }
 
@@ -103,35 +95,25 @@ export function OwnerRow({ owner, description, rightIcon, withoutLink, callback,
             return <Multiselectable checked={checked} readOnly />;
         }
 
-        if (linkProps.component) {
+        if (linkProps.href || rightIcon) {
             return createElement(rightIcon || IconChevronRight, { size: 14, stroke: 1.5 });
         }
 
         return null;
     }
 
-    function CellRow() {
-        return (
-            <WrappedCell
-                {...linkProps}
-                titleBadge={getBadge()}
-                interactiveAnimation={interactiveAnimation}
-                before={<OwnerAvatar owner={owner} size={description ? 48 : 40} />}
-                style={style}
-                after={RightBlock()}
-                description={description}
-                multiline={true}
-            >
-                {name.join(' ')}
-            </WrappedCell>
-        );
-    }
-
-    return linkProps.href ? (
-        <Link to={linkProps.href} target="_blank">
-            {CellRow()}
-        </Link>
-    ) : (
-        CellRow()
+    return (
+        <WrappedCell
+            {...linkProps}
+            titleBadge={getBadge()}
+            interactiveAnimation={interactiveAnimation}
+            before={<OwnerAvatar owner={owner} size={description ? 48 : 40} />}
+            style={style}
+            after={RightBlock()}
+            description={description}
+            multiline={true}
+        >
+            {name.join(' ')}
+        </WrappedCell>
     );
 }
