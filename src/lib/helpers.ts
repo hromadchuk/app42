@@ -570,7 +570,7 @@ export async function getCurrentUser(): Promise<Api.User | null> {
 
         return user;
     } catch (error) {
-        console.error('getCurrentUser error', error);
+        console.error('getCurrentUser error', error?.toString());
     }
 
     return null;

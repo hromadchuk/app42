@@ -6,6 +6,7 @@ import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useBackButton, useCloudStorage, useLaunchParams, useMiniApp, useViewport } from '@tma.js/sdk-react';
 import { Locales, useTonAddress, useTonConnectModal, useTonConnectUI } from '@tonconnect/ui-react';
 import { Api, TelegramClient } from 'telegram';
+import { LogLevel } from 'telegram/extensions/Logger';
 import { StringSession } from 'telegram/sessions';
 import { getCardById } from './cards.ts';
 import { Constants } from './constants.ts';
@@ -227,6 +228,8 @@ export function App() {
                     langCode: getAppLangCode()
                 }
             );
+
+            window.TelegramClient.setLogLevel(isDev ? LogLevel.DEBUG : LogLevel.INFO);
 
             const versionKey = 'TGLibVersion';
             const version = window.TelegramClient.__version__;
