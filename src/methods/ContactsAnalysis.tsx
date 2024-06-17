@@ -222,9 +222,9 @@ export default function ContactsAnalysis() {
 
     return (
         <>
-            {SectionBlock(EFilerType.PREMIUM, premiumUsersData, 'premium')}
-            {SectionBlock(EFilerType.MUTUAL, mutualUsersData, 'mutual')}
             {SectionBlock(EFilerType.NON_MUTUAL, nonMutualUsersData, 'non_mutual')}
+            {SectionBlock(EFilerType.MUTUAL, mutualUsersData, 'mutual')}
+            {SectionBlock(EFilerType.PREMIUM, premiumUsersData, 'premium')}
             {SectionBlock(EFilerType.WITHOUT_PHOTO, withoutPhotoUsersData, 'without_photo')}
             {SectionBlock(EFilerType.VERIFIED, verifiedUsersData, 'verified')}
             {SectionBlock(EFilerType.WITHOUT_PHONE, withoutPhoneUsersData, 'without_phone')}
