@@ -25,7 +25,8 @@
     "selected_button_subtext": "Выбрано {count} из {total}",
     "errors": {
       "api_error": "Ошибка API",
-      "api_rate_limit": "Вы достигли лимита запросов к API, нужно подождать {time}"
+      "api_rate_limit": "Вы достигли лимита запросов к API, нужно подождать {time}",
+      "cant_open_link": "Не удается открыть ссылку"
     },
     "time_short": {
       "days": "д",

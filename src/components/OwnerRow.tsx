@@ -1,8 +1,10 @@
-import { createElement, CSSProperties, ForwardRefExoticComponent, RefAttributes } from 'react';
-import { Multiselectable } from '@telegram-apps/telegram-ui';
+import { createElement, CSSProperties, ForwardRefExoticComponent, RefAttributes, useState } from 'react';
+import { Multiselectable, Spinner } from '@telegram-apps/telegram-ui';
 import { Api } from 'telegram';
+import { useUtils } from '@tma.js/sdk-react';
 import { Icon, IconChevronRight, IconProps, IconRosetteDiscountCheckFilled } from '@tabler/icons-react';
-import { TOwnerInfo } from '../lib/helpers.ts';
+import { CallAPI, isDev, notifyError, TOwnerInfo, wrapCallMAMethod } from '../lib/helpers.ts';
+import { t } from '../lib/lang.ts';
 import { WrappedCell } from './Helpers.tsx';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
 
@@ -22,6 +24,10 @@ interface ILinkProps {
 }
 
 export function OwnerRow({ owner, description, rightIcon, withoutLink, callback, disabled, checked }: IOwnerRow) {
+    const utils = useUtils();
+
+    const [isLoading, setLoading] = useState(false);
+
     const name: string[] = [];
     const linkProps: ILinkProps = {};
     const isUser = owner instanceof Api.User;
@@ -36,11 +42,46 @@ export function OwnerRow({ owner, description, rightIcon, withoutLink, callback,
             const username = (owner.usernames ? owner.usernames[0].username : owner.username) as string;
 
             linkProps.href = `https://t.me/${username}`;
-        } else if (owner?.id && (isChannel || isChat)) {
-            // TODO fix this
-            // linkProps.href = `https://t.me/c/${owner.id}/999999999`;
         } else if (isUser && owner?.phone) {
             linkProps.href = `https://t.me/+${owner.phone}`;
+        } else if (owner?.id && (isChannel || isChat)) {
+            linkProps.onClick = async () => {
+                if (isLoading) {
+                    return;
+                }
+
+                setLoading(true);
+
+                const dialog = await CallAPI(
+                    new Api.messages.GetHistory({
+                        peer: owner,
+                        limit: 1
+                    })
+                );
+
+                if (dialog instanceof Api.messages.Messages || dialog instanceof Api.messages.ChannelMessages) {
+                    const messageId = dialog.messages[0].id;
+                    if (messageId) {
+                        const link = `https://t.me/c/${owner.id}/${messageId}`;
+
+                        if (isDev) {
+                            window.open(link);
+                        } else {
+                            wrapCallMAMethod<void>(() => utils.openTelegramLink(link));
+                        }
+                    } else {
+                        notifyError({
+                            message: t('common.errors.cant_open_link')
+                        });
+                    }
+                } else {
+                    notifyError({
+                        message: t('common.errors.cant_open_link')
+                    });
+                }
+
+                setLoading(false);
+            };
         }
     }
 
@@ -91,6 +132,10 @@ export function OwnerRow({ owner, description, rightIcon, withoutLink, callback,
     }
 
     function RightBlock() {
+        if (isLoading) {
+            return <Spinner size="s" />;
+        }
+
         if (isCheckbox) {
             return <Multiselectable checked={checked} readOnly />;
         }

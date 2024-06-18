@@ -25,7 +25,8 @@
     "selected_button_subtext": "Selected {count} from {total}",
     "errors": {
       "api_error": "API error",
-      "api_rate_limit": "You have reached the API request limit, please wait {time}"
+      "api_rate_limit": "You have reached the API request limit, please wait {time}",
+      "cant_open_link": "Can't open link"
     },
     "time_short": {
       "days": "d",
