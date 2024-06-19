@@ -41,7 +41,7 @@ export default function MethodPage() {
         <>
             <PageHeader header={method.name} subheader={t(`menu.cards.${categoryId}`)} color={card.color} />
 
-            <Content />
+            {Content()}
         </>
     );
 }
