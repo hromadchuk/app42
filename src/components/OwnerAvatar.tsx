@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Avatar } from '@telegram-apps/telegram-ui';
 import { Api } from 'telegram';
 import { useIntersection } from '../hooks/useIntersection.ts';
@@ -10,19 +10,17 @@ interface IOwnerAvatar {
 }
 
 export function OwnerAvatar({ owner, size }: IOwnerAvatar) {
-    const [ref, entry] = useIntersection({
-        root: null,
-        rootMargin: '0px',
-        threshold: 0.1
-    });
+    const ref = useRef();
     const [alreadyRequested, setAlreadyRequested] = useState<boolean>(false);
     const [userAvatar, setUserAvatar] = useState<null | string>(null);
+
+    const isIntersecting = useIntersection(ref);
 
     useEffect(() => {
         if (
             (owner instanceof Api.User || owner instanceof Api.Chat || owner instanceof Api.Channel) &&
             owner.photo &&
-            entry?.isIntersecting &&
+            isIntersecting &&
             !alreadyRequested
         ) {
             if (owner.photo instanceof Api.UserProfilePhotoEmpty || owner.photo instanceof Api.ChatPhotoEmpty) {
@@ -40,7 +38,7 @@ export function OwnerAvatar({ owner, size }: IOwnerAvatar) {
                 }
             });
         }
-    }, [entry?.isIntersecting]);
+    }, [isIntersecting]);
 
     let name = '';
 
