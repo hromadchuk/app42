@@ -154,7 +154,7 @@ export function App() {
 
                 if (isDev) {
                     // TODO only test
-                    // const method = getMethodById('clear_dialog_members');
+                    // const method = getMethodById('contacts_analysis');
                     // method && openMethod(method);
                 }
             }

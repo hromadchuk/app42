@@ -855,15 +855,15 @@ export default function MessagesStat() {
                         <Placeholder description={mt('inactive_users_description')} />
 
                         {chatInactiveMembers.slice(0, chatInactiveMembersShowCount).map((owner, key) => (
-                            <div key={owner.id.valueOf() + key}>
-                                {OwnerRow({
-                                    owner,
-                                    callback:
-                                        !(selectedOwner instanceof Api.User) && !selectedOwner?.adminRights?.banUsers
-                                            ? undefined
-                                            : () => onKickUserClick(owner)
-                                })}
-                            </div>
+                            <OwnerRow
+                                owner={owner}
+                                key={owner.id.valueOf() + key}
+                                callback={
+                                    !(selectedOwner instanceof Api.User) && !selectedOwner?.adminRights?.banUsers
+                                        ? undefined
+                                        : () => onKickUserClick(owner)
+                                }
+                            />
                         ))}
 
                         {chatInactiveMembers.length >

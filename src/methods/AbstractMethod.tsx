@@ -100,7 +100,7 @@ export default function AbstractMethod() {
                 setListAction
             }}
         >
-            {HelpersBlock()}
+            <HelpersBlock />
             {method.element || (
                 <>
                     <div>Method not found</div>
