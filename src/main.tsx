@@ -32,6 +32,4 @@ import './App.css';
 
 import 'chartkick/chart.js';
 
-// Deploy trigger
-
 createRoot(document.getElementById('root') as HTMLElement).render(<MiniAppWrapper />);
