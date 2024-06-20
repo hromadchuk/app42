@@ -200,14 +200,14 @@ export default function ContactsAnalysis() {
                 className={classNames(commonClasses.sectionBox, commonClasses.hideHr)}
             >
                 {users.slice(0, 3).map((owner, key) => (
-                    <>
-                        <OwnerRow key={key} owner={owner} description={getDescription(type, owner)} />
+                    <div key={key}>
+                        <OwnerRow owner={owner} description={getDescription(type, owner)} />
                         <Divider
                             style={{
                                 display: key === users.slice(0, 3).length - 1 && users.length <= 3 ? 'none' : 'block'
                             }}
                         />
-                    </>
+                    </div>
                 ))}
 
                 {users.length > 3 && (
