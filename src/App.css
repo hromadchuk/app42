@@ -21,6 +21,8 @@ body {
 
 html {
     background-color: var(--tg-background-color);
+
+    --tg-theme-islands-background-color: var(--tg-theme-header-bg-color);
 }
 
 a {

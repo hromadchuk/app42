@@ -3,9 +3,20 @@ import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import { SDKProvider, useSDKContext } from '@tma.js/sdk-react';
 import { AppRoot, Placeholder, Spinner } from '@telegram-apps/telegram-ui';
 import { MemoryRouter } from 'react-router-dom';
-import { hexToRgba } from './lib/helpers.ts';
+import { getParams, hexToRgba } from './lib/helpers.ts';
 import { TonApiCall } from './lib/TonApi.ts';
 import { App } from './App.tsx';
+
+type BackgroundPlatforms =
+    | 'android'
+    | 'android_x'
+    | 'ios'
+    | 'macos'
+    | 'tdesktop'
+    | 'unigram'
+    | 'unknown'
+    | 'web'
+    | 'weba';
 
 function MiniAppLoader({ children }: PropsWithChildren) {
     const { loading, initResult, error } = useSDKContext();
@@ -69,6 +80,15 @@ export function MiniAppWrapper() {
                     }
                 }
             }
+        }
+
+        const platform = getParams().get('tgWebAppPlatform');
+        const badBackgroundPlatforms: BackgroundPlatforms[] = ['android', 'android_x', 'tdesktop', 'web', 'weba'];
+        if (badBackgroundPlatforms.includes(platform as BackgroundPlatforms)) {
+            htmlElement.style.setProperty(
+                '--tg-theme-islands-background-color',
+                'var(--tg-theme-secondary-background-color)'
+            );
         }
     }, []);
 
