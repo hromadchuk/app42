@@ -70,15 +70,6 @@ export function MiniAppWrapper() {
                 }
             }
         }
-
-        const extendedColors = getGlobalColors();
-        const bgColor = extendedColors.find(({ key }) => key === '--tg-background-color');
-        const headerBgColor = extendedColors.find(({ key }) => key === '--tg-theme-header-bg-color');
-
-        // for web
-        if (bgColor?.value === headerBgColor?.value) {
-            htmlElement.style.setProperty('--tg-theme-header-bg-color', 'var(--tg-theme-secondary-bg-color)');
-        }
     }, []);
 
     return (
