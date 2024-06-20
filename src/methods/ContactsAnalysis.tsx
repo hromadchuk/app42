@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { ButtonCell, Caption, Modal, Section } from '@telegram-apps/telegram-ui';
+import { ButtonCell, Caption, Divider, Modal, Section } from '@telegram-apps/telegram-ui';
 import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
 import { Api } from 'telegram';
 import dayjs from 'dayjs';
@@ -197,10 +197,17 @@ export default function ContactsAnalysis() {
                         </Caption>
                     </Section.Header>
                 }
-                className={classNames(commonClasses.sectionBox, commonClasses.showHr)}
+                className={classNames(commonClasses.sectionBox, commonClasses.hideHr)}
             >
                 {users.slice(0, 3).map((owner, key) => (
-                    <OwnerRow key={key} owner={owner} description={getDescription(type, owner)} />
+                    <>
+                        <OwnerRow key={key} owner={owner} description={getDescription(type, owner)} />
+                        <Divider
+                            style={{
+                                display: key === users.slice(0, 3).length - 1 && users.length <= 3 ? 'none' : 'block'
+                            }}
+                        />
+                    </>
                 ))}
 
                 {users.length > 3 && (

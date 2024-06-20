@@ -35,31 +35,49 @@ const alphaColors = new Map<string, number>([
     ['--tg-theme-hint-color', 0.2]
 ]);
 
+function getGlobalColors() {
+    const htmlElement = document.documentElement;
+    const styleString = htmlElement.getAttribute('style') as string;
+    const regExp = '(--[\\w-]+)\\s*:\\s*([^;]+)';
+    const allColors = (styleString.match(new RegExp(regExp, 'g')) || []).map((color) => {
+        const [key, value] = color.split(':');
+
+        return { key, value: value.trim() };
+    });
+
+    return allColors;
+}
+
 export function MiniAppWrapper() {
     useEffect(() => {
         const htmlElement = document.documentElement;
-        const styleString = htmlElement.getAttribute('style') as string;
-        const regExp = '(--[\\w-]+)\\s*:\\s*([^;]+)';
-        const allColors = styleString.match(new RegExp(regExp, 'g')) || [];
+        const initColors = getGlobalColors();
 
-        for (const color of allColors) {
-            const [key, value] = color.split(':');
-
+        for (const { key, value } of initColors) {
             if (key.startsWith('--tg') && key.includes('background') && key.endsWith('-color')) {
                 const fixName = key.replace('background', 'bg');
 
-                htmlElement.style.setProperty(fixName, value.trim());
+                htmlElement.style.setProperty(fixName, value);
             }
 
             if (alphaColors.has(key)) {
                 const alpha = alphaColors.get(key);
                 if (alpha) {
-                    const rgba = hexToRgba(value.trim(), alpha);
+                    const rgba = hexToRgba(value, alpha);
                     if (rgba) {
                         htmlElement.style.setProperty(`${key}-alpha`, rgba);
                     }
                 }
             }
+        }
+
+        const extendedColors = getGlobalColors();
+        const bgColor = extendedColors.find(({ key }) => key === '--tg-background-color');
+        const headerBgColor = extendedColors.find(({ key }) => key === '--tg-theme-header-bg-color');
+
+        // for web
+        if (bgColor?.value === headerBgColor?.value) {
+            htmlElement.style.setProperty('--tg-theme-header-bg-color', 'var(--tg-theme-secondary-bg-color)');
         }
     }, []);
 

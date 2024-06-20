@@ -924,7 +924,6 @@ export default function MessagesStat() {
 
                 {chatTopics.length > 0 && (
                     <Section header={mt('headers.topics')}>
-                        {/* <Divider my="xs" label={mt('headers.topics')} labelPosition="center" mb={0} /> */}
                         <Padding>
                             <Button
                                 stretched
