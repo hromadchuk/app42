@@ -29,15 +29,27 @@ a {
 }
 
 [name="wrapped-cell"]:hover {
-    background: var(--tg-background-color-hover);
+    background: var(--tg-background-color-alpha);
 }
 
 [role="dialog"] [name="wrapped-cell"]:hover {
-    background: var(--tg-theme-header-bg-color-hover);
+    background: var(--tg-theme-header-bg-color-alpha);
+}
+
+[role="dialog"] header:before {
+    background: var(--tg-theme-link-color);
 }
 
 [datatype="disabled"]:hover {
     background: none;
     opacity: 1;
     cursor: default;
+}
+
+[vaul-overlay=""] {
+    background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+:is(hr) {
+    border-color: var(--tg-theme-hint-color-alpha) !important;
 }

@@ -21,7 +21,7 @@ import { getCache, removeCache, setCache } from '../lib/cache.ts';
 import { CountryFlag } from '../components/CountryFlag.tsx';
 import { Constants } from '../constants.ts';
 import { AppContext } from '../contexts/AppContext.tsx';
-import { CallAPI, encodeString, getCurrentUser, isDev, wrapCallMAMethod } from '../lib/helpers.ts';
+import { CallAPI, classNames, encodeString, getCurrentUser, isDev, wrapCallMAMethod } from '../lib/helpers.ts';
 import { getAppLangCode, t } from '../lib/lang.ts';
 import { AnimatedHeader } from '../components/AnimatedHeader.tsx';
 
@@ -30,6 +30,7 @@ import AnimatedCloud from '../assets/animated_stickers/cloud.json';
 import AnimatedMonkey from '../assets/animated_stickers/monkey.json';
 
 import classes from '../styles/AuthorizationPage.module.css';
+import commonClasses from '../styles/Common.module.css';
 
 interface IInputCountry {
     name: string;
@@ -365,7 +366,7 @@ export default function AuthTgPage() {
                                     key={key}
                                     data-key={key + 1}
                                     autoFocus={key === 0}
-                                    className={classes.pinInput}
+                                    className={classNames(classes.pinInput, commonClasses.fixInput)}
                                     type="num"
                                     inputMode="numeric"
                                     onChange={onCodeChange}
@@ -413,6 +414,7 @@ export default function AuthTgPage() {
                             value={password}
                             status={passwordError ? 'error' : 'default'}
                             header={passwordError}
+                            className={commonClasses.fixInput}
                             onChange={(e) => setPassword(e.currentTarget.value)}
                         />
 
@@ -462,6 +464,7 @@ export default function AuthTgPage() {
                         before={`+${selectedCountry.prefix}`}
                         placeholder={selectedCountry.pattern}
                         onChange={(e) => setNumber(e.currentTarget.value)}
+                        className={commonClasses.fixInput}
                     />
 
                     <Button
@@ -488,6 +491,7 @@ export default function AuthTgPage() {
                             size={28}
                             placeholder={t('auth_modal.search_placeholder')}
                             onChange={(e) => setSearchCountry(e.target.value)}
+                            className={commonClasses.fixInput}
                         />
 
                         <Divider />

@@ -138,7 +138,7 @@ export default function ContactsNames() {
     }
 
     function LinkRow() {
-        const link = isDev ? 'https://t.me/kit42_bot/kit42?startapp=cn' : 'https://t.me/app42/app?startapp=cn';
+        const link = 'https://t.me/app42/app?startapp=cn';
 
         return (
             <Section className={commonClasses.sectionBox}>

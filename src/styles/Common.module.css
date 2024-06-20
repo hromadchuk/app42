@@ -8,11 +8,11 @@
     }
 
     & > div {
-        background-color: var(--tg-theme-header-bg-color) !important;
+        background-color: var(--tg-theme-secondary-bg-color) !important;
     }
 
     & > div > div {
-        background-color: var(--tg-theme-header-bg-color) !important;
+        background-color: var(--tg-theme-secondary-bg-color) !important;
     }
 }
 
@@ -73,6 +73,10 @@
 
 .fixSearchBackground {
     & > div {
-        background-color: var(--tg-theme-header-bg-color) !important;
+        background-color: var(--tg-theme-secondary-bg-color) !important;
     }
+}
+
+.fixInput {
+    box-shadow: 0 0 0 2px var(--tg-theme-accent-text-color) !important;
 }

@@ -94,7 +94,7 @@ export default function MenuPage() {
                             key={key}
                             before={
                                 <Avatar size={40} style={{ backgroundColor: card.color }}>
-                                    <card.icon size={28} stroke={1.2} />
+                                    <card.icon size={28} stroke={1.2} color="white" />
                                 </Avatar>
                             }
                             description={t(`menu.cards.${card.id}_description`)}

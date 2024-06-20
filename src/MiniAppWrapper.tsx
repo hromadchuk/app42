@@ -29,6 +29,12 @@ function MiniAppLoader({ children }: PropsWithChildren) {
     return <>{children}</>;
 }
 
+const alphaColors = new Map<string, number>([
+    ['--tg-background-color', 0.4],
+    ['--tg-theme-header-bg-color', 0.4],
+    ['--tg-theme-hint-color', 0.2]
+]);
+
 export function MiniAppWrapper() {
     useEffect(() => {
         const htmlElement = document.documentElement;
@@ -45,10 +51,13 @@ export function MiniAppWrapper() {
                 htmlElement.style.setProperty(fixName, value.trim());
             }
 
-            if (['--tg-background-color', '--tg-theme-header-bg-color']) {
-                const rgba = hexToRgba(value.trim(), 0.4);
-                if (rgba) {
-                    htmlElement.style.setProperty(`${key}-hover`, rgba);
+            if (alphaColors.has(key)) {
+                const alpha = alphaColors.get(key);
+                if (alpha) {
+                    const rgba = hexToRgba(value.trim(), alpha);
+                    if (rgba) {
+                        htmlElement.style.setProperty(`${key}-alpha`, rgba);
+                    }
                 }
             }
         }
