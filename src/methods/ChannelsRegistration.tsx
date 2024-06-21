@@ -32,7 +32,7 @@ export default function ChannelsRegistration() {
             return correctType.creator;
         });
 
-        if (!dialogs.length) {
+        if (!createdChannels.length) {
             setFinishBlock({ state: 'error', text: mt('no_created') });
             return;
         }
