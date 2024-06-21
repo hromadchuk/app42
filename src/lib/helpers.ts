@@ -75,7 +75,11 @@ export function getUserId() {
 
 export const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
-export const isDevUser = [44221708, 5000925865].includes(getUserId());
+export const isDevUser = [
+    44221708, // Pavlo Hro
+    5000925865, // Test env account
+    1345025252 // Vova
+].includes(getUserId());
 
 export function formatNumber(number: number): string {
     return `${number}`.replace(/(\d)(?=(\d{3})+$)/g, '$1\u00a0');
