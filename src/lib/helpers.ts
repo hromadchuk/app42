@@ -78,7 +78,9 @@ export const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostnam
 export const isDevUser = [
     44221708, // Pavlo Hro
     5000925865, // Test env account
-    1345025252 // Vova
+    1345025252, // Vova
+    487641753, // Oksana
+    240746628 // Ksenia
 ].includes(getUserId());
 
 export function formatNumber(number: number): string {
