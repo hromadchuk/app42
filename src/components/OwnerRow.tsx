@@ -59,7 +59,11 @@ export function OwnerRow({ owner, description, rightIcon, withoutLink, callback,
                     })
                 );
 
-                if (dialog instanceof Api.messages.Messages || dialog instanceof Api.messages.ChannelMessages) {
+                if (
+                    dialog instanceof Api.messages.Messages ||
+                    dialog instanceof Api.messages.MessagesSlice ||
+                    dialog instanceof Api.messages.ChannelMessages
+                ) {
                     const messageId = dialog.messages[0].id;
                     if (messageId) {
                         const link = `https://t.me/c/${owner.id}/${messageId}`;
