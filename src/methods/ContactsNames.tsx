@@ -157,7 +157,14 @@ export default function ContactsNames() {
                 <>
                     <Section className={classNames(commonClasses.sectionBox, commonClasses.showHr)}>
                         {serverData.names.map(({ name, count }, key) => (
-                            <WrappedCell key={key} after={<Badge type="number">{count}</Badge>}>
+                            <WrappedCell
+                                key={key}
+                                after={
+                                    <Badge type="number" mode="secondary">
+                                        {count}
+                                    </Badge>
+                                }
+                            >
                                 {name}
                             </WrappedCell>
                         ))}
