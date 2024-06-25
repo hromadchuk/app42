@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, useEffect, useState } from 'react';
 import { IconButton, Snackbar } from '@telegram-apps/telegram-ui';
 import { IconX } from '@tabler/icons-react';
 import ReactGA from 'react-ga4';
@@ -16,8 +16,8 @@ import { getAppLangCode } from './lib/lang.ts';
 import { AuthType, getMethodById, IMethod, IRouter, MethodCategory, routes } from './routes.tsx';
 
 import { IShareOptions, ShareModal } from './modals/ShareModal.tsx';
-import { AccountsModal } from './modals/AccountsModal.tsx';
-import { PremiumModal } from './modals/PremiumModal.tsx';
+const AccountsModal = lazy(() => import('./modals/AccountsModal.tsx'));
+const PremiumModal = lazy(() => import('./modals/PremiumModal.tsx'));
 
 import { AppContext, IInitData, ISnackbarOptions } from './contexts/AppContext.tsx';
 

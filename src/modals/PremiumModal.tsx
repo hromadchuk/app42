@@ -17,7 +17,7 @@ interface IPremiumModalProps {
     onOpenChange: (open: boolean) => void;
 }
 
-export function PremiumModal({ isOpen, onOpenChange }: IPremiumModalProps) {
+export default function PremiumModal({ isOpen, onOpenChange }: IPremiumModalProps) {
     const { setPremium } = useContext(AppContext);
 
     const invoice = useInvoice();

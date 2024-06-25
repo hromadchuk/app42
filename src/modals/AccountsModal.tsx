@@ -21,7 +21,7 @@ interface IAccountsModalProps {
     onOpenChange: (open: boolean) => void;
 }
 
-export function AccountsModal({ isOpen, onOpenChange }: IAccountsModalProps) {
+export default function AccountsModal({ isOpen, onOpenChange }: IAccountsModalProps) {
     const { user, setUser } = useContext(AppContext);
 
     const storage = useCloudStorage();
