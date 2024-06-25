@@ -16,6 +16,7 @@ interface IOwnerRow {
     disabled?: boolean;
     callback?: () => void;
     checked?: boolean;
+    onlyPremium?: boolean;
 }
 
 interface ILinkProps {
@@ -23,7 +24,16 @@ interface ILinkProps {
     href?: string;
 }
 
-export function OwnerRow({ owner, description, rightIcon, withoutLink, callback, disabled, checked }: IOwnerRow) {
+export function OwnerRow({
+    owner,
+    description,
+    rightIcon,
+    withoutLink,
+    callback,
+    disabled,
+    checked,
+    onlyPremium
+}: IOwnerRow) {
     const utils = useUtils();
 
     const [isLoading, setLoading] = useState(false);
@@ -161,6 +171,7 @@ export function OwnerRow({ owner, description, rightIcon, withoutLink, callback,
             after={RightBlock()}
             description={description}
             multiline={true}
+            onlyPremium={onlyPremium}
         >
             {name.join(' ')}
         </WrappedCell>

@@ -17,6 +17,7 @@ import { AuthType, getMethodById, IMethod, IRouter, MethodCategory, routes } fro
 
 import { IShareOptions, ShareModal } from './modals/ShareModal.tsx';
 import { AccountsModal } from './modals/AccountsModal.tsx';
+import { PremiumModal } from './modals/PremiumModal.tsx';
 
 import { AppContext, IInitData, ISnackbarOptions } from './contexts/AppContext.tsx';
 
@@ -48,7 +49,9 @@ export function App() {
 
     const [user, setUser] = useState<null | Api.User>(null);
     const [isUserChecked, setUserChecked] = useState(false);
+    const [isPremium, setPremium] = useState(false);
     const [isAccountsModalOpen, setAccountsModalOpen] = useState(false);
+    const [isPremiumModalOpen, setPremiumModalOpen] = useState(false);
     const [isShareModalOpen, setShareModalOpen] = useState(false);
     const [shareModalData, setShareModalData] = useState<IShareOptions | null>(null);
     const [initData, setInitData] = useState<null | IInitData>(null);
@@ -195,6 +198,7 @@ export function App() {
 
                 if (serverData?.storageHash) {
                     setInitData(serverData);
+                    setPremium(serverData.isPremium);
                 }
             } catch (error) {
                 console.error(`Error init app: ${error}`);
@@ -312,7 +316,10 @@ export function App() {
                 user,
                 setUser,
                 isUserChecked,
+                isPremium,
+                setPremium,
                 openMethod,
+                setPremiumModalOpen,
                 setAccountsModalOpen,
                 initData,
                 setInitData,
@@ -322,6 +329,7 @@ export function App() {
             <Routes>{routes.map(GetRouter)}</Routes>
 
             <AccountsModal isOpen={isAccountsModalOpen} onOpenChange={(open) => setAccountsModalOpen(open)} />
+            <PremiumModal isOpen={isPremiumModalOpen} onOpenChange={(open) => setPremiumModalOpen(open)} />
             <ShareModal
                 isOpen={isShareModalOpen}
                 onOpenChange={(open) => {

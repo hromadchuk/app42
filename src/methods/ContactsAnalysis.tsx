@@ -259,6 +259,7 @@ export default function ContactsAnalysis() {
                                 key={key}
                                 owner={owner}
                                 description={getDescription(modalDescriptionType, owner)}
+                                onlyPremium={key >= 5}
                             />
                         ))}
                     </Section>

@@ -17,6 +17,16 @@
     "wallet_disconnect": "Disconnect the wallet?",
     "account_disconnect": "Disconnect account?"
   },
+  "premium_modal": {
+    "title": "App 42 Premium",
+    "description": "To access the full functionality of the project, you need to purchase a subscription.",
+    "only_premium": "Only for premium",
+    "buttons": {
+      "week": "A week",
+      "month": "A month",
+      "stars": "stars"
+    }
+  },
   "common": {
     "progress": "Loading",
     "footer": "Made with love",

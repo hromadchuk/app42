@@ -164,6 +164,7 @@ export default function ContactsNames() {
                                         {count}
                                     </Badge>
                                 }
+                                onlyPremium={key >= 3}
                             >
                                 {name}
                             </WrappedCell>

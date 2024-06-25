@@ -4,7 +4,15 @@ export function ServerMock<T>(method: string) {
             status: 'ok',
             topMethods: ['messages_stat', 'contacts_analysis', 'animated_messages', 'common_chats_top', 'administered'],
             storageHash: 'localTestStorageHash',
-            showEruda: false
+            showEruda: false,
+            isPremium: false
+        } as T;
+    }
+
+    if (method === 'is-premium') {
+        return {
+            status: 'ok',
+            isPremium: false
         } as T;
     }
 
@@ -50,6 +58,13 @@ export function ServerMock<T>(method: string) {
                     number: 88802375914
                 }
             ]
+        } as T;
+    }
+
+    if (method === 'get-invoice') {
+        return {
+            link: 'https://t.me/$rGgxuJxG0UsKAAAAdqFEuQL8Oi4',
+            status: 'ok'
         } as T;
     }
 

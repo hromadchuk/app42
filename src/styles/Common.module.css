@@ -80,3 +80,11 @@
 .fixInput {
     box-shadow: 0 0 0 2px var(--tg-theme-accent-text-color) !important;
 }
+
+.onlyPremium {
+    filter: blur(1px);
+
+    & img {
+        filter: blur(5px);
+    }
+}
