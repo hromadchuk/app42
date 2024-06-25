@@ -22,8 +22,8 @@
     "description": "To access the full functionality of the project, you need to purchase a subscription.",
     "only_premium": "Only for premium",
     "buttons": {
-      "week": "A week",
-      "month": "A month",
+      "week": "1 week",
+      "month": "1 month",
       "stars": "stars"
     }
   },
