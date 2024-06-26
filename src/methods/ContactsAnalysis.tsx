@@ -259,7 +259,7 @@ export default function ContactsAnalysis() {
                                 key={key}
                                 owner={owner}
                                 description={getDescription(modalDescriptionType, owner)}
-                                onlyPremium={key >= 5}
+                                onlyPremium={modalDescriptionType === EFilerType.NON_MUTUAL && key >= 5}
                             />
                         ))}
                     </Section>
