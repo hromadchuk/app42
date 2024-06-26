@@ -2,6 +2,7 @@ import { useContext, useState } from 'react';
 import {
     Avatar,
     AvatarStack,
+    Blockquote,
     Divider,
     Input,
     List,
@@ -25,11 +26,11 @@ import classes from '../styles/MenuPage.module.css';
 import TonLogo from '../assets/ton_logo.svg';
 import { MethodRow } from './MethodsPage.tsx';
 
-// function getInfoTextWithLink() {
-//     return t('menu.info')
-//         .replace('{link}', '<a href="https://t.me/iamhro" target="_blank">')
-//         .replace('{/link}', '</a>');
-// }
+function getInfoTextWithLink() {
+    return t('menu.info')
+        .replace('{link}', '<a href="https://t.me/iamhro" target="_blank">')
+        .replace('{/link}', '</a>');
+}
 
 export default function MenuPage() {
     const { user, setAccountsModalOpen, isUserChecked } = useContext(AppContext);
@@ -126,9 +127,9 @@ export default function MenuPage() {
                     </WrappedCell>
                 </Section>
 
-                {/* <Blockquote> */}
-                {/*     <div dangerouslySetInnerHTML={{ __html: getInfoTextWithLink() }}></div> */}
-                {/* </Blockquote> */}
+                <Blockquote>
+                    <div dangerouslySetInnerHTML={{ __html: getInfoTextWithLink() }}></div>
+                </Blockquote>
             </>
         );
     }
