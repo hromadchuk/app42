@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from 'react';
-import { Cell, Section } from '@telegram-apps/telegram-ui';
+import { Section } from '@telegram-apps/telegram-ui';
 import { IconEye, IconHeart, IconMapPin, IconPhoto, IconThumbUp, IconVideo } from '@tabler/icons-react';
 import { Api } from 'telegram';
 import { ActivityChart } from '../components/charts/Activity.tsx';
 import { CalculateActivityTime } from '../components/charts/chart_helpers.ts';
-import { Padding } from '../components/Helpers.tsx';
+import { Padding, WrappedCell } from '../components/Helpers.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
 
 import { CallAPI, classNames } from '../lib/helpers.ts';
@@ -350,24 +350,24 @@ export default function CallsStat() {
 
         return (
             <Section className={classNames(commonClasses.sectionBox, commonClasses.showHr)}>
-                <Cell before={<IconPhoto />} after={stat.counts.photos}>
+                <WrappedCell before={<IconPhoto />} after={stat.counts.photos}>
                     {mt('counts.photos')}
-                </Cell>
-                <Cell before={<IconVideo />} after={stat.counts.videos}>
+                </WrappedCell>
+                <WrappedCell before={<IconVideo />} after={stat.counts.videos}>
                     {mt('counts.videos')}
-                </Cell>
-                <Cell before={<IconEye />} after={stat.counts.views}>
+                </WrappedCell>
+                <WrappedCell before={<IconEye />} after={stat.counts.views}>
                     {mt('counts.views')}
-                </Cell>
-                <Cell before={<IconHeart />} after={stat.counts.reactions}>
+                </WrappedCell>
+                <WrappedCell before={<IconHeart />} after={stat.counts.reactions}>
                     {mt('counts.reactions')}
-                </Cell>
-                <Cell before={<IconMapPin />} after={stat.counts.geoMediaAreas}>
+                </WrappedCell>
+                <WrappedCell before={<IconMapPin />} after={stat.counts.geoMediaAreas}>
                     {mt('counts.geo_media_areas')}
-                </Cell>
-                <Cell before={<IconThumbUp />} after={stat.counts.reactionMediaAreas}>
+                </WrappedCell>
+                <WrappedCell before={<IconThumbUp />} after={stat.counts.reactionMediaAreas}>
                     {mt('counts.reaction_media_areas')}
-                </Cell>
+                </WrappedCell>
 
                 <Padding>
                     <ReactionsList reactions={stat.reactions?.total} />

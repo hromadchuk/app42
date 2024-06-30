@@ -3,19 +3,27 @@
     overflow: hidden;
     margin: 16px;
 
-    hr {
+    :is(hr) {
         display: none;
+    }
+
+    & > div {
+        background-color: var(--tg-theme-islands-background-color) !important;
+    }
+
+    & > div > div {
+        background-color: var(--tg-theme-islands-background-color) !important;
     }
 }
 
 .showHr {
-    hr {
+    :is(hr) {
         display: block;
     }
 }
 
 .hideHr {
-    hr {
+    :is(hr) {
         display: none;
     }
 }
@@ -60,5 +68,24 @@
 
     & div {
         margin-right: 5px;
+    }
+}
+
+.fixSearchBackground {
+    & > div {
+        background-color: var(--tg-theme-islands-background-color) !important;
+    }
+}
+
+.fixInput {
+    box-shadow: 0 0 0 2px var(--tg-theme-accent-text-color) !important;
+}
+
+.onlyPremium {
+    filter: blur(1px);
+
+    & img {
+        filter: hue-rotate(45deg) sepia(1) blur(4px);
+        transform: scale(-1, -1);
     }
 }

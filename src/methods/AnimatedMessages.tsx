@@ -1,5 +1,5 @@
 import { ForwardRefExoticComponent, RefAttributes, useContext, useEffect, useState } from 'react';
-import { Blockquote, Button, Cell, Input, Modal, Placeholder, Section } from '@telegram-apps/telegram-ui';
+import { Blockquote, Button, Input, Modal, Placeholder, Section } from '@telegram-apps/telegram-ui';
 import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
 import {
     Icon,
@@ -11,6 +11,7 @@ import {
     IconTicTac
 } from '@tabler/icons-react';
 import { Api } from 'telegram';
+import { WrappedCell } from '../components/Helpers.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { CallAPI, classNames, getTextTime, notifyError, sleep } from '../lib/helpers.ts';
 
@@ -221,7 +222,7 @@ export default function AnimatedMessages() {
         }
 
         return (
-            <Cell
+            <WrappedCell
                 key={key}
                 before={<option.icon size={28} stroke={1.2} />}
                 multiline={true}
@@ -231,7 +232,7 @@ export default function AnimatedMessages() {
                 onClick={() => setSelectedOption(option)}
             >
                 {option.title}
-            </Cell>
+            </WrappedCell>
         );
     }
 

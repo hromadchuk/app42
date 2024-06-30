@@ -1,8 +1,8 @@
 import { IconUser } from '@tabler/icons-react';
-import { Button, Cell, Multiselectable, Radio, Section } from '@telegram-apps/telegram-ui';
+import { Button, Multiselectable, Radio, Section } from '@telegram-apps/telegram-ui';
 import { Dispatch, SetStateAction, useContext, useState } from 'react';
 import { Api } from 'telegram';
-import { Padding } from '../components/Helpers.tsx';
+import { Padding, WrappedCell } from '../components/Helpers.tsx';
 import { formatNumber, notifyError, TOwnerType } from '../lib/helpers.ts';
 
 import { MethodContext, TDialogWithoutUser } from '../contexts/MethodContext.tsx';
@@ -153,20 +153,21 @@ export default function ClearDialogMembers() {
 
     function RemovableCheckbox({ checked, members, text, onChange }: IRemovableCheckboxProps) {
         return (
-            <Cell
+            <WrappedCell
                 Component="label"
                 before={<IconUser />}
+                multiline={true}
                 after={
                     <Multiselectable
-                        // disabled={members?.length === 0}
+                        disabled={members?.length === 0}
                         defaultChecked={checked}
                         onChange={(e) => onChange(e.target.checked)}
                     />
                 }
-                // disabled={members?.length === 0}
+                disabled={members?.length === 0}
             >
                 {`${mt(text)} (${formatNumber(Number(members?.length))})`}
-            </Cell>
+            </WrappedCell>
         );
     }
 
@@ -217,7 +218,7 @@ export default function ClearDialogMembers() {
 
                 {needRemoveNotBeenForLongTime &&
                     offlineDays.map((period, key) => (
-                        <Cell
+                        <WrappedCell
                             key={key}
                             Component="label"
                             before={
@@ -230,7 +231,7 @@ export default function ClearDialogMembers() {
                         >
                             {mt('radio_offline_for').replace('{days}', mt(`periods.${period}`)) +
                                 ` (${formatNumber(Number(getNotBeenForLongTime(period)?.length))})`}
-                        </Cell>
+                        </WrappedCell>
                     ))}
 
                 <RemovableCheckbox

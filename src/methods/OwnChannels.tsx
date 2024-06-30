@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
-import { Cell, Section } from '@telegram-apps/telegram-ui';
-import { Link } from 'react-router-dom';
+import { Section } from '@telegram-apps/telegram-ui';
 import { Api } from 'telegram';
+import { WrappedCell } from '../components/Helpers.tsx';
 import { OwnerAvatar } from '../components/OwnerAvatar.tsx';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
@@ -80,7 +80,7 @@ export default function OwnChannels() {
             return `https://t.me/${username}`;
         }
 
-        return `https://t.me/c/${channel.id}/999999999`;
+        return undefined;
     }
 
     if (usersList.length) {
@@ -88,19 +88,19 @@ export default function OwnChannels() {
             <Section className={classNames(commonClasses.sectionBox, commonClasses.showHr)}>
                 {usersList.map(({ user, personalChannel }, key) => {
                     return (
-                        <Link to={getChannelUrl(personalChannel)} target="_blank" key={key}>
-                            <Cell
-                                before={<OwnerAvatar size={48} owner={personalChannel} />}
-                                description={
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                                        <OwnerAvatar size={20} owner={user} /> {getUserName(user as Api.User)}
-                                    </div>
-                                }
-                                style={{ borderRadius: 'inherit' }}
-                            >
-                                {personalChannel.title}
-                            </Cell>
-                        </Link>
+                        <WrappedCell
+                            key={key}
+                            before={<OwnerAvatar size={48} owner={personalChannel} />}
+                            href={getChannelUrl(personalChannel)}
+                            description={
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                                    <OwnerAvatar size={20} owner={user} /> {getUserName(user as Api.User)}
+                                </div>
+                            }
+                            style={{ borderRadius: 'inherit' }}
+                        >
+                            {personalChannel.title}
+                        </WrappedCell>
                     );
                 })}
             </Section>

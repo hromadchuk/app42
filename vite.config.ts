@@ -10,5 +10,9 @@ export default defineConfig({
         visualizer({
             filename: 'bundle-visualizer.html'
         })
-    ]
+    ],
+    build: {
+        minify: 'esbuild',
+        reportCompressedSize: false
+    }
 });

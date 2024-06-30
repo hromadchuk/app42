@@ -96,7 +96,7 @@ const appRoutes: IAppRouter[] = [
     },
     {
         path: '/methods/:categoryId/:methodId',
-        element: createElement(lazy(() => import('./methods/AbstractMethod.tsx')))
+        element: createElement(lazy(() => import('./pages/MethodPage.tsx')))
     }
 ];
 

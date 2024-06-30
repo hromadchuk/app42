@@ -1,9 +1,11 @@
-import { createElement, CSSProperties, ForwardRefExoticComponent, RefAttributes } from 'react';
-import { Cell, Multiselectable } from '@telegram-apps/telegram-ui';
-import { Link } from 'react-router-dom';
+import { createElement, CSSProperties, ForwardRefExoticComponent, RefAttributes, useState } from 'react';
+import { Multiselectable, Spinner } from '@telegram-apps/telegram-ui';
 import { Api } from 'telegram';
+import { useUtils } from '@tma.js/sdk-react';
 import { Icon, IconChevronRight, IconProps, IconRosetteDiscountCheckFilled } from '@tabler/icons-react';
-import { TOwnerInfo } from '../lib/helpers.ts';
+import { CallAPI, isDev, notifyError, TOwnerInfo, wrapCallMAMethod } from '../lib/helpers.ts';
+import { t } from '../lib/lang.ts';
+import { WrappedCell } from './Helpers.tsx';
 import { OwnerAvatar } from './OwnerAvatar.tsx';
 
 interface IOwnerRow {
@@ -14,16 +16,28 @@ interface IOwnerRow {
     disabled?: boolean;
     callback?: () => void;
     checked?: boolean;
+    onlyPremium?: boolean;
 }
 
 interface ILinkProps {
     onClick?: () => void;
     href?: string;
-    target?: string;
-    component?: 'a' | 'button';
 }
 
-export function OwnerRow({ owner, description, rightIcon, withoutLink, callback, disabled, checked }: IOwnerRow) {
+export function OwnerRow({
+    owner,
+    description,
+    rightIcon,
+    withoutLink,
+    callback,
+    disabled,
+    checked,
+    onlyPremium
+}: IOwnerRow) {
+    const utils = useUtils();
+
+    const [isLoading, setLoading] = useState(false);
+
     const name: string[] = [];
     const linkProps: ILinkProps = {};
     const isUser = owner instanceof Api.User;
@@ -34,18 +48,54 @@ export function OwnerRow({ owner, description, rightIcon, withoutLink, callback,
     if (!withoutLink && !disabled) {
         if (callback) {
             linkProps.onClick = () => callback();
-            linkProps.component = 'a';
         } else if ((isUser || isChannel) && (owner.username || owner.usernames)) {
             const username = (owner.usernames ? owner.usernames[0].username : owner.username) as string;
 
             linkProps.href = `https://t.me/${username}`;
+        } else if (isUser && owner?.phone) {
+            linkProps.href = `https://t.me/+${owner.phone}`;
         } else if (owner?.id && (isChannel || isChat)) {
-            linkProps.href = `https://t.me/c/${owner.id}/999999999`;
-        }
+            linkProps.onClick = async () => {
+                if (isLoading) {
+                    return;
+                }
 
-        if (linkProps.href) {
-            linkProps.target = '_blank';
-            linkProps.component = 'a';
+                setLoading(true);
+
+                const dialog = await CallAPI(
+                    new Api.messages.GetHistory({
+                        peer: owner,
+                        limit: 1
+                    })
+                );
+
+                if (
+                    dialog instanceof Api.messages.Messages ||
+                    dialog instanceof Api.messages.MessagesSlice ||
+                    dialog instanceof Api.messages.ChannelMessages
+                ) {
+                    const messageId = dialog.messages[0].id;
+                    if (messageId) {
+                        const link = `https://t.me/c/${owner.id}/${messageId}`;
+
+                        if (isDev) {
+                            window.open(link);
+                        } else {
+                            wrapCallMAMethod<void>(() => utils.openTelegramLink(link));
+                        }
+                    } else {
+                        notifyError({
+                            message: t('common.errors.cant_open_link')
+                        });
+                    }
+                } else {
+                    notifyError({
+                        message: t('common.errors.cant_open_link')
+                    });
+                }
+
+                setLoading(false);
+            };
         }
     }
 
@@ -96,38 +146,34 @@ export function OwnerRow({ owner, description, rightIcon, withoutLink, callback,
     }
 
     function RightBlock() {
+        if (isLoading) {
+            return <Spinner size="s" />;
+        }
+
         if (isCheckbox) {
             return <Multiselectable checked={checked} readOnly />;
         }
 
-        if (linkProps.component) {
+        if (linkProps.href || rightIcon) {
             return createElement(rightIcon || IconChevronRight, { size: 14, stroke: 1.5 });
         }
 
         return null;
     }
 
-    function CellRow() {
-        return (
-            <Cell
-                {...linkProps}
-                titleBadge={getBadge()}
-                interactiveAnimation={interactiveAnimation}
-                before={<OwnerAvatar owner={owner} size={description ? 48 : 40} />}
-                style={style}
-                after={RightBlock()}
-                description={description}
-            >
-                {name.join(' ')}
-            </Cell>
-        );
-    }
-
-    return linkProps.href ? (
-        <Link to={linkProps.href} target="_blank">
-            {CellRow()}
-        </Link>
-    ) : (
-        CellRow()
+    return (
+        <WrappedCell
+            {...linkProps}
+            titleBadge={getBadge()}
+            interactiveAnimation={interactiveAnimation}
+            before={<OwnerAvatar owner={owner} size={description ? 48 : 40} />}
+            style={style}
+            after={RightBlock()}
+            description={description}
+            multiline={true}
+            onlyPremium={onlyPremium}
+        >
+            {name.join(' ')}
+        </WrappedCell>
     );
 }

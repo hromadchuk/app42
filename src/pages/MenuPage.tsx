@@ -1,25 +1,22 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import {
     Avatar,
     AvatarStack,
     Blockquote,
-    Cell,
     Divider,
     Input,
     List,
     Placeholder,
     Section,
+    Spinner,
     Tappable
 } from '@telegram-apps/telegram-ui';
-import { IconBook2, IconNews, IconPigMoney, IconSearch } from '@tabler/icons-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useMiniApp } from '@tma.js/sdk-react';
+import { IconNews, IconPigMoney, IconSearch } from '@tabler/icons-react';
+import { useNavigate } from 'react-router-dom';
 import { useTonAddress } from '@tonconnect/ui-react';
 import { cards } from '../cards.ts';
+import { WrappedCell } from '../components/Helpers.tsx';
 import { OwnerAvatar } from '../components/OwnerAvatar.tsx';
-import { Constants } from '../constants.ts';
-import { getCache } from '../lib/cache.ts';
-import { getDocLink, wrapCallMAMethod } from '../lib/helpers.ts';
 import { getMethodsByName } from '../routes.tsx';
 import { t } from '../lib/lang.ts';
 
@@ -36,40 +33,36 @@ function getInfoTextWithLink() {
 }
 
 export default function MenuPage() {
-    const { user, setAccountsModalOpen } = useContext(AppContext);
+    const { user, setAccountsModalOpen, isUserChecked } = useContext(AppContext);
 
     const userFriendlyAddress = useTonAddress();
-    const miniApp = useMiniApp();
     const navigate = useNavigate();
 
     const [searchText, setSearchText] = useState('');
 
-    useEffect(() => {
-        if (!userFriendlyAddress) {
-            return;
-        }
-
-        getCache(Constants.AUTH_STATE_METHOD_KEY).then((cacheMethodId) => {
-            if (cacheMethodId) {
-                // removeCache(Constants.AUTH_STATE_METHOD_KEY);
-                // navigate(`/methods/${cacheMethodId}`);
-            }
-        });
-    }, [userFriendlyAddress]);
-
     function AccountsRow() {
-        if (!user && !userFriendlyAddress) {
+        if (!user && !userFriendlyAddress && isUserChecked) {
             return null;
         }
 
         const avatars = [];
 
-        if (user) {
-            avatars.push(<OwnerAvatar key="user" owner={user} size={28} />);
-        }
-
         if (userFriendlyAddress) {
             avatars.push(<Avatar key="wallet" size={28} src={TonLogo} />);
+        }
+
+        if (user) {
+            avatars.push(<OwnerAvatar key="user" owner={user} size={28} />);
+        } else if (!isUserChecked) {
+            avatars.push(
+                <div key="avatar-spinner" className={classes.avatarSpinnerBox}>
+                    <Avatar size={28} src={''}>
+                        <div className={classes.avatarSpinner}>
+                            <Spinner size="s" />
+                        </div>
+                    </Avatar>
+                </div>
+            );
         }
 
         return (
@@ -98,37 +91,40 @@ export default function MenuPage() {
             <>
                 <Section className={classes.categories}>
                     {cards.map((card, key) => (
-                        <Cell
+                        <WrappedCell
                             key={key}
                             before={
                                 <Avatar size={40} style={{ backgroundColor: card.color }}>
-                                    <card.icon size={28} stroke={1.2} />
+                                    <card.icon size={28} stroke={1.2} color="white" />
                                 </Avatar>
                             }
                             description={t(`menu.cards.${card.id}_description`)}
                             multiline={true}
                             onClick={() => {
                                 navigate(`/methods/${card.id}`);
-                                wrapCallMAMethod(() => miniApp.setHeaderColor(card.color));
                             }}
                         >
                             {t(`menu.cards.${card.id}`)}
-                        </Cell>
+                        </WrappedCell>
                     ))}
                 </Section>
 
                 <Section className={classes.categories}>
-                    <Link to={getDocLink('')} target="_blank" className={classes.link}>
-                        <Cell before={<IconBook2 size={28} stroke={1.2} />}>{t('menu.documentation')}</Cell>
-                    </Link>
-                    <Link to="https://t.me/tribute?start=sd1c" target="_blank" className={classes.link}>
-                        <Cell before={<IconPigMoney size={28} stroke={1.2} className={classes.donutIcon} />}>
-                            {t('menu.donate')}
-                        </Cell>
-                    </Link>
-                    <Link to="https://t.me/app42news" target="_blank" className={classes.link}>
-                        <Cell before={<IconNews size={28} stroke={1.2} />}>{t('menu.telegram_channel')}</Cell>
-                    </Link>
+                    <WrappedCell
+                        before={<IconPigMoney size={28} stroke={1.2} className={classes.donutIcon} />}
+                        href="https://t.me/tribute/app?startapp=donation_13215"
+                        className={classes.link}
+                    >
+                        {t('menu.donate')}
+                    </WrappedCell>
+
+                    <WrappedCell
+                        before={<IconNews size={28} stroke={1.2} />}
+                        href="https://t.me/app42news"
+                        className={classes.link}
+                    >
+                        {t('menu.telegram_channel')}
+                    </WrappedCell>
                 </Section>
 
                 <Blockquote>

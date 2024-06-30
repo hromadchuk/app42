@@ -17,6 +17,16 @@
     "wallet_disconnect": "Disconnect the wallet?",
     "account_disconnect": "Disconnect account?"
   },
+  "premium_modal": {
+    "title": "App 42 Premium",
+    "description": "To access the full functionality of the project, you need to purchase a subscription.",
+    "only_premium": "Only for premium",
+    "buttons": {
+      "week": "1 week",
+      "month": "1 month",
+      "stars": "stars"
+    }
+  },
   "common": {
     "progress": "Loading",
     "footer": "Made with love",
@@ -25,7 +35,8 @@
     "selected_button_subtext": "Selected {count} from {total}",
     "errors": {
       "api_error": "API error",
-      "api_rate_limit": "You have reached the limit of API requests, you need to wait {time} and try again"
+      "api_rate_limit": "You have reached the API request limit, please wait {time}",
+      "cant_open_link": "Can't open link"
     },
     "time_short": {
       "days": "d",
@@ -86,9 +97,9 @@
       "contacts": "Contacts",
       "contacts_description": "Analyse your contacts",
       "channels": "Channels",
-      "channels_description": "Analyse your channels and clear your personal channels",
+      "channels_description": "Analyze your subscriptions and manage your channels",
       "chats": "Chats",
-      "chats_description": "Analyse chats and clean up private chats",
+      "chats_description": "Analyze your chats and manage them",
       "ton": "TON",
       "ton_description": "Analysing your wallet in the TON network"
     }
@@ -591,7 +602,7 @@
     "stories_stat": {
       "get_stories_list": "Getting a list of your stories",
       "get_stories_reactions": "Getting a list of your stories reactions",
-      "no_stories": "You haven't stories yet",
+      "no_stories": "You haven't published any stories yet",
       "counts": {
         "photos": "Total photo stories",
         "videos": "Total video stories",

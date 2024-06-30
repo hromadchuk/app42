@@ -4,9 +4,7 @@ import { IFinishBlock, IProgress, ISetListAction, MethodContext } from '../conte
 import { Server } from '../lib/helpers.ts';
 import { t, td } from '../lib/lang.ts';
 import { getMethodById, MethodCategory } from '../routes.tsx';
-import { getCardById } from '../cards.ts';
 import { ListAction } from '../components/ListAction.tsx';
-import { PageHeader } from '../components/PageHeader.tsx';
 import { MethodLoader } from '../components/MethodLoader.tsx';
 import { MethodPlaceholder } from '../components/MethodPlaceholder.tsx';
 
@@ -16,7 +14,6 @@ let progressSafe: IProgress | null = null;
 export default function AbstractMethod() {
     const categoryId = useParams().categoryId as MethodCategory;
     const methodId = useParams().methodId as string;
-    const card = getCardById(categoryId);
     const method = getMethodById(methodId);
 
     const [progress, _setProgress] = useState<IProgress | null>();
@@ -103,9 +100,8 @@ export default function AbstractMethod() {
                 setListAction
             }}
         >
-            <PageHeader header={method.name} subheader={t(`menu.cards.${categoryId}`)} color={card.color} />
-
             {HelpersBlock()}
+
             {method.element || (
                 <>
                     <div>Method not found</div>

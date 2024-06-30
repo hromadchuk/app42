@@ -1,7 +1,7 @@
 .headerBox {
     display: flex;
     align-items: center;
-    background: var(--tgui--secondary_bg_color);
+    background: var(--tg-theme-bg-color);
 }
 
 .searchBox {
@@ -9,12 +9,12 @@
     margin-right: -22px;
 
     & > div {
-        background: var(--tgui--secondary_bg_color);
+        background: var(--tg-theme-bg-color);
     }
 }
 
 .searchInput {
-    background: var(--tgui--bg_color);
+    background-color: var(--tg-theme-islands-background-color);
 }
 
 .avatarsBox {
@@ -24,6 +24,10 @@
 .categories {
     border-radius: 10px;
     overflow: hidden;
+
+    & > div > div {
+        background-color: var(--tg-theme-islands-background-color);
+    }
 }
 
 .link {
@@ -34,6 +38,20 @@
 .donutIcon {
     animation: donateAnimation 5s infinite;
     color: #c2255c;
+}
+
+.avatarSpinnerBox {
+    box-shadow: none;
+
+    & > div {
+        background-color: var(--tg-background-color);
+    }
+}
+
+.avatarSpinner {
+    margin-top: 6px;
+    margin-left: 1px;
+    z-index: 99;
 }
 
 @keyframes donateAnimation {

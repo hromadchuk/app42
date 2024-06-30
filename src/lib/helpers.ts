@@ -75,7 +75,13 @@ export function getUserId() {
 
 export const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
-export const isDevUser = [44221708, 5000925865].includes(getUserId());
+export const isDevUser = [
+    44221708, // Pavlo Hro
+    5000925865, // Test env account
+    1345025252, // Vova
+    487641753, // Oksana
+    240746628 // Ksenia
+].includes(getUserId());
 
 export function formatNumber(number: number): string {
     return `${number}`.replace(/(\d)(?=(\d{3})+$)/g, '$1\u00a0');
@@ -570,7 +576,7 @@ export async function getCurrentUser(): Promise<Api.User | null> {
 
         return user;
     } catch (error) {
-        console.error('getCurrentUser error', error);
+        console.error('getCurrentUser error', error?.toString());
     }
 
     return null;
@@ -604,6 +610,14 @@ export function rgbToHex(nr: number, ng: number, nb: number): string {
     return '#' + ((1 << 24) + (nr << 16) + (ng << 8) + nb).toString(16).slice(1);
 }
 
+export function hexToRgba(hex: string, alpha: number) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export function generateColorGradation(hex: string, steps: number): string[] {
     const bigint = parseInt(hex.slice(1), 16);
     const r = (bigint >> 16) & 255;
@@ -622,4 +636,8 @@ export function generateColorGradation(hex: string, steps: number): string[] {
     }
 
     return gradation;
+}
+
+export function isMobile() {
+    return /Mobi|Android/i.test(navigator.userAgent);
 }

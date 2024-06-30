@@ -17,15 +17,41 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.5;
+}
 
-    --app-background-color: transparent;
-    --app-text-color: black;
+html {
+    background-color: var(--tg-background-color);
 
-    background: var(--app-background-color);
-    color: var(--app-text-color);
+    --tg-theme-islands-background-color: var(--tg-theme-header-bg-color);
 }
 
 a {
     text-decoration: none;
     color: var(--tgui--link_color);
+}
+
+[name="wrapped-cell"]:hover {
+    background: var(--tg-background-color-alpha);
+}
+
+[role="dialog"] [name="wrapped-cell"]:hover {
+    background: var(--tg-theme-header-bg-color-alpha);
+}
+
+[role="dialog"] header:before {
+    background: var(--tg-theme-link-color);
+}
+
+[datatype="disabled"]:hover {
+    background: none;
+    opacity: 1;
+    cursor: default;
+}
+
+[vaul-overlay=""] {
+    background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+:is(hr) {
+    border-color: var(--tg-theme-hint-color-alpha) !important;
 }

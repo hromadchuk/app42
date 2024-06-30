@@ -53,26 +53,28 @@ export default function GetId() {
     return (
         <>
             <Section className={commonClasses.sectionBox}>
-                <Input
-                    placeholder={mt('input_placeholder')}
-                    value={username}
-                    status={inputError ? 'error' : 'default'}
-                    header={inputError}
-                    before={<IconAt size={24} />}
-                    onChange={(event) => setUsername(event.target.value)}
-                    after={
-                        <Tappable
-                            Component="div"
-                            style={{
-                                display: 'flex',
-                                opacity: 0.5
-                            }}
-                            onClick={() => setUsername('')}
-                        >
-                            <IconX size={16} />
-                        </Tappable>
-                    }
-                />
+                <div className={commonClasses.fixSearchBackground}>
+                    <Input
+                        placeholder={mt('input_placeholder')}
+                        value={username}
+                        status={inputError ? 'error' : 'default'}
+                        header={inputError}
+                        before={<IconAt size={24} />}
+                        onChange={(event) => setUsername(event.target.value)}
+                        after={
+                            <Tappable
+                                Component="div"
+                                style={{
+                                    display: 'flex',
+                                    opacity: 0.5
+                                }}
+                                onClick={() => setUsername('')}
+                            >
+                                <IconX size={16} />
+                            </Tappable>
+                        }
+                    />
+                </div>
 
                 <div style={{ padding: 10 }}>
                     <Button
@@ -93,11 +95,13 @@ export default function GetId() {
                         <OwnerRow owner={ownerInfo} />
                     </div>
 
-                    <Input
-                        after={<CopyButton value={ownerInfo.id.toString()} />}
-                        value={ownerInfo.id.valueOf()}
-                        readOnly
-                    />
+                    <div className={commonClasses.fixSearchBackground}>
+                        <Input
+                            after={<CopyButton value={ownerInfo.id.toString()} />}
+                            value={ownerInfo.id.valueOf()}
+                            readOnly
+                        />
+                    </div>
                 </Section>
             )}
         </>

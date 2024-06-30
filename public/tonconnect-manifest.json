@@ -1,7 +1,7 @@
 {
   "url": "https://app42.app/app/",
   "name": "App 42",
-  "iconUrl": "https://app42.app/app/icons/512x512.png",
+  "iconUrl": "https://app42.app/app/app.png",
   "termsOfUseUrl": "https://app42.app/app/terms-of-use.txt",
   "privacyPolicyUrl": "https://app42.app/app/privacy-policy.txt"
 }

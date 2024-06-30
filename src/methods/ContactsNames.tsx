@@ -3,7 +3,6 @@ import {
     Blockquote,
     Button,
     Caption,
-    Cell,
     InlineButtons,
     Input,
     Placeholder,
@@ -16,6 +15,7 @@ import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Api } from 'telegram';
 import { CopyButton } from '../components/CopyButton.tsx';
+import { WrappedCell } from '../components/Helpers.tsx';
 import { Constants } from '../constants.ts';
 import { MethodContext } from '../contexts/MethodContext.tsx';
 import { getCache, setCache } from '../lib/cache.ts';
@@ -138,13 +138,15 @@ export default function ContactsNames() {
     }
 
     function LinkRow() {
-        const link = isDev ? 'https://t.me/kit42_bot/kit42?startapp=cn' : 'https://t.me/app42/app?startapp=cn';
+        const link = 'https://t.me/app42/app?startapp=cn';
 
         return (
             <Section className={commonClasses.sectionBox}>
                 <Blockquote>{mt('share_description')}</Blockquote>
 
-                <Input after={<CopyButton value={link} />} value={link} readOnly />
+                <div className={commonClasses.fixSearchBackground}>
+                    <Input after={<CopyButton value={link} />} value={link} readOnly />
+                </div>
             </Section>
         );
     }
@@ -155,13 +157,16 @@ export default function ContactsNames() {
                 <>
                     <Section className={classNames(commonClasses.sectionBox, commonClasses.showHr)}>
                         {serverData.names.map(({ name, count }, key) => (
-                            <Cell
+                            <WrappedCell
                                 key={key}
-                                after={<Badge type="number">{count}</Badge>}
-                                titleBadge={<Badge type="dot" />}
+                                after={
+                                    <Badge type="number" mode="secondary">
+                                        {count}
+                                    </Badge>
+                                }
                             >
                                 {name}
-                            </Cell>
+                            </WrappedCell>
                         ))}
                     </Section>
 

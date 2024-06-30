@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Cell, Modal, Section, SegmentedControl } from '@telegram-apps/telegram-ui';
+import { Modal, Section, SegmentedControl } from '@telegram-apps/telegram-ui';
 import { SegmentedControlItem } from '@telegram-apps/telegram-ui/dist/components/Navigation/SegmentedControl/components/SegmentedControlItem/SegmentedControlItem';
 import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
 import { IconBrandTether, IconDiamond, IconTransfer } from '@tabler/icons-react';
@@ -7,6 +7,7 @@ import { useTonConnectUI } from '@tonconnect/ui-react';
 import dayjs from 'dayjs';
 import { BarChart, LineChart } from 'react-chartkick';
 import { JettonTransferAction } from 'tonapi-sdk-js';
+import { WrappedCell } from '../components/Helpers.tsx';
 import { TonApiCall } from '../lib/TonApi.ts';
 import { classNames, formatNumber, formatNumberFloat } from '../lib/helpers.ts';
 
@@ -331,32 +332,38 @@ export default function TonTransactions() {
     function CountBlock(period: IStatPeriod, header: string, className?: string) {
         return (
             <Section className={className} header={header}>
-                <Cell before={<IconTransfer />} after={formatNumberFloat(period.eventsCount)}>
+                <WrappedCell before={<IconTransfer />} after={formatNumberFloat(period.eventsCount)}>
                     {mt('total_events')}
-                </Cell>
+                </WrappedCell>
 
                 {period.sentTON > 0 && (
-                    <Cell before={<IconDiamond color="#095584" />} after={formatNumberFloat(period.sentTON)}>
+                    <WrappedCell before={<IconDiamond color="#095584" />} after={formatNumberFloat(period.sentTON)}>
                         {mt('sent_ton')}
-                    </Cell>
+                    </WrappedCell>
                 )}
 
                 {period.receivedTON > 0 && (
-                    <Cell before={<IconDiamond color="#095584" />} after={formatNumberFloat(period.receivedTON)}>
+                    <WrappedCell before={<IconDiamond color="#095584" />} after={formatNumberFloat(period.receivedTON)}>
                         {mt('received_ton')}
-                    </Cell>
+                    </WrappedCell>
                 )}
 
                 {period.sentUSDT > 0 && (
-                    <Cell before={<IconBrandTether color="#1f6b4d" />} after={formatNumberFloat(period.sentUSDT)}>
+                    <WrappedCell
+                        before={<IconBrandTether color="#1f6b4d" />}
+                        after={formatNumberFloat(period.sentUSDT)}
+                    >
                         {mt('sent_usdt')}
-                    </Cell>
+                    </WrappedCell>
                 )}
 
                 {period.receivedUSDT > 0 && (
-                    <Cell before={<IconBrandTether color="#1f6b4d" />} after={formatNumberFloat(period.receivedUSDT)}>
+                    <WrappedCell
+                        before={<IconBrandTether color="#1f6b4d" />}
+                        after={formatNumberFloat(period.receivedUSDT)}
+                    >
                         {mt('received_usdt')}
-                    </Cell>
+                    </WrappedCell>
                 )}
             </Section>
         );
@@ -370,9 +377,9 @@ export default function TonTransactions() {
                 {actions
                     .sort((a, b) => period.actions[b] - period.actions[a])
                     .map((action, key) => (
-                        <Cell key={key} after={formatNumberFloat(period.actions[action])}>
+                        <WrappedCell key={key} after={formatNumberFloat(period.actions[action])}>
                             {action}
-                        </Cell>
+                        </WrappedCell>
                     ))}
             </Section>
         );
@@ -445,7 +452,7 @@ export default function TonTransactions() {
                 {stat.yearsKeys.length > 1 && (
                     <Section className={commonClasses.sectionBox} header={mt('grouped_by_years')}>
                         {stat.yearsKeys.map((year, key) => (
-                            <Cell
+                            <WrappedCell
                                 key={key}
                                 after={formatNumber(stat.years[year].eventsCount)}
                                 onClick={() => {
@@ -453,15 +460,15 @@ export default function TonTransactions() {
                                 }}
                             >
                                 {year}
-                            </Cell>
+                            </WrappedCell>
                         ))}
                     </Section>
                 )}
 
                 {stat.monthsKeys.length > 1 && (
-                    <Section className={commonClasses.sectionBox} header={mt('grouped_by_years')}>
+                    <Section className={commonClasses.sectionBox} header={mt('grouped_by_months')}>
                         {stat.monthsKeys.map((month, key) => (
-                            <Cell
+                            <WrappedCell
                                 key={key}
                                 after={formatNumber(stat.months[month].eventsCount)}
                                 onClick={() => {
@@ -469,7 +476,7 @@ export default function TonTransactions() {
                                 }}
                             >
                                 {dayjs(month, 'MM.YYYY').format('MMM YY')}
-                            </Cell>
+                            </WrappedCell>
                         ))}
                     </Section>
                 )}

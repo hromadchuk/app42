@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { ButtonCell, Caption, Modal, Section } from '@telegram-apps/telegram-ui';
+import { ButtonCell, Caption, Divider, Modal, Section } from '@telegram-apps/telegram-ui';
 import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
 import { Api } from 'telegram';
 import dayjs from 'dayjs';
@@ -178,7 +178,7 @@ export default function ContactsAnalysis() {
         return undefined;
     }
 
-    function SectionBlock(type: EFilerType, users: Api.User[], lang: string) {
+    function SectionBlock({ type, users, lang }: { type: EFilerType; users: Api.User[]; lang: string }) {
         if (!users.length) {
             return null;
         }
@@ -197,10 +197,17 @@ export default function ContactsAnalysis() {
                         </Caption>
                     </Section.Header>
                 }
-                className={classNames(commonClasses.sectionBox, commonClasses.showHr)}
+                className={classNames(commonClasses.sectionBox, commonClasses.hideHr)}
             >
                 {users.slice(0, 3).map((owner, key) => (
-                    <div key={key}>{OwnerRow({ owner, description: getDescription(type, owner) })}</div>
+                    <div key={key}>
+                        <OwnerRow owner={owner} description={getDescription(type, owner)} />
+                        <Divider
+                            style={{
+                                display: key === users.slice(0, 3).length - 1 && users.length <= 3 ? 'none' : 'block'
+                            }}
+                        />
+                    </div>
                 ))}
 
                 {users.length > 3 && (
@@ -222,19 +229,19 @@ export default function ContactsAnalysis() {
 
     return (
         <>
-            {SectionBlock(EFilerType.PREMIUM, premiumUsersData, 'premium')}
-            {SectionBlock(EFilerType.MUTUAL, mutualUsersData, 'mutual')}
-            {SectionBlock(EFilerType.NON_MUTUAL, nonMutualUsersData, 'non_mutual')}
-            {SectionBlock(EFilerType.WITHOUT_PHOTO, withoutPhotoUsersData, 'without_photo')}
-            {SectionBlock(EFilerType.VERIFIED, verifiedUsersData, 'verified')}
-            {SectionBlock(EFilerType.WITHOUT_PHONE, withoutPhoneUsersData, 'without_phone')}
-            {SectionBlock(EFilerType.WITHOUT_USERNAME, withoutUsernameUsersData, 'without_username')}
-            {SectionBlock(EFilerType.DELETED, deletedUsersData, 'deleted')}
-            {SectionBlock(EFilerType.LONG_TIME_ONLINE, longTimeOnlineUsersData, 'long_time_online')}
-            {SectionBlock(EFilerType.RECENT_ONLINE, recentOnlineUsersData, 'recent_online')}
-            {SectionBlock(EFilerType.FEW_USERNAMES, fewUsernamesUsersData, 'few_usernames')}
-            {SectionBlock(EFilerType.HIDE_ONLINE, hideOnlineUsersData, 'hide_online')}
-            {SectionBlock(EFilerType.OLD, oldUsersData, 'old')}
+            <SectionBlock type={EFilerType.NON_MUTUAL} users={nonMutualUsersData} lang="non_mutual" />
+            <SectionBlock type={EFilerType.MUTUAL} users={mutualUsersData} lang="mutual" />
+            <SectionBlock type={EFilerType.PREMIUM} users={premiumUsersData} lang="premium" />
+            <SectionBlock type={EFilerType.WITHOUT_PHOTO} users={withoutPhotoUsersData} lang="without_photo" />
+            <SectionBlock type={EFilerType.VERIFIED} users={verifiedUsersData} lang="verified" />
+            <SectionBlock type={EFilerType.WITHOUT_PHONE} users={withoutPhoneUsersData} lang="without_phone" />
+            <SectionBlock type={EFilerType.WITHOUT_USERNAME} users={withoutUsernameUsersData} lang="without_username" />
+            <SectionBlock type={EFilerType.DELETED} users={deletedUsersData} lang="deleted" />
+            <SectionBlock type={EFilerType.LONG_TIME_ONLINE} users={longTimeOnlineUsersData} lang="long_time_online" />
+            <SectionBlock type={EFilerType.RECENT_ONLINE} users={recentOnlineUsersData} lang="recent_online" />
+            <SectionBlock type={EFilerType.FEW_USERNAMES} users={fewUsernamesUsersData} lang="few_usernames" />
+            <SectionBlock type={EFilerType.HIDE_ONLINE} users={hideOnlineUsersData} lang="hide_online" />
+            <SectionBlock type={EFilerType.OLD} users={oldUsersData} lang="old" />
 
             {modalUsers && (
                 <Modal
@@ -248,9 +255,11 @@ export default function ContactsAnalysis() {
                 >
                     <Section header={modalName}>
                         {modalUsers.map((owner, key) => (
-                            <div key={key}>
-                                {OwnerRow({ owner, description: getDescription(modalDescriptionType, owner) })}
-                            </div>
+                            <OwnerRow
+                                key={key}
+                                owner={owner}
+                                description={getDescription(modalDescriptionType, owner)}
+                            />
                         ))}
                     </Section>
                 </Modal>

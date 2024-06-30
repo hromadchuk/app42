@@ -1,5 +1,5 @@
 import { ForwardRefExoticComponent, RefAttributes, useContext, useState } from 'react';
-import { Blockquote, Button, Cell, Modal, Placeholder, Section } from '@telegram-apps/telegram-ui';
+import { Blockquote, Button, Modal, Placeholder, Section } from '@telegram-apps/telegram-ui';
 import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
 import {
     Icon,
@@ -17,7 +17,7 @@ import {
 import dayjs from 'dayjs';
 import { Api } from 'telegram';
 import { usePopup } from '@tma.js/sdk-react';
-import { Padding } from '../components/Helpers.tsx';
+import { Padding, WrappedCell } from '../components/Helpers.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { ActivityChart } from '../components/charts/Activity.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
@@ -831,9 +831,9 @@ export default function MessagesStat() {
                     header={mt('headers.counts')}
                 >
                     {counts.map((item, key) => (
-                        <Cell key={key} before={<item.icon size={14} />} after={item.value}>
+                        <WrappedCell key={key} before={<item.icon size={14} />} after={item.value}>
                             {item.label}
-                        </Cell>
+                        </WrappedCell>
                     ))}
 
                     <Padding>
@@ -855,15 +855,15 @@ export default function MessagesStat() {
                         <Placeholder description={mt('inactive_users_description')} />
 
                         {chatInactiveMembers.slice(0, chatInactiveMembersShowCount).map((owner, key) => (
-                            <div key={owner.id.valueOf() + key}>
-                                {OwnerRow({
-                                    owner,
-                                    callback:
-                                        !(selectedOwner instanceof Api.User) && !selectedOwner?.adminRights?.banUsers
-                                            ? undefined
-                                            : () => onKickUserClick(owner)
-                                })}
-                            </div>
+                            <OwnerRow
+                                owner={owner}
+                                key={owner.id.valueOf() + key}
+                                callback={
+                                    !(selectedOwner instanceof Api.User) && !selectedOwner?.adminRights?.banUsers
+                                        ? undefined
+                                        : () => onKickUserClick(owner)
+                                }
+                            />
                         ))}
 
                         {chatInactiveMembers.length >
@@ -924,7 +924,6 @@ export default function MessagesStat() {
 
                 {chatTopics.length > 0 && (
                     <Section header={mt('headers.topics')}>
-                        {/* <Divider my="xs" label={mt('headers.topics')} labelPosition="center" mb={0} /> */}
                         <Padding>
                             <Button
                                 stretched

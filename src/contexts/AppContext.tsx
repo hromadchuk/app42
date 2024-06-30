@@ -7,6 +7,7 @@ export interface IInitData {
     status: 'ok' | 'error';
     topMethods: string[];
     storageHash: string;
+    isPremium: boolean;
 }
 
 export interface ISnackbarOptions {
@@ -20,16 +21,17 @@ export interface ISnackbarOptions {
 export interface IAppContext {
     user: Api.User | null;
     setUser: (user: Api.User | null) => void;
+    isUserChecked: boolean;
     openMethod: (method: IMethod, categoryId?: MethodCategory) => void;
+    isPremium: boolean;
+    setPremium: (state: boolean) => void;
+    setPremiumModalOpen: (state: boolean) => void;
     setAccountsModalOpen: (state: boolean) => void;
     initData: IInitData | null;
     setInitData: (user: IInitData | null) => void;
     showShareModal: (options: IShareOptions) => void;
-    // isAppLoading: boolean;
-    // setAppLoading: (state: boolean) => void;
     markOnboardingAsCompleted(): Promise<void>;
     checkIsOnboardingCompleted(): Promise<boolean>;
-    // sendSecureData(data: object): void;
 }
 
 // @ts-ignore

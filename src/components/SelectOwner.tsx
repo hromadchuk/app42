@@ -4,11 +4,14 @@ import { IconSearch } from '@tabler/icons-react';
 import { Api } from 'telegram';
 import { CallAPI, getPeerId, TOwnerType } from '../lib/helpers.ts';
 import { t } from '../lib/lang.ts';
-import { AppContext } from '../contexts/AppContext.tsx';
-import classes from '../styles/MenuPage.module.css';
 import { OwnerRow } from './OwnerRow.tsx';
 import { useDebouncedInput } from '../hooks/useDebouncedInput.ts';
 import { TDialogWithoutUser } from '../contexts/MethodContext.tsx';
+
+import { AppContext } from '../contexts/AppContext.tsx';
+
+import commonClasses from '../styles/Common.module.css';
+import classes from '../styles/MenuPage.module.css';
 
 export enum EOwnerType {
     user = 'user',
@@ -105,12 +108,14 @@ function SelectOwner({ getOwners, onOwnerSelect, searchOwners }: IOptionsSelectO
 
     return (
         <>
-            <Input
-                before={<IconSearch opacity={0.3} />}
-                placeholder={t('menu.search_placeholder')}
-                className={classes.searchInput}
-                onChange={setSearchQuery}
-            />
+            <div className={commonClasses.fixSearchBackground}>
+                <Input
+                    before={<IconSearch opacity={0.3} />}
+                    placeholder={t('menu.search_placeholder')}
+                    className={classes.searchInput}
+                    onChange={setSearchQuery}
+                />
+            </div>
 
             {UsersBlock()}
         </>

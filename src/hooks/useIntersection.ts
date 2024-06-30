@@ -1,38 +1,23 @@
-import { MutableRefObject, useEffect, useRef, useState } from 'react';
+import { MutableRefObject, useEffect, useState } from 'react';
 
-interface IntersectionOptions {
-    root?: Element | null;
-    rootMargin?: string;
-    threshold?: number | number[];
-}
-
-export function useIntersection(
-    options: IntersectionOptions = {}
-): [MutableRefObject<null | HTMLElement>, IntersectionObserverEntry | null] {
-    const [entry, setEntry] = useState<IntersectionObserverEntry | null>(null);
-    const observerRef = useRef<IntersectionObserver | null>(null);
-    const elementRef = useRef<null | HTMLElement>(null);
+export function useIntersection(ref: MutableRefObject<Element | undefined>): boolean {
+    const [isIntersecting, setIntersecting] = useState<boolean>(false);
 
     useEffect(() => {
-        if (observerRef.current) {
-            observerRef.current.disconnect();
-        }
+        const observer = new IntersectionObserver(([entry]) => setIntersecting(entry.isIntersecting), {
+            threshold: 0.5
+        });
 
-        observerRef.current = new IntersectionObserver(([newEntry]) => setEntry(newEntry), options);
-
-        const { current: currentObserver } = observerRef;
-        const { current: currentElement } = elementRef;
-
-        if (currentElement) {
-            currentObserver.observe(currentElement);
+        if (ref.current) {
+            observer.observe(ref.current);
         }
 
         return () => {
-            if (currentObserver) {
-                currentObserver.disconnect();
+            if (ref.current) {
+                observer.unobserve(ref.current);
             }
         };
-    }, [options]);
+    }, [ref]);
 
-    return [elementRef, entry];
+    return isIntersecting;
 }

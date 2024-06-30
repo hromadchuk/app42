@@ -6,6 +6,7 @@ import { t } from '../lib/lang.ts';
 
 import AnimatedDuckCountDucks from '../assets/animated_stickers/duck_count_ducks.json';
 import AnimatedDuckSearchFolders from '../assets/animated_stickers/duck_search_folders.json';
+import AnimatedDuckClean from '../assets/animated_stickers/duck_clean.json';
 
 import classes from '../styles/MethodLoader.module.css';
 
@@ -13,6 +14,11 @@ enum ELoadType {
     SPINNER = 'spinner',
     COUNT = 'count'
 }
+
+const clearIconsLang = [
+    t('methods.clear_blacklist.clearing_progress'),
+    t('methods.clear_dialog_members.clearing_progress')
+];
 
 export function MethodLoader(progress: IProgress) {
     if (!progress) {
@@ -25,6 +31,18 @@ export function MethodLoader(progress: IProgress) {
         }
 
         return ELoadType.COUNT;
+    }
+
+    function getImage() {
+        if (getImageType() === ELoadType.COUNT) {
+            if (clearIconsLang.includes(String(progress.text))) {
+                return AnimatedDuckClean;
+            }
+
+            return AnimatedDuckCountDucks;
+        }
+
+        return AnimatedDuckSearchFolders;
     }
 
     function LoadingRow() {
@@ -81,12 +99,7 @@ export function MethodLoader(progress: IProgress) {
     return (
         <>
             <div className={classes.animationSection}>
-                <Lottie
-                    animationData={
-                        getImageType() === ELoadType.COUNT ? AnimatedDuckCountDucks : AnimatedDuckSearchFolders
-                    }
-                    loop
-                />
+                <Lottie animationData={getImage()} loop />
             </div>
 
             <div className={classes.progressSection}>

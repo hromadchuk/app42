@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, useEffect, useState } from 'react';
 import { IconButton, Snackbar } from '@telegram-apps/telegram-ui';
 import { IconX } from '@tabler/icons-react';
 import ReactGA from 'react-ga4';
@@ -6,7 +6,9 @@ import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useBackButton, useCloudStorage, useLaunchParams, useMiniApp, useViewport } from '@tma.js/sdk-react';
 import { Locales, useTonAddress, useTonConnectModal, useTonConnectUI } from '@tonconnect/ui-react';
 import { Api, TelegramClient } from 'telegram';
+import { LogLevel } from 'telegram/extensions/Logger';
 import { StringSession } from 'telegram/sessions';
+import { getCardById } from './cards.ts';
 import { Constants } from './constants.ts';
 import { clearOldCache, getCache, removeCache, setCache } from './lib/cache.ts';
 import { decodeString, getCurrentUser, getParams, isDev, Server, wrapCallMAMethod } from './lib/helpers.ts';
@@ -14,8 +16,8 @@ import { getAppLangCode } from './lib/lang.ts';
 import { AuthType, getMethodById, IMethod, IRouter, MethodCategory, routes } from './routes.tsx';
 
 import { IShareOptions, ShareModal } from './modals/ShareModal.tsx';
-import { AccountsModal } from './modals/AccountsModal.tsx';
-import { AuthorizationModal } from './modals/AuthorizationModal.tsx';
+const AccountsModal = lazy(() => import('./modals/AccountsModal.tsx'));
+const PremiumModal = lazy(() => import('./modals/PremiumModal.tsx'));
 
 import { AppContext, IInitData, ISnackbarOptions } from './contexts/AppContext.tsx';
 import Onboarding from './components/Onboarding.tsx';
@@ -47,33 +49,17 @@ export function App() {
     const [, setOptions] = useTonConnectUI();
 
     const [user, setUser] = useState<null | Api.User>(null);
+    const [isUserChecked, setUserChecked] = useState(false);
+    const [isPremium, setPremium] = useState(false);
     const [isAccountsModalOpen, setAccountsModalOpen] = useState(false);
+    const [isPremiumModalOpen, setPremiumModalOpen] = useState(false);
     const [isShareModalOpen, setShareModalOpen] = useState(false);
     const [shareModalData, setShareModalData] = useState<IShareOptions | null>(null);
-    const [isAuthorizationModalOpen, setAuthorizationModalOpen] = useState(false);
     const [initData, setInitData] = useState<null | IInitData>(null);
     const [snackbarOptions, setSnackbarOptions] = useState<null | ISnackbarOptions>(null);
     const [needShowOnboarding, setNeedShowOnboarding] = useState(false);
 
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
-
-    useEffect(() => {
-        const MALib = getComputedStyle(document.querySelector('#root > div') as Element);
-        const body = document.body.style;
-
-        const backgroundColor = MALib.getPropertyValue('--tgui--secondary_bg_color');
-        const textColor = MALib.getPropertyValue('--tgui--text_color');
-
-        body.setProperty('--app-background-color', backgroundColor);
-        body.setProperty('--app-text-color', textColor);
-
-        backButton.on('click', () => {
-            navigate('/');
-        });
-
-        window.showSnackbar = (options: ISnackbarOptions) => setSnackbarOptions(options);
-        window.hideSnackbar = () => setSnackbarOptions(null);
-    }, []);
 
     useEffect(() => {
         if (['/'].includes(currentLocation.pathname)) {
@@ -82,6 +68,17 @@ export function App() {
                 miniApp.setHeaderColor(launchParams.themeParams.headerBackgroundColor as `#${string}`);
             });
         } else {
+            if (currentLocation.pathname.startsWith('/methods/')) {
+                const [, , categoryId] = currentLocation.pathname.split('/');
+                if (categoryId) {
+                    const card = getCardById(categoryId as MethodCategory);
+
+                    wrapCallMAMethod(() => {
+                        miniApp.setHeaderColor(card.color);
+                    });
+                }
+            }
+
             wrapCallMAMethod(() => backButton.show());
         }
     }, [currentLocation]);
@@ -116,6 +113,8 @@ export function App() {
             }
 
             if (initData) {
+                console.log('location', JSON.stringify(location));
+
                 if (!user && initData?.status === 'ok') {
                     const storageSessionHashed = isDev
                         ? await getCache(Constants.SESSION_KEY)
@@ -125,12 +124,20 @@ export function App() {
                         : null;
                     console.log('storageSession', Boolean(storageSession));
                     if (storageSession) {
-                        setUser(await getCurrentUser());
+                        const loggedUser = await getCurrentUser();
+                        if (loggedUser) {
+                            setUser(await getCurrentUser());
+                        }
                     }
                 }
 
-                const param = new URLSearchParams(location.search).get('tgWebAppStartParam');
+                setUserChecked(true);
+
+                const param = new URLSearchParams(window.location.search.slice(1)).get('tgWebAppStartParam');
                 const value = await getCache(Constants.AUTH_STATE_METHOD_KEY);
+
+                console.log('tgWebAppStartParam', param);
+                console.log('value', value && JSON.stringify(value));
 
                 if (value) {
                     if (value) {
@@ -151,7 +158,7 @@ export function App() {
 
                 if (isDev) {
                     // TODO only test
-                    // const method = getMethodById('clear_dialog_members');
+                    // const method = getMethodById('contacts_analysis');
                     // method && openMethod(method);
                 }
             }
@@ -160,6 +167,9 @@ export function App() {
 
     useEffect(() => {
         (async () => {
+            window.showSnackbar = (options: ISnackbarOptions) => setSnackbarOptions(options);
+            window.hideSnackbar = () => setSnackbarOptions(null);
+
             // init mini app
             wrapCallMAMethod(() => miniApp.ready());
             wrapCallMAMethod(() => viewport.expand());
@@ -189,6 +199,7 @@ export function App() {
 
                 if (serverData?.storageHash) {
                     setInitData(serverData);
+                    setPremium(serverData.isPremium);
                 }
             } catch (error) {
                 console.error(`Error init app: ${error}`);
@@ -222,6 +233,8 @@ export function App() {
                     langCode: getAppLangCode()
                 }
             );
+
+            window.TelegramClient.setLogLevel(LogLevel.INFO);
 
             const versionKey = 'TGLibVersion';
             const version = window.TelegramClient.__version__;
@@ -287,7 +300,7 @@ export function App() {
                 navigate(methodPath);
             } else {
                 setCache(Constants.AUTH_STATE_METHOD_KEY, data, 15).then(() => {
-                    setAuthorizationModalOpen(true);
+                    navigate(methodPath);
                 });
             }
         }
@@ -322,7 +335,11 @@ export function App() {
             value={{
                 user,
                 setUser,
+                isUserChecked,
+                isPremium,
+                setPremium,
                 openMethod,
+                setPremiumModalOpen,
                 setAccountsModalOpen,
                 initData,
                 setInitData,
@@ -334,6 +351,7 @@ export function App() {
             <Routes>{routes.map(GetRouter)}</Routes>
 
             <AccountsModal isOpen={isAccountsModalOpen} onOpenChange={(open) => setAccountsModalOpen(open)} />
+            <PremiumModal isOpen={isPremiumModalOpen} onOpenChange={(open) => setPremiumModalOpen(open)} />
             <ShareModal
                 isOpen={isShareModalOpen}
                 onOpenChange={(open) => {
@@ -344,21 +362,6 @@ export function App() {
                     }
                 }}
                 modalData={shareModalData}
-            />
-            <AuthorizationModal
-                isOpen={isAuthorizationModalOpen}
-                onOpenChange={(open) => setAuthorizationModalOpen(open)}
-                onAuthComplete={() => {
-                    getCache(Constants.AUTH_STATE_METHOD_KEY).then((value) => {
-                        if (value) {
-                            const { methodPath } = value as { methodPath: string };
-
-                            window.alreadyVisitedRefLink = true;
-                            navigate(methodPath);
-                            removeCache(Constants.AUTH_STATE_METHOD_KEY);
-                        }
-                    });
-                }}
             />
 
             {snackbarOptions && (

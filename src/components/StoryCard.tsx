@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Api } from 'telegram';
 import { Caption, Image } from '@telegram-apps/telegram-ui';
 import { useIntersection } from '../hooks/useIntersection.ts';
@@ -21,13 +21,11 @@ interface ILinkProps {
 }
 
 export function StoryCard({ story, actionCount, key, peer }: IStoriesCarousel) {
-    const [ref, entry] = useIntersection({
-        root: null,
-        rootMargin: '0px',
-        threshold: 0.1
-    });
+    const ref = useRef();
     const [alreadyRequested, setAlreadyRequested] = useState<boolean>(false);
     const [mediaPhoto, setMediaPhoto] = useState<null | string>(null);
+
+    const isIntersecting = useIntersection(ref);
 
     let storyMediaDocument: Api.TypePhoto | Api.TypeDocument | undefined = undefined;
     if (story.media instanceof Api.MessageMediaPhoto) {
@@ -37,7 +35,7 @@ export function StoryCard({ story, actionCount, key, peer }: IStoriesCarousel) {
     }
 
     useEffect(() => {
-        if (storyMediaDocument && entry?.isIntersecting && !alreadyRequested) {
+        if (storyMediaDocument && isIntersecting && !alreadyRequested) {
             setAlreadyRequested(true);
 
             if (storyMediaDocument instanceof Api.Photo) {
@@ -50,7 +48,7 @@ export function StoryCard({ story, actionCount, key, peer }: IStoriesCarousel) {
                 });
             }
         }
-    }, [entry?.isIntersecting]);
+    }, [isIntersecting]);
 
     const linkProps: ILinkProps = { component: 'button' };
 

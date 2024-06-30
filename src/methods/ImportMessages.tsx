@@ -1,11 +1,12 @@
 import { createElement, useContext, useEffect, useState } from 'react';
-import { Avatar, Blockquote, Cell, FileInput, Input, Placeholder, Section } from '@telegram-apps/telegram-ui';
+import { Avatar, Blockquote, FileInput, Input, Placeholder, Section } from '@telegram-apps/telegram-ui';
 import { IconBrandFacebook, IconBrandInstagram, IconBrandVk, IconCheck, IconSearch } from '@tabler/icons-react';
 import { Buffer } from 'buffer';
 import JSZip from 'jszip';
 import dayjs from 'dayjs';
 import { Api } from 'telegram';
 import { CustomFile } from 'telegram/client/uploads';
+import { WrappedCell } from '../components/Helpers.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { CallAPI, getDocLink, parallelLimit } from '../lib/helpers.ts';
 import { getAppLangCode, LangType } from '../lib/lang.ts';
@@ -406,7 +407,7 @@ export default function ImportMessages() {
         const isSelected = importType === type;
 
         return (
-            <Cell
+            <WrappedCell
                 key={type}
                 Component="label"
                 // before={<Radio name="social" value={type} />}
@@ -416,7 +417,7 @@ export default function ImportMessages() {
                 onClick={() => setImportType(type)}
             >
                 {mt(`networks.${type}`)}
-            </Cell>
+            </WrappedCell>
         );
     }
 
@@ -465,21 +466,23 @@ export default function ImportMessages() {
                 </Section>
 
                 <Section className={commonClasses.sectionBox}>
-                    <Input
-                        before={<IconSearch opacity={0.3} />}
-                        placeholder={mt('search_placeholder')}
-                        value={searchQuery}
-                        onChange={(event) => setSearchQuery(event.currentTarget.value)}
-                    />
+                    <div className={commonClasses.fixSearchBackground}>
+                        <Input
+                            before={<IconSearch opacity={0.3} />}
+                            placeholder={mt('search_placeholder')}
+                            value={searchQuery}
+                            onChange={(event) => setSearchQuery(event.currentTarget.value)}
+                        />
+                    </div>
 
                     {filterList(fileUsers).map((user, key) => (
-                        <Cell
+                        <WrappedCell
                             key={key}
                             onClick={() => selectUserFrom(user)}
                             before={<Avatar acronym={user.name[0]} size={28} src={''} />}
                         >
                             {user.name}
-                        </Cell>
+                        </WrappedCell>
                     ))}
                 </Section>
             </>
