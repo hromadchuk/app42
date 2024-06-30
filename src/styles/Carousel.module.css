@@ -1,0 +1,63 @@
+.carouselContainer {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.slideContainer {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.slideContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.slideContent.hidden {
+    display: none;
+}
+
+.indicators {
+    position: absolute;
+    bottom: 16px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin: 0 4px;
+}
+
+.indicator.active {
+    background-color: #3390EC;
+}
+
+.indicator.inactive {
+    background-color: #DDDDDD;
+}
+
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px;
+}
+
+.slideTitle {
+    margin-top: 16px;
+    margin-bottom: 8px;
+}
+
+.slideDescription {
+    text-align: center;
+    max-width: 80%;
+}
