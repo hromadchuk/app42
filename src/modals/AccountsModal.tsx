@@ -21,7 +21,7 @@ interface IAccountsModalProps {
 }
 
 export function AccountsModal({ isOpen, onOpenChange }: IAccountsModalProps) {
-    const { user, setUser } = useContext(AppContext);
+    const { user, setUser, markOnboardingAsCompleted } = useContext(AppContext);
 
     const storage = useCloudStorage();
     const navigate = useNavigate();
@@ -87,7 +87,7 @@ export function AccountsModal({ isOpen, onOpenChange }: IAccountsModalProps) {
                                 navigate('/');
 
                                 localStorage.clear();
-                                // markOnboardingAsCompleted();
+                                markOnboardingAsCompleted();
                                 location.reload();
                             };
 

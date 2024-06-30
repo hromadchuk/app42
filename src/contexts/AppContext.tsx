@@ -27,8 +27,8 @@ export interface IAppContext {
     showShareModal: (options: IShareOptions) => void;
     // isAppLoading: boolean;
     // setAppLoading: (state: boolean) => void;
-    // markOnboardingAsCompleted(): Promise<void>;
-    // checkIsOnboardingCompleted(): Promise<boolean>;
+    markOnboardingAsCompleted(): Promise<void>;
+    checkIsOnboardingCompleted(): Promise<boolean>;
     // sendSecureData(data: object): void;
 }
 
