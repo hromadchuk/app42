@@ -25,6 +25,7 @@ import { AppContext } from '../contexts/AppContext.tsx';
 import classes from '../styles/MenuPage.module.css';
 import TonLogo from '../assets/ton_logo.svg';
 import { MethodRow } from './MethodsPage.tsx';
+import { ShareButton } from '../components/ShareButton.tsx';
 
 function getInfoTextWithLink() {
     return t('menu.info')
@@ -125,6 +126,8 @@ export default function MenuPage() {
                     >
                         {t('menu.telegram_channel')}
                     </WrappedCell>
+
+                    <ShareButton />
                 </Section>
 
                 <Blockquote>

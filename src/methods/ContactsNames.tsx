@@ -24,6 +24,7 @@ import { CallAPI, classNames, isDev, Server, wrapCallMAMethod } from '../lib/hel
 import AnimatedDuckFaceControl from '../assets/animated_stickers/duck_face_control.json';
 
 import commonClasses from '../styles/Common.module.css';
+import { ShareButton } from '../components/ShareButton.tsx';
 
 interface IServerData {
     date: number;
@@ -145,7 +146,16 @@ export default function ContactsNames() {
                 <Blockquote>{mt('share_description')}</Blockquote>
 
                 <div className={commonClasses.fixSearchBackground}>
-                    <Input after={<CopyButton value={link} />} value={link} readOnly />
+                    <Input
+                        after={
+                            <>
+                                <CopyButton value={link} />
+                            </>
+                        }
+                        value={link}
+                        readOnly
+                    />
+                    <ShareButton url={link} shareText={mt('share_message')} />
                 </div>
             </Section>
         );

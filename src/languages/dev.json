@@ -29,6 +29,7 @@
   },
   "common": {
     "progress": "Loading",
+    "share": "Share",
     "footer": "Made with love",
     "done": "Done!",
     "getting_dialogs": "Getting dialogs",
@@ -86,6 +87,7 @@
   },
   "menu": {
     "search_placeholder": "Type to search",
+    "share_button": "Hello Pasha",
     "documentation": "Documentation",
     "donate": "Support the project",
     "telegram_channel": "Telegram channel with updates",
@@ -701,7 +703,8 @@
       "decline_button": "Decline",
       "updated": "Updated {date}",
       "no_records": "We have no record of you. :(",
-      "share_description": "Share the link to the method with your friends so we can show them to you!"
+      "share_description": "Share the link to the method with your friends so we can show them to you!",
+      "share_message": "Want to see how you saved in my Telegram contacts? Go to App 42 and check it out! \uD83C\uDF1A"
     },
     "ton_nft_analysis": {
       "loading_nft_info": "Getting NFT info",
