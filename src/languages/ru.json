@@ -153,6 +153,7 @@
     "ton_contacts": "Контакты с NFT",
     "ton_jettons_analysis": "Анализ жетонов",
     "ton_transactions": "Анализ транзакций",
+    "ton_nft_analysis": "Анализ NFT",
     "contacts_names": "Ваше имя в списках контактов"
   },
   "charts": {
@@ -701,6 +702,12 @@
       "updated": "Обновлено {date}",
       "no_records": "У нас нет записей о вас. :(",
       "share_description": "Поделитесь со своими друзьями ссылкой на этот метод!"
+    },
+    "ton_nft_analysis": {
+      "loading_nft_info": "Получение информации об NFT",
+      "no_nfts": "У вас нет NFT",
+      "collection_floor_price": "Минимальная цена в коллекции: {price} TON",
+      "now": "Сейчас"
     }
   }
 }

@@ -153,6 +153,7 @@
     "ton_contacts": "Contacts with NFT",
     "ton_jettons_analysis": "Jettons analysis",
     "ton_transactions": "Transactions analysis",
+    "ton_nft_analysis": "NFT analysis",
     "contacts_names": "Your name in the contacts list"
   },
   "charts": {
@@ -701,6 +702,12 @@
       "updated": "Updated {date}",
       "no_records": "We have no record of you. :(",
       "share_description": "Share the link to the method with your friends so we can show them to you!"
+    },
+    "ton_nft_analysis": {
+      "loading_nft_info": "Getting NFT info",
+      "no_nfts": "You don't have any NFT",
+      "collection_floor_price": "Floor price in the collection: {price} TON",
+      "now": "Now"
     }
   }
 }
