@@ -1,4 +1,4 @@
-import { Blockquote, Caption, Progress, Spinner } from '@telegram-apps/telegram-ui';
+import { Blockquote, Caption, Progress, Section, Spinner, Text } from '@telegram-apps/telegram-ui';
 import Lottie from 'lottie-react';
 import { IProgress } from '../contexts/MethodContext.tsx';
 import { formatNumber } from '../lib/helpers.ts';
@@ -72,6 +72,8 @@ export function MethodLoader(progress: IProgress) {
                     </Blockquote>
                 )}
 
+                <DoNotLeaveMessage />
+
                 <Progress value={percent} />
 
                 <Caption level="1" weight="3">
@@ -87,6 +89,10 @@ export function MethodLoader(progress: IProgress) {
             <>
                 <Spinner size="m" />
 
+                <Section>
+                    <DoNotLeaveMessage />
+                </Section>
+
                 {progress.text && (
                     <Caption level="1" weight="3">
                         {progress.text}
@@ -96,13 +102,20 @@ export function MethodLoader(progress: IProgress) {
         );
     }
 
+    function DoNotLeaveMessage() {
+        return <Text className={classes.doNotLeaveMessage}>{t('common.do_not_leave')}</Text>;
+    }
+
     return (
         <>
             <div className={classes.animationSection}>
                 <Lottie animationData={getImage()} loop />
             </div>
 
-            <div className={classes.progressSection}>
+            <div
+                className={classes.progressSection}
+                style={getImageType() !== ELoadType.COUNT ? { lineHeight: 'initial' } : {}}
+            >
                 {getImageType() === ELoadType.COUNT ? LoadingRow() : SpinnerRow()}
             </div>
         </>

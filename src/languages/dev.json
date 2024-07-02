@@ -29,6 +29,7 @@
   },
   "common": {
     "progress": "Loading",
+    "do_not_leave": "Please do not leave this section",
     "footer": "Made with love",
     "done": "Done!",
     "getting_dialogs": "Getting dialogs",
