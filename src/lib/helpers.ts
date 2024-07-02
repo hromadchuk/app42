@@ -638,9 +638,11 @@ export function generateColorGradation(hex: string, steps: number): string[] {
     return gradation;
 }
 
-export function generateShareLink(url: string, text: string): string {
-    const encodedUrl = encodeURIComponent(url);
-    const encodedText = encodeURIComponent(text);
+export function getShareLink(text: string, startApp?: string): string {
+    const appUrl = `https://t.me/app42/app${startApp ? `?startapp=${startApp}` : ''}`;
+    const encodedUrl = encodeURIComponent(appUrl);
+    const encodedText = encodeURI(text);
+
     return `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`;
 }
 

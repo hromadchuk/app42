@@ -1,3 +1,4 @@
+import { IconShare2 } from '@tabler/icons-react';
 import {
     Badge,
     Blockquote,
@@ -8,7 +9,7 @@ import {
     Placeholder,
     Section
 } from '@telegram-apps/telegram-ui';
-import { useCloudStorage } from '@tma.js/sdk-react';
+import { useCloudStorage, useUtils } from '@tma.js/sdk-react';
 import dayjs from 'dayjs';
 import Lottie from 'lottie-react';
 import { useContext, useEffect, useState } from 'react';
@@ -19,12 +20,12 @@ import { WrappedCell } from '../components/Helpers.tsx';
 import { Constants } from '../constants.ts';
 import { MethodContext } from '../contexts/MethodContext.tsx';
 import { getCache, setCache } from '../lib/cache.ts';
-import { CallAPI, classNames, isDev, Server, wrapCallMAMethod } from '../lib/helpers.ts';
+import { CallAPI, classNames, getShareLink, isDev, Server, wrapCallMAMethod } from '../lib/helpers.ts';
 
 import AnimatedDuckFaceControl from '../assets/animated_stickers/duck_face_control.json';
+import { t } from '../lib/lang.ts';
 
 import commonClasses from '../styles/Common.module.css';
-import { ShareButton } from '../components/ShareButton.tsx';
 
 interface IServerData {
     date: number;
@@ -40,6 +41,7 @@ export default function ContactsNames() {
     const { mt, needHideContent, setProgress } = useContext(MethodContext);
 
     const storage = useCloudStorage();
+    const utils = useUtils();
     const navigate = useNavigate();
     const [needShowWarning, setShowWarning] = useState<boolean>(false);
     const [serverData, setServerData] = useState<IServerData | null>(null);
@@ -155,7 +157,18 @@ export default function ContactsNames() {
                         value={link}
                         readOnly
                     />
-                    <ShareButton url={link} shareText={mt('share_message')} />
+
+                    <Button
+                        stretched={true}
+                        mode="filled"
+                        size="l"
+                        before={<IconShare2 size={24} />}
+                        onClick={() => {
+                            utils.openTelegramLink(getShareLink(mt('share_message'), 'cn'));
+                        }}
+                    >
+                        {t('common.share')}
+                    </Button>
                 </div>
             </Section>
         );

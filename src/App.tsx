@@ -140,16 +140,14 @@ export function App() {
                 console.log('value', value && JSON.stringify(value));
 
                 if (value) {
-                    if (value) {
-                        const { methodId, authType } = value as {
-                            methodId: string;
-                            authType: AuthType;
-                        };
+                    const { methodId, authType } = value as {
+                        methodId: string;
+                        authType: AuthType;
+                    };
 
-                        if (authType === AuthType.TG) {
-                            const method = getMethodById(methodId);
-                            method && openMethod(method);
-                        }
+                    if (authType === AuthType.TG) {
+                        const method = getMethodById(methodId);
+                        method && openMethod(method);
                     }
                 } else if (param === 'cn' && !window.alreadyVisitedRefLink) {
                     const method = getMethodById('contacts_names');

@@ -87,10 +87,11 @@
   },
   "menu": {
     "search_placeholder": "Type to search",
-    "share_button": "Hello Pasha",
     "documentation": "Documentation",
     "donate": "Support the project",
     "telegram_channel": "Telegram channel with updates",
+    "share_app": "Share the app",
+    "share_description": "App 42 is a feature-rich app for Telegram. Try it yourself!",
     "info": "If you have a question, bug or request, you can always {link}write to the developer{/link} about it!",
     "no_methods": "No methods founds",
     "cards": {
