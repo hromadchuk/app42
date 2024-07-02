@@ -20,6 +20,7 @@ const AccountsModal = lazy(() => import('./modals/AccountsModal.tsx'));
 const PremiumModal = lazy(() => import('./modals/PremiumModal.tsx'));
 
 import { AppContext, IInitData, ISnackbarOptions } from './contexts/AppContext.tsx';
+import Onboarding from './components/Onboarding.tsx';
 
 declare global {
     interface Window {
@@ -56,6 +57,7 @@ export function App() {
     const [shareModalData, setShareModalData] = useState<IShareOptions | null>(null);
     const [initData, setInitData] = useState<null | IInitData>(null);
     const [snackbarOptions, setSnackbarOptions] = useState<null | ISnackbarOptions>(null);
+    const [needShowOnboarding, setNeedShowOnboarding] = useState(false);
 
     const GetRouter = ({ path, element }: IRouter) => <Route key={path} path={path} element={element} />;
 
@@ -105,11 +107,10 @@ export function App() {
         setOptions({ language: getAppLangCode() as Locales });
 
         (async () => {
-            // TODO return onboarding
-            // const isOnboardingCompleted = await checkIsOnboardingCompleted();
-            // if (!isOnboardingCompleted) {
-            //     setShowOnboarding(true);
-            // }
+            const isOnboardingCompleted = await checkIsOnboardingCompleted();
+            if (!isOnboardingCompleted) {
+                setNeedShowOnboarding(true);
+            }
 
             if (initData) {
                 console.log('location', JSON.stringify(location));
@@ -255,14 +256,14 @@ export function App() {
             if (!currentVersion) {
                 localStorage.setItem(versionKey, version);
             } else if (currentVersion !== version) {
-                // const isOnboardingCompleted = await checkIsOnboardingCompleted();
+                const isOnboardingCompleted = await checkIsOnboardingCompleted();
 
                 localStorage.removeItem('GramJs:apiCache');
                 localStorage.setItem(versionKey, version);
 
-                // if (isOnboardingCompleted) {
-                //     await markOnboardingAsCompleted();
-                // }
+                if (isOnboardingCompleted) {
+                    await markOnboardingAsCompleted();
+                }
 
                 window.location.reload();
                 return;
@@ -323,6 +324,33 @@ export function App() {
         setShareModalOpen(true);
     }
 
+    async function markOnboardingAsCompleted(): Promise<void> {
+        if (isDev) {
+            await setCache(Constants.ONBOARDING_COMPLETED_KEY, '1', 60);
+        } else {
+            await wrapCallMAMethod<string>(() => storage.set(Constants.ONBOARDING_COMPLETED_KEY, '1'));
+        }
+    }
+
+    async function checkIsOnboardingCompleted(): Promise<boolean> {
+        const state = isDev
+            ? await getCache(Constants.ONBOARDING_COMPLETED_KEY)
+            : await wrapCallMAMethod<string>(() => storage.get(Constants.ONBOARDING_COMPLETED_KEY));
+
+        return Boolean(state);
+    }
+
+    if (needShowOnboarding) {
+        return (
+            <Onboarding
+                onOnboardingEnd={() => {
+                    setNeedShowOnboarding(false);
+                    markOnboardingAsCompleted();
+                }}
+            />
+        );
+    }
+
     return (
         <AppContext.Provider
             value={{
@@ -336,7 +364,9 @@ export function App() {
                 setAccountsModalOpen,
                 initData,
                 setInitData,
-                showShareModal
+                showShareModal,
+                markOnboardingAsCompleted,
+                checkIsOnboardingCompleted
             }}
         >
             <Routes>{routes.map(GetRouter)}</Routes>

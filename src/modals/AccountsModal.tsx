@@ -22,7 +22,7 @@ interface IAccountsModalProps {
 }
 
 export default function AccountsModal({ isOpen, onOpenChange }: IAccountsModalProps) {
-    const { user, setUser } = useContext(AppContext);
+    const { user, setUser, markOnboardingAsCompleted } = useContext(AppContext);
 
     const storage = useCloudStorage();
     const navigate = useNavigate();
@@ -93,7 +93,7 @@ export default function AccountsModal({ isOpen, onOpenChange }: IAccountsModalPr
                                 setUser(null);
                                 navigate('/');
 
-                                // markOnboardingAsCompleted();
+                                markOnboardingAsCompleted();
                             };
 
                             if (isDev) {
