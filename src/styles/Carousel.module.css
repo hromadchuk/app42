@@ -53,8 +53,8 @@
 }
 
 .slideTitle {
-    margin-top: 16px;
-    margin-bottom: 8px;
+    margin-top: 16px !important;
+    margin-bottom: 8px !important;
 }
 
 .slideDescription {

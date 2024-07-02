@@ -325,11 +325,19 @@ export function App() {
     }
 
     async function markOnboardingAsCompleted(): Promise<void> {
-        await storage.set(Constants.ONBOARDING_COMPLETED_KEY, '1');
+        if (isDev) {
+            await setCache(Constants.ONBOARDING_COMPLETED_KEY, '1', 60);
+        } else {
+            await wrapCallMAMethod<string>(() => storage.set(Constants.ONBOARDING_COMPLETED_KEY, '1'));
+        }
     }
 
     async function checkIsOnboardingCompleted(): Promise<boolean> {
-        return Boolean(await storage.get(Constants.ONBOARDING_COMPLETED_KEY));
+        const state = isDev
+            ? await getCache(Constants.ONBOARDING_COMPLETED_KEY)
+            : await wrapCallMAMethod<string>(() => storage.get(Constants.ONBOARDING_COMPLETED_KEY));
+
+        return Boolean(state);
     }
 
     if (needShowOnboarding) {
