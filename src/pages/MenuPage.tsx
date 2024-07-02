@@ -1,3 +1,4 @@
+import { useUtils } from '@tma.js/sdk-react';
 import { useContext, useState } from 'react';
 import {
     Avatar,
@@ -11,12 +12,13 @@ import {
     Spinner,
     Tappable
 } from '@telegram-apps/telegram-ui';
-import { IconNews, IconPigMoney, IconSearch } from '@tabler/icons-react';
+import { IconNews, IconPigMoney, IconSearch, IconShare2 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { useTonAddress } from '@tonconnect/ui-react';
 import { cards } from '../cards.ts';
 import { WrappedCell } from '../components/Helpers.tsx';
 import { OwnerAvatar } from '../components/OwnerAvatar.tsx';
+import { getShareLink } from '../lib/helpers.ts';
 import { getMethodsByName } from '../routes.tsx';
 import { t } from '../lib/lang.ts';
 
@@ -37,6 +39,7 @@ export default function MenuPage() {
 
     const userFriendlyAddress = useTonAddress();
     const navigate = useNavigate();
+    const utils = useUtils();
 
     const [searchText, setSearchText] = useState('');
 
@@ -124,6 +127,16 @@ export default function MenuPage() {
                         className={classes.link}
                     >
                         {t('menu.telegram_channel')}
+                    </WrappedCell>
+
+                    <WrappedCell
+                        before={<IconShare2 size={28} stroke={1.2} />}
+                        className={classes.link}
+                        onClick={() => {
+                            utils.openTelegramLink(getShareLink(t('menu.share_description')));
+                        }}
+                    >
+                        {t('menu.share_app')}
                     </WrappedCell>
                 </Section>
 

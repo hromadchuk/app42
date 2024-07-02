@@ -29,6 +29,7 @@
   },
   "common": {
     "progress": "Loading",
+    "share": "Share",
     "footer": "Made with love",
     "done": "Done!",
     "getting_dialogs": "Getting dialogs",
@@ -89,6 +90,8 @@
     "documentation": "Documentation",
     "donate": "Support the project",
     "telegram_channel": "Telegram channel with updates",
+    "share_app": "Share the app",
+    "share_description": "App 42 is a feature-rich app for Telegram. Try it yourself!",
     "info": "If you have a question, bug or request, you can always {link}write to the developer{/link} about it!",
     "no_methods": "No methods founds",
     "cards": {
@@ -701,7 +704,8 @@
       "decline_button": "Decline",
       "updated": "Updated {date}",
       "no_records": "We have no record of you. :(",
-      "share_description": "Share the link to the method with your friends so we can show them to you!"
+      "share_description": "Share the link to the method with your friends so we can show them to you!",
+      "share_message": "Want to see how you saved in my Telegram contacts? Go to App 42 and check it out! \uD83C\uDF1A"
     },
     "ton_nft_analysis": {
       "loading_nft_info": "Getting NFT info",
