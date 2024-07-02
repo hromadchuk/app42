@@ -1,13 +1,9 @@
-import { Section } from '@telegram-apps/telegram-ui';
 import { useContext, useEffect, useState } from 'react';
 import { Api } from 'telegram';
-import { CallAPI, classNames } from '../lib/helpers.ts';
-import dayjs from 'dayjs';
-import { OwnerRow } from '../components/OwnerRow.tsx';
+import { CallAPI, isDev } from '../lib/helpers.ts';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
-
-import commonClasses from '../styles/Common.module.css';
+import dayjs from 'dayjs';
 
 type TOwner = Api.Channel | Api.Chat;
 
@@ -17,7 +13,7 @@ interface IOwnerInfo {
 }
 
 export default function InactiveChannels() {
-    const { mt, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
+    const { mt, needHideContent, setProgress, setFinishBlock, setListAction } = useContext(MethodContext);
 
     const [inactiveOwners, setInactiveOwners] = useState<IOwnerInfo[] | null>(null);
 
@@ -48,20 +44,40 @@ export default function InactiveChannels() {
 
     if (needHideContent()) return null;
 
-    if (inactiveOwners) {
-        return (
-            <Section className={classNames(commonClasses.sectionBox, commonClasses.showHr)}>
-                {inactiveOwners.map((owner, key) => (
-                    <OwnerRow
-                        key={key}
-                        owner={owner.owner}
-                        description={mt('last_active').replace(
-                            '{diff_time}',
-                            dayjs().to(dayjs(owner.lastActive * 1000))
-                        )}
-                    />
-                ))}
-            </Section>
-        );
-    }
+    if (!inactiveOwners) return null;
+
+    const descriptions = inactiveOwners.reduce(
+        (acc, ownerInfo) => {
+            acc[ownerInfo.owner.id.valueOf()] = mt('last_active').replace(
+                '{diff_time}',
+                dayjs().to(dayjs(ownerInfo.lastActive * 1000))
+            );
+
+            return acc;
+        },
+        {} as Record<string | number, string>
+    );
+
+    setListAction({
+        buttonText: mt('button_clear'),
+        loadingText: mt('clearing_progress'),
+        requestSleep: 777,
+        owners: inactiveOwners.map((ownerInfo) => ownerInfo.owner),
+        descriptions,
+        // eslint-disable-next-line require-await
+        action: async (owner) => {
+            if (isDev) {
+                console.log('Leave', {
+                    id: owner.id
+                });
+                return;
+            }
+
+            await CallAPI(
+                new Api.channels.LeaveChannel({
+                    channel: owner.id
+                })
+            );
+        }
+    });
 }

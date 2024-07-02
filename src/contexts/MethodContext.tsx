@@ -23,6 +23,7 @@ export interface ISetListAction {
     requestSleep: number;
     owners: TOwnerType[];
     action: (owner: TOwnerType) => Promise<void>;
+    descriptions?: Record<string | number, string>;
 }
 
 export interface IMethodContext {

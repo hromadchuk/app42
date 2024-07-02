@@ -19,7 +19,8 @@ export function ListAction({
     requestSleep,
     action,
     setProgress,
-    setFinishBlock
+    setFinishBlock,
+    descriptions
 }: IListActionProps) {
     const [selected, setSelected] = useState<number[]>([]);
 
@@ -62,11 +63,13 @@ export function ListAction({
         <Section className={commonClasses.sectionBox}>
             {owners.map((owner, key) => {
                 const peerId = owner.id.valueOf();
+                const description = descriptions ? descriptions[peerId] || '' : '';
 
                 return (
                     <div key={key}>
                         <OwnerRow
                             owner={owner}
+                            description={description}
                             checked={selected.includes(peerId)}
                             callback={() => {
                                 if (selected.includes(peerId)) {
