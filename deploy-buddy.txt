@@ -1,6 +1,6 @@
 cd kit-42
 git pull
-npm ci
+npm ci --force
 npm run build
 rm -rf ~/kit-42-server/dist-client
 cp -r ~/kit-42/dist/ ~/kit-42-server/dist-client

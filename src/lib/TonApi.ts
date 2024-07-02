@@ -3,6 +3,7 @@ import {
     AccountEvent,
     AccountEvents,
     Error,
+    Event,
     HttpResponse,
     JettonHolders,
     JettonsBalances,
@@ -109,6 +110,49 @@ export class TonApiCall {
         return list;
     }
 
+    static async getEvent(eventId: string) {
+        return await TonApiCall.request<Event>('getEvent', TonApi.events.getEvent, eventId);
+    }
+
+    static async getNftHistory(nftId: string) {
+        return await TonApiCall.request<AccountEvents>('getNftHistory', TonApi.nft.getNftHistoryById, nftId, {
+            limit: 50
+        });
+    }
+
+    static async getRate() {
+        const result = await TonApiCall.request<{
+            rates: { TON: { prices: { USD: number } } };
+        }>('getRate', TonApi.rates.getRates, {
+            tokens: ['ton'],
+            currencies: ['usd']
+        });
+
+        if (result?.rates?.TON?.prices?.USD) {
+            return result.rates.TON.prices.USD;
+        }
+
+        return 0;
+    }
+
+    static async getRateForDate(date: number) {
+        const { points } = await TonApiCall.request<{
+            points: number[][];
+        }>('getRateForDate', TonApi.rates.getChartRates, {
+            token: 'ton',
+            currency: 'usd',
+            start_date: date,
+            end_date: date + 86400,
+            points_count: 1
+        });
+
+        if (points?.length) {
+            return points[0][1];
+        }
+
+        return 0;
+    }
+
     private static async request<T>(method: string, func: Function, ...params: unknown[]): Promise<T> {
         try {
             const cacheKey = `TON.${method}:${MD5(JSON.stringify(params))}`;
@@ -136,7 +180,8 @@ export class TonApiCall {
 
             if (
                 ['rate limit: limit for ip', 'rate limit: limit for tier'].includes(errorMessage) ||
-                errorMessage.includes('parent tx for')
+                errorMessage.includes('parent tx for') ||
+                errorMessage.includes('inMessage not found')
             ) {
                 await sleep(1000);
 

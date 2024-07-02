@@ -166,6 +166,29 @@ export function App() {
     }, [initData]);
 
     useEffect(() => {
+        function backButtonClick() {
+            const urlParts = currentLocation.pathname.split('/');
+            if (urlParts.length === 4) {
+                navigate(urlParts.slice(0, -1).join('/'));
+            } else {
+                navigate('/');
+            }
+
+            if (window.isProgress) {
+                // need for stop all requests
+                window.isProgress = false;
+                window.isNeedToThrowErrorOnRequest = true;
+            }
+        }
+
+        backButton.on('click', backButtonClick);
+
+        return () => {
+            backButton.off('click', backButtonClick);
+        };
+    }, [currentLocation]);
+
+    useEffect(() => {
         (async () => {
             window.showSnackbar = (options: ISnackbarOptions) => setSnackbarOptions(options);
             window.hideSnackbar = () => setSnackbarOptions(null);
@@ -173,16 +196,6 @@ export function App() {
             // init mini app
             wrapCallMAMethod(() => miniApp.ready());
             wrapCallMAMethod(() => viewport.expand());
-
-            backButton.on('click', () => {
-                navigate('/');
-
-                if (window.isProgress) {
-                    // need for stop all requests
-                    window.isProgress = false;
-                    window.isNeedToThrowErrorOnRequest = true;
-                }
-            });
 
             // clear cache
             clearOldCache();

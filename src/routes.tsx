@@ -25,6 +25,7 @@ import {
     IconMessageCircleSearch,
     IconMessageCircleUp,
     IconPhoneCall,
+    IconPhoto,
     IconPhotoPentagon,
     IconProps,
     IconReportAnalytics,
@@ -247,6 +248,13 @@ const appMethods: IMethodComponent[] = [
         element: createElement(lazy(() => import('./methods/ContactsNames.tsx'))),
         categories: [MethodCategory.CONTACTS, MethodCategory.ACCOUNT],
         authType: AuthType.TG
+    },
+    {
+        id: 'ton_nft_analysis',
+        icon: IconPhoto,
+        element: createElement(lazy(() => import('./methods/TonNFTAnalysis.tsx'))),
+        categories: [MethodCategory.TON],
+        authType: AuthType.TON
     }
 ];
 
