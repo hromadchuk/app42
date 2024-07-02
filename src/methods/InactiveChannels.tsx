@@ -64,7 +64,6 @@ export default function InactiveChannels() {
         requestSleep: 777,
         owners: inactiveOwners.map((ownerInfo) => ownerInfo.owner),
         descriptions,
-        // eslint-disable-next-line require-await
         action: async (owner) => {
             if (isDev) {
                 console.log('Leave', {
