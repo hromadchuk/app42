@@ -67,16 +67,15 @@ export default function InactiveChannels() {
         action: async (owner) => {
             if (isDev) {
                 console.log('Leave', {
-                    id: owner.id
+                    id: owner.id.valueOf()
                 });
-                return;
+            } else {
+                await CallAPI(
+                    new Api.channels.LeaveChannel({
+                        channel: owner.id
+                    })
+                );
             }
-
-            await CallAPI(
-                new Api.channels.LeaveChannel({
-                    channel: owner.id
-                })
-            );
         }
     });
 }

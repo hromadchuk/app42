@@ -450,7 +450,9 @@
     },
     "inactive_channels": {
       "no_inactive": "У вас нет неактивных каналов и супергрупп",
-      "last_active": "Последняя активность {diff_time}"
+      "last_active": "Последняя активность {diff_time}",
+      "button_clear": "Очистить неактивные каналы",
+      "clearing_progress": "Очистка неактивных каналов"
     },
     "import_messages": {
       "read_warning": "Перед использованием метода необходимо {link}прочитать документацию{/link}",

@@ -450,7 +450,9 @@
     },
     "inactive_channels": {
       "no_inactive": "You don't have inactive channels and supergroups",
-      "last_active": "Last active {diff_time}"
+      "last_active": "Last active {diff_time}",
+      "button_clear": "Clear inactive channels",
+      "clearing_progress": "Clearing inactive channels"
     },
     "import_messages": {
       "read_warning": "Before using the method, you need to {link}read the documentation{/link}",
