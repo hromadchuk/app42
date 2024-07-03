@@ -28,7 +28,7 @@ export default function TonNFTAnalysis() {
     const { mt, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
 
     const [nftsList, setNftsList] = useState<INft[]>([]);
-    const [floorCollections, setfloorCollections] = useState<Map<string, number>>(new Map());
+    const [floorCollections, setFloorCollections] = useState<Map<string, number>>(new Map());
     const [usdRate, setUsdRate] = useState<number>(0);
 
     const [wallet] = useTonConnectUI();
@@ -116,7 +116,7 @@ export default function TonNFTAnalysis() {
                     result.set(address, data[address]);
                 }
 
-                setfloorCollections(result);
+                setFloorCollections(result);
             }
 
             setNftsList(list);

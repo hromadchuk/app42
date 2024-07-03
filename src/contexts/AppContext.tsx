@@ -30,6 +30,8 @@ export interface IAppContext {
     initData: IInitData | null;
     setInitData: (user: IInitData | null) => void;
     showShareModal: (options: IShareOptions) => void;
+    markOnboardingAsCompleted(): Promise<void>;
+    checkIsOnboardingCompleted(): Promise<boolean>;
 }
 
 // @ts-ignore
