@@ -638,6 +638,14 @@ export function generateColorGradation(hex: string, steps: number): string[] {
     return gradation;
 }
 
+export function getShareLink(text: string, startApp?: string): string {
+    const appUrl = `https://t.me/app42/app${startApp ? `?startapp=${startApp}` : ''}`;
+    const encodedUrl = encodeURIComponent(appUrl);
+    const encodedText = encodeURI(text);
+
+    return `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`;
+}
+
 export function isMobile() {
     return /Mobi|Android/i.test(navigator.userAgent);
 }
