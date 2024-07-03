@@ -72,6 +72,8 @@ export function MethodLoader(progress: IProgress) {
                     </Blockquote>
                 )}
 
+                <Caption>{t('common.do_not_leave')}</Caption>
+
                 <Progress value={percent} />
 
                 <Caption level="1" weight="3">
