@@ -1,0 +1,30 @@
+.block {
+    overflow: scroll;
+    scrollbar-width: none;
+    display: flex;
+
+    & > div {
+        display: none;
+    }
+
+    & button {
+        flex: none;
+    }
+}
+
+.firstButton {
+    margin-left: 10px;
+}
+
+.lastButton {
+    margin-right: 10px;
+}
+
+.selected {
+    border-bottom: 3px solid var(--tgui--button_color);
+}
+
+.icon {
+    margin-right: 5px;
+    display: inline;
+}

@@ -1,0 +1,20 @@
+.block {
+    padding: 12px 16px;
+    border-radius: 0 0 10px 10px;
+    transition: .5s;
+    color: white;
+}
+
+.description {
+    opacity: 0.5;
+}
+
+@keyframes animation {
+    0% {
+        margin-top: -150px;
+    }
+
+    100% {
+        margin-top: -8px;
+    }
+}

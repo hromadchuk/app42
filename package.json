@@ -1,0 +1,52 @@
+{
+  "name": "kit-42",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 4242 --host",
+    "build": "npm run lint && vite build",
+    "build-vite": "vite build",
+    "build-watch": "vite build --watch",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0 && tsc",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tabler/icons-react": "^3.7.0",
+    "@telegram-apps/sdk-react": "^1.1.3",
+    "@telegram-apps/telegram-ui": "^2.1.7",
+    "@tonconnect/ui-react": "^2.0.9",
+    "chart.js": "^4.4.3",
+    "crypto-js": "^4.2.0",
+    "dayjs": "^1.11.11",
+    "dexie": "^3.2.7",
+    "jszip": "^3.10.1",
+    "lottie-react": "^2.4.0",
+    "react": "^18.3.1",
+    "react-chartkick": "^0.5.3",
+    "react-dom": "^18.3.1",
+    "react-ga4": "^2.1.0",
+    "react-imask": "^7.6.0",
+    "react-multi-date-picker": "^4.5.1",
+    "react-router-dom": "^6.23.0",
+    "telegram": "^2.24.10",
+    "tonapi-sdk-js": "^1.0.11"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
+    "@types/css-modules": "^1.0.5",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^8.10.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.3.5",
+    "rollup-plugin-visualizer": "^5.12.0",
+    "typescript": "^5.4.5",
+    "vite": "^4.5.3"
+  }
+}

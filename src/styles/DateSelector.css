@@ -1,0 +1,84 @@
+.rmdp-wrapper,
+.rmdp-calendar,
+.rmdp-day-picker > div {
+    width: 100% !important;
+}
+
+.rmdp-day,
+.rmdp-header-values {
+    color: var(--tgui--text_color) !important;
+}
+
+.rmdp-day {
+    margin: 3px !important;
+}
+
+.rmdp-shadow {
+    box-shadow: none !important;
+}
+
+.rmdp-week-day {
+    color: var(--tgui--link_color) !important;
+}
+
+.rmdp-arrow {
+    border-color: var(--tgui--link_color) !important;
+}
+
+.rmdp-arrow-container:hover {
+    background-color: var(--tgui--button_color) !important;
+    opacity: 0.7 !important;
+    box-shadow: none !important;
+    border-radius: 8px !important;
+}
+
+.rmdp-wrapper {
+    background-color: var(--tgui--bg_color) !important;
+}
+
+.rmdp-border-bottom {
+    border-bottom: 1px solid var(--tgui--outline) !important;
+}
+
+.rmdp-range {
+    background-color: var(--tgui--button_color) !important;
+}
+
+.rmdp-range:hover {
+    opacity: 0.9 !important;
+}
+
+.rmdp-day span:hover {
+    background-color: var(--tgui--button_color) !important;
+    opacity: 0.7 !important;
+}
+
+.rmdp-day span,
+.rmdp-day-hidden > span:hover,
+.rmdp-range > span:hover {
+    background-color: transparent !important;
+}
+
+.rmdp-day .highlight-red {
+    color: var(--tgui--destructive_text_color) !important;
+}
+
+.rmdp-day,
+.rmdp-day span:hover {
+    border-radius: 8px !important;
+}
+
+.rmdp-cancel {
+    color: var(--tgui--plain_foreground) !important;
+    background: var(--tgui--plain_background) !important;
+}
+
+.rmdp-day.rmdp-deactive, .rmdp-day.rmdp-disabled {
+    opacity: 0.4 !important;
+}
+
+.rmdp-day.rmdp-deactive > span:hover,
+.rmdp-day.rmdp-disabled > span:hover {
+    background-color: transparent !important;
+    opacity: 1 !important;
+}

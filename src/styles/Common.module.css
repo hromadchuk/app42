@@ -1,0 +1,82 @@
+.sectionBox {
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px;
+
+    :is(hr) {
+        display: none;
+    }
+
+    & > div {
+        background-color: var(--tg-theme-islands-background-color) !important;
+    }
+
+    & > div > div {
+        background-color: var(--tg-theme-islands-background-color) !important;
+    }
+}
+
+.showHr {
+    :is(hr) {
+        display: block;
+    }
+}
+
+.hideHr {
+    :is(hr) {
+        display: none;
+    }
+}
+
+.footerCount {
+    display: block;
+    text-align: center;
+    padding: 5px;
+    color: var(--tgui--secondary_hint_color);
+}
+
+.partWidth {
+    width: 50%;
+}
+
+.center {
+    text-align: center;
+    margin: 0 auto;
+    justify-content: center;
+}
+
+.disabledCell {
+    background: unset !important;
+    opacity: 1 !important;
+    cursor: default;
+}
+
+.tinySegment {
+    margin-bottom: 5px;
+
+    & button {
+        height: 30px;
+        padding: unset;
+    }
+}
+
+.scroll {
+    overflow: scroll;
+    scrollbar-width: none;
+    display: flex;
+    padding: 10px 5px 10px 10px;
+
+    & div {
+        margin-right: 5px;
+    }
+}
+
+.fixSearchBackground {
+    & > div {
+        background-color: var(--tg-theme-islands-background-color) !important;
+    }
+}
+
+.fixInput {
+    box-shadow: 0 0 0 2px var(--tg-theme-accent-text-color) !important;
+}

@@ -1,0 +1,15 @@
+.card {
+    height: 200px !important;
+    width: 112px !important;
+
+    & img {
+        height: 200px;
+        width: 112px;
+    }
+}
+
+.caption {
+    width: 112px;
+    display: block;
+    text-align: center;
+}

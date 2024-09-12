@@ -1,0 +1,57 @@
+html,
+body {
+    overflow: auto;
+    overscroll-behavior-y: none;
+    margin: 0;
+}
+
+* {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+}
+
+html {
+    background-color: var(--tg-theme-bg-color);
+
+    --tg-theme-islands-background-color: var(--tg-theme-header-bg-color);
+}
+
+a {
+    text-decoration: none;
+    color: var(--tgui--link_color);
+}
+
+[name="wrapped-cell"]:hover {
+    background: var(--tg-theme-bg-color-alpha);
+}
+
+[role="dialog"] [name="wrapped-cell"]:hover {
+    background: var(--tg-theme-header-bg-color-alpha);
+}
+
+[role="dialog"] header:before {
+    background: var(--tg-theme-link-color);
+}
+
+[datatype="disabled"]:hover {
+    background: none;
+    opacity: 1;
+    cursor: default;
+}
+
+[vaul-overlay=""] {
+    background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+:is(hr) {
+    border-color: var(--tg-theme-hint-color-alpha) !important;
+}
