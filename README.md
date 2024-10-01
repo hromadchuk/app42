@@ -22,6 +22,3 @@ Read the [contributing guidelines](DEVELOPMENT.md) to get started.
 
 ## 🌏 Translations
 We use [Crowdin](https://crowdin.com/project/app-42) as a translation platform.
-
-![en](https://img.shields.io/badge/dynamic/json?color=green&style=flat&query=%24.progress[?(@.data.languageId==%27en%27)].data.approvalProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-16517975-702839-update.json&label=EN)
-![ru](https://img.shields.io/badge/dynamic/json?color=green&style=flat&query=%24.progress[?(@.data.languageId==%27ru%27)].data.approvalProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-16517975-702839-update.json&label=RU)
