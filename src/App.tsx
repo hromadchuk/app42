@@ -35,7 +35,6 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 import 'dayjs/locale/ru';
-import 'dayjs/locale/uk';
 
 dayjs.extend(toObject);
 dayjs.extend(relativeTime);
@@ -217,8 +216,6 @@ export function App() {
     useEffect(() => {
         (async () => {
             setOptions({ language: getAppLangCode() as Locales });
-
-            console.log(111);
 
             tonConnectUI.setConnectRequestParameters({
                 state: 'ready',

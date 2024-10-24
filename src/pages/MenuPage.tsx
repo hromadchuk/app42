@@ -30,7 +30,7 @@ import { MethodRow } from './MethodsPage.tsx';
 
 function getInfoTextWithLink() {
     return t('menu.info')
-        .replace('{link}', '<a href="https://t.me/iamhro" target="_blank">')
+        .replace('{link}', '<a href="https://github.com/hromadchuk/app42" target="_blank">')
         .replace('{/link}', '</a>');
 }
 
@@ -143,8 +143,6 @@ export default function MenuPage() {
                     </WrappedCell>
                 </Section>
 
-                <PopularMethodsRow />
-
                 <Blockquote>
                     <div dangerouslySetInnerHTML={{ __html: getInfoTextWithLink() }}></div>
                 </Blockquote>
@@ -175,35 +173,6 @@ export default function MenuPage() {
                 >
                     {method.name}
                 </WrappedCell>
-            </Section>
-        );
-    }
-
-    function PopularMethodsRow() {
-        if (!window.initData.topMethods?.length) {
-            return null;
-        }
-
-        const methods = window.initData.topMethods.map((methodId) => getMethodById(methodId)).filter(Boolean);
-        if (!methods.length) {
-            return null;
-        }
-
-        return (
-            <Section className={classes.categories}>
-                <Section.Header style={{ paddingTop: 4 }}>{t('menu.popular_methods')}</Section.Header>
-
-                {methods.map((method) => (
-                    <WrappedCell
-                        key={method.id}
-                        before={<method.icon size={28} stroke={1.2} />}
-                        onClick={() => openMethod(method)}
-                        className={classes.link}
-                        multiline={true}
-                    >
-                        {method.name}
-                    </WrappedCell>
-                ))}
             </Section>
         );
     }

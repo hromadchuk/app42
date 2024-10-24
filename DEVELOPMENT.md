@@ -6,7 +6,7 @@ Some information for developers for an easy start. For any additional questions 
 
 ## Language keys
 
-All language keys are written in the [dev.json](src%2Flanguages%2Fdev.json) file, which is used as a base file for translation. If you have difficulties with English, please use the [DeepL](https://deepl.com/) translate service.
+All language keys are written in the [en.json](src%2Flanguages%2Fen.json) file, which is used as a base file for translation. If you have difficulties with English, please use the [DeepL](https://deepl.com/) translate service.
 
 **Do not make** changes in other language files! We will do the translation and update the PR.
 

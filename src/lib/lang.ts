@@ -1,4 +1,3 @@
-import DEVLang from '../languages/dev.json';
 import ENLang from '../languages/en.json';
 import RULang from '../languages/ru.json';
 import { getUserData } from './utils.ts';
@@ -14,7 +13,6 @@ export interface ILang {
 }
 
 const appLangSources: ILang = {
-    [LangType.DEV]: DEVLang as ILang,
     [LangType.EN]: ENLang as ILang,
     [LangType.RU]: RULang as ILang
 };
@@ -66,7 +64,7 @@ const appLanguages = [LangType.EN, LangType.RU];
 for (const appLang of appLanguages) {
     appLangSources[appLang] = mergeDeep(
         {},
-        appLangSources[LangType.DEV] as ILang,
+        appLangSources[LangType.EN] as ILang,
         appLangSources[appLang] as ILang
     ) as ILang;
 }

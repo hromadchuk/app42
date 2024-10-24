@@ -7,6 +7,8 @@ A multifunctional Telegram Mini App that extends the capabilities of Telegram. I
 
 📰 [Member of TON Accelerator](https://blog.ton.org/ton-accelerator-participants-announcement) (old name Kit 42)
 
+✉️ For any questions you can write me in Telegram — [@iamhro](https://t.me/iamhro)
+
 ### Open App 42 — [t.me/app42/app](https://t.me/app42/app)
 
 ## 👨🏻‍💻 Contributing
@@ -19,9 +21,3 @@ Read the [contributing guidelines](DEVELOPMENT.md) to get started.
 * [Telegram UI](https://github.com/Telegram-Mini-Apps/TelegramUI) — UI components library
 * [Tabler icons](https://tabler-icons.io/) — free and open-source icons
 * [GramJS](https://github.com/gram-js/gramjs) — Telegram client library
-
-## 🌏 Translations
-We use [Crowdin](https://crowdin.com/project/app-42) as a translation platform.
-
-![en](https://img.shields.io/badge/dynamic/json?color=green&style=flat&query=%24.progress[?(@.data.languageId==%27en%27)].data.approvalProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-16517975-702839-update.json&label=EN)
-![ru](https://img.shields.io/badge/dynamic/json?color=green&style=flat&query=%24.progress[?(@.data.languageId==%27ru%27)].data.approvalProgress&url=https%3A%2F%2Fbadges.awesome-crowdin.com%2Fstats-16517975-702839-update.json&label=RU)

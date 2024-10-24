@@ -83,7 +83,7 @@
     "telegram_channel": "Telegram channel with updates",
     "share_app": "Share the app",
     "share_description": "App 42 is a feature-rich app for Telegram. Try it yourself!",
-    "info": "If you have a question, bug or request, you can always {link}write to the developer{/link} about it!",
+    "info": "An {link}open source project{/link} that you can always run locally or contribute new functionality for everyone.",
     "no_methods": "No methods founds",
     "recommend_method": "Try this method",
     "popular_methods": "Popular methods",
