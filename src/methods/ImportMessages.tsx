@@ -1,6 +1,6 @@
 import { createElement, useContext, useEffect, useState } from 'react';
 import { Avatar, Blockquote, FileInput, Input, Placeholder, Section } from '@telegram-apps/telegram-ui';
-import { IconBrandFacebook, IconBrandInstagram, IconBrandVk, IconCheck, IconSearch } from '@tabler/icons-react';
+import { IconBrandFacebook, IconBrandInstagram, IconCheck, IconSearch } from '@tabler/icons-react';
 import { Buffer } from 'buffer';
 import JSZip from 'jszip';
 import dayjs from 'dayjs';
@@ -9,14 +9,12 @@ import { CustomFile } from 'telegram/client/uploads';
 import { WrappedCell } from '../components/Helpers.tsx';
 import { EOwnerType, SelectDialog } from '../components/SelectOwner.tsx';
 import { CallAPI, getDocLink, parallelLimit } from '../lib/helpers.ts';
-import { getAppLangCode, LangType } from '../lib/lang.ts';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
 
 import commonClasses from '../styles/Common.module.css';
 
 enum ImportType {
-    VK = 'vk',
     Instagram = 'instagram',
     Facebook = 'facebook'
 }
@@ -65,29 +63,10 @@ interface IMetaFileSchema {
     thread_path: string;
 }
 
-interface IVKFileSchema {
-    users: {
-        id: number;
-        name: string;
-        photo: string;
-    }[];
-    messages: {
-        date: number;
-        userId: number;
-        text: string;
-        photos: string[];
-    }[];
-}
-
 const icons = {
-    [ImportType.VK]: IconBrandVk,
     [ImportType.Facebook]: IconBrandFacebook,
     [ImportType.Instagram]: IconBrandInstagram
 };
-
-const sortButtons = [LangType.RU].includes(getAppLangCode())
-    ? [ImportType.VK, ImportType.Instagram, ImportType.Facebook]
-    : [ImportType.Instagram, ImportType.Facebook, ImportType.VK];
 
 export default function ImportMessages() {
     const { mt, needHideContent, setProgress, setFinishBlock } = useContext(MethodContext);
@@ -126,22 +105,11 @@ export default function ImportMessages() {
             return;
         }
 
-        if (importType === ImportType.VK) {
-            selectUserFrom(users[0]);
-        } else {
-            setFileUsers(users);
-        }
+        setFileUsers(users);
     }
 
     async function getUsers(archive: JSZip, files: string[]) {
         const filesWithUsers: IFileUser[] = [];
-
-        if (importType === ImportType.VK) {
-            filesWithUsers.push({
-                filePath: 'messages.json',
-                name: ImportType.VK
-            });
-        }
 
         if (importType === ImportType.Instagram) {
             for (const filePath of files) {
@@ -206,77 +174,40 @@ export default function ImportMessages() {
             (filePath) => filePath.startsWith(user.filePath) && filePath.length > user.filePath.length
         );
 
-        if (importType === ImportType.VK) {
-            const content: IVKFileSchema = JSON.parse(
-                await (archive.file('messages.json') as JSZip.JSZipObject).async('string')
+        const messageFiles = userFiles.filter((filePath) => filePath.match(/\/message_\d+\.json$/));
+        const messages = [];
+
+        for (const filePath of messageFiles) {
+            const content: IMetaFileSchema = JSON.parse(
+                await (archive.file(filePath) as JSZip.JSZipObject).async('string')
             );
 
-            content.messages.sort((a, b) => a.date - b.date);
-
-            const usersInfo = new Map<number, string>();
-
-            content.users.forEach((vkUser) => {
-                usersInfo.set(vkUser.id, vkUser.name);
-            });
-
-            content.messages.forEach((message) => {
-                const date = dayjs(message.date * 1000).format('DD.MM.YYYY, HH:mm:ss');
-                const userName = usersInfo.get(message.userId) as string;
-                const prefix = `[${date}] ${userName}: `;
-
-                if (message.text) {
-                    data.rows.push(prefix + message.text);
-                }
-
-                if (message.photos) {
-                    message.photos.forEach((photoName) => {
-                        data.rows.push(prefix + `<attached: ${photoName}>`);
-                        data.media.push({
-                            name: photoName,
-                            path: photoName,
-                            type: TImportMedia.PHOTO
-                        });
-                    });
-                }
-            });
+            messages.push(...content.messages);
         }
 
-        if (importType === ImportType.Instagram || importType === ImportType.Facebook) {
-            const messageFiles = userFiles.filter((filePath) => filePath.match(/\/message_\d+\.json$/));
-            const messages = [];
+        messages.sort((a, b) => a.timestamp_ms - b.timestamp_ms);
 
-            for (const filePath of messageFiles) {
-                const content: IMetaFileSchema = JSON.parse(
-                    await (archive.file(filePath) as JSZip.JSZipObject).async('string')
-                );
+        messages.forEach((message) => {
+            const date = dayjs(message.timestamp_ms).format('DD.MM.YYYY, HH:mm:ss');
+            const prefix = `[${date}] ${message.sender_name}: `;
 
-                messages.push(...content.messages);
+            if (message.content) {
+                data.rows.push(prefix + decodeText(message.content));
             }
 
-            messages.sort((a, b) => a.timestamp_ms - b.timestamp_ms);
+            if (message.photos) {
+                message.photos.forEach((photo) => {
+                    const photoName = photo.uri.split('/').pop() as string;
 
-            messages.forEach((message) => {
-                const date = dayjs(message.timestamp_ms).format('DD.MM.YYYY, HH:mm:ss');
-                const prefix = `[${date}] ${message.sender_name}: `;
-
-                if (message.content) {
-                    data.rows.push(prefix + decodeText(message.content));
-                }
-
-                if (message.photos) {
-                    message.photos.forEach((photo) => {
-                        const photoName = photo.uri.split('/').pop() as string;
-
-                        data.rows.push(prefix + `<attached: ${photoName}>`);
-                        data.media.push({
-                            name: photoName,
-                            path: photo.uri,
-                            type: TImportMedia.PHOTO
-                        });
+                    data.rows.push(prefix + `<attached: ${photoName}>`);
+                    data.media.push({
+                        name: photoName,
+                        path: photo.uri,
+                        type: TImportMedia.PHOTO
                     });
-                }
-            });
-        }
+                });
+            }
+        });
 
         return data;
     }
@@ -507,7 +438,7 @@ export default function ImportMessages() {
             </Section>
 
             <Section className={commonClasses.sectionBox} header={mt('networks.title')}>
-                {sortButtons.map((type) => (
+                {[ImportType.Instagram, ImportType.Facebook].map((type) => (
                     <RadioRow key={type} type={type} />
                 ))}
 
