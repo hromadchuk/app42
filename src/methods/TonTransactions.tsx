@@ -177,9 +177,7 @@ export default function TonTransactions() {
         });
 
         const years = Object.keys(calc.years).sort((a, b) => Number(b) - Number(a));
-        const months = Object.keys(calc.months).sort(
-            (a, b) => dayjs(b, 'MM.YYYY').unix() - dayjs(a, 'MM.YYYY').unix()
-        );
+        const months = Object.keys(calc.months).sort((a, b) => dayjs(b, 'MM.YYYY').unix() - dayjs(a, 'MM.YYYY').unix());
         const result: IStatResult = {
             total: calc.total,
             years: calc.years,
