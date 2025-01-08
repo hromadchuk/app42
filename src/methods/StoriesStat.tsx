@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { Section } from '@telegram-apps/telegram-ui';
 import { IconEye, IconHeart, IconMapPin, IconPhoto, IconThumbUp, IconVideo } from '@tabler/icons-react';
 import { Api } from 'telegram';
@@ -6,6 +6,7 @@ import { ActivityChart } from '../components/charts/Activity.tsx';
 import { CalculateActivityTime } from '../components/charts/chart_helpers.ts';
 import { Padding, WrappedCell } from '../components/Helpers.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
+import { useAsyncEffect } from '../hooks/useAsyncEffect.ts';
 
 import { CallAPI, classNames } from '../lib/helpers.ts';
 import { StoryCard } from '../components/StoryCard.tsx';
@@ -67,124 +68,122 @@ export default function CallsStat() {
     const [stat, setStat] = useState<IStatResult | null>(null);
     const [selectedTab, setSelectedTab] = useState<ETabId>(ETabId.views);
 
-    useEffect(() => {
-        (async () => {
-            setProgress({ text: mt('get_stories_list') });
+    useAsyncEffect(async () => {
+        setProgress({ text: mt('get_stories_list') });
 
-            const storiesByIds = new Map<number, Api.StoryItem>();
-            const storiesStat = new Map<number, IStoryStat>() as TStoriesStat;
-            const storiesPeer = new Api.InputPeerSelf();
-            const stories = await getValidStories(storiesPeer);
+        const storiesByIds = new Map<number, Api.StoryItem>();
+        const storiesStat = new Map<number, IStoryStat>() as TStoriesStat;
+        const storiesPeer = new Api.InputPeerSelf();
+        const stories = await getValidStories(storiesPeer);
 
-            if (!stories.length) {
-                setFinishBlock({ text: mt('no_stories'), state: 'error' });
-                setProgress(null);
-                return;
-            }
-
-            const storyActionByCreationDate = new CalculateActivityTime();
-            const storiesWithReactions: number[] = [];
-
-            stories.forEach((story) => {
-                const storyId = story.id.valueOf();
-                storiesByIds.set(storyId, story);
-
-                storyActionByCreationDate.add(0, story.date);
-
-                const storiesReactionsCount = story.views?.reactionsCount || 0;
-                if (storiesReactionsCount > 0) {
-                    storiesWithReactions.push(story.id);
-                }
-
-                storiesStat.set(storyId, {
-                    views: story.views?.viewsCount || 0,
-                    reactions: storiesReactionsCount
-                });
-            });
-
-            let storiesReactions: IGetStoriesReactionsResult | undefined;
-            if (storiesWithReactions.length > 0) {
-                setProgress({ text: mt('get_stories_reactions'), count: 0, total: storiesWithReactions.length });
-                storiesReactions = await getStoriesReactions(storiesPeer, storiesWithReactions);
-            }
-
-            // totals
-            const totalViews = Array.from(storiesStat.values()).reduce((res, story) => res + story.views, 0);
-            const totalReactions = Array.from(storiesStat.values()).reduce((res, story) => res + story.reactions, 0);
-            const totalPhotos = stories.reduce(
-                (res, story) => (story.media instanceof Api.MessageMediaPhoto ? res + 1 : res),
-                0
-            );
-            const totalVideos = stories.length - totalPhotos;
-
-            // Media areas
-            const storiesMediaAreas = stories.flatMap((story) => story.mediaAreas);
-            const totalGeoMediaAreas = storiesMediaAreas.reduce(
-                (res, mediaArea) =>
-                    mediaArea instanceof Api.MediaAreaGeoPoint ||
-                    mediaArea instanceof Api.MediaAreaVenue ||
-                    mediaArea instanceof Api.InputMediaAreaVenue
-                        ? res + 1
-                        : res,
-                0
-            );
-            const totalReactionMediaAreas = storiesMediaAreas.reduce(
-                (res, mediaArea) => (mediaArea instanceof Api.MediaAreaSuggestedReaction ? res + 1 : res),
-                0
-            );
-
-            // tops
-            const getTopStory = (storiesStats: TStoriesStat, statKey: keyof IStoryStat): IStoryTop[] => {
-                return Array.from(storiesStats.entries())
-                    .sort((a, b) => b[1][statKey] - a[1][statKey])
-                    .map(
-                        ([storyId, story]) =>
-                            ({
-                                story: storiesByIds.get(storyId) as Api.StoryItem,
-                                count: story[statKey]
-                            }) as IStoryTop
-                    );
-            };
-
-            const topByViews = getTopStory(storiesStat, 'views');
-            const topByReactions = getTopStory(storiesStat, 'reactions');
-
-            const result: IStatResult = {
-                activity: storyActionByCreationDate.get(0),
-                reactions: storiesReactions,
-                counts: {
-                    views: totalViews,
-                    reactions: totalReactions,
-                    photos: totalPhotos,
-                    videos: totalVideos,
-                    geoMediaAreas: totalGeoMediaAreas,
-                    reactionMediaAreas: totalReactionMediaAreas
-                },
-                tops: {
-                    views: topByViews,
-                    reactions: topByReactions
-                }
-            };
-
-            if (storiesReactions) {
-                Array.from(storiesReactions?.total.keys() || []).forEach((emoji) => {
-                    result.tops[emoji] = Array.from(storiesReactions?.stories.entries() || [])
-                        .map(
-                            (storyReactions) =>
-                                ({
-                                    story: storiesByIds.get(storyReactions[0]),
-                                    count: storyReactions[1].get(emoji) || 0
-                                }) as IStoryTop
-                        )
-                        .filter((reaction) => reaction.count !== 0)
-                        .sort((a, b) => b.count - a.count);
-                });
-            }
-            // result.tops[]
-
-            setStat(result);
+        if (!stories.length) {
+            setFinishBlock({ text: mt('no_stories'), state: 'error' });
             setProgress(null);
-        })();
+            return;
+        }
+
+        const storyActionByCreationDate = new CalculateActivityTime();
+        const storiesWithReactions: number[] = [];
+
+        stories.forEach((story) => {
+            const storyId = story.id.valueOf();
+            storiesByIds.set(storyId, story);
+
+            storyActionByCreationDate.add(0, story.date);
+
+            const storiesReactionsCount = story.views?.reactionsCount || 0;
+            if (storiesReactionsCount > 0) {
+                storiesWithReactions.push(story.id);
+            }
+
+            storiesStat.set(storyId, {
+                views: story.views?.viewsCount || 0,
+                reactions: storiesReactionsCount
+            });
+        });
+
+        let storiesReactions: IGetStoriesReactionsResult | undefined;
+        if (storiesWithReactions.length > 0) {
+            setProgress({ text: mt('get_stories_reactions'), count: 0, total: storiesWithReactions.length });
+            storiesReactions = await getStoriesReactions(storiesPeer, storiesWithReactions);
+        }
+
+        // totals
+        const totalViews = Array.from(storiesStat.values()).reduce((res, story) => res + story.views, 0);
+        const totalReactions = Array.from(storiesStat.values()).reduce((res, story) => res + story.reactions, 0);
+        const totalPhotos = stories.reduce(
+            (res, story) => (story.media instanceof Api.MessageMediaPhoto ? res + 1 : res),
+            0
+        );
+        const totalVideos = stories.length - totalPhotos;
+
+        // Media areas
+        const storiesMediaAreas = stories.flatMap((story) => story.mediaAreas);
+        const totalGeoMediaAreas = storiesMediaAreas.reduce(
+            (res, mediaArea) =>
+                mediaArea instanceof Api.MediaAreaGeoPoint ||
+                mediaArea instanceof Api.MediaAreaVenue ||
+                mediaArea instanceof Api.InputMediaAreaVenue
+                    ? res + 1
+                    : res,
+            0
+        );
+        const totalReactionMediaAreas = storiesMediaAreas.reduce(
+            (res, mediaArea) => (mediaArea instanceof Api.MediaAreaSuggestedReaction ? res + 1 : res),
+            0
+        );
+
+        // tops
+        const getTopStory = (storiesStats: TStoriesStat, statKey: keyof IStoryStat): IStoryTop[] => {
+            return Array.from(storiesStats.entries())
+                .sort((a, b) => b[1][statKey] - a[1][statKey])
+                .map(
+                    ([storyId, story]) =>
+                        ({
+                            story: storiesByIds.get(storyId) as Api.StoryItem,
+                            count: story[statKey]
+                        }) as IStoryTop
+                );
+        };
+
+        const topByViews = getTopStory(storiesStat, 'views');
+        const topByReactions = getTopStory(storiesStat, 'reactions');
+
+        const result: IStatResult = {
+            activity: storyActionByCreationDate.get(0),
+            reactions: storiesReactions,
+            counts: {
+                views: totalViews,
+                reactions: totalReactions,
+                photos: totalPhotos,
+                videos: totalVideos,
+                geoMediaAreas: totalGeoMediaAreas,
+                reactionMediaAreas: totalReactionMediaAreas
+            },
+            tops: {
+                views: topByViews,
+                reactions: topByReactions
+            }
+        };
+
+        if (storiesReactions) {
+            Array.from(storiesReactions?.total.keys() || []).forEach((emoji) => {
+                result.tops[emoji] = Array.from(storiesReactions?.stories.entries() || [])
+                    .map(
+                        (storyReactions) =>
+                            ({
+                                story: storiesByIds.get(storyReactions[0]),
+                                count: storyReactions[1].get(emoji) || 0
+                            }) as IStoryTop
+                    )
+                    .filter((reaction) => reaction.count !== 0)
+                    .sort((a, b) => b.count - a.count);
+            });
+        }
+        // result.tops[]
+
+        setStat(result);
+        setProgress(null);
     }, []);
 
     async function getValidStories(peer: Api.TypeEntityLike): Promise<Api.StoryItem[]> {

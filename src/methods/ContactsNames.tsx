@@ -44,19 +44,17 @@ export default function ContactsNames() {
         const storageData = isDev
             ? getCache(Constants.ALLOW_USE_CONTACTS_NAMES_KEY)
             : wrapCallMAMethod<string>(() => storage.get(Constants.ALLOW_USE_CONTACTS_NAMES_KEY));
-        storageData.then((allowUseMethod) => {
+        storageData.then(async (allowUseMethod) => {
             if (allowUseMethod !== 'allow') {
                 setShowWarning(true);
                 setProgress(null);
             } else {
-                (async () => {
-                    setProgress({});
+                setProgress({});
 
-                    const data = await getContactsNames();
+                const data = await getContactsNames();
 
-                    setServerData(data);
-                    setProgress(null);
-                })();
+                setServerData(data);
+                setProgress(null);
             }
         });
     }, []);

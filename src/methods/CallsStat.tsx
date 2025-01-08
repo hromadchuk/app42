@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { Button, Modal, Section } from '@telegram-apps/telegram-ui';
 import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
 import { IconClock, IconClockUp, IconPhone, IconUsers } from '@tabler/icons-react';
@@ -7,6 +7,7 @@ import { ActivityChart } from '../components/charts/Activity.tsx';
 import { CalculateActivityTime } from '../components/charts/chart_helpers.ts';
 import { Padding, WrappedCell } from '../components/Helpers.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
+import { useAsyncEffect } from '../hooks/useAsyncEffect.ts';
 import { ICallStatImagesOptions } from '../images_generator/CallStatImagesGenerator.ts';
 import { CallAPI, classNames, declineAndFormat, getShortTextTime, getTextTime } from '../lib/helpers.ts';
 import { OwnerRow } from '../components/OwnerRow.tsx';
@@ -54,158 +55,152 @@ export default function CallsStat() {
     const { user: appUser, showShareModal } = useContext(AppContext);
     const { mt, md, needHideContent, setFinishBlock, setProgress } = useContext(MethodContext);
 
-    // const [isModalOpened, { open, close }] = useDisclosure(false);
     const [stat, setStat] = useState<IStatResult | null>(null);
     const [modalData, setModalData] = useState<IUserTop | null>(null);
     const [shareData, setShareData] = useState<ICallStatImagesOptions | null>(null);
     const [selectedTab, setSelectedTab] = useState<ETabId>(ETabId.calls);
 
-    useEffect(() => {
-        (async () => {
-            setProgress({ text: mt('get_calls') });
+    useAsyncEffect(async () => {
+        setProgress({ text: mt('get_calls') });
 
-            const users = new Map<number, Api.User>();
-            const usersStat = new Map<number, IUserStat>();
-            const params = {
-                q: '',
-                limit: 100,
-                addOffset: 0,
-                filter: new Api.InputMessagesFilterPhoneCalls({}),
-                peer: new Api.InputPeerEmpty()
-            };
+        const users = new Map<number, Api.User>();
+        const usersStat = new Map<number, IUserStat>();
+        const params = {
+            q: '',
+            limit: 100,
+            addOffset: 0,
+            filter: new Api.InputMessagesFilterPhoneCalls({}),
+            peer: new Api.InputPeerEmpty()
+        };
 
-            const allMessages: Api.TypeMessage[] = [];
-            let work = false;
-            do {
-                const data = (await CallAPI(new Api.messages.Search(params))) as Exclude<
-                    Api.messages.TypeMessages,
-                    Api.messages.MessagesNotModified
-                >;
+        const allMessages: Api.TypeMessage[] = [];
+        let work = false;
+        do {
+            const data = (await CallAPI(new Api.messages.Search(params))) as Exclude<
+                Api.messages.TypeMessages,
+                Api.messages.MessagesNotModified
+            >;
 
-                allMessages.push(...data.messages);
+            allMessages.push(...data.messages);
 
-                data.messages.forEach((message) => {
-                    const user = data.users.find((findUser) => {
-                        const peerId = (message as Api.Message).peerId;
-                        const userId = (peerId as Api.PeerUser).userId.valueOf();
+            data.messages.forEach((message) => {
+                const user = data.users.find((findUser) => {
+                    const peerId = (message as Api.Message).peerId;
+                    const userId = (peerId as Api.PeerUser).userId.valueOf();
 
-                        return findUser.id.valueOf() === userId;
-                    }) as Api.User;
+                    return findUser.id.valueOf() === userId;
+                }) as Api.User;
 
-                    if (!user) {
-                        console.log('user not found', message);
-                    }
-
-                    if (user) {
-                        users.set(user.id.valueOf(), user);
-                    }
-                });
-
-                if (data instanceof Api.messages.MessagesSlice) {
-                    params.addOffset += params.limit;
-                    work = params.addOffset < data.count;
-
-                    setProgress({ total: data.count, count: allMessages.length });
+                if (!user) {
+                    console.log('user not found', message);
                 }
-            } while (work);
 
-            const userActionsByTime = new CalculateActivityTime();
+                if (user) {
+                    users.set(user.id.valueOf(), user);
+                }
+            });
 
-            if (!allMessages.length) {
-                setFinishBlock({ text: mt('no_calls'), state: 'error' });
-                setProgress(null);
+            if (data instanceof Api.messages.MessagesSlice) {
+                params.addOffset += params.limit;
+                work = params.addOffset < data.count;
+
+                setProgress({ total: data.count, count: allMessages.length });
+            }
+        } while (work);
+
+        const userActionsByTime = new CalculateActivityTime();
+
+        if (!allMessages.length) {
+            setFinishBlock({ text: mt('no_calls'), state: 'error' });
+            setProgress(null);
+            return;
+        }
+
+        allMessages.forEach((message) => {
+            const typedMessage = message as Api.Message;
+            const action = typedMessage.action;
+
+            if (!(action instanceof Api.MessageActionPhoneCall)) {
+                console.log('unknown event', message);
                 return;
             }
 
-            allMessages.forEach((message) => {
-                const typedMessage = message as Api.Message;
-                const action = typedMessage.action;
+            const peerId = typedMessage.peerId;
+            const userId = (peerId as Api.PeerUser).userId.valueOf();
+            const currentStat = usersStat.get(userId) || { calls: 0, duration: 0, maxDuration: 0 };
 
-                if (!(action instanceof Api.MessageActionPhoneCall)) {
-                    console.log('unknown event', message);
-                    return;
-                }
+            userActionsByTime.add(userId, typedMessage.date);
+            userActionsByTime.add(0, typedMessage.date);
 
-                const peerId = typedMessage.peerId;
-                const userId = (peerId as Api.PeerUser).userId.valueOf();
-                const currentStat = usersStat.get(userId) || { calls: 0, duration: 0, maxDuration: 0 };
+            usersStat.set(userId, {
+                calls: currentStat.calls + 1,
+                duration: currentStat.duration + (action.duration || 0),
+                maxDuration: Math.max(currentStat.maxDuration, action.duration || 0)
+            });
+        });
 
-                userActionsByTime.add(userId, typedMessage.date);
-                userActionsByTime.add(0, typedMessage.date);
+        // totals
+        const totalCalls = Array.from(usersStat.values()).reduce((res, user) => res + user.calls, 0);
+        const totalDuration = Array.from(usersStat.values()).reduce((res, user) => res + user.duration, 0);
+        const maxDuration = Array.from(usersStat.values()).reduce((res, user) => Math.max(res, user.maxDuration), 0);
 
-                usersStat.set(userId, {
-                    calls: currentStat.calls + 1,
-                    duration: currentStat.duration + (action.duration || 0),
-                    maxDuration: Math.max(currentStat.maxDuration, action.duration || 0)
+        // tops
+        const getTopUser = ([userId, user]: [number, IUserStat]): IUserTop => {
+            const time = userActionsByTime.get(userId);
+            const findUser = users.get(userId) as Api.User;
+
+            return {
+                ...user,
+                time,
+                user: findUser
+            };
+        };
+
+        const topByCalls = Array.from(usersStat.entries())
+            .sort((a, b) => b[1].calls - a[1].calls)
+            .map(getTopUser);
+
+        const topByDuration = Array.from(usersStat.entries())
+            .sort((a, b) => b[1].duration - a[1].duration)
+            .map(getTopUser);
+
+        const topByMaxDuration = Array.from(usersStat.entries())
+            .sort((a, b) => b[1].maxDuration - a[1].maxDuration)
+            .map(getTopUser);
+
+        const result: IStatResult = {
+            activity: userActionsByTime.get(0),
+            counts: {
+                calls: totalCalls,
+                duration: totalDuration,
+                maxDuration,
+                participants: users.size
+            },
+            tops: {
+                calls: topByCalls,
+                duration: topByDuration,
+                maxDuration: topByMaxDuration
+            }
+        };
+
+        canShare(appUser as Api.User).then((share) => {
+            if (share.canPost) {
+                setShareData({
+                    title: mt('sharing.title'),
+                    totalDurationCount: getShortTextTime(totalDuration, 3),
+                    totalDurationLabel: mt('sharing.total_duration'),
+                    callsCount: totalCalls,
+                    callsLabel: mt('sharing.total_calls'),
+                    participantsCount: users.size,
+                    participantsLabel: mt('sharing.participants'),
+                    maxDurationCount: getShortTextTime(maxDuration, 3),
+                    maxDurationLabel: mt('sharing.max_duration')
                 });
-            });
+            }
+        });
 
-            // totals
-            const totalCalls = Array.from(usersStat.values()).reduce((res, user) => res + user.calls, 0);
-            const totalDuration = Array.from(usersStat.values()).reduce((res, user) => res + user.duration, 0);
-            const maxDuration = Array.from(usersStat.values()).reduce(
-                (res, user) => Math.max(res, user.maxDuration),
-                0
-            );
-
-            // tops
-            const getTopUser = ([userId, user]: [number, IUserStat]): IUserTop => {
-                const time = userActionsByTime.get(userId);
-                const findUser = users.get(userId) as Api.User;
-
-                return {
-                    ...user,
-                    time,
-                    user: findUser
-                };
-            };
-
-            const topByCalls = Array.from(usersStat.entries())
-                .sort((a, b) => b[1].calls - a[1].calls)
-                .map(getTopUser);
-
-            const topByDuration = Array.from(usersStat.entries())
-                .sort((a, b) => b[1].duration - a[1].duration)
-                .map(getTopUser);
-
-            const topByMaxDuration = Array.from(usersStat.entries())
-                .sort((a, b) => b[1].maxDuration - a[1].maxDuration)
-                .map(getTopUser);
-
-            const result: IStatResult = {
-                activity: userActionsByTime.get(0),
-                counts: {
-                    calls: totalCalls,
-                    duration: totalDuration,
-                    maxDuration,
-                    participants: users.size
-                },
-                tops: {
-                    calls: topByCalls,
-                    duration: topByDuration,
-                    maxDuration: topByMaxDuration
-                }
-            };
-
-            canShare(appUser as Api.User).then((share) => {
-                if (share.canPost) {
-                    setShareData({
-                        title: mt('sharing.title'),
-                        totalDurationCount: getShortTextTime(totalDuration, 3),
-                        totalDurationLabel: mt('sharing.total_duration'),
-                        callsCount: totalCalls,
-                        callsLabel: mt('sharing.total_calls'),
-                        participantsCount: users.size,
-                        participantsLabel: mt('sharing.participants'),
-                        maxDurationCount: getShortTextTime(maxDuration, 3),
-                        maxDurationLabel: mt('sharing.max_duration')
-                    });
-                }
-            });
-
-            setStat(result);
-            setProgress(null);
-        })();
+        setStat(result);
+        setProgress(null);
     }, []);
 
     if (needHideContent()) return null;

@@ -83,10 +83,8 @@
     "telegram_channel": "Telegram channel with updates",
     "share_app": "Share the app",
     "share_description": "App 42 is a feature-rich app for Telegram. Try it yourself!",
-    "info": "An {link}open source project{/link} that you can always run locally or contribute new functionality for everyone.",
+    "info": "An {channel_link}open source project{/channel_link} that you can always run locally or contribute new functionality for everyone. You can also {author_link}message the developer{/author_link} in private with any questions.",
     "no_methods": "No methods founds",
-    "recommend_method": "Try this method",
-    "popular_methods": "Popular methods",
     "cards": {
       "account": "Account",
       "account_description": "Analyse your account and keep it clean",
@@ -98,14 +96,6 @@
       "chats_description": "Analyze your chats and manage them",
       "ton": "TON",
       "ton_description": "Analysing your wallet in the TON network"
-    },
-    "recommendations": {
-      "contacts_analysis": "Analyse your contacts and see who hasn't saved you to their contact list yet!",
-      "messages_stat": "See your chat activity and compete with other members!",
-      "animated_messages": "Surprise your loved ones with an animated heart!",
-      "calls_stat": "Find out how much you talk through Telegram calls!",
-      "own_channels": "Don't miss your friends' personal channels!",
-      "contacts_names": "See how other people have signed you in their contact list!"
     }
   },
   "share": {
@@ -161,7 +151,8 @@
     "contacts_names": "Your name in the contacts list",
     "ton_transactions_csv": "Transactions list to CSV",
     "monetization_list": "Bots & Channels stars",
-    "boost_levels": "Top by boost level"
+    "boost_levels": "Top by boost level",
+    "gifts_stat": "Gifts stat"
   },
   "charts": {
     "activity": {

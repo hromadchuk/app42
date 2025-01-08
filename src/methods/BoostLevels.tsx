@@ -4,7 +4,7 @@ import { IconMessages, IconUsersGroup } from '@tabler/icons-react';
 import { Api } from 'telegram';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { ITabItem, TabsList } from '../components/TabsList.tsx';
-import useAsyncEffect from '../hooks/useAsyncEffect.ts';
+import { useAsyncEffect } from '../hooks/useAsyncEffect.ts';
 import { classNames } from '../lib/helpers.ts';
 import { getDialogs } from '../lib/logic_helpers.ts';
 

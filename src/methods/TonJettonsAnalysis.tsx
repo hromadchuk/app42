@@ -1,7 +1,8 @@
 import { Avatar, Blockquote, Caption, Section } from '@telegram-apps/telegram-ui';
 import { useTonConnectUI } from '@tonconnect/ui-react';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { WrappedCell } from '../components/Helpers.tsx';
+import { useAsyncEffect } from '../hooks/useAsyncEffect.ts';
 import { formatNumberFloat } from '../lib/helpers.ts';
 import { getAppLangCode, LangType } from '../lib/lang.ts';
 import { TonApiCall } from '../lib/TonApi.ts';
@@ -29,64 +30,62 @@ export default function TonJettonsAnalysis() {
     const [wallet] = useTonConnectUI();
     const userWallet = wallet.account?.address as string;
 
-    useEffect(() => {
-        (async () => {
-            setProgress({});
+    useAsyncEffect(async () => {
+        setProgress({});
 
-            const currencies = getAppLangCode() === LangType.RU ? ['ton', 'usd', 'rub'] : ['ton', 'usd'];
-            const { balances } = await TonApiCall.getJettons(userWallet, currencies);
-            const filteredBalances = balances.filter((balance) => Number(balance.balance) > 0);
+        const currencies = getAppLangCode() === LangType.RU ? ['ton', 'usd', 'rub'] : ['ton', 'usd'];
+        const { balances } = await TonApiCall.getJettons(userWallet, currencies);
+        const filteredBalances = balances.filter((balance) => Number(balance.balance) > 0);
 
-            if (!filteredBalances.length) {
-                setProgress(null);
-                setFinishBlock({ state: 'error', text: mt('no_jettons') });
-                return;
-            }
+        if (!filteredBalances.length) {
+            setProgress(null);
+            setFinishBlock({ state: 'error', text: mt('no_jettons') });
+            return;
+        }
 
-            const jettons: IJetton[] = [];
+        const jettons: IJetton[] = [];
 
-            setProgress({ total: filteredBalances.length, text: mt('get_jettons_info') });
+        setProgress({ total: filteredBalances.length, text: mt('get_jettons_info') });
 
-            for (const { jetton, balance, price } of filteredBalances) {
-                let amountTON = 0;
-                const point = '1' + new Array(jetton.decimals).fill(0).join('');
-                const formattedBalance = formatNumberFloat(Number((Number(balance) / Number(point)).toFixed(2)));
+        for (const { jetton, balance, price } of filteredBalances) {
+            let amountTON = 0;
+            const point = '1' + new Array(jetton.decimals).fill(0).join('');
+            const formattedBalance = formatNumberFloat(Number((Number(balance) / Number(point)).toFixed(2)));
 
-                const holders = await TonApiCall.getJettonHolders(jetton.address);
-                const holderPosition = holders.addresses.findIndex((holder) => holder.owner.address === userWallet);
+            const holders = await TonApiCall.getJettonHolders(jetton.address);
+            const holderPosition = holders.addresses.findIndex((holder) => holder.owner.address === userWallet);
 
-                const amounts: string[] = [];
-                const priceKeys = Object.keys(price?.prices || {});
+            const amounts: string[] = [];
+            const priceKeys = Object.keys(price?.prices || {});
 
-                for (const key of priceKeys) {
-                    const amount = (Number(balance) / Number(point)) * Number(price?.prices?.[key]);
+            for (const key of priceKeys) {
+                const amount = (Number(balance) / Number(point)) * Number(price?.prices?.[key]);
 
-                    if (key === 'TON') {
-                        amountTON = amount;
-                    }
-
-                    amounts.push(`${formatNumberFloat(amount)} ${key}`);
+                if (key === 'TON') {
+                    amountTON = amount;
                 }
 
-                setProgress({ addCount: 1 });
-
-                jettons.push({
-                    name: jetton.name,
-                    image: jetton.image,
-                    formattedBalance,
-                    symbol: jetton.symbol,
-                    decimals: jetton.decimals,
-                    holderPosition,
-                    amounts,
-                    amountTON
-                });
+                amounts.push(`${formatNumberFloat(amount)} ${key}`);
             }
 
-            jettons.sort((a, b) => b.amountTON - a.amountTON);
+            setProgress({ addCount: 1 });
 
-            setJettonsList(jettons);
-            setProgress(null);
-        })();
+            jettons.push({
+                name: jetton.name,
+                image: jetton.image,
+                formattedBalance,
+                symbol: jetton.symbol,
+                decimals: jetton.decimals,
+                holderPosition,
+                amounts,
+                amountTON
+            });
+        }
+
+        jettons.sort((a, b) => b.amountTON - a.amountTON);
+
+        setJettonsList(jettons);
+        setProgress(null);
     }, []);
 
     if (needHideContent()) return null;

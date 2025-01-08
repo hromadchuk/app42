@@ -2,11 +2,12 @@ import { IconArrowRight } from '@tabler/icons-react';
 import { Blockquote, Caption, Image, Section } from '@telegram-apps/telegram-ui';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import dayjs from 'dayjs';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { TrustType } from 'tonapi-sdk-js';
 import { WrappedCell } from '../components/Helpers.tsx';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
+import { useAsyncEffect } from '../hooks/useAsyncEffect.ts';
 import { formatNumberFloat } from '../lib/helpers.ts';
 import { TonApiCall } from '../lib/TonApi.ts';
 import { Server } from '../lib/utils.ts';
@@ -35,94 +36,91 @@ export default function TonNFTAnalysis() {
     const [wallet] = useTonConnectUI();
     const userWallet = wallet.account?.address as string;
 
-    useEffect(() => {
-        (async () => {
-            setProgress({});
+    useAsyncEffect(async () => {
+        setProgress({});
 
-            const nfts = (await TonApiCall.getNfts(userWallet)).filter(
-                (nft) => Boolean(nft.collection?.address) && nft.trust === TrustType.Whitelist
-            );
+        const nfts = (await TonApiCall.getNfts(userWallet)).filter(
+            (nft) => Boolean(nft.collection?.address) && nft.trust === TrustType.Whitelist
+        );
 
-            if (!nfts.length) {
-                setFinishBlock({ state: 'error', text: mt('no_nfts') });
-                return;
-            }
+        if (!nfts.length) {
+            setFinishBlock({ state: 'error', text: mt('no_nfts') });
+            return;
+        }
 
-            setProgress({ text: mt('loading_nft_info'), total: nfts.length });
+        setProgress({ text: mt('loading_nft_info'), total: nfts.length });
 
-            const nftCollections: string[] = [];
-            const list: INft[] = [];
+        const nftCollections: string[] = [];
+        const list: INft[] = [];
 
-            for (const nft of nfts) {
-                const history = await TonApiCall.getNftHistory(nft.address);
-                const findTransferEvent = history.events.find((event) => {
-                    return event.actions.find(
-                        (action) =>
-                            action.type === 'NftItemTransfer' &&
-                            action.NftItemTransfer?.recipient?.address === userWallet
-                    );
+        for (const nft of nfts) {
+            const history = await TonApiCall.getNftHistory(nft.address);
+            const findTransferEvent = history.events.find((event) => {
+                return event.actions.find(
+                    (action) =>
+                        action.type === 'NftItemTransfer' && action.NftItemTransfer?.recipient?.address === userWallet
+                );
+            });
+
+            if (findTransferEvent) {
+                const event = await TonApiCall.getEvent(findTransferEvent.event_id);
+                const findAction = event.actions.find((action) => {
+                    return action.type === 'NftPurchase' && action.NftPurchase?.buyer?.address === userWallet;
                 });
 
-                if (findTransferEvent) {
-                    const event = await TonApiCall.getEvent(findTransferEvent.event_id);
-                    const findAction = event.actions.find((action) => {
-                        return action.type === 'NftPurchase' && action.NftPurchase?.buyer?.address === userWallet;
+                if (findAction) {
+                    const image = nft.previews?.find((preview) => preview.resolution === '100x100')?.url;
+                    const boughtPrice = findAction.NftPurchase?.amount
+                        ? Number(findAction.NftPurchase.amount.value) / 1e9
+                        : 0;
+                    const tonViewerUrl = `https://tonviewer.com/${nft.address}?section=nft`;
+                    const usdRateForDate = await TonApiCall.getRateForDate(findTransferEvent.timestamp);
+
+                    list.push({
+                        name: nft.metadata.name,
+                        image,
+                        tonViewerUrl,
+                        collectionAddress: String(nft.collection?.address),
+                        bought: {
+                            price: boughtPrice,
+                            priceUsd: boughtPrice * usdRateForDate,
+                            date: findTransferEvent.timestamp
+                        }
                     });
 
-                    if (findAction) {
-                        const image = nft.previews?.find((preview) => preview.resolution === '100x100')?.url;
-                        const boughtPrice = findAction.NftPurchase?.amount
-                            ? Number(findAction.NftPurchase.amount.value) / 1e9
-                            : 0;
-                        const tonViewerUrl = `https://tonviewer.com/${nft.address}?section=nft`;
-                        const usdRateForDate = await TonApiCall.getRateForDate(findTransferEvent.timestamp);
-
-                        list.push({
-                            name: nft.metadata.name,
-                            image,
-                            tonViewerUrl,
-                            collectionAddress: String(nft.collection?.address),
-                            bought: {
-                                price: boughtPrice,
-                                priceUsd: boughtPrice * usdRateForDate,
-                                date: findTransferEvent.timestamp
-                            }
-                        });
-
-                        if (nft?.collection?.address && !nftCollections.includes(nft.collection.address)) {
-                            nftCollections.push(nft.collection.address);
-                        }
+                    if (nft?.collection?.address && !nftCollections.includes(nft.collection.address)) {
+                        nftCollections.push(nft.collection.address);
                     }
                 }
-
-                setProgress({ addCount: 1 });
             }
 
-            if (!list.length) {
-                setFinishBlock({ state: 'error', text: mt('no_nfts') });
-                return;
+            setProgress({ addCount: 1 });
+        }
+
+        if (!list.length) {
+            setFinishBlock({ state: 'error', text: mt('no_nfts') });
+            return;
+        }
+
+        setProgress({});
+
+        setUsdRate(await TonApiCall.getRate());
+
+        if (nftCollections.length) {
+            const result = new Map<string, number>();
+            const data = await Server('get_collections_floor', {
+                addresses: nftCollections
+            });
+
+            for (const address in data) {
+                result.set(address, data[address]);
             }
 
-            setProgress({});
+            setFloorCollections(result);
+        }
 
-            setUsdRate(await TonApiCall.getRate());
-
-            if (nftCollections.length) {
-                const result = new Map<string, number>();
-                const data = await Server('get_collections_floor', {
-                    addresses: nftCollections
-                });
-
-                for (const address in data) {
-                    result.set(address, data[address]);
-                }
-
-                setFloorCollections(result);
-            }
-
-            setNftsList(list);
-            setProgress(null);
-        })();
+        setNftsList(list);
+        setProgress(null);
     }, []);
 
     if (needHideContent()) return null;

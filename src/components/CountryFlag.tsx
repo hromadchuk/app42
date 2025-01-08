@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Skeleton } from '@telegram-apps/telegram-ui';
+import { useAsyncEffect } from '../hooks/useAsyncEffect.ts';
 
 interface ICountryFlag {
     code: string;
@@ -12,20 +13,18 @@ export function CountryFlag({ code, size }: ICountryFlag) {
     const aspectRatio = 32 / 48;
     const skeletonHeight = size * aspectRatio;
 
-    useEffect(() => {
+    useAsyncEffect(async () => {
         setImageUrl('');
 
-        (async () => {
-            try {
-                const flag = await import(`../assets/flags/${code}.svg`);
+        try {
+            const flag = await import(`../assets/flags/${code}.svg`);
 
-                setImageUrl(flag.default);
-            } catch (error) {
-                const UNFlag = await import('../assets/flags/UN.svg');
+            setImageUrl(flag.default);
+        } catch (error) {
+            const UNFlag = await import('../assets/flags/UN.svg');
 
-                setImageUrl(UNFlag.default);
-            }
-        })();
+            setImageUrl(UNFlag.default);
+        }
     }, [code]);
 
     return (

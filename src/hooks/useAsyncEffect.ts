@@ -1,6 +1,6 @@
 import { DependencyList, useEffect } from 'react';
 
-function useAsyncEffect(effect: () => Promise<void>, dependencies?: DependencyList) {
+export function useAsyncEffect(effect: () => Promise<void>, dependencies?: DependencyList) {
     useEffect(() => {
         const asyncEffect = async () => {
             try {
@@ -13,5 +13,3 @@ function useAsyncEffect(effect: () => Promise<void>, dependencies?: DependencyLi
         asyncEffect();
     }, dependencies || []);
 }
-
-export default useAsyncEffect;

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { Modal, Section, SegmentedControl } from '@telegram-apps/telegram-ui';
 import { SegmentedControlItem } from '@telegram-apps/telegram-ui/dist/components/Navigation/SegmentedControl/components/SegmentedControlItem/SegmentedControlItem';
 import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import { BarChart, LineChart } from 'react-chartkick';
 import { JettonTransferAction } from 'tonapi-sdk-js';
 import { WrappedCell } from '../components/Helpers.tsx';
+import { useAsyncEffect } from '../hooks/useAsyncEffect.ts';
 import { TonApiCall } from '../lib/TonApi.ts';
 import { classNames, formatNumber, formatNumberFloat } from '../lib/helpers.ts';
 
@@ -84,162 +85,160 @@ export default function TonTransactions() {
     const [wallet] = useTonConnectUI();
     const userWallet = wallet.account?.address as string;
 
-    useEffect(() => {
-        (async () => {
-            setProgress({ text: mt('get_events') });
+    useAsyncEffect(async () => {
+        setProgress({ text: mt('get_events') });
 
-            const events = await TonApiCall.getEvents(userWallet, setProgress);
-            const calc: IStatCalc = {
-                total: getEmptyPeriod(),
-                years: {},
-                months: {}
-            };
+        const events = await TonApiCall.getEvents(userWallet, setProgress);
+        const calc: IStatCalc = {
+            total: getEmptyPeriod(),
+            years: {},
+            months: {}
+        };
 
-            if (!events.length) {
-                setProgress(null);
-                setFinishBlock({ state: 'error', text: mt('no_transactions') });
-                return;
+        if (!events.length) {
+            setProgress(null);
+            setFinishBlock({ state: 'error', text: mt('no_transactions') });
+            return;
+        }
+
+        events.sort((a, b) => b.timestamp - a.timestamp);
+
+        events.forEach((event) => {
+            const month = dayjs(event.timestamp * 1000).format('MM.YYYY');
+            const year = dayjs(event.timestamp * 1000).format('YYYY');
+
+            if (!calc.years[year]) {
+                calc.years[year] = getEmptyPeriod();
             }
 
-            events.sort((a, b) => b.timestamp - a.timestamp);
+            if (!calc.months[month]) {
+                calc.months[month] = getEmptyPeriod();
+            }
 
-            events.forEach((event) => {
-                const month = dayjs(event.timestamp * 1000).format('MM.YYYY');
-                const year = dayjs(event.timestamp * 1000).format('YYYY');
+            [calc.total, calc.years[year], calc.months[month]].forEach((period) => {
+                period.eventsCount++;
 
-                if (!calc.years[year]) {
-                    calc.years[year] = getEmptyPeriod();
-                }
+                event.actions.forEach((action) => {
+                    if (!period.actions[action.type]) {
+                        period.actions[action.type] = 0;
+                    }
 
-                if (!calc.months[month]) {
-                    calc.months[month] = getEmptyPeriod();
-                }
+                    period.actions[action.type]++;
 
-                [calc.total, calc.years[year], calc.months[month]].forEach((period) => {
-                    period.eventsCount++;
+                    if (action.type === 'JettonSwap') {
+                        const dex = action.JettonSwap?.dex as string;
 
-                    event.actions.forEach((action) => {
-                        if (!period.actions[action.type]) {
-                            period.actions[action.type] = 0;
+                        if (!period.dex[dex]) {
+                            period.dex[dex] = 0;
                         }
 
-                        period.actions[action.type]++;
+                        period.dex[dex]++;
+                    }
 
-                        if (action.type === 'JettonSwap') {
-                            const dex = action.JettonSwap?.dex as string;
+                    if (action.type === 'TonTransfer') {
+                        const isRecipient = action.TonTransfer?.recipient.address === userWallet;
+                        const amount = Number(action.TonTransfer?.amount) / 1e9;
 
-                            if (!period.dex[dex]) {
-                                period.dex[dex] = 0;
+                        if (amount) {
+                            if (isRecipient) {
+                                period.receivedTON += amount;
+                            } else {
+                                period.sentTON += amount;
                             }
-
-                            period.dex[dex]++;
                         }
+                    }
 
-                        if (action.type === 'TonTransfer') {
-                            const isRecipient = action.TonTransfer?.recipient.address === userWallet;
-                            const amount = Number(action.TonTransfer?.amount) / 1e9;
+                    if (action.type === 'JettonTransfer') {
+                        if (action.JettonTransfer?.jetton.address === USDT_WALLET) {
+                            const point = `1${new Array(action.JettonTransfer?.jetton.decimals).fill(0).join('')}`;
+                            const amount = Number(action.JettonTransfer?.amount) / Number(point);
+                            const isRecipient = action.JettonTransfer?.recipient?.address === userWallet;
 
                             if (amount) {
                                 if (isRecipient) {
-                                    period.receivedTON += amount;
+                                    period.receivedUSDT += amount;
                                 } else {
-                                    period.sentTON += amount;
+                                    period.sentUSDT += amount;
                                 }
                             }
-                        }
-
-                        if (action.type === 'JettonTransfer') {
-                            if (action.JettonTransfer?.jetton.address === USDT_WALLET) {
-                                const point = `1${new Array(action.JettonTransfer?.jetton.decimals).fill(0).join('')}`;
-                                const amount = Number(action.JettonTransfer?.amount) / Number(point);
-                                const isRecipient = action.JettonTransfer?.recipient?.address === userWallet;
-
-                                if (amount) {
-                                    if (isRecipient) {
-                                        period.receivedUSDT += amount;
-                                    } else {
-                                        period.sentUSDT += amount;
-                                    }
+                        } else {
+                            const dex = detectDexName(action.JettonTransfer as JettonTransferAction);
+                            if (dex) {
+                                if (!period.dex[dex]) {
+                                    period.dex[dex] = 0;
                                 }
-                            } else {
-                                const dex = detectDexName(action.JettonTransfer as JettonTransferAction);
-                                if (dex) {
-                                    if (!period.dex[dex]) {
-                                        period.dex[dex] = 0;
-                                    }
 
-                                    period.dex[dex]++;
-                                }
+                                period.dex[dex]++;
                             }
                         }
-                    });
+                    }
                 });
             });
+        });
 
-            const years = Object.keys(calc.years).sort((a, b) => Number(b) - Number(a));
-            const months = Object.keys(calc.months).sort(
-                (a, b) => dayjs(b, 'MM.YYYY').unix() - dayjs(a, 'MM.YYYY').unix()
-            );
-            const result: IStatResult = {
-                total: calc.total,
-                years: calc.years,
-                months: calc.months,
-                needShowPeriodSegment: true,
-                needShowCurrencySegment: true,
-                yearsKeys: years,
-                monthsKeys: months,
-                chartDataTON: {
-                    months: [],
-                    years: []
-                },
-                chartDataUSDT: {
-                    months: [],
-                    years: []
-                }
-            };
+        const years = Object.keys(calc.years).sort((a, b) => Number(b) - Number(a));
+        const months = Object.keys(calc.months).sort(
+            (a, b) => dayjs(b, 'MM.YYYY').unix() - dayjs(a, 'MM.YYYY').unix()
+        );
+        const result: IStatResult = {
+            total: calc.total,
+            years: calc.years,
+            months: calc.months,
+            needShowPeriodSegment: true,
+            needShowCurrencySegment: true,
+            yearsKeys: years,
+            monthsKeys: months,
+            chartDataTON: {
+                months: [],
+                years: []
+            },
+            chartDataUSDT: {
+                months: [],
+                years: []
+            }
+        };
 
-            result.needShowPeriodSegment = years.length > 1;
-            result.needShowCurrencySegment = calc.total.sentUSDT > 0 || calc.total.receivedUSDT > 0;
+        result.needShowPeriodSegment = years.length > 1;
+        result.needShowCurrencySegment = calc.total.sentUSDT > 0 || calc.total.receivedUSDT > 0;
 
-            result.chartDataTON.years = years
-                .map((year) => ({
-                    date: Number(year),
-                    label: String(year),
-                    sent: fixedNumber(calc.years[year].sentTON),
-                    received: fixedNumber(calc.years[year].receivedTON)
-                }))
-                .sort((a, b) => a.date - b.date);
-            result.chartDataTON.months = months
-                .slice(0, 12)
-                .map((month) => ({
-                    date: dayjs(month, 'MM.YYYY').unix(),
-                    label: dayjs(month, 'MM.YYYY').format('MMM YY'),
-                    sent: fixedNumber(calc.months[month].sentTON),
-                    received: fixedNumber(calc.months[month].receivedTON)
-                }))
-                .sort((a, b) => a.date - b.date);
+        result.chartDataTON.years = years
+            .map((year) => ({
+                date: Number(year),
+                label: String(year),
+                sent: fixedNumber(calc.years[year].sentTON),
+                received: fixedNumber(calc.years[year].receivedTON)
+            }))
+            .sort((a, b) => a.date - b.date);
+        result.chartDataTON.months = months
+            .slice(0, 12)
+            .map((month) => ({
+                date: dayjs(month, 'MM.YYYY').unix(),
+                label: dayjs(month, 'MM.YYYY').format('MMM YY'),
+                sent: fixedNumber(calc.months[month].sentTON),
+                received: fixedNumber(calc.months[month].receivedTON)
+            }))
+            .sort((a, b) => a.date - b.date);
 
-            result.chartDataUSDT.years = years
-                .map((year) => ({
-                    date: Number(year),
-                    label: String(year),
-                    sent: fixedNumber(calc.years[year].sentUSDT),
-                    received: fixedNumber(calc.years[year].receivedUSDT)
-                }))
-                .sort((a, b) => a.date - b.date);
-            result.chartDataUSDT.months = months
-                .slice(0, 12)
-                .map((month) => ({
-                    date: dayjs(month, 'MM.YYYY').unix(),
-                    label: dayjs(month, 'MM.YYYY').format('MMM YY'),
-                    sent: fixedNumber(calc.months[month].sentUSDT),
-                    received: fixedNumber(calc.months[month].receivedUSDT)
-                }))
-                .sort((a, b) => a.date - b.date);
+        result.chartDataUSDT.years = years
+            .map((year) => ({
+                date: Number(year),
+                label: String(year),
+                sent: fixedNumber(calc.years[year].sentUSDT),
+                received: fixedNumber(calc.years[year].receivedUSDT)
+            }))
+            .sort((a, b) => a.date - b.date);
+        result.chartDataUSDT.months = months
+            .slice(0, 12)
+            .map((month) => ({
+                date: dayjs(month, 'MM.YYYY').unix(),
+                label: dayjs(month, 'MM.YYYY').format('MMM YY'),
+                sent: fixedNumber(calc.months[month].sentUSDT),
+                received: fixedNumber(calc.months[month].receivedUSDT)
+            }))
+            .sort((a, b) => a.date - b.date);
 
-            setStat(result);
-            setProgress(null);
-        })();
+        setStat(result);
+        setProgress(null);
     }, []);
 
     function fixedNumber(num: number) {

@@ -21,6 +21,7 @@ import { Api } from 'telegram';
 import { getCardById } from './cards.ts';
 import { AppFooter } from './components/AppFooter.tsx';
 import { Constants } from './constants.ts';
+import { useAsyncEffect } from './hooks/useAsyncEffect.ts';
 import { clearOldCache, getCache, removeCache, setCache } from './lib/cache.ts';
 import { getCurrentUser } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
@@ -115,79 +116,77 @@ export function App() {
         });
     }, [tonWallet]);
 
-    useEffect(() => {
-        (async () => {
-            const isOnboardingCompleted = await checkIsOnboardingCompleted();
-            if (!isOnboardingCompleted) {
-                setNeedShowOnboarding(true);
-            }
+    useAsyncEffect(async () => {
+        const isOnboardingCompleted = await checkIsOnboardingCompleted();
+        if (!isOnboardingCompleted) {
+            setNeedShowOnboarding(true);
+        }
 
-            console.log('location', JSON.stringify(location));
+        console.log('location', JSON.stringify(location));
 
-            if (!user && window.initData.status === 'ok') {
-                const storageSessionHashed = isDev
-                    ? await getCache(Constants.SESSION_KEY)
-                    : await wrapCallMAMethod<string>(() => storage.get(Constants.SESSION_KEY));
-                const storageSession = storageSessionHashed
-                    ? decodeString(storageSessionHashed as string, window.initData.storageHash || '')
-                    : null;
-                console.log('storageSession', Boolean(storageSession));
-                if (storageSession) {
-                    const loggedUser = await getCurrentUser();
-                    if (loggedUser instanceof Api.User) {
-                        setUser(loggedUser);
+        if (!user && window.initData.status === 'ok') {
+            const storageSessionHashed = isDev
+                ? await getCache(Constants.SESSION_KEY)
+                : await wrapCallMAMethod<string>(() => storage.get(Constants.SESSION_KEY));
+            const storageSession = storageSessionHashed
+                ? decodeString(storageSessionHashed as string, window.initData.storageHash || '')
+                : null;
+            console.log('storageSession', Boolean(storageSession));
+            if (storageSession) {
+                const loggedUser = await getCurrentUser();
+                if (loggedUser instanceof Api.User) {
+                    setUser(loggedUser);
 
-                        const storageData = isDev
-                            ? getCache(Constants.ALLOW_USE_CONTACTS_NAMES_KEY)
-                            : wrapCallMAMethod<string>(() => storage.get(Constants.ALLOW_USE_CONTACTS_NAMES_KEY));
-                        storageData.then((allowUseMethod) => {
-                            console.log('allowSyncContactsFromMenu', allowUseMethod);
-                            if (allowUseMethod === 'allow') {
-                                getContactsNames();
-                            }
-                        });
-                    } else if (loggedUser === -1) {
-                        if (isDev) {
-                            await removeCache(Constants.SESSION_KEY);
-                        } else {
-                            await storage.delete(Constants.SESSION_KEY);
+                    const storageData = isDev
+                        ? getCache(Constants.ALLOW_USE_CONTACTS_NAMES_KEY)
+                        : wrapCallMAMethod<string>(() => storage.get(Constants.ALLOW_USE_CONTACTS_NAMES_KEY));
+                    storageData.then((allowUseMethod) => {
+                        console.log('allowSyncContactsFromMenu', allowUseMethod);
+                        if (allowUseMethod === 'allow') {
+                            getContactsNames();
                         }
-
-                        window.location.reload();
-                        return;
+                    });
+                } else if (loggedUser === -1) {
+                    if (isDev) {
+                        await removeCache(Constants.SESSION_KEY);
+                    } else {
+                        await storage.delete(Constants.SESSION_KEY);
                     }
+
+                    window.location.reload();
+                    return;
                 }
             }
+        }
 
-            setUserChecked(true);
+        setUserChecked(true);
 
-            const param = new URLSearchParams(window.location.search.slice(1)).get('tgWebAppStartParam');
-            const value = await getCache(Constants.AUTH_STATE_METHOD_KEY);
+        const param = new URLSearchParams(window.location.search.slice(1)).get('tgWebAppStartParam');
+        const value = await getCache(Constants.AUTH_STATE_METHOD_KEY);
 
-            console.log('tgWebAppStartParam', param);
-            console.log('value', value && JSON.stringify(value));
+        console.log('tgWebAppStartParam', param);
+        console.log('value', value && JSON.stringify(value));
 
-            if (value) {
-                const { methodId, authType } = value as {
-                    methodId: string;
-                    authType: AuthType;
-                };
+        if (value) {
+            const { methodId, authType } = value as {
+                methodId: string;
+                authType: AuthType;
+            };
 
-                if (authType === AuthType.TG) {
-                    const method = getMethodById(methodId);
-                    method && openMethod(method);
-                }
-            } else if (param === 'cn' && !window.alreadyVisitedRefLink) {
-                const method = getMethodById('contacts_names');
+            if (authType === AuthType.TG) {
+                const method = getMethodById(methodId);
                 method && openMethod(method);
             }
+        } else if (param === 'cn' && !window.alreadyVisitedRefLink) {
+            const method = getMethodById('contacts_names');
+            method && openMethod(method);
+        }
 
-            if (isDev) {
-                // TODO only test
-                // const method = getMethodById('contacts_analysis');
-                // method && openMethod(method);
-            }
-        })();
+        if (isDev) {
+            // TODO only test
+            // const method = getMethodById('gifts_stat');
+            // method && openMethod(method);
+        }
     }, []);
 
     useEffect(() => {
@@ -213,69 +212,67 @@ export function App() {
         };
     }, [currentLocation]);
 
-    useEffect(() => {
-        (async () => {
-            setOptions({ language: getAppLangCode() as Locales });
+    useAsyncEffect(async () => {
+        setOptions({ language: getAppLangCode() as Locales });
 
-            tonConnectUI.setConnectRequestParameters({
-                state: 'ready',
-                value: {
-                    tonProof: window.initData.walletHash
-                }
-            });
+        tonConnectUI.setConnectRequestParameters({
+            state: 'ready',
+            value: {
+                tonProof: window.initData.walletHash
+            }
+        });
 
-            window.showSnackbar = (options: ISnackbarOptions) => setSnackbarOptions(options);
-            window.hideSnackbar = () => setSnackbarOptions(null);
+        window.showSnackbar = (options: ISnackbarOptions) => setSnackbarOptions(options);
+        window.hideSnackbar = () => setSnackbarOptions(null);
 
-            tonConnectUI.onStatusChange((wallet) => {
-                if (wallet?.connectItems?.tonProof && 'proof' in wallet.connectItems.tonProof) {
-                    Server('set_wallet', {
-                        proof: wallet.connectItems.tonProof.proof,
-                        account: wallet.account
-                    });
-                }
-            });
+        tonConnectUI.onStatusChange((wallet) => {
+            if (wallet?.connectItems?.tonProof && 'proof' in wallet.connectItems.tonProof) {
+                Server('set_wallet', {
+                    proof: wallet.connectItems.tonProof.proof,
+                    account: wallet.account
+                });
+            }
+        });
 
-            // init mini app
-            wrapCallMAMethod(() => miniApp.ready());
-            wrapCallMAMethod(() => swipeBehavior.disableVerticalSwipe());
+        // init mini app
+        wrapCallMAMethod(() => miniApp.ready());
+        wrapCallMAMethod(() => swipeBehavior.disableVerticalSwipe());
 
-            // clear cache
-            clearOldCache();
+        // clear cache
+        clearOldCache();
 
-            // init analytics
-            if (!isDev) {
-                ReactGA.initialize('G-T5H886J9RS');
+        // init analytics
+        if (!isDev) {
+            ReactGA.initialize('G-T5H886J9RS');
+        }
+
+        const versionKey = 'TGLibVersion';
+        const version = window.TelegramClient.__version__;
+        const currentVersion = localStorage.getItem(versionKey);
+
+        if (!currentVersion) {
+            localStorage.setItem(versionKey, version);
+        } else if (currentVersion !== version) {
+            const isOnboardingCompleted = await checkIsOnboardingCompleted();
+
+            localStorage.removeItem('GramJs:apiCache');
+            localStorage.setItem(versionKey, version);
+
+            if (isOnboardingCompleted) {
+                await markOnboardingAsCompleted();
             }
 
-            const versionKey = 'TGLibVersion';
-            const version = window.TelegramClient.__version__;
-            const currentVersion = localStorage.getItem(versionKey);
+            window.location.reload();
+            return;
+        }
 
-            if (!currentVersion) {
-                localStorage.setItem(versionKey, version);
-            } else if (currentVersion !== version) {
-                const isOnboardingCompleted = await checkIsOnboardingCompleted();
+        window.listenEvents = {};
 
-                localStorage.removeItem('GramJs:apiCache');
-                localStorage.setItem(versionKey, version);
-
-                if (isOnboardingCompleted) {
-                    await markOnboardingAsCompleted();
-                }
-
-                window.location.reload();
-                return;
+        window.TelegramClient.addEventHandler((event) => {
+            if (window.listenEvents[event.className]) {
+                window.listenEvents[event.className](event);
             }
-
-            window.listenEvents = {};
-
-            window.TelegramClient.addEventHandler((event) => {
-                if (window.listenEvents[event.className]) {
-                    window.listenEvents[event.className](event);
-                }
-            });
-        })();
+        });
     }, []);
 
     function openMethod(method: IMethod, categoryId?: MethodCategory) {

@@ -4,7 +4,7 @@ import { IconCalendarStar, IconStar } from '@tabler/icons-react';
 import { Api } from 'telegram';
 import { WrappedCell } from '../components/Helpers.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
-import useAsyncEffect from '../hooks/useAsyncEffect.ts';
+import { useAsyncEffect } from '../hooks/useAsyncEffect.ts';
 import { CallAPI, classNames, formatNumberFloat, sleep, TOwnerType } from '../lib/helpers.ts';
 import { getDialogs } from '../lib/logic_helpers.ts';
 

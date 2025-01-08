@@ -1,8 +1,9 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { Button, Multiselectable, Section } from '@telegram-apps/telegram-ui';
 import { IconRobot, IconUser } from '@tabler/icons-react';
 import { Api } from 'telegram';
 import { Padding, WrappedCell } from '../components/Helpers.tsx';
+import { useAsyncEffect } from '../hooks/useAsyncEffect.ts';
 import { CallAPI, declineAndFormat } from '../lib/helpers.ts';
 import { isDev } from '../lib/utils.ts';
 
@@ -22,25 +23,23 @@ export default function ClearBlacklist() {
     const [needRemoveBots, setNeedRemoveBots] = useState(false);
     const [blockedResult, setBlockedResult] = useState<IBannedResult | null>(null);
 
-    useEffect(() => {
-        (async () => {
-            const blocked = await getBlocked();
+    useAsyncEffect(async () => {
+        const blocked = await getBlocked();
 
-            if (blocked.count) {
-                setBlockedResult(blocked);
-                setProgress(null);
+        if (blocked.count) {
+            setBlockedResult(blocked);
+            setProgress(null);
 
-                if (!blocked.bots.length) {
-                    setNeedRemoveBots(false);
-                }
-
-                if (!blocked.users.length) {
-                    setNeedRemoveUsers(false);
-                }
-            } else {
-                setFinishBlock({ text: mt('blacklist_empty') });
+            if (!blocked.bots.length) {
+                setNeedRemoveBots(false);
             }
-        })();
+
+            if (!blocked.users.length) {
+                setNeedRemoveUsers(false);
+            }
+        } else {
+            setFinishBlock({ text: mt('blacklist_empty') });
+        }
     }, []);
 
     async function getBlocked() {

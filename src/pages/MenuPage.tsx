@@ -1,5 +1,5 @@
 import { useUtils } from '@telegram-apps/sdk-react';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import {
     Avatar,
     AvatarStack,
@@ -19,8 +19,8 @@ import { cards } from '../cards.ts';
 import { WrappedCell } from '../components/Helpers.tsx';
 import { OwnerAvatar } from '../components/OwnerAvatar.tsx';
 import { getShareLink } from '../lib/helpers.ts';
-import { getMethodById, getMethodsByName } from '../routes.tsx';
-import { t, to } from '../lib/lang.ts';
+import { getMethodsByName } from '../routes.tsx';
+import { t } from '../lib/lang.ts';
 
 import { AppContext } from '../contexts/AppContext.tsx';
 
@@ -30,27 +30,20 @@ import { MethodRow } from './MethodsPage.tsx';
 
 function getInfoTextWithLink() {
     return t('menu.info')
-        .replace('{link}', '<a href="https://github.com/hromadchuk/app42" target="_blank">')
-        .replace('{/link}', '</a>');
+        .replace('{channel_link}', '<a href="https://github.com/hromadchuk/app42" target="_blank">')
+        .replace('{/channel_link}', '</a>')
+        .replace('{author_link}', '<a href="https://t.me/iamhro" target="_blank">')
+        .replace('{/author_link}', '</a>');
 }
 
 export default function MenuPage() {
-    const { user, setAccountsModalOpen, isUserChecked, openMethod } = useContext(AppContext);
-    const [randomMethodId, setRandomMethodId] = useState<string | null>(null);
+    const { user, setAccountsModalOpen, isUserChecked } = useContext(AppContext);
 
     const userFriendlyAddress = useTonAddress();
     const navigate = useNavigate();
     const utils = useUtils();
 
     const [searchText, setSearchText] = useState('');
-
-    useEffect(() => {
-        const recommendations = to<{ [key: string]: string }>('menu.recommendations');
-        const recommendationIds = Object.keys(recommendations);
-        const randomRecommendationId = recommendationIds[Number(new Date()) % recommendationIds.length];
-
-        setRandomMethodId(randomRecommendationId);
-    }, []);
 
     function AccountsRow() {
         if (!user && !userFriendlyAddress && isUserChecked) {
@@ -101,8 +94,6 @@ export default function MenuPage() {
 
         return (
             <>
-                <RandomMethodRow />
-
                 <Section className={classes.categories}>
                     {cards.map((card, key) => (
                         <WrappedCell
@@ -147,33 +138,6 @@ export default function MenuPage() {
                     <div dangerouslySetInnerHTML={{ __html: getInfoTextWithLink() }}></div>
                 </Blockquote>
             </>
-        );
-    }
-
-    function RandomMethodRow() {
-        if (!randomMethodId) {
-            return null;
-        }
-
-        const method = getMethodById(randomMethodId);
-        if (!method) {
-            return null;
-        }
-
-        return (
-            <Section className={classes.categories}>
-                <Section.Header style={{ paddingTop: 4 }}>{t('menu.recommend_method')}</Section.Header>
-
-                <WrappedCell
-                    before={<method.icon size={28} stroke={1.2} />}
-                    onClick={() => openMethod(method)}
-                    description={t(`menu.recommendations.${method.id}`)}
-                    className={classes.link}
-                    multiline={true}
-                >
-                    {method.name}
-                </WrappedCell>
-            </Section>
         );
     }
 

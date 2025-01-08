@@ -1,7 +1,8 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { Input, Placeholder, Spinner } from '@telegram-apps/telegram-ui';
 import { IconSearch } from '@tabler/icons-react';
 import { Api } from 'telegram';
+import { useAsyncEffect } from '../hooks/useAsyncEffect.ts';
 import { CallAPI, getPeerId, TOwnerType } from '../lib/helpers.ts';
 import { t } from '../lib/lang.ts';
 import { OwnerRow } from './OwnerRow.tsx';
@@ -47,29 +48,25 @@ function SelectOwner({ getOwners, onOwnerSelect, searchOwners }: IOptionsSelectO
     // const [searchQuery, setSearchQuery] = useState<string>('');
     const [debouncedSearchQuery, setSearchQuery] = useDebouncedInput('', 500);
 
-    useEffect(() => {
-        (async () => {
-            const owners = await getOwners();
+    useAsyncEffect(async () => {
+        const owners = await getOwners();
 
-            setDialogsList(owners);
-            setLoading(false);
-        })();
+        setDialogsList(owners);
+        setLoading(false);
     }, []);
 
-    useEffect(() => {
+    useAsyncEffect(async () => {
         if (!debouncedSearchQuery) {
             setSearchDialogsList(null);
             return;
         }
 
-        (async () => {
-            setLoading(true);
+        setLoading(true);
 
-            const owners = await searchOwners(debouncedSearchQuery);
+        const owners = await searchOwners(debouncedSearchQuery);
 
-            setSearchDialogsList(owners);
-            setLoading(false);
-        })();
+        setSearchDialogsList(owners);
+        setLoading(false);
     }, [debouncedSearchQuery]);
 
     const UsersBlock = () => {

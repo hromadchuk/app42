@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import { Api } from 'telegram';
 import { computeCheck } from 'telegram/Password';
 import { WrappedCell } from '../components/Helpers.tsx';
+import { useAsyncEffect } from '../hooks/useAsyncEffect.ts';
 import { getCache, removeCache, setCache } from '../lib/cache.ts';
 import { CountryFlag } from '../components/CountryFlag.tsx';
 import { Constants } from '../constants.ts';
@@ -74,22 +75,20 @@ export default function AuthTgPage() {
     const [password, setPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
-    useEffect(() => {
-        (async () => {
-            const authStateNumber = (await getCache(Constants.AUTH_STATE_NUMBER_KEY)) as IAuthStateNumber;
-            if (authStateNumber || (isUserChecked && !user)) {
-                await getAuthData();
-            }
+    useAsyncEffect(async () => {
+        const authStateNumber = (await getCache(Constants.AUTH_STATE_NUMBER_KEY)) as IAuthStateNumber;
+        if (authStateNumber || (isUserChecked && !user)) {
+            await getAuthData();
+        }
 
-            if (authStateNumber) {
-                setSelectedCountryCode(authStateNumber.countryCode);
-                setPhoneCodeHash(authStateNumber.phoneCodeHash);
-                setCodeLength(authStateNumber.phoneCode);
-                setNumber(authStateNumber.numberSuffix);
-                setWaitingCode(true);
-                setButtonLoading(false);
-            }
-        })();
+        if (authStateNumber) {
+            setSelectedCountryCode(authStateNumber.countryCode);
+            setPhoneCodeHash(authStateNumber.phoneCodeHash);
+            setCodeLength(authStateNumber.phoneCode);
+            setNumber(authStateNumber.numberSuffix);
+            setWaitingCode(true);
+            setButtonLoading(false);
+        }
     }, [isUserChecked]);
 
     useEffect(() => {

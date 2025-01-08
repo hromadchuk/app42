@@ -1,7 +1,8 @@
 import { Section } from '@telegram-apps/telegram-ui';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import { Api } from 'telegram';
 import dayjs from 'dayjs';
+import { useAsyncEffect } from '../hooks/useAsyncEffect.ts';
 import { CallAPI, classNames, sleep } from '../lib/helpers.ts';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 
@@ -19,46 +20,44 @@ export default function Birthdays() {
 
     const [usersList, setUsersList] = useState<IUserItem[]>([]);
 
-    useEffect(() => {
-        (async () => {
-            setProgress({});
+    useAsyncEffect(async () => {
+        setProgress({});
 
-            const result = (await CallAPI(new Api.contacts.GetContacts({}))) as Api.contacts.Contacts;
+        const result = (await CallAPI(new Api.contacts.GetContacts({}))) as Api.contacts.Contacts;
 
-            if (!result.users?.length) {
-                setProgress(null);
-                setFinishBlock({ state: 'error', text: mt('no_contacts') });
-                return;
-            }
-
-            const usersBirthdays = new Map<number, Api.Birthday>();
-
-            setProgress({ text: mt('get_users_info'), total: result.users.length });
-
-            for (const user of result.users) {
-                await sleep(666);
-                const { fullUser } = await CallAPI(new Api.users.GetFullUser({ id: user.id }));
-                if (fullUser.birthday) {
-                    usersBirthdays.set(user.id.valueOf(), fullUser.birthday);
-                }
-
-                setProgress({ addCount: 1 });
-            }
-
-            const list: IUserItem[] = result.users
-                .filter((user) => usersBirthdays.has(user.id.valueOf()))
-                .map((user) => ({ user, birthday: usersBirthdays.get(user.id.valueOf()) as Api.Birthday }))
-                .sort((a, b) => a.birthday.month - b.birthday.month || a.birthday.day - b.birthday.day);
-
-            if (!list.length) {
-                setProgress(null);
-                setFinishBlock({ state: 'error', text: mt('no_birthdays') });
-                return;
-            }
-
-            setUsersList(list);
+        if (!result.users?.length) {
             setProgress(null);
-        })();
+            setFinishBlock({ state: 'error', text: mt('no_contacts') });
+            return;
+        }
+
+        const usersBirthdays = new Map<number, Api.Birthday>();
+
+        setProgress({ text: mt('get_users_info'), total: result.users.length });
+
+        for (const user of result.users) {
+            await sleep(666);
+            const { fullUser } = await CallAPI(new Api.users.GetFullUser({ id: user.id }));
+            if (fullUser.birthday) {
+                usersBirthdays.set(user.id.valueOf(), fullUser.birthday);
+            }
+
+            setProgress({ addCount: 1 });
+        }
+
+        const list: IUserItem[] = result.users
+            .filter((user) => usersBirthdays.has(user.id.valueOf()))
+            .map((user) => ({ user, birthday: usersBirthdays.get(user.id.valueOf()) as Api.Birthday }))
+            .sort((a, b) => a.birthday.month - b.birthday.month || a.birthday.day - b.birthday.day);
+
+        if (!list.length) {
+            setProgress(null);
+            setFinishBlock({ state: 'error', text: mt('no_birthdays') });
+            return;
+        }
+
+        setUsersList(list);
+        setProgress(null);
     }, []);
 
     if (needHideContent()) return null;
