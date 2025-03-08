@@ -96,8 +96,6 @@ export default function MonetizationList() {
                     calcStat.totalStarsUsd += result.currentBalance * result.starsUsdRate;
                 }
 
-                // TODO add TON?
-
                 calcStat.list.push(result);
             } catch (error) {
                 console.error('MonetizationList error', error);

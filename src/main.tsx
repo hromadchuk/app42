@@ -5,7 +5,6 @@ import { TelegramClient } from 'telegram';
 import { createRoot } from 'react-dom/client';
 import { SuspenseLoader } from './components/SuspenseLoader.tsx';
 import { ISnackbarOptions } from './contexts/AppContext.tsx';
-import { ServerResponses } from './interfaces/server.ts';
 import { getUserData, initDevEnv, isDevUser } from './lib/utils.ts';
 import { MiniAppWrapper } from './MiniAppWrapper.tsx';
 
@@ -15,11 +14,9 @@ declare global {
         listenEvents: { [key: string]: (event: object) => void };
         isProgress: boolean;
         isNeedToThrowErrorOnRequest: boolean;
-        alreadyVisitedRefLink: boolean;
         showSnackbar: (options: ISnackbarOptions) => void;
         hideSnackbar: () => void;
         eruda: { init: () => void };
-        initData: ServerResponses['init'];
     }
 }
 

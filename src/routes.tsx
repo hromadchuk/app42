@@ -20,7 +20,6 @@ import {
     IconCoins,
     IconCreativeCommonsNd,
     IconDoorEnter,
-    IconFileTypeCsv,
     IconFriendsOff,
     IconHourglassLow,
     IconKeyframes,
@@ -28,14 +27,12 @@ import {
     IconMessageCircleSearch,
     IconMessageCircleUp,
     IconPhoneCall,
-    IconPhoto,
     IconPhotoPentagon,
     IconProps,
     IconReportAnalytics,
     IconThumbDownOff,
     IconTransfer,
-    IconUsersGroup,
-    IconWritingSign
+    IconUsersGroup
 } from '@tabler/icons-react';
 
 import { t } from './lib/lang.ts';
@@ -245,27 +242,6 @@ const appMethods: IMethodComponent[] = [
         element: createElement(lazy(() => import('./methods/TonTransactions.tsx'))),
         categories: [MethodCategory.TON],
         authType: AuthType.TON
-    },
-    {
-        id: 'contacts_names',
-        icon: IconWritingSign,
-        element: createElement(lazy(() => import('./methods/ContactsNames.tsx'))),
-        categories: [MethodCategory.CONTACTS, MethodCategory.ACCOUNT],
-        authType: AuthType.TG
-    },
-    {
-        id: 'ton_nft_analysis',
-        icon: IconPhoto,
-        element: createElement(lazy(() => import('./methods/TonNFTAnalysis.tsx'))),
-        categories: [MethodCategory.TON],
-        authType: AuthType.TON
-    },
-    {
-        id: 'ton_transactions_csv',
-        icon: IconFileTypeCsv,
-        element: createElement(lazy(() => import('./methods/TonTransactionsCsv.tsx'))),
-        categories: [MethodCategory.TON],
-        authType: AuthType.NONE
     },
     {
         id: 'monetization_list',

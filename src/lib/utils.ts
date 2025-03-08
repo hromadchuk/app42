@@ -1,7 +1,5 @@
-import { AES, enc } from 'crypto-js';
-import { ServerMock } from './mock.ts';
+import { AES, enc, MD5 } from 'crypto-js';
 import { mockTelegramEnv, parseInitData, retrieveLaunchParams } from '@telegram-apps/sdk-react';
-import { ServerMethods, ServerRequests, ServerResponses } from '../interfaces/server.ts';
 
 export const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
@@ -78,43 +76,6 @@ export async function wrapCallMAMethod<T>(func: Function) {
     return null;
 }
 
-export async function Server<METHOD extends ServerMethods>(
-    method: METHOD,
-    params: ServerRequests[METHOD]
-): Promise<ServerResponses[METHOD]> {
-    if (isDev) {
-        const mockData = ServerMock<METHOD>(method);
-
-        console.log('skip Server', method, params);
-        console.log('mockData', mockData);
-
-        return mockData as ServerResponses[METHOD];
-    }
-
-    const authData = getParams().initDataRaw;
-    if (!authData) {
-        console.log('No auth data');
-        return {} as ServerResponses[METHOD];
-    }
-
-    const noobBody = encodeString(JSON.stringify(params), `noobHook${getUserId()}`);
-    const data = await fetch(`https://tool42.pav.la/app42/api/${method}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            authData
-        },
-        body: JSON.stringify({ nb: noobBody })
-    }).then((response) => response.json());
-
-    console.group(`SERVER /${method}`);
-    console.log('Request:', params);
-    console.log('Result:', data);
-    console.groupEnd();
-
-    return data as ServerResponses[METHOD];
-}
-
 export function initDevEnv() {
     if (isDev) {
         const initDataRaw = new URLSearchParams([
@@ -157,4 +118,13 @@ export function initDevEnv() {
             platform: 'tdesktop'
         });
     }
+}
+
+export function getStorageHash() {
+    const user = getUserData();
+    if (!user) {
+        return '';
+    }
+
+    return MD5(`storageHash:${user.id}`).toString();
 }

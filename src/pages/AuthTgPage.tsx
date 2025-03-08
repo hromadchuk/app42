@@ -25,7 +25,7 @@ import { AppContext } from '../contexts/AppContext.tsx';
 import { CallAPI, classNames, getCurrentUser } from '../lib/helpers.ts';
 import { getAppLangCode, t } from '../lib/lang.ts';
 import { AnimatedHeader } from '../components/AnimatedHeader.tsx';
-import { encodeString, isDev, wrapCallMAMethod } from '../lib/utils.ts';
+import { encodeString, getStorageHash, isDev, wrapCallMAMethod } from '../lib/utils.ts';
 
 import AnimatedPhone from '../assets/animated_stickers/phone.json';
 import AnimatedCloud from '../assets/animated_stickers/cloud.json';
@@ -102,7 +102,6 @@ export default function AuthTgPage() {
             if (value) {
                 const { methodPath } = value as { methodPath: string };
 
-                window.alreadyVisitedRefLink = true;
                 navigate(methodPath);
                 removeCache(Constants.AUTH_STATE_METHOD_KEY);
             }
@@ -313,14 +312,14 @@ export default function AuthTgPage() {
         if (isDev) {
             await setCache(
                 Constants.SESSION_KEY,
-                encodeString(`${window.TelegramClient.session.save()}`, window.initData.storageHash),
+                encodeString(`${window.TelegramClient.session.save()}`, getStorageHash()),
                 60 * 24 * 365
             );
         } else {
             await wrapCallMAMethod(() => {
                 storage.set(
                     Constants.SESSION_KEY,
-                    encodeString(`${window.TelegramClient.session.save()}`, window.initData.storageHash)
+                    encodeString(`${window.TelegramClient.session.save()}`, getStorageHash())
                 );
             });
         }

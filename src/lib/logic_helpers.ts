@@ -2,7 +2,6 @@ import { Api } from 'telegram';
 import { CallAPI, sleep, TOwnerType } from './helpers.ts';
 import { t } from './lang.ts';
 import { IProgress } from '../contexts/MethodContext.tsx';
-import { Server } from './utils.ts';
 
 interface IGetDialogsOptions {
     types: (typeof Api.Chat | typeof Api.Channel | typeof Api.User)[];
@@ -98,37 +97,4 @@ export async function getDialogs<TYPES extends TOwnerType>(
     setProgress(null);
 
     return filteredDialogs.list as TYPES[];
-}
-
-export async function getContactsNames() {
-    function getPart(users: [number, string][]) {
-        const result: { [key: number]: string } = {};
-
-        users.forEach(([id, name]) => {
-            result[id] = name;
-        });
-
-        return result;
-    }
-
-    const PART_LIMIT = 300;
-    const result = (await CallAPI(new Api.contacts.GetContacts({}))) as Api.contacts.Contacts;
-    const usersParts: [number, string][] = [];
-
-    result.users.forEach((user) => {
-        if (user instanceof Api.User) {
-            usersParts.push([user.id.valueOf(), `${user.firstName || ''} ${user.lastName || ''}`.trim()]);
-        }
-    });
-
-    const firstSyncPart = getPart(usersParts.splice(0, PART_LIMIT));
-    const data = await Server('get_my_names', { list: firstSyncPart });
-
-    while (usersParts.length) {
-        const part = getPart(usersParts.splice(0, PART_LIMIT));
-
-        Server('get_my_names', { list: part, onlySync: true });
-    }
-
-    return data;
 }

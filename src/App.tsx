@@ -25,8 +25,7 @@ import { useAsyncEffect } from './hooks/useAsyncEffect.ts';
 import { clearOldCache, getCache, removeCache, setCache } from './lib/cache.ts';
 import { getCurrentUser } from './lib/helpers.ts';
 import { getAppLangCode } from './lib/lang.ts';
-import { getContactsNames } from './lib/logic_helpers.ts';
-import { decodeString, isDev, Server, wrapCallMAMethod } from './lib/utils.ts';
+import { decodeString, getStorageHash, isDev, wrapCallMAMethod } from './lib/utils.ts';
 import { AuthType, getMethodById, IMethod, IRouter, MethodCategory, routes } from './routes.tsx';
 
 import dayjs from 'dayjs';
@@ -56,13 +55,12 @@ export function App() {
     const backButton = useBackButton();
     const storage = useCloudStorage();
     const swipeBehavior = useSwipeBehavior();
-    const location = useLocation();
     const navigate = useNavigate();
     const currentLocation = useLocation();
     const launchParams = useLaunchParams();
     const tonWallet = useTonAddress();
     const { open: tonAuth } = useTonConnectModal();
-    const [tonConnectUI, setOptions] = useTonConnectUI();
+    const [, setOptions] = useTonConnectUI();
 
     const [user, setUser] = useState<null | Api.User>(null);
     const [isUserChecked, setUserChecked] = useState(false);
@@ -122,30 +120,18 @@ export function App() {
             setNeedShowOnboarding(true);
         }
 
-        console.log('location', JSON.stringify(location));
-
-        if (!user && window.initData.status === 'ok') {
+        if (!user) {
             const storageSessionHashed = isDev
                 ? await getCache(Constants.SESSION_KEY)
                 : await wrapCallMAMethod<string>(() => storage.get(Constants.SESSION_KEY));
             const storageSession = storageSessionHashed
-                ? decodeString(storageSessionHashed as string, window.initData.storageHash || '')
+                ? decodeString(storageSessionHashed as string, getStorageHash())
                 : null;
             console.log('storageSession', Boolean(storageSession));
             if (storageSession) {
                 const loggedUser = await getCurrentUser();
                 if (loggedUser instanceof Api.User) {
                     setUser(loggedUser);
-
-                    const storageData = isDev
-                        ? getCache(Constants.ALLOW_USE_CONTACTS_NAMES_KEY)
-                        : wrapCallMAMethod<string>(() => storage.get(Constants.ALLOW_USE_CONTACTS_NAMES_KEY));
-                    storageData.then((allowUseMethod) => {
-                        console.log('allowSyncContactsFromMenu', allowUseMethod);
-                        if (allowUseMethod === 'allow') {
-                            getContactsNames();
-                        }
-                    });
                 } else if (loggedUser === -1) {
                     if (isDev) {
                         await removeCache(Constants.SESSION_KEY);
@@ -177,15 +163,6 @@ export function App() {
                 const method = getMethodById(methodId);
                 method && openMethod(method);
             }
-        } else if (param === 'cn' && !window.alreadyVisitedRefLink) {
-            const method = getMethodById('contacts_names');
-            method && openMethod(method);
-        }
-
-        if (isDev) {
-            // TODO only test
-            // const method = getMethodById('gifts_stat');
-            // method && openMethod(method);
         }
     }, []);
 
@@ -215,24 +192,8 @@ export function App() {
     useAsyncEffect(async () => {
         setOptions({ language: getAppLangCode() as Locales });
 
-        tonConnectUI.setConnectRequestParameters({
-            state: 'ready',
-            value: {
-                tonProof: window.initData.walletHash
-            }
-        });
-
         window.showSnackbar = (options: ISnackbarOptions) => setSnackbarOptions(options);
         window.hideSnackbar = () => setSnackbarOptions(null);
-
-        tonConnectUI.onStatusChange((wallet) => {
-            if (wallet?.connectItems?.tonProof && 'proof' in wallet.connectItems.tonProof) {
-                Server('set_wallet', {
-                    proof: wallet.connectItems.tonProof.proof,
-                    account: wallet.account
-                });
-            }
-        });
 
         // init mini app
         wrapCallMAMethod(() => miniApp.ready());
@@ -282,7 +243,6 @@ export function App() {
 
         if (method.authType === AuthType.TON) {
             if (tonWallet) {
-                window.alreadyVisitedRefLink = true;
                 navigate(methodPath);
             } else {
                 setCache(Constants.AUTH_STATE_METHOD_KEY, data, 15).then(() => {
@@ -293,7 +253,6 @@ export function App() {
 
         if (method.authType === AuthType.TG) {
             if (user) {
-                window.alreadyVisitedRefLink = true;
                 navigate(methodPath);
             } else {
                 setCache(Constants.AUTH_STATE_METHOD_KEY, data, 15).then(() => {
@@ -303,7 +262,6 @@ export function App() {
         }
 
         if (method.authType === AuthType.NONE) {
-            window.alreadyVisitedRefLink = true;
             navigate(methodPath);
         }
     }

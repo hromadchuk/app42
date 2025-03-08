@@ -5,9 +5,10 @@ import { LogLevel } from 'telegram/extensions/Logger';
 import { StringSession } from 'telegram/sessions';
 import { SuspenseLoader } from './components/SuspenseLoader.tsx';
 import { Constants } from './constants.ts';
+import { useAsyncEffect } from './hooks/useAsyncEffect.ts';
 import { getCache } from './lib/cache.ts';
 import { getAppLangCode } from './lib/lang.ts';
-import { decodeString, getParams, hexToRgba, isDev, Server, wrapCallMAMethod } from './lib/utils.ts';
+import { decodeString, getParams, getStorageHash, hexToRgba, isDev, wrapCallMAMethod } from './lib/utils.ts';
 
 const AppWrapper = lazy(() => import('./App.tsx'));
 
@@ -79,35 +80,29 @@ export function MiniAppWrapper() {
         }
     }, []);
 
-    useEffect(() => {
-        Server('init', {
-            platform: getParams().platform
-        }).then(async (data) => {
-            window.initData = data;
+    useAsyncEffect(async () => {
+        const storageSessionHashed = isDev
+            ? await getCache(Constants.SESSION_KEY)
+            : await wrapCallMAMethod<string>(() => storage.get(Constants.SESSION_KEY));
+        const storageSession = storageSessionHashed
+            ? decodeString(storageSessionHashed as string, getStorageHash())
+            : '';
 
-            const storageSessionHashed = isDev
-                ? await getCache(Constants.SESSION_KEY)
-                : await wrapCallMAMethod<string>(() => storage.get(Constants.SESSION_KEY));
-            const storageSession = storageSessionHashed
-                ? decodeString(storageSessionHashed as string, window.initData.storageHash)
-                : '';
+        window.TelegramClient = new TelegramClient(
+            new StringSession(storageSession),
+            Constants.API_ID,
+            Constants.API_HASH,
+            {
+                connectionRetries: 5,
+                useWSS: true,
+                floodSleepThreshold: 0,
+                langCode: getAppLangCode()
+            }
+        );
 
-            window.TelegramClient = new TelegramClient(
-                new StringSession(storageSession),
-                Constants.API_ID,
-                Constants.API_HASH,
-                {
-                    connectionRetries: 5,
-                    useWSS: true,
-                    floodSleepThreshold: 0,
-                    langCode: getAppLangCode()
-                }
-            );
+        window.TelegramClient.setLogLevel(LogLevel.INFO);
 
-            window.TelegramClient.setLogLevel(LogLevel.INFO);
-
-            setInitData(true);
-        });
+        setInitData(true);
     }, []);
 
     useEffect(() => {

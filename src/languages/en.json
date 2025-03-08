@@ -147,9 +147,6 @@
     "ton_contacts": "Contacts with NFT",
     "ton_jettons_analysis": "Jettons analysis",
     "ton_transactions": "Transactions analysis",
-    "ton_nft_analysis": "NFT analysis",
-    "contacts_names": "Your name in the contacts list",
-    "ton_transactions_csv": "Transactions list to CSV",
     "monetization_list": "Bots & Channels stars",
     "boost_levels": "Top by boost level",
     "gifts_stat": "Gifts stat"
@@ -693,28 +690,6 @@
       "by_years": "By years",
       "grouped_by_years": "Grouped by years",
       "grouped_by_months": "Grouped by months"
-    },
-    "contacts_names": {
-      "no_contacts": "You don't have any contacts",
-      "allow_description": "To see information about how you are saved in other contacts list you must allow synchronisation of your contacts. This is necessary so that we can fill the database. Don't worry, the data will be recorded in an anonymised form.",
-      "allow_button": "Allow",
-      "decline_button": "Decline",
-      "updated": "Updated {date}",
-      "no_records": "We have no record of you. :(",
-      "share_description": "Share the link to the method with your friends so we can show them to you!",
-      "share_message": "Want to see how you saved in my Telegram contacts? Go to App 42 and check it out! 🌚"
-    },
-    "ton_nft_analysis": {
-      "loading_nft_info": "Getting NFT info",
-      "no_nfts": "You don't have any NFT",
-      "collection_floor_price": "Floor price in the collection: {price} TON",
-      "now": "Now"
-    },
-    "ton_transactions_csv": {
-      "input_placeholder": "Wallet",
-      "sent_description": "The result will be send to App 42 chat",
-      "button_get": "Get transactions",
-      "button_chat": "Open App 42 chat"
     },
     "monetization_list": {
       "no_created": "You don't have any created bots or channels",

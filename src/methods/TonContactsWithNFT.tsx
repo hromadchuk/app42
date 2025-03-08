@@ -1,14 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
 import { Divider, Modal, Section } from '@telegram-apps/telegram-ui';
 import { ModalHeader } from '@telegram-apps/telegram-ui/dist/components/Overlays/Modal/components/ModalHeader/ModalHeader';
-import { IconAt, IconInfoCircle, IconLink, IconPhone, IconWallet } from '@tabler/icons-react';
+import { IconAt, IconInfoCircle, IconPhone } from '@tabler/icons-react';
 import { Api } from 'telegram';
 import dayjs from 'dayjs';
 import { WrappedCell } from '../components/Helpers.tsx';
 import { OwnerRow } from '../components/OwnerRow.tsx';
 import { CallAPI, classNames, formatNumberFloat } from '../lib/helpers.ts';
-import { Server } from '../lib/utils.ts';
-import { TonApiCall } from '../lib/TonApi.ts';
 
 import { MethodContext } from '../contexts/MethodContext.tsx';
 import commonClasses from '../styles/Common.module.css';
@@ -17,8 +15,6 @@ interface IUserRow {
     user: Api.User;
     wallets: string[];
     description: string;
-    walletsAlias: Map<string, string>;
-    walletsBalances: Map<string, number>;
     collectedNames: string[];
     collectedNumbers: number[];
     fragmentInfo: Map<string, Api.fragment.TypeCollectibleInfo>;
@@ -69,7 +65,6 @@ export default function TonContactsWithNFT() {
             return;
         }
 
-        const data = await Server('get_wallets', { usernames, numbers });
         const filteredUsers: IUserRow[] = [];
 
         for (const user of result.users) {
@@ -81,63 +76,40 @@ export default function TonContactsWithNFT() {
             if (user instanceof Api.User) {
                 if (user.usernames) {
                     for (const username of user.usernames) {
-                        const findWallet = data.usernames.find((item) => item.username === username.username);
-                        if (findWallet) {
-                            wallets.add(findWallet.ownerWallet);
+                        collectedNames.push(username.username);
 
-                            collectedNames.push(username.username);
+                        const fragment = await CallAPI(
+                            new Api.fragment.GetCollectibleInfo({
+                                collectible: new Api.InputCollectibleUsername({ username: username.username })
+                            })
+                        );
 
-                            const fragment = await CallAPI(
-                                new Api.fragment.GetCollectibleInfo({
-                                    collectible: new Api.InputCollectibleUsername({ username: username.username })
-                                })
-                            );
-
-                            fragmentInfo.set(username.username, fragment);
-                        }
+                        fragmentInfo.set(username.username, fragment);
                     }
                 }
 
                 if (user.phone?.startsWith('888')) {
-                    const findWallet = data.numbers.find((item) => item.number === Number(user.phone));
-                    if (findWallet) {
-                        wallets.add(findWallet.ownerWallet);
+                    collectedNumbers.push(Number(user.phone));
 
-                        collectedNumbers.push(Number(user.phone));
+                    const fragment = await CallAPI(
+                        new Api.fragment.GetCollectibleInfo({
+                            collectible: new Api.InputCollectiblePhone({ phone: user.phone })
+                        })
+                    );
 
-                        const fragment = await CallAPI(
-                            new Api.fragment.GetCollectibleInfo({
-                                collectible: new Api.InputCollectiblePhone({ phone: user.phone })
-                            })
-                        );
-
-                        fragmentInfo.set(user.phone, fragment);
-                    }
+                    fragmentInfo.set(user.phone, fragment);
                 }
 
-                if (wallets.size) {
-                    const walletsAlias = new Map<string, string>();
-                    const walletsBalances = new Map<string, number>();
+                const description = [
+                    ...collectedNames.map((name) => `@${name}`),
+                    ...collectedNumbers.map((phone) => `+${phone}`)
+                ].join(', ');
 
-                    for (const wallet of wallets) {
-                        const alias = await TonApiCall.getNormalizedWallet(wallet);
-                        walletsAlias.set(wallet, alias);
-
-                        const info = await TonApiCall.getWallet(wallet);
-                        walletsBalances.set(wallet, info.balance);
-                    }
-
-                    const description = [
-                        ...collectedNames.map((name) => `@${name}`),
-                        ...collectedNumbers.map((phone) => `+${phone}`)
-                    ].join(', ');
-
+                if (description.length) {
                     filteredUsers.push({
                         user,
                         wallets: Array.from(wallets),
                         description,
-                        walletsAlias,
-                        walletsBalances,
                         collectedNames,
                         collectedNumbers,
                         fragmentInfo
@@ -258,30 +230,6 @@ export default function TonContactsWithNFT() {
                                         hint={sum}
                                     >
                                         +{phone}
-                                    </WrappedCell>
-                                );
-                            })}
-                        </Section>
-                    )}
-
-                    {selectedUser.wallets.length > 0 && (
-                        <Section header={mt('titles.wallets')} className={commonClasses.hideHr}>
-                            {selectedUser.wallets.map((wallet, walletKey) => {
-                                const balance = parseFloat(
-                                    ((selectedUser.walletsBalances.get(wallet) as number) / 1e9).toFixed(2)
-                                );
-
-                                return (
-                                    <WrappedCell
-                                        key={walletKey}
-                                        before={<IconWallet size={28} color="var(--tgui--link_color)" />}
-                                        description={`${formatNumberFloat(balance)} TON`}
-                                        Component="a"
-                                        href={`https://tonviewer.com/${wallet}`}
-                                        target="_blank"
-                                        after={<IconLink size={18} />}
-                                    >
-                                        {TonApiCall.getShortAddress(selectedUser.walletsAlias.get(wallet) || wallet)}
                                     </WrappedCell>
                                 );
                             })}

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { IFinishBlock, IProgress, ISetListAction, MethodContext } from '../contexts/MethodContext.tsx';
-import { Server } from '../lib/utils.ts';
 import { t, td } from '../lib/lang.ts';
 import { getMethodById, MethodCategory } from '../routes.tsx';
 import { ListAction } from '../components/ListAction.tsx';
@@ -46,8 +45,6 @@ export default function AbstractMethod() {
     };
 
     useEffect(() => {
-        Server('method', { method: method.id });
-
         return () => setProgress(null);
     }, []);
 
