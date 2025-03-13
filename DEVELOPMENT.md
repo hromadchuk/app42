@@ -21,10 +21,6 @@ What is the difference between dev and eng? In general, these files are the same
 5. Open [http://127.0.0.1:4242](http://127.0.0.1:4242) in your browser
 6. `npm run lint` to check your code for errors
 
-## Server requests
-
-The repository provides client-side code, but in some situations the application communicates with the server. In development mode you will see [mock data](src/lib/mock.ts) instead of the actual response, which is enough to write code. 
-
 ## GramJS
 
 This library has 2 code variants, for node.js and browser. To update the package version, you need to call the `npm i telegram@browser --save` command. Otherwise, the package may not run.
