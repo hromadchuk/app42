@@ -1,4 +1,4 @@
-# App 42
+# App 42 (Kit 42)
 
 [![Lint](https://github.com/hromadchuk/app42/actions/workflows/lint.yml/badge.svg?branch=master)](https://github.com/hromadchuk/app42/actions/workflows/lint.yml)
 [![Deploy](https://github.com/hromadchuk/app42/actions/workflows/pages.yml/badge.svg?branch=master)](https://github.com/hromadchuk/app42/actions/workflows/pages.yml)
