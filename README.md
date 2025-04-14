@@ -9,7 +9,7 @@ A multifunctional Telegram Mini App that extends the capabilities of Telegram. I
 
 ✉️ For any questions you can write me in Telegram — [@iamhro](https://t.me/iamhro)
 
-### Open App 42 — [t.me/app42/app](https://t.me/app42/app)
+### Open App 42 — [t.me/kit42bot/app](https://t.me/kit42bot/app)
 
 ## 👨🏻‍💻 Contributing
 
