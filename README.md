@@ -7,7 +7,7 @@ A multifunctional Telegram Mini App that extends the capabilities of Telegram. I
 
 📰 [Member of TON Accelerator](https://blog.ton.org/ton-accelerator-participants-announcement) (old name Kit 42)
 
-✉️ For any questions you can write me in Telegram — [@iamhro](https://t.me/iamhro)
+✉️ For any questions you can write me in Telegram — [@emigrant](https://t.me/emigrant)
 
 ### Open App 42 — [t.me/kit42bot/app](https://t.me/kit42bot/app)
 
