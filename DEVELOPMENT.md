@@ -1,6 +1,6 @@
 # Development
 
-Some information for developers for an easy start. For any additional questions you can [message me on Telegram](https://t.me/iamhro).
+Some information for developers for an easy start. For any additional questions you can [message me on Telegram](https://t.me/emigrant).
 
 ***Write all commits and comments in English.***
 

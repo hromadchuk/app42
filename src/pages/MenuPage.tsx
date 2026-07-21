@@ -32,7 +32,7 @@ function getInfoTextWithLink() {
     return t('menu.info')
         .replace('{channel_link}', '<a href="https://github.com/hromadchuk/app42" target="_blank">')
         .replace('{/channel_link}', '</a>')
-        .replace('{author_link}', '<a href="https://t.me/iamhro" target="_blank">')
+        .replace('{author_link}', '<a href="https://t.me/emigrant" target="_blank">')
         .replace('{/author_link}', '</a>');
 }
 
